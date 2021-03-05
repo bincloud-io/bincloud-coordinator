@@ -1,15 +1,18 @@
-package io.bincloud.storage.resource.accounting.domain.model;
+package io.bincloud.storage.domain.model.resource;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @ToString
+@SuperBuilder
 public class Resource {
+	@NonNull
 	@EqualsAndHashCode.Include
-	private final Long id; 
+	private Long id;
 	
 	public Resource(@NonNull IdGenerator idGenerator) {
 		super();
