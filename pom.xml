@@ -26,6 +26,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>7.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>3.0.7</version>
@@ -148,7 +155,7 @@
 						</compilerArgs>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<parameters>true</parameters>
-						
+
 						<annotationProcessorPaths>
 							<path>
 								<groupId>org.projectlombok</groupId>

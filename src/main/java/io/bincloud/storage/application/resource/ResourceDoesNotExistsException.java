@@ -1,4 +1,4 @@
-package io.bincloud.storage.application;
+package io.bincloud.storage.application.resource;
 
 import io.bincloud.storage.domain.model.resource.ResourceManagementException;
 import lombok.NonNull;
