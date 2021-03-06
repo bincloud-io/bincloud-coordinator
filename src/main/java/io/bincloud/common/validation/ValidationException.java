@@ -1,6 +1,7 @@
-package io.bincloud.common;
+package io.bincloud.common.validation;
 
-import io.bincloud.common.ValidationState.ErrorState;
+import io.bincloud.common.ApplicationException;
+import io.bincloud.common.validation.ValidationState.ErrorState;
 import lombok.Getter;
 import lombok.NonNull;
 

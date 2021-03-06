@@ -1,9 +1,9 @@
 package io.bincloud.storage.features
 
-import io.bincloud.common.ValidationException
-import io.bincloud.common.ValidationService
-import io.bincloud.common.ValidationState
 import io.bincloud.common.ApplicationException.Severity
+import io.bincloud.common.validation.ValidationException
+import io.bincloud.common.validation.ValidationService
+import io.bincloud.common.validation.ValidationState
 import io.bincloud.storage.application.CreateResourceService
 import io.bincloud.storage.domain.model.resource.Resource
 import io.bincloud.storage.domain.model.resource.ResourceRepository
