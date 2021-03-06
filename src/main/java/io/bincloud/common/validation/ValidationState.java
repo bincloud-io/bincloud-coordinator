@@ -1,4 +1,4 @@
-package io.bincloud.common;
+package io.bincloud.common.validation;
 
 import java.util.ArrayList;
 import java.util.Collection;

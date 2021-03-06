@@ -1,9 +1,9 @@
 package io.bincloud.storage.components
 
-import io.bincloud.common.ValidationException
-import io.bincloud.common.ValidationState
 import io.bincloud.common.ApplicationException.Severity
-import io.bincloud.common.ValidationState.ErrorState
+import io.bincloud.common.validation.ValidationException
+import io.bincloud.common.validation.ValidationState
+import io.bincloud.common.validation.ValidationState.ErrorState
 import spock.lang.Specification
 
 class ValidationStateSpec extends Specification {
