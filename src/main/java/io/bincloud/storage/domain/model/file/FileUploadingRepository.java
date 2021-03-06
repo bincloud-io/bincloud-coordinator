@@ -1,3 +1,4 @@
+package io.bincloud.storage.domain.model.file;
 
 import java.util.Optional;
 import java.util.UUID;
