@@ -1,4 +1,4 @@
-package io.bincloud.storage.application;
+package io.bincloud.storage.application.resource;
 
 import io.bincloud.common.event.EventPublisher;
 import io.bincloud.storage.domain.model.resource.ResourceHasBeenRemoved;

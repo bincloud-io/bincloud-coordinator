@@ -1,4 +1,4 @@
-package io.bincloud.storage.components
+package io.bincloud.common.components
 
 import io.bincloud.common.ApplicationException
 import io.bincloud.common.ApplicationException.Severity

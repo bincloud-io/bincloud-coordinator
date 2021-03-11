@@ -1,6 +1,4 @@
-package io.bincloud.storage.domain.model.file;
-
-import java.util.UUID;
+package io.bincloud.storage.domain.model.resource.file;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,7 +14,7 @@ public class FileUploading {
 	
 	@NonNull
 	@EqualsAndHashCode.Include
-	private final UUID fileId;
+	private final String fileId;
 
 	public FileUploading(@NonNull InitialState initialState) {
 		super();
@@ -26,6 +24,6 @@ public class FileUploading {
 	
 	public interface InitialState {
 		public Long getResourceId();
-		public UUID getFileId();
+		public String getFileId();
 	}
 }

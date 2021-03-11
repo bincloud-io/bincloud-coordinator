@@ -2,9 +2,9 @@ package io.bincloud.storage.features
 
 import io.bincloud.common.ApplicationException.Severity
 import io.bincloud.common.event.EventPublisher
-import io.bincloud.storage.application.RemoveResourceService
-import io.bincloud.storage.application.ResourceDoesNotExistsException
-import io.bincloud.storage.application.UnspecifiedResourceException
+import io.bincloud.storage.application.resource.RemoveResourceService
+import io.bincloud.storage.application.resource.ResourceDoesNotExistException
+import io.bincloud.storage.application.resource.UnspecifiedResourceException
 import io.bincloud.storage.domain.model.resource.Resource
 import io.bincloud.storage.domain.model.resource.ResourceHasBeenRemoved
 import io.bincloud.storage.domain.model.resource.ResourceManagementException
@@ -63,7 +63,7 @@ class RemoveExistingResourceFeature extends Specification {
 		removeResourceService.removeExistingResource(removableResourceId)
 
 		then: "The resource does not exists error occurred"
-		ResourceDoesNotExistsException error = thrown()
+		ResourceDoesNotExistException error = thrown()
 		error.severity == Severity.BUSINESS
 		error.context == ResourceManagementException.CONTEXT
 		error.errorCode == ResourceDoesNotExistsException.ERROR_CODE
@@ -77,7 +77,7 @@ class RemoveExistingResourceFeature extends Specification {
 		removeResourceService.removeExistingResource(null)
 
 		then: "The uspecified resource error occurred"
-		ResourceDoesNotExistsException error = thrown()
+		ResourceDoesNotExistException error = thrown()
 		error.severity == Severity.BUSINESS
 		error.context == ResourceManagementException.CONTEXT
 		error.errorCode == UnspecifiedResourceException.ERROR_CODE
