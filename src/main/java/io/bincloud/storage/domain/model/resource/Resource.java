@@ -16,7 +16,7 @@ public class Resource {
 	@EqualsAndHashCode.Include
 	private Long id;
 	private String fileName;
-
+	
 	public Resource(@NonNull IdGenerator idGenerator, @NonNull ResourceDetails resourceDetails) {
 		super();
 		this.id = idGenerator.generateId();
