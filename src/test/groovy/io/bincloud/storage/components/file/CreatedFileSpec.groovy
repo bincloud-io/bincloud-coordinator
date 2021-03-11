@@ -1,4 +1,4 @@
-package io.bincloud.storage.components
+package io.bincloud.storage.components.file
 
 import java.time.Instant
 

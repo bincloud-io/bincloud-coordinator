@@ -1,4 +1,4 @@
-package io.bincloud.storage.components
+package io.bincloud.storage.components.file
 
 import java.time.Instant
 
@@ -10,7 +10,7 @@ import io.bincloud.common.io.transfer.TransferingScheduler
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileDownloadingContext
 import io.bincloud.storage.domain.model.file.FileManagementException
-import io.bincloud.storage.domain.model.file.FileNotExistsException
+import io.bincloud.storage.domain.model.file.FileNotExistException
 import io.bincloud.storage.domain.model.file.FileUploadingContext
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
 import io.bincloud.storage.domain.model.file.states.DraftState
@@ -52,10 +52,10 @@ class DraftFileSpec extends Specification {
 		file.uploadFile(createDummyUploadingContext())
 
 		then: "The file not exists error has been thrown"
-		FileNotExistsException thrownError = thrown(FileNotExistsException)
+		FileNotExistException thrownError = thrown(FileNotExistException)
 		thrownError.context == FileManagementException.CONTEXT
-		thrownError.errorCode == FileNotExistsException.ERROR_CODE
-		thrownError.severity == Severity.BUSINESS
+		thrownError.errorCode == FileNotExistException.ERROR_CODE
+		thrownError.severity == Severity.INCIDENT
 	}
 
 	def "Scenario: file can not be downloaded in the draft state"() {
@@ -66,10 +66,10 @@ class DraftFileSpec extends Specification {
 		file.downloadFileRange(createDummyDownloadingContext(), 0, 100)
 
 		then: "The file not exists error should be thrown"
-		FileNotExistsException thrownError = thrown(FileNotExistsException)
+		FileNotExistException thrownError = thrown(FileNotExistException)
 		thrownError.context == FileManagementException.CONTEXT
-		thrownError.errorCode == FileNotExistsException.ERROR_CODE
-		thrownError.severity == Severity.BUSINESS
+		thrownError.errorCode == FileNotExistException.ERROR_CODE
+		thrownError.severity == Severity.INCIDENT
 	}
 
 	def "Scenario: file distribution can not be started in the draft state"() {
@@ -80,10 +80,10 @@ class DraftFileSpec extends Specification {
 		file.startDistribution(filesystem)
 
 		then: "The file not exists error should be thrown"
-		FileNotExistsException thrownError = thrown(FileNotExistsException)
+		FileNotExistException thrownError = thrown(FileNotExistException)
 		thrownError.context == FileManagementException.CONTEXT
-		thrownError.errorCode == FileNotExistsException.ERROR_CODE
-		thrownError.severity == Severity.BUSINESS
+		thrownError.errorCode == FileNotExistException.ERROR_CODE
+		thrownError.severity == Severity.INCIDENT
 	}
 
 	def createDummyDownloadingContext() {

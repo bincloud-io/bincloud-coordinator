@@ -8,11 +8,15 @@ import io.bincloud.common.io.transfer.SourcePoint;
 
 public interface FileStorage {
 	public String createNewFile();
-	
+
 	public Optional<FileDescriptor> getFileDescriptor(String fileId);
+
 	public void uploadFile(String fileId, SourcePoint source, CompletionCallback callback);
-	
+
 	public void downloadFile(String fileId, DestinationPoint destination, CompletionCallback callback);
-	
+
+	public void downloadFileRange(String fileId, DestinationPoint destination, CompletionCallback callback, Long offset,
+			Long size);
+
 	public void disposeFile(String fileId);
 }

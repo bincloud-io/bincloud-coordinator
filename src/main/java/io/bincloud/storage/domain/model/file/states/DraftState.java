@@ -1,7 +1,7 @@
 package io.bincloud.storage.domain.model.file.states;
 
 import io.bincloud.storage.domain.model.file.FileDownloadingContext;
-import io.bincloud.storage.domain.model.file.FileNotExistsException;
+import io.bincloud.storage.domain.model.file.FileNotExistException;
 import io.bincloud.storage.domain.model.file.FileState;
 import io.bincloud.storage.domain.model.file.FileUploadingContext;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
@@ -23,17 +23,16 @@ public class DraftState implements FileState {
 
 	@Override
 	public FileState uploadFile(RootContext context, FileUploadingContext uploadingContext) {
-		throw new FileNotExistsException();
+		throw new FileNotExistException();
 	}
 
 	@Override
 	public FileState startDistribution(RootContext context, FilesystemAccessor fileSystem) {
-		throw new FileNotExistsException();
+		throw new FileNotExistException();
 	}
 
 	@Override
 	public FileState downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
-		throw new FileNotExistsException();
+		throw new FileNotExistException();
 	}
-
 }
