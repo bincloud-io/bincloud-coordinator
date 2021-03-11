@@ -1,9 +1,11 @@
 package io.bincloud.storage.features
 
+import io.bincloud.common.ApplicationException.Severity
 import io.bincloud.common.event.EventPublisher
 import io.bincloud.common.io.transfer.CompletionCallback
 import io.bincloud.common.io.transfer.SourcePoint
 import io.bincloud.storage.application.resource.FileUploader
+import io.bincloud.storage.application.resource.ResourceDoesNotExistException
 import io.bincloud.storage.application.resource.ResourceManagementService
 import io.bincloud.storage.domain.model.file.FileStorage
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded
@@ -81,7 +83,10 @@ class UploadFileToResourceFeature extends Specification {
 		
 		then: "The file uploading was completed with resource does not exist error"
 		1 * completionCallback.onError(_) >> {
-			
+			ResourceDoesNotExistException error = it[0]
+			error.context == ResourceDoesNotExistException.CONTEXT
+			error.errorCode == ResourceDoesNotExistException.ERROR_CODE
+			error.severity == Severity.INCIDENT
 		}
 	}
 
