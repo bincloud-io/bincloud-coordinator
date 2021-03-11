@@ -13,6 +13,7 @@ public class Resource {
 	@NonNull
 	@EqualsAndHashCode.Include
 	private Long id;
+	private String fileName;
 	
 	public Resource(@NonNull IdGenerator idGenerator) {
 		super();
