@@ -1,4 +1,4 @@
-package io.bincloud.storage.application.file;
+package io.bincloud.storage.domain.model.resource;
 
 import java.util.Optional;
 import java.util.function.Consumer;

@@ -1,6 +1,5 @@
-package io.bincloud.storage.application.resource;
+package io.bincloud.storage.domain.model.resource;
 
-import io.bincloud.storage.domain.model.resource.ResourceManagementException;
 import lombok.Getter;
 
 @Getter

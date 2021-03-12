@@ -1,6 +1,4 @@
-package io.bincloud.storage.application.resource;
-
-import io.bincloud.storage.domain.model.resource.ResourceManagementException;
+package io.bincloud.storage.domain.model.resource;
 
 public class ResourceDoesNotHaveUploadingsException extends ResourceManagementException {
 	private static final long serialVersionUID = -7004351298684061160L;

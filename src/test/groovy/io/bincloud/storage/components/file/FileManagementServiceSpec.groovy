@@ -9,7 +9,6 @@ import io.bincloud.common.io.transfer.DestinationPoint
 import io.bincloud.common.io.transfer.SourcePoint
 import io.bincloud.common.io.transfer.TransferingScheduler
 import io.bincloud.common.io.transfer.Transmitter
-import io.bincloud.storage.application.file.FileManagementService
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileDescriptor
 import io.bincloud.storage.domain.model.file.FileNotExistException
@@ -18,6 +17,7 @@ import io.bincloud.storage.domain.model.file.FileStorage
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
 import io.bincloud.storage.domain.model.file.File.IdGenerator
 import io.bincloud.storage.domain.model.file.states.FileStatus
+import io.bincloud.storage.domain.model.resource.FileManagementService
 import spock.lang.Specification
 
 class FileManagementServiceSpec extends Specification {

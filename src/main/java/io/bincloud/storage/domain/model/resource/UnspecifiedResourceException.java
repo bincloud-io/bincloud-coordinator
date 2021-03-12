@@ -1,6 +1,4 @@
-package io.bincloud.storage.application.resource;
-
-import io.bincloud.storage.domain.model.resource.ResourceManagementException;
+package io.bincloud.storage.domain.model.resource;
 
 public class UnspecifiedResourceException extends ResourceManagementException {
 	private static final long serialVersionUID = -6158040825883289420L;

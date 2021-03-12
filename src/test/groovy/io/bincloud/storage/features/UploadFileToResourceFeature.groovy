@@ -4,12 +4,12 @@ import io.bincloud.common.ApplicationException.Severity
 import io.bincloud.common.event.EventPublisher
 import io.bincloud.common.io.transfer.CompletionCallback
 import io.bincloud.common.io.transfer.SourcePoint
-import io.bincloud.storage.application.resource.FileUploader
-import io.bincloud.storage.application.resource.ResourceDoesNotExistException
 import io.bincloud.storage.application.resource.ResourceManagementService
 import io.bincloud.storage.domain.model.file.FileStorage
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded
+import io.bincloud.storage.domain.model.resource.FileUploader
 import io.bincloud.storage.domain.model.resource.Resource
+import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException
 import io.bincloud.storage.domain.model.resource.ResourceRepository
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
 import spock.lang.Narrative

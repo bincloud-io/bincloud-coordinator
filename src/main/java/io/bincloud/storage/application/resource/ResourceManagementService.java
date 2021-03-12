@@ -6,6 +6,8 @@ import io.bincloud.common.io.transfer.CompletionCallbackWrapper;
 import io.bincloud.common.io.transfer.SourcePoint;
 import io.bincloud.storage.domain.model.file.FileStorage;
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
+import io.bincloud.storage.domain.model.resource.FileUploader;
+import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException;
 import io.bincloud.storage.domain.model.resource.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 
