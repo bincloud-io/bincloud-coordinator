@@ -1,16 +1,22 @@
 package io.bincloud.storage.application.file;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import io.bincloud.common.io.transfer.CompletionCallback;
+import io.bincloud.common.io.transfer.CompletionCallbackWrapper;
 import io.bincloud.common.io.transfer.DestinationPoint;
 import io.bincloud.common.io.transfer.SourcePoint;
 import io.bincloud.common.io.transfer.TransferingScheduler;
+import io.bincloud.storage.domain.model.file.File;
+import io.bincloud.storage.domain.model.file.File.IdGenerator;
 import io.bincloud.storage.domain.model.file.FileDescriptor;
+import io.bincloud.storage.domain.model.file.FileDownloadingContext;
+import io.bincloud.storage.domain.model.file.FileNotExistException;
 import io.bincloud.storage.domain.model.file.FileRepository;
 import io.bincloud.storage.domain.model.file.FileStorage;
+import io.bincloud.storage.domain.model.file.FileUploadingContext;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
-import io.bincloud.storage.domain.model.file.File.IdGenerator;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -22,32 +28,58 @@ public class FileManagementService implements FileStorage {
 
 	@Override
 	public String createNewFile() {
-		throw new UnsupportedOperationException();
+		File file = new File(idGenerator);
+		file.createFile(filesystemAccessor);
+		fileRepository.save(file);
+		return file.getFileId();
 	}
 
 	@Override
 	public Optional<FileDescriptor> getFileDescriptor(String fileId) {
-		throw new UnsupportedOperationException();
+		return fileRepository.findById(fileId).map(file -> file);
 	}
 
 	@Override
 	public void uploadFile(String fileId, SourcePoint source, CompletionCallback callback) {
-		throw new UnsupportedOperationException();
+		consumeExistingFileAsync(fileId, callback, file -> {
+			file.uploadFile(new FileUploadingContext(source, transferingScheduler, filesystemAccessor,
+					new CompletionCallbackWrapper(callback) {
+						@Override
+						public void onSuccess() {
+							file.startDistribution(filesystemAccessor);
+							fileRepository.save(file);
+							super.onSuccess();
+						}
+					}));
+		});
 	}
 
 	@Override
 	public void downloadFile(String fileId, DestinationPoint destination, CompletionCallback callback) {
-		throw new UnsupportedOperationException();
+		consumeExistingFileAsync(fileId, callback,
+				file -> file.downloadFile(createDownloadingContext(destination, callback)));
 	}
 
 	@Override
 	public void downloadFileRange(String fileId, DestinationPoint destination, CompletionCallback callback, Long offset,
 			Long size) {
-		throw new UnsupportedOperationException();
+		consumeExistingFileAsync(fileId, callback,
+				file -> file.downloadFileRange(createDownloadingContext(destination, callback), offset, size));
+	}
+
+	private FileDownloadingContext createDownloadingContext(DestinationPoint destination, CompletionCallback callback) {
+		return new FileDownloadingContext(destination, transferingScheduler, filesystemAccessor, callback);
+	}
+
+	private void consumeExistingFileAsync(String fileId, CompletionCallback callback, Consumer<File> consumer) {
+		fileRepository.findById(fileId).ifPresentOrElse(consumer, () -> callback.onError(new FileNotExistException()));
 	}
 
 	@Override
 	public void disposeFile(String fileId) {
-		throw new UnsupportedOperationException();
+		File file = fileRepository.findById(fileId).orElseThrow(FileNotExistException::new);
+		file.dispose();
+		fileRepository.save(file);
 	}
+
 }

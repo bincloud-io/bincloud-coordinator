@@ -38,16 +38,16 @@ public class File implements FileDescriptor {
 	}
 
 	public void createFile(FilesystemAccessor fileSystem) {
-		this.state = state.createFile(createRootContext(), fileSystem);
+		state.createFile(createRootContext(), fileSystem);
 		updateModification();
 	}
 
 	public void uploadFile(FileUploadingContext uploadingContext) {
-		this.state = state.uploadFile(createRootContext(), uploadingContext);
+		state.uploadFile(createRootContext(), uploadingContext);
 	}
 	
 	public void startDistribution(FilesystemAccessor fileSystem) {
-		this.state = state.startDistribution(createRootContext(), fileSystem);
+		state.startDistribution(createRootContext(), fileSystem);
 		updateModification();
 	}
 
@@ -56,7 +56,7 @@ public class File implements FileDescriptor {
 	}
 	
 	public void downloadFileRange(FileDownloadingContext downloadingContext, Long offset, Long size) {
-		this.state = state.downloadFile(createRootContext(), downloadingContext, offset, size);
+		state.downloadFile(createRootContext(), downloadingContext, offset, size);
 	}
 
 	public void dispose() {
@@ -78,6 +78,11 @@ public class File implements FileDescriptor {
 			@Override
 			public void setSize(Long size) {
 				File.this.size = size;
+			}
+
+			@Override
+			public void setState(FileState fileState) {
+				File.this.state = fileState;
 			}
 		};
 	}
