@@ -21,6 +21,7 @@ import io.bincloud.storage.domain.model.file.states.FileStatus
 import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore("Not implemented")
 class FileManagementServiceSpec extends Specification {
 	private static final Instant TIMESTAMP_INITIAL_POINT = Instant.now()
 	private static final Instant TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plusMillis(1)
