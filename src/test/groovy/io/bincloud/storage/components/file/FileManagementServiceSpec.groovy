@@ -18,6 +18,7 @@ import io.bincloud.storage.domain.model.file.FileStorage
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
 import io.bincloud.storage.domain.model.file.File.IdGenerator
 import io.bincloud.storage.domain.model.file.states.FileStatus
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class FileManagementServiceSpec extends Specification {
