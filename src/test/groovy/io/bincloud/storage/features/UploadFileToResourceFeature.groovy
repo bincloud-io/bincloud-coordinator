@@ -43,13 +43,13 @@ class UploadFileToResourceFeature extends Specification {
 
 	def "Scenario: file is successfuly uploaded to the existing resource"() {
 		given: "The resource exists in the repository"
-		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		resourceRepository.isExists(RESOURCE_ID) >> true
 
 		and: "The file storage will successfully create new resource"
 		fileStorage.createNewFile() >> FILE_ID
 
 		and: "The file uploading will successfully completed"
-		fileStorage.uploadFile(FILE_ID, source, _) >> {
+		1 * fileStorage.uploadFile(FILE_ID, source, _) >> {
 			CompletionCallback callback = it[2]
 			callback.onSuccess()
 		}
@@ -57,13 +57,7 @@ class UploadFileToResourceFeature extends Specification {
 		when: "The file uploading is requested"
 		fileUploader.uploadFile(RESOURCE_ID, source, completionCallback)
 		
-		then: "The file creation should be requested to the file storage"
-		1 * fileStorage.createNewFile()
-		
-		and: "File uploading should be requested to the file storage"
-		1 * fileStorage.uploadFile(FILE_ID, source, _)
-		
-		and: "Completion callback should be successfully completed"
+		then: "Completion callback should be successfully completed"
 		1 * completionCallback.onSuccess()
 		
 		and: "System should be notified about file uploading to the resource"
@@ -76,7 +70,7 @@ class UploadFileToResourceFeature extends Specification {
 
 	def "Scenario: file uploading will be completed with resource does not exist error if resource not found"() {
 		given: "The doesn't exist in the repository"
-		resourceRepository.findById(RESOURCE_ID) >> Optional.empty()
+				resourceRepository.isExists(RESOURCE_ID) >> false
 		
 		when: "The file uploading is requested"
 		fileUploader.uploadFile(RESOURCE_ID, source, completionCallback)
