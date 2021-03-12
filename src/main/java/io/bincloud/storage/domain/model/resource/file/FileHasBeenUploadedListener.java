@@ -2,6 +2,7 @@ package io.bincloud.storage.domain.model.resource.file;
 
 import io.bincloud.common.event.EventListener;
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
+import io.bincloud.storage.domain.model.resource.file.FileUploading.InitialState;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -10,6 +11,22 @@ public class FileHasBeenUploadedListener implements EventListener<FileHasBeenUpl
 	
 	@Override
 	public void onEvent(FileHasBeenUploaded event) {
-		throw new UnsupportedOperationException();
+		FileUploading fileUploading = new FileUploading(new FileUploadingInitialState(event));
+		fileUploadingRepository.save(fileUploading);
+	}
+	
+	@RequiredArgsConstructor
+	private class FileUploadingInitialState implements InitialState {
+		private final FileHasBeenUploaded event;
+		
+		@Override
+		public Long getResourceId() {
+			return event.getResourceId();
+		}
+
+		@Override
+		public String getFileId() {
+			return event.getFileId();
+		}
 	}
 }
