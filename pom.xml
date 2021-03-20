@@ -168,12 +168,8 @@
 					<version>3.8.0</version>
 
 					<configuration>
-						<release>14</release>
-						<source>14</source>
-						<target>14</target>
-						<compilerArgs>
-							<arg>--enable-preview</arg>
-						</compilerArgs>
+						<source>1.8</source>
+						<target>1.8</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<parameters>true</parameters>
 
@@ -201,7 +197,6 @@
 
 					<configuration>
 						<useFile>false</useFile>
-						<argLine>--enable-preview</argLine>
 						<includes>
 							<include>**/*Test.java</include>
 							<include>**/*Spec.java</include>

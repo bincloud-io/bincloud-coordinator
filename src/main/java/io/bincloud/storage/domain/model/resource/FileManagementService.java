@@ -72,7 +72,12 @@ public class FileManagementService implements FileStorage {
 	}
 
 	private void consumeExistingFileAsync(String fileId, CompletionCallback callback, Consumer<File> consumer) {
-		fileRepository.findById(fileId).ifPresentOrElse(consumer, () -> callback.onError(new FileNotExistException()));
+		Optional<File> file = fileRepository.findById(fileId);
+		if (!file.isPresent()) {
+			callback.onError(new FileNotExistException());
+		} else {
+			consumer.accept(file.get());
+		}
 	}
 
 	@Override
