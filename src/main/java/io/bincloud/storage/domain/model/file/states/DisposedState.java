@@ -15,22 +15,22 @@ public class DisposedState implements FileState {
 	}
 
 	@Override
-	public FileState createFile(RootContext context, FilesystemAccessor fileSystem) {
+	public void createFile(RootContext context, FilesystemAccessor fileSystem) {
 		throw new FileHasAlreadyBeenDisposedException();
 	}
 
 	@Override
-	public FileState uploadFile(RootContext context, FileUploadingContext uploadingContext) {
+	public void uploadFile(RootContext context, FileUploadingContext uploadingContext) {
 		throw new FileHasAlreadyBeenDisposedException();
 	}
 
 	@Override
-	public FileState downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
+	public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
 		throw new FileHasAlreadyBeenDisposedException();
 	}
 
 	@Override
-	public FileState startDistribution(RootContext context, FilesystemAccessor fileSystem) {
+	public void startDistribution(RootContext context, FilesystemAccessor fileSystem) {
 		throw new FileHasAlreadyBeenDisposedException();
 	}
 }

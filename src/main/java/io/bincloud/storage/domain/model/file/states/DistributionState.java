@@ -17,23 +17,22 @@ public class DistributionState implements FileState {
 	}
 
 	@Override
-	public FileState createFile(RootContext context, FilesystemAccessor fileSystem) {
+	public void createFile(RootContext context, FilesystemAccessor fileSystem) {
 		throw new FileAlreadyExistsException();
 	}
 
 	@Override
-	public FileState uploadFile(RootContext context, FileUploadingContext uploadingContext) {
+	public void uploadFile(RootContext context, FileUploadingContext uploadingContext) {
 		throw new FileHasAlreadyBeenUploadedException();
 	}
 
 	@Override
-	public FileState startDistribution(RootContext context, FilesystemAccessor fileSystem) {
+	public void startDistribution(RootContext context, FilesystemAccessor fileSystem) {
 		throw new FileHasAlreadyBeenUploadedException();
 	}
 
 	@Override
-	public FileState downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
+	public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
 		downloadingContext.download(context.getFileName(), offset, size);
-		return this;
 	}
 }
