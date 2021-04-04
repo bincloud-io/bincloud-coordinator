@@ -9,7 +9,7 @@ RUN apt install mariadb-server -y
 
 # OVERRIDE DEFAULTS
 RUN mv /etc/mysql/my.cnf /etc/mysql/my.default.cnf
-ADD ./mariadb-defaults.cnf /etc/mysql/my.cnf
+ADD mariadb-defaults.cnf /etc/mysql/my.cnf
 RUN echo "!include /etc/mysql/my.default.cnf" >> my.cnf
 
 # CLEANUP DIRECTORIES
@@ -20,7 +20,7 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN mkdir -p ./mariadb/schema ./mariadb/init.sql /var/run/mysqld
 
 # ADD SCRIPTS
-ADD ./start_mariadb.sh ./mariadb/start_mariadb.sh
+ADD start_mariadb.sh ./mariadb/start_mariadb.sh
 
 # SET PERMISSIONS
 RUN chown -R bincloud:bincloud ./mariadb /var/run/mysqld
