@@ -8,6 +8,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.junit.runner.RunWith
 
 import io.bincloud.storage.domain.model.file.FileRepository
+import liquibase.Liquibase
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
