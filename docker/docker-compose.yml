@@ -1,20 +1,16 @@
 version: "3.9"
 services:
-  linux: 
-    build: ./linux/20.04
-    image: bincloud/linux:ubuntu-20.04
-  java:
-    build: ./java/openjdk/v8
-    image: bincloud/java:openjdk-8-jre
-    depends_on:
-      - linux
   mariadb:
-    build: ./mariadb/10.5
     image: bincloud/mariadb:10.5
-    depends_on:
-      - linux
+    restart: always
   wildfly:
-    build: ./wildfly/23.0.0.Final
     image: bincloud/wildfly:23.0.0.Final
-    depends_on:
-      - java
+    restart: always
+    ports:
+      - 8080:8080
+      - 9990:9990
+    networks:
+      - nw_internal
+networks:
+  nw_internal:
+    driver: bridge
