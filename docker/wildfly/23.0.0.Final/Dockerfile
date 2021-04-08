@@ -20,4 +20,4 @@ VOLUME /srv/bincloud/wildfly
 EXPOSE 8080
 EXPOSE 9990
 
-CMD ["/srv/bincloud/wildfly/bin/standalone.sh", "--server-config=standalone-full.xml", "-b", "0.0.0.0"]
+CMD ["/srv/bincloud/wildfly/bin/standalone.sh", "--server-config=standalone-full.xml", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
