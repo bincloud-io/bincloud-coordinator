@@ -9,8 +9,3 @@ services:
     ports:
       - 8080:8080
       - 9990:9990
-    networks:
-      - nw_internal
-networks:
-  nw_internal:
-    driver: bridge
