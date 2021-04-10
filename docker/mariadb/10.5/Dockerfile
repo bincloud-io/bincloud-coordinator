@@ -17,14 +17,14 @@ RUN rm -rf /tmp/*
 RUN rm -rf  /var/tmp/*
 RUN rm -rf /var/lib/mysql
 RUN rm -rf /var/lib/apt/lists/*
-RUN mkdir -p ./mariadb/schema ./mariadb/init.sql /var/run/mysqld
+RUN mkdir -p /srv/bincloud/mariadb/schema /srv/bincloud/mariadb/init.sql /var/run/mysqld
 
 # ADD SCRIPTS
-ADD start_mariadb.sh ./mariadb/start_mariadb.sh
+ADD start_mariadb.sh /srv/bincloud/mariadb/start_mariadb.sh
 
 # SET PERMISSIONS
-RUN chown -R bincloud:bincloud ./mariadb /var/run/mysqld
-RUN chmod -R 777 ./mariadb /var/run/mysqld
+RUN chown -R bincloud:bincloud /srv/bincloud/mariadb /var/run/mysqld
+RUN chmod -R 777 /srv/bincloud/mariadb /var/run/mysqld
 
 # INSTALL DATABASE
 RUN mariadb-install-db --user=bincloud
