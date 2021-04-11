@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  database:
+    build: ./database
+    image: bincloud/database:v1.0.0
+    restart: always
+  appserver:
+    build: ./appserver
+    image: bincloud/appserver:v1.0.0
+    restart: always
+    ports:
+      - 8080:8080
+      - 9990:9990
+    depends_on:
+      - database
