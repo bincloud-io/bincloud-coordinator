@@ -1,0 +1,2 @@
+/deployment=mariadb_jdbc:add(runtime-name=mariadb_jdbc, content=[{url=${DEPLOYMENT_MARIADB_JDBC_CLIENT_URL}}], enabled=true)
+/subsystem=datasources/data-source=BC_CENTRAL:add(driver-name=mariadb_jdbc, jndi-name=${DB_CENTRAL_JNDI_NAME}, driver-class=org.mariadb.jdbc.Driver, connection-url=${DB_CENTRAL_CONNECTION_URL}, user-name=${DB_CENTRAL_USERNAME}, password=${DB_CENTRAL_PASSWORD})
