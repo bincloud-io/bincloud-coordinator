@@ -3,10 +3,12 @@ services:
   database:
     build: ./database
     image: bincloud/database:v1.0.0
+    hostname: central.bincloud.internal
     restart: always
   appserver:
     build: ./appserver
     image: bincloud/appserver:v1.0.0
+    hostname: appserver.bincloud.internal
     restart: always
     ports:
       - 8080:8080
