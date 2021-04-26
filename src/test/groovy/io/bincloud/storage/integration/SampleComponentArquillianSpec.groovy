@@ -10,7 +10,6 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset
 import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.junit.runner.RunWith
 
-import spock.lang.Ignore
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)

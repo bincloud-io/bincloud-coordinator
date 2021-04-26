@@ -11,11 +11,11 @@ import io.bincloud.storage.domain.model.file.FileRepository
 import liquibase.Liquibase
 import spock.lang.Specification
 
-@RunWith(ArquillianSputnik)
+//@RunWith(ArquillianSputnik)
 class FileRepositorySpec extends Specification {
-	public static Archive "create deployment"() {
-		return ShrinkWrap.create(JavaArchive)
-			.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-			.addClass(FileRepository);
-	}
+//	public static Archive "create deployment"() {
+//		return ShrinkWrap.create(JavaArchive)
+//			.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+//			.addClass(FileRepository);
+//	}
 }
