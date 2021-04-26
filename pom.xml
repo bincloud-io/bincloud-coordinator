@@ -15,6 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<arquillian.framework.version>1.4.1.Final</arquillian.framework.version>
+		<arquillian.cube.version>1.18.2</arquillian.cube.version>
 		<arquillian.spock.version>1.0.0.CR1</arquillian.spock.version>
 		<spock.reporter.version>1.8.0</spock.reporter.version>
 		<testcontainers.version>1.15.2</testcontainers.version>
@@ -57,6 +58,14 @@
 				<version>${arquillian.framework.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.arquillian.cube</groupId>
+				<artifactId>arquillian-cube-bom</artifactId>
+				<version>${arquillian.cube.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 
 			<dependency>
@@ -130,13 +139,6 @@
 				<groupId>org.jboss.arquillian.spock</groupId>
 				<artifactId>arquillian-spock-container</artifactId>
 				<version>${arquillian.spock.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.arquillian.container</groupId>
-				<artifactId>arquillian-container-chameleon</artifactId>
-				<version>${arquillian.chameleon.version}</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -268,6 +270,18 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.arquillian.cube</groupId>
+			<artifactId>arquillian-cube-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.arquillian.cube</groupId>
+			<artifactId>arquillian-cube-docker</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
