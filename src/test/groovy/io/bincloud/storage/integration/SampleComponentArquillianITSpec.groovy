@@ -10,6 +10,7 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset
 import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.junit.runner.RunWith
 
+import io.bincloud.testing.archive.ArchiveBuilder
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
@@ -17,9 +18,10 @@ import spock.lang.Specification
 class SampleComponentArquillianITSpec extends Specification {
 	@Deployment
 	static def Archive "create deployment"() {
-		return ShrinkWrap.create(JavaArchive)
-			.addClass(SampleComponent)
-			.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+		return ArchiveBuilder.jar("test.jar")
+			.appendClasses(SampleComponent)
+			.copyMetaInfResource("beans.xml")
+		.build()
 	}
 	
 	@Inject
@@ -27,6 +29,6 @@ class SampleComponentArquillianITSpec extends Specification {
 	
 	def "Scenario: The sample of working spock integration test on arquillian"() {
 		expect:
-			component.greeting == "Hello"
+		component.greeting == "Hello"
 	}
 }

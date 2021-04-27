@@ -69,12 +69,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.jboss.arquillian.junit5</groupId>
-				<artifactId>arquillian-junit5-container</artifactId>
-				<version>1.7.0.Alpha8</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.spockframework</groupId>
 				<artifactId>spock-core</artifactId>
 				<version>${spock.version}</version>
@@ -281,6 +275,12 @@
 		<dependency>
 			<groupId>org.arquillian.cube</groupId>
 			<artifactId>arquillian-cube-docker</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-impl-maven</artifactId>
 			<scope>test</scope>
 		</dependency>
 
