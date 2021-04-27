@@ -14,7 +14,7 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 //@Ignore
-class SampleComponentArquillianSpec extends Specification {
+class SampleComponentArquillianITSpec extends Specification {
 	@Deployment
 	static def Archive "create deployment"() {
 		return ShrinkWrap.create(JavaArchive)
