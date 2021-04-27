@@ -93,6 +93,7 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 
 		protected ClassContainingArchiveBuilder(Class<A> archiveType, String archiveName) {
 			super(archiveType, archiveName);
+			appendPackagesRecursively("io.bincloud.testing");
 		}
 
 		public B appendClasses(Class<?>... appendedClasses) {
