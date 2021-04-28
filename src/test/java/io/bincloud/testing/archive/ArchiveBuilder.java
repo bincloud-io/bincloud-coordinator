@@ -1,23 +1,28 @@
 package io.bincloud.testing.archive;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.GenericArchive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.container.ClassContainer;
+import org.jboss.shrinkwrap.api.container.ManifestContainer;
+import org.jboss.shrinkwrap.api.importer.ZipImporter;
 import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenFormatStage;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenStrategyStage;
 import org.jboss.shrinkwrap.resolver.api.maven.PomEquippedResolveStage;
 import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuilder<A, B>> {
 	protected A archive;
@@ -28,17 +33,15 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 	}
 
 	public DependencyResolver resolveDependencies(String pomFile) {
-		return new DependencyResolver(Maven.resolver(), pomFile);
+		return new DependencyResolver(pomFile);
 	}
-	
+
 	public B appendLibraries(Archive<?>... libraryArchives) {
 		this.archive = this.appendLibrariesToArchive(libraryArchives);
 		return self();
 	}
 
-	public A build() {
-		return this.archive;
-	}
+	public abstract A build();
 
 	@SuppressWarnings("unchecked")
 	protected B self() {
@@ -46,54 +49,73 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 	}
 
 	protected abstract A appendLibrariesToArchive(Archive<?>... archives);
-	
-	@RequiredArgsConstructor
+
 	public class DependencyResolver {
-		private final MavenResolverSystem resolverSystem;
-		private final String pomFile;
+		private PomEquippedResolveStage resolver;
 		private Set<String> profiles = new HashSet<>();
 		private Set<ScopeType> scopes = new HashSet<ScopeType>();
-		
+		private Set<Archive<?>> resolved = new HashSet<Archive<?>>();
+
+		public DependencyResolver(String pomFile) {
+			super();
+			this.resolver = loadPomFile(pomFile);
+		}
+
 		public DependencyResolver withProfile(String profile) {
 			this.profiles.add(profile);
 			return this;
 		}
-		
-		public DependencyResolver withScope(ScopeType scope) {
-			this.scopes.add(scope);
+
+		public DependencyResolver withScopes(ScopeType... scopes) {
+			this.scopes.addAll(Arrays.asList(scopes));
+			return this;
+		}
+
+		public DependencyResolver resolveAll() {
+			this.resolved.addAll(resolveDependencies(() -> resolver.resolve()));
 			return this;
 		}
 		
+		public DependencyResolver resolveDependency(String group, String artifact) {
+			this.resolved.addAll(resolveDependencies(() -> resolver.resolve(String.format("%s:%s", group, artifact))));
+			return this;
+		}
+
+		private Collection<Archive<?>> resolveDependencies(Supplier<MavenStrategyStage> resolveFunction) {
+			try {
+				return Arrays.stream(resolveFunction.get().withTransitivity().asFile())
+						.map(archiveFile -> ShrinkWrap.create(ZipImporter.class, archiveFile.getName())
+								.importFrom(archiveFile).as(GenericArchive.class))
+						.collect(Collectors.toList());
+			} catch (Exception e) {
+				return Collections.emptyList();
+			}
+		}
+
 		public B apply() {
-			appendLibrariesToArchive(createDependenciesResolver().get().as(Archive.class));
+			appendLibrariesToArchive(resolved.toArray(new Archive<?>[resolved.size()]));
 			return self();
 		}
-		
-		private Supplier<MavenFormatStage> createDependenciesResolver() {
-			return () -> createScopedDependencyLoader().get()
-					.resolve().withTransitivity();
-		}
-		
-		private Supplier<PomEquippedResolveStage> createScopedDependencyLoader() {
-			final Supplier<PomEquippedResolveStage> result = createDependencyLoader();
+
+		private PomEquippedResolveStage loadPomFile(String pomFileLocation) {
+			PomEquippedResolveStage result = createDependencyLoader(pomFileLocation);
 			if (!scopes.isEmpty()) {
-				return () -> result.get().importDependencies(scopes.toArray(new ScopeType[scopes.size()]));
+				return result.importDependencies(scopes.toArray(new ScopeType[scopes.size()]));
 			}
 			return result;
 		}
-		
-		private Supplier<PomEquippedResolveStage> createDependencyLoader() {
-			return () -> resolverSystem.loadPomFromFile(pomFile, profiles.toArray(new String[profiles.size()]));
+
+		private PomEquippedResolveStage createDependencyLoader(String pomFileLocation) {
+			return Maven.resolver().loadPomFromFile(pomFileLocation, profiles.toArray(new String[profiles.size()]));
 		}
-		
+
 	}
 
-	public static abstract class ClassContainingArchiveBuilder<A extends Archive<A> & ClassContainer<A>, B extends ArchiveBuilder<A, B>>
+	public static abstract class ClassContainingArchiveBuilder<A extends Archive<A> & ClassContainer<A> & ManifestContainer<A>, B extends ArchiveBuilder<A, B>>
 			extends ArchiveBuilder<A, B> {
 
 		protected ClassContainingArchiveBuilder(Class<A> archiveType, String archiveName) {
 			super(archiveType, archiveName);
-			appendPackagesRecursively("io.bincloud.testing");
 		}
 
 		public B appendClasses(Class<?>... appendedClasses) {
@@ -110,14 +132,14 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 			this.archive = this.archive.addPackages(false, appendedPackages);
 			return self();
 		}
-		
-		public B copyMetaInfResource(String resourceName) {
-			String resourcePath = String.format("META-INF/%s", resourceName);
-			return copyResource(resourcePath);
+
+		public B appendResource(String resourcePath) {
+			this.archive = this.archive.addAsResource(resourcePath);
+			return self();
 		}
-		
-		public B copyResource(String resourcePath) {
-			this.archive = this.archive.addAsResource(resourcePath, resourcePath);
+
+		public B appendManifestResource(String resourcePath, String targetPath) {
+			this.archive = this.archive.addAsManifestResource(resourcePath, targetPath);
 			return self();
 		}
 	}
@@ -126,14 +148,19 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 		private JarArchiveBuilder(String archiveName) {
 			super(JavaArchive.class, archiveName);
 		}
-		
+
 		@Override
 		protected JavaArchive appendLibrariesToArchive(Archive<?>... archives) {
 			JavaArchive result = this.archive;
 			for (Archive<?> archive : archives) {
 				result = result.merge(archive);
 			}
-			return result;
+			return result.as(JavaArchive.class).addManifest();
+		}
+
+		@Override
+		public JavaArchive build() {
+			return archive.as(JavaArchive.class);
 		}
 	}
 
@@ -141,16 +168,20 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 		private WarArchiveBuilder(String archiveName) {
 			super(WebArchive.class, archiveName);
 		}
-		
-		public WarArchiveBuilder copyWebInfResource(String resourceName) {
-			String resourcePath = String.format("WEB-INF/%s", resourceName);
-			this.archive = this.archive.addAsResource(resourcePath, resourcePath);
+
+		public WarArchiveBuilder appendWebResource(String resourcePath, String targetPath) {
+			this.archive = this.archive.addAsWebInfResource(resourcePath, targetPath);
 			return self();
 		}
 
 		@Override
 		protected WebArchive appendLibrariesToArchive(Archive<?>... archives) {
 			return this.archive.addAsLibraries(archives);
+		}
+
+		@Override
+		public WebArchive build() {
+			return archive.as(WebArchive.class);
 		}
 	}
 
@@ -167,6 +198,11 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 		@Override
 		protected EnterpriseArchive appendLibrariesToArchive(Archive<?>... archives) {
 			return this.archive.addAsLibraries(archives);
+		}
+
+		@Override
+		public EnterpriseArchive build() {
+			return archive.as(EnterpriseArchive.class);
 		}
 	}
 

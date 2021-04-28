@@ -1,4 +1,4 @@
-package io.bincloud.testing.database;
+package io.bincloud.testing.database.jdbc;
 
 import java.util.function.Supplier;
 
