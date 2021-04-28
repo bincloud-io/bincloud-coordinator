@@ -19,7 +19,7 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 
-class FileRepositorySpec extends Specification {
+class FileRepositoryITSpec extends Specification {
 	@Deployment
 	public static Archive "create deployment"() {
 		return ArchiveBuilder.jar("file-repository-spec.jar")
