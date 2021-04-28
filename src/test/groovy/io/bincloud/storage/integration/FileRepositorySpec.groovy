@@ -9,7 +9,6 @@ import javax.inject.Inject
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
-import org.jboss.shrinkwrap.api.exporter.ZipExporter
 import org.junit.runner.RunWith
 
 import io.bincloud.storage.port.adapter.file.JPAFileRepository
@@ -28,6 +27,7 @@ class FileRepositorySpec extends Specification {
 			.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 			.appendClasses(JPAFileRepository)
 			.appendManifestResource("META-INF/beans.xml", "beans.xml")
+			.appendManifestResource("META-INF/persistence.xml", "persistence.xml")
 			.resolveDependencies("pom.xml")
 				.withScopes(COMPILE, RUNTIME, TEST)
 				.resolveDependency("org.liquibase", "liquibase-core")
