@@ -134,10 +134,15 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 		}
 
 		public B appendResource(String resourcePath) {
-			this.archive = this.archive.addAsResource(resourcePath);
+			this.archive = this.archive.addAsResource(resourcePath, resourcePath);
 			return self();
 		}
 
+		public B appendResource(String resourcePath, String targetPath) {
+			this.archive = this.archive.addAsResource(resourcePath, targetPath);
+			return self();
+		}
+		
 		public B appendManifestResource(String resourcePath, String targetPath) {
 			this.archive = this.archive.addAsManifestResource(resourcePath, targetPath);
 			return self();

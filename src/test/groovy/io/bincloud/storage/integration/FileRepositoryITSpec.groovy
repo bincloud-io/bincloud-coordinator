@@ -26,6 +26,7 @@ class FileRepositoryITSpec extends Specification {
 			.appendPackagesRecursively(File.getPackage().getName())
 			.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 			.appendClasses(JPAFileRepository)
+			.appendResource("liquibase")
 			.appendManifestResource("META-INF/beans.xml", "beans.xml")
 			.appendManifestResource("META-INF/persistence.xml", "persistence.xml")
 			.resolveDependencies("pom.xml")
@@ -38,6 +39,14 @@ class FileRepositoryITSpec extends Specification {
 	@Inject
 	@JdbcLiquibase
 	private DatabaseConfigurer databaseConfigurer;
+	
+	def setup() {
+		databaseConfigurer.setup("liquibase/master.changelog.xml")
+	}
+	
+	def cleanup() {
+		databaseConfigurer.tearDown()
+	}
 	
 	def "Scenario: database configurer injected"() {
 		expect:
