@@ -1,4 +1,4 @@
-package io.bincloud.common.components
+package io.bincloud.common.components.io
 
 import java.nio.ByteBuffer
 

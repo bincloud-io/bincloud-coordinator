@@ -1,10 +1,10 @@
 package io.bincloud.storage.domain.model.file;
 
-import java.time.Instant;
+import io.bincloud.common.time.DateTime;
 
 public interface FileDescriptor {
 	public String getStatus();
-	public Instant getCreationMoment();
-	public Instant getLastModification();
+	public DateTime getCreationMoment();
+	public DateTime getLastModification();
 	public Long getSize();
 }

@@ -1,7 +1,9 @@
 package io.bincloud.storage.components.file
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
+import io.bincloud.common.time.DateTime
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.File.IdGenerator
 import io.bincloud.storage.domain.model.file.states.CreatedState
@@ -13,8 +15,8 @@ import spock.lang.Unroll
 
 class FileSpec extends Specification {
 	private static final String FILE_ID = "12345"
-	private static final Instant TIMESTAMP_INITIAL_POINT = Instant.now()
-	private static final Instant TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plusMillis(1)
+	private static final DateTime TIMESTAMP_INITIAL_POINT = new DateTime()
+	private static final DateTime TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plus(1, ChronoUnit.MILLIS)
 	
 	private IdGenerator idGenerator;
 

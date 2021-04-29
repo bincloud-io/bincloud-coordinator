@@ -1,4 +1,4 @@
-package io.bincloud.common.components
+package io.bincloud.common.components.validation
 
 import io.bincloud.common.ApplicationException.Severity
 import io.bincloud.common.validation.ValidationException

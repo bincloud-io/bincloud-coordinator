@@ -7,6 +7,7 @@ import io.bincloud.common.io.transfer.CompletionCallback
 import io.bincloud.common.io.transfer.DestinationPoint
 import io.bincloud.common.io.transfer.SourcePoint
 import io.bincloud.common.io.transfer.TransferingScheduler
+import io.bincloud.common.time.DateTime
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileDownloadingContext
 import io.bincloud.storage.domain.model.file.FileManagementException
@@ -19,7 +20,7 @@ import spock.lang.Specification
 
 class DraftFileSpec extends Specification {
 	private static final String FILE_ID = "12345"
-	private static final Instant TIMESTAMP_INITIAL_POINT = Instant.now()
+	private static final DateTime TIMESTAMP_INITIAL_POINT = DateTime.now()
 	private FilesystemAccessor filesystem;
 
 	def setup() {

@@ -12,6 +12,8 @@ appserver:
   image: bincloud/appserver:v1.0.0
   hostName: appserver.bincloud.internal
   portBindings: [8080/tcp, 9990/tcp]
+  links:
+    - database:database
   await:
     strategy: log
     match: 'Admin console listening on http://0.0.0.0:9990'

@@ -46,6 +46,7 @@ class FileRepositoryITSpec extends Specification {
 	
 	def cleanup() {
 		databaseConfigurer.tearDown()
+		Thread.sleep(60000)
 	}
 	
 	def "Scenario: database configurer injected"() {

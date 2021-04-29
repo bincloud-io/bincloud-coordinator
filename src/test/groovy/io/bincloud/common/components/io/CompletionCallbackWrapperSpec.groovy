@@ -1,4 +1,4 @@
-package io.bincloud.common.components
+package io.bincloud.common.components.io
 
 import io.bincloud.common.io.transfer.CompletionCallback
 import io.bincloud.common.io.transfer.CompletionCallbackWrapper

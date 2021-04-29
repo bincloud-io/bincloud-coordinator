@@ -1,6 +1,7 @@
 package io.bincloud.storage.components.file
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import io.bincloud.common.ApplicationException
 import io.bincloud.common.ApplicationException.Severity
@@ -9,6 +10,7 @@ import io.bincloud.common.io.transfer.DestinationPoint
 import io.bincloud.common.io.transfer.SourcePoint
 import io.bincloud.common.io.transfer.TransferingScheduler
 import io.bincloud.common.io.transfer.Transmitter
+import io.bincloud.common.time.DateTime
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileDescriptor
 import io.bincloud.storage.domain.model.file.FileNotExistException
@@ -21,8 +23,8 @@ import io.bincloud.storage.domain.model.resource.FileManagementService
 import spock.lang.Specification
 
 class FileManagementServiceSpec extends Specification {
-	private static final Instant TIMESTAMP_INITIAL_POINT = Instant.now()
-	private static final Instant TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plusMillis(1)
+	private static final DateTime TIMESTAMP_INITIAL_POINT = new DateTime()
+	private static final DateTime TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plus(1, ChronoUnit.MILLIS)
 	private static final String FILE_ID = "12345"
 	private static final Long FILE_SIZE = 100L
 
