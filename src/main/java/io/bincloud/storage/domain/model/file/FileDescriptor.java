@@ -1,6 +1,6 @@
 package io.bincloud.storage.domain.model.file;
 
-import io.bincloud.common.time.DateTime;
+import io.bincloud.common.domain.model.time.DateTime;
 
 public interface FileDescriptor {
 	public String getStatus();

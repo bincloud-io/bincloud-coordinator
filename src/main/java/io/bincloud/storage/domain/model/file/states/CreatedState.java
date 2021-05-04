@@ -6,12 +6,16 @@ import io.bincloud.storage.domain.model.file.FileHasNotBeenUploadedException;
 import io.bincloud.storage.domain.model.file.FileState;
 import io.bincloud.storage.domain.model.file.FileUploadingContext;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CreatedState implements FileState {
 
 	@Override
 	@ToString.Include
+	@EqualsAndHashCode.Include
 	public String getStatus() {
 		return FileStatus.CREATED.name();
 	}
@@ -29,7 +33,7 @@ public class CreatedState implements FileState {
 	@Override
 	public void startDistribution(RootContext context, FilesystemAccessor fileSystem) {
 		context.setSize(fileSystem.getFileSize(context.getFileName()));
-		context.setState(new DistributionState()); 	
+		context.setState(new DistributionState());
 	}
 
 	@Override

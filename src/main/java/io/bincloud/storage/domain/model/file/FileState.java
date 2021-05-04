@@ -12,5 +12,4 @@ public interface FileState {
 		public void setSize(Long size);
 		public void setState(FileState fileState);
 	}
-} 
-
+}

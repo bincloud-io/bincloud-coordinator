@@ -1,9 +1,9 @@
 package io.bincloud.storage.application.resource;
 
-import io.bincloud.common.event.EventPublisher;
-import io.bincloud.common.io.transfer.CompletionCallback;
-import io.bincloud.common.io.transfer.CompletionCallbackWrapper;
-import io.bincloud.common.io.transfer.SourcePoint;
+import io.bincloud.common.domain.model.event.EventPublisher;
+import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
+import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper;
+import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.storage.domain.model.file.FileStorage;
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
 import io.bincloud.storage.domain.model.resource.FileUploader;
@@ -36,3 +36,4 @@ public class ResourceManagementService implements FileUploader {
 		}
 	}
 }
+

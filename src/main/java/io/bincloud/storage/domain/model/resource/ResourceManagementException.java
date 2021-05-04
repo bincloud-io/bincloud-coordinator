@@ -1,6 +1,6 @@
 package io.bincloud.storage.domain.model.resource;
 
-import io.bincloud.common.ApplicationException;
+import io.bincloud.common.domain.model.error.ApplicationException;
 import lombok.NonNull;
 
 public class ResourceManagementException extends ApplicationException {

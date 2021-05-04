@@ -3,11 +3,11 @@ package io.bincloud.storage.domain.model.resource;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import io.bincloud.common.io.transfer.CompletionCallback;
-import io.bincloud.common.io.transfer.CompletionCallbackWrapper;
-import io.bincloud.common.io.transfer.DestinationPoint;
-import io.bincloud.common.io.transfer.SourcePoint;
-import io.bincloud.common.io.transfer.TransferingScheduler;
+import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
+import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper;
+import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
+import io.bincloud.common.domain.model.io.transfer.SourcePoint;
+import io.bincloud.common.domain.model.io.transfer.TransferingScheduler;
 import io.bincloud.storage.domain.model.file.File;
 import io.bincloud.storage.domain.model.file.File.IdGenerator;
 import io.bincloud.storage.domain.model.file.FileDescriptor;

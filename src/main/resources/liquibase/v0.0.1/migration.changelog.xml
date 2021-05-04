@@ -4,23 +4,121 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
-    <changeSet id="CSET.CREATE_FILE_TABLE" author="Dmitry Mikhaylenko">
-    	<createTable tableName="FILE" remarks="The table storing data about physical files">
-    		<column name="FILE_ID" type="java.sql.Types.VARCHAR(256)" remarks="The physical file identifier on a filesystem. Should be the same as the file name."/>
-    		<column name="CREATION_MOMENT_TIME" type="java.sql.Types.TIMESTAMP" remarks="The file creation time multiple of a second"/>
-    		<column name="LAST_MODIFICATION_TIME" type="java.sql.Types.TIMESTAMP" remarks="The file creation time multiple of a second"/>
-    		<column name="STATUS" type="java.sql.Types.VARCHAR(16)" remarks="The current file status"/>
-    		<column name="SIZE" type="java.sql.Types.BIGINT(20)" remarks="The file size in bytes"/>
-    	</createTable>
-    	
-    	<addPrimaryKey tableName="FILE" columnNames="FILE_ID" constraintName="PK_FILE"/>
-    	<addNotNullConstraint tableName="FILE" columnName="FILE_ID"/>
-    	<addNotNullConstraint tableName="FILE" columnName="CREATION_MOMENT_TIME"/>
-    	<addNotNullConstraint tableName="FILE" columnName="LAST_MODIFICATION_TIME"/>
-    	<addNotNullConstraint tableName="FILE" columnName="STATUS"/>
-    	<addNotNullConstraint tableName="FILE" columnName="SIZE"/>
-    </changeSet>
-    <changeSet id="CSET.TAG_V_0_0_1" author="Dmitry Mikhaylenko">
-    	<tagDatabase tag="v0.0.1"/>
-    </changeSet>
+
+	<changeSet id="CSET.SEQUENCE_GENERATOR_TABLES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="SEQUENCES"
+			remarks="The current state of sequence generator">
+			<column name="SEQUENCE_NAME" type="VARCHAR(40)"
+				remarks="The sequence generator name">
+				<constraints nullable="false" />
+			</column>
+			<column name="SEQUENCE_VALUE" type="BIGINT(20)"
+				defaultValueNumeric="0" remarks="The last generated value">
+				<constraints nullable="false" />
+			</column>
+			<column name="LAST_HISTORY_MARKER" type="VARCHAR(36)"
+				remarks="The last histoy marker identifier in the history table">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey columnNames="SEQUENCE_NAME"
+			tableName="SEQUENCES" />
+
+		<addUniqueConstraint
+			constraintName="UNC__LAST_HISTORY_MARKER"
+			columnNames="LAST_HISTORY_MARKER" tableName="SEQUENCES" />
+
+		<createTable tableName="SEQUENCE_VALUES_HISTORY"
+			remarks="The sequences generations history table">
+			<column name="GUID" type="VARCHAR(36)"
+				remarks="The historical identifier">
+				<constraints nullable="false" />
+			</column>
+			<column name="SEQUENCE_VALUE" type="BIGINT(20)"
+				remarks="The generated value">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey columnNames="GUID"
+			tableName="SEQUENCE_VALUES_HISTORY" />
+	</changeSet>
+
+	<changeSet id="CSET.SEQUENCE_GENERATOR"
+		author="Dmitry Mikhaylenko">
+		<sqlFile encoding="UTF-8" endDelimiter="/"
+			splitStatements="true" stripComments="true"
+			path="liquibase/v0.0.1/create_sequence_generator.sql" />
+		<rollback>
+			<sqlFile encoding="UTF-8" splitStatements="true"
+				stripComments="true"
+				path="liquibase/v0.0.1/drop_sequence_generator.sql" />
+		</rollback>
+	</changeSet>
+
+	<changeSet id="CSET.CREATE_FILE_TABLE"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="FILE"
+			remarks="The table storing data about physical files">
+			<column name="FILE_ID" type="java.sql.Types.VARCHAR(256)"
+				remarks="The physical file identifier on a filesystem. Should be the same as the file name.">
+				<constraints nullable="false" />
+			</column>
+			<column name="CREATION_MOMENT" type="java.sql.Types.TIMESTAMP"
+				remarks="The file creation time multiple of a second">
+				<constraints nullable="false" />
+			</column>
+			<column name="LAST_MODIFICATION"
+				type="java.sql.Types.TIMESTAMP"
+				remarks="The file creation time multiple of a second">
+				<constraints nullable="false" />
+			</column>
+			<column name="STATUS" type="java.sql.Types.VARCHAR(16)"
+				remarks="The current file status">
+				<constraints nullable="false" />
+			</column>
+			<column name="SIZE" type="java.sql.Types.BIGINT(20)"
+				remarks="The file size in bytes">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="FILE" columnNames="FILE_ID"
+			constraintName="PK_FILE"/>
+	</changeSet>
+
+	<changeSet id="CSET.CREATE_RESOURCE_TABLE"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="RESOURCE">
+			<column name="ID"  type="java.sql.Types.BIGINT(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="FILE_NAME" type="java.sql.Types.VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="RESOURCE" columnNames="ID"
+			constraintName="PK_RESOURCE" />
+	</changeSet>
+
+	<changeSet id="CSET.CREATE_RESOURCE_SEQUENCE"
+		author="Dmitry Mikhaylenko">
+		<sql>
+			INSERT INTO `SEQUENCES`(`sequence_name`, `last_history_marker`)
+			SELECT 'RESOURCE_SEQUENCE' as `sequence_name`, UUID() as `last_history_marker`
+			FROM DUAL;
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM `SEQUENCES` WHERE `sequence_name`='RESOURCE_SEQUENCE';
+			</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="CSET.TAG_V_0_0_1" author="Dmitry Mikhaylenko">
+		<tagDatabase tag="v0.0.1" />
+	</changeSet>
 </databaseChangeLog>

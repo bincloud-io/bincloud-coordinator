@@ -1,12 +1,13 @@
 package io.bincloud.storage.domain.model.file;
 
-import io.bincloud.common.time.DateTime;
+import io.bincloud.common.domain.model.time.DateTime;
 import io.bincloud.storage.domain.model.file.FileState.RootContext;
 import io.bincloud.storage.domain.model.file.states.DisposedState;
 import io.bincloud.storage.domain.model.file.states.DraftState;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -14,9 +15,12 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @ToString
 @SuperBuilder
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class File implements FileDescriptor {
+	@NonNull
 	@EqualsAndHashCode.Include
-	private final String fileId;
+	private String fileId;
 	private DateTime creationMoment;
 	private DateTime lastModification;
 	@Getter(value = AccessLevel.NONE)

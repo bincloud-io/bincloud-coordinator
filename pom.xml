@@ -53,6 +53,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>com.github.jknack</groupId>
+				<artifactId>handlebars</artifactId>
+				<version>4.2.0</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.jboss.arquillian</groupId>
 				<artifactId>arquillian-bom</artifactId>
 				<version>${arquillian.framework.version}</version>
@@ -203,6 +209,11 @@
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.github.jknack</groupId>
+			<artifactId>handlebars</artifactId>
 		</dependency>
 
 		<dependency>
@@ -458,11 +469,6 @@
 								<id>integration-test</id>
 								<goals>
 									<goal>integration-test</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>verify</id>
-								<goals>
 									<goal>verify</goal>
 								</goals>
 							</execution>

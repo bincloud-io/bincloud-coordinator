@@ -15,6 +15,7 @@ public class JDBCLiquibaseConfigurerProducer {
 	@Resource(lookup = "java:/jdbc/BC_CENTRAL")
 	private DataSource dataSource;
 	
+	
 	@Produces
 	@JdbcLiquibase
 	public DatabaseConfigurer databaseConfigurer() {

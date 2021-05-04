@@ -21,8 +21,10 @@ public class LiquibaseDatabaseConfigurer implements DatabaseConfigurer {
 	
 	@Override
 	public void setup(String configLocation) {
-		updateDatabase(configLocation);
-		cacheConfigPath(configLocation);
+		if (isNotCached(configLocation)) {			
+			updateDatabase(configLocation);
+			cacheConfigPath(configLocation);
+		}
 	}
 
 	@Override
@@ -31,19 +33,26 @@ public class LiquibaseDatabaseConfigurer implements DatabaseConfigurer {
 		this.changesetsStack.clear();
 	}
 	
+	private boolean isNotCached(String configLocation) {
+		return !this.changesetsStack.contains(configLocation);
+	}
+	
 	private void cacheConfigPath(String configLocation) {
 		this.changesetsStack.add(0, configLocation);
 	}
 	
 	@SneakyThrows
 	private void updateDatabase(String configLocation) {
-		createLiquibaseFor(configLocation).update(new Contexts());
+		try (Liquibase liquibase = createLiquibaseFor(configLocation)) {
+			liquibase.update(new Contexts());
+		}
 	}
 	
 	@SneakyThrows
 	private void rollbackConfig(String configLocation) {
-		Liquibase liquibase = createLiquibaseFor(configLocation);
-		liquibase.rollback(getChangingsCount(liquibase), new Contexts(), new LabelExpression());
+		try (Liquibase liquibase = createLiquibaseFor(configLocation)) {
+			liquibase.rollback(getChangingsCount(liquibase), new Contexts(), new LabelExpression());			
+		}
 	}
 	
 	@SneakyThrows

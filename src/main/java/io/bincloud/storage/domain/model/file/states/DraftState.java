@@ -5,12 +5,16 @@ import io.bincloud.storage.domain.model.file.FileNotExistException;
 import io.bincloud.storage.domain.model.file.FileState;
 import io.bincloud.storage.domain.model.file.FileUploadingContext;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DraftState implements FileState {
 
 	@Override
 	@ToString.Include
+	@EqualsAndHashCode.Include
 	public String getStatus() {
 		return FileStatus.DRAFT.name();
 	}
