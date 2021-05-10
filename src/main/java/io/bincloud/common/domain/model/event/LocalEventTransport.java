@@ -8,6 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.experimental.UtilityClass;
 
+/**
+ * This class provides the functional, allowing transfer domain events
+ * during local module. These domain events mustn't violate local module
+ * bindings. 
+ * 
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @UtilityClass
 public class LocalEventTransport {
 	private final Map<Class<?>, List<EventListener<Object>>> LOCAL_EVENT_LISTENERS = new ConcurrentHashMap<Class<?>, List<EventListener<Object>>>();
