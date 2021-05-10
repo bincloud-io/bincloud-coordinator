@@ -13,16 +13,18 @@ import org.junit.runner.RunWith
 
 import io.bincloud.common.domain.model.error.ApplicationException
 import io.bincloud.common.domain.model.generator.SequentialGenerator
-import io.bincloud.storage.domain.model.file.FileRepository
+import io.bincloud.common.domain.model.logging.Loggers
+import io.bincloud.common.domain.model.message.MessageTemplate
+import io.bincloud.common.domain.model.time.DateTime
+import io.bincloud.common.port.adapters.time.JPADateTimeConverter
 import io.bincloud.storage.domain.model.resource.Resource
 import io.bincloud.storage.domain.model.resource.ResourceRepository
+import io.bincloud.storage.port.adapter.file.JPAFileStateConverter
 import io.bincloud.storage.port.adapter.resource.JPAResourceRepository
 import io.bincloud.testing.archive.ArchiveBuilder
 import io.bincloud.testing.database.DatabaseConfigurer
 import io.bincloud.testing.database.jdbc.cdi.JdbcLiquibase
-import spock.lang.Ignore
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @RunWith(ArquillianSputnik)
 class ResourceRepositoryITSpec extends Specification {
@@ -36,6 +38,10 @@ class ResourceRepositoryITSpec extends Specification {
 		.appendPackagesRecursively(Resource.getPackage().getName())
 		.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 		.appendPackagesRecursively(ApplicationException.getPackage().getName())
+		.appendPackagesRecursively(DateTime.getPackage().getName())
+		.appendPackagesRecursively(JPADateTimeConverter.getPackage().getName())
+		.appendPackagesRecursively(Loggers.getPackage().getName())
+		.appendPackagesRecursively(MessageTemplate.getPackage().getName())
 		.appendClasses(SequentialGenerator,  JPAResourceRepository, ResourceRepositoryITSpecConfig)
 		.appendResource("liquibase")
 		.appendResource("liquibase-test")

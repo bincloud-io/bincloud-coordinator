@@ -4,11 +4,13 @@ import io.bincloud.common.domain.model.event.EventPublisher;
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
 import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
+import io.bincloud.storage.domain.model.file.FileDescriptor;
 import io.bincloud.storage.domain.model.file.FileStorage;
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
 import io.bincloud.storage.domain.model.resource.FileUploader;
 import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException;
 import io.bincloud.storage.domain.model.resource.ResourceRepository;
+import io.bincloud.storage.domain.model.resource.UploadedFileHasNotBeenFoundException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,7 +26,10 @@ public class ResourceManagementService implements FileUploader {
 		fileStorage.uploadFile(fileId, source, new CompletionCallbackWrapper(callback) {
 			@Override
 			public void onSuccess() {
-				fileHasBeenUploadedPublisher.publish(new FileHasBeenUploaded(resourceId, fileId));
+				FileDescriptor fileDescriptor = fileStorage.getFileDescriptor(fileId)
+						.orElseThrow(() -> new UploadedFileHasNotBeenFoundException());
+				fileHasBeenUploadedPublisher
+						.publish(new FileHasBeenUploaded(resourceId, fileId, fileDescriptor.getLastModification()));
 				super.onSuccess();
 			}
 		});
@@ -36,4 +41,3 @@ public class ResourceManagementService implements FileUploader {
 		}
 	}
 }
-

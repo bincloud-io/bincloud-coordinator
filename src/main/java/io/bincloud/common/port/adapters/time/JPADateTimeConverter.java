@@ -1,9 +1,10 @@
-package io.bincloud.storage.port.adapter.file;
+package io.bincloud.common.port.adapters.time;
 
 import java.sql.Timestamp;
 import java.util.Optional;
 
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 import io.bincloud.common.domain.model.logging.Level;
 import io.bincloud.common.domain.model.logging.LogRecord;
@@ -11,6 +12,7 @@ import io.bincloud.common.domain.model.logging.Loggers;
 import io.bincloud.common.domain.model.message.templates.TextMessageTemplate;
 import io.bincloud.common.domain.model.time.DateTime;
 
+@Converter(autoApply = true)
 public class JPADateTimeConverter implements AttributeConverter<DateTime, Timestamp> {
 	@Override
 	public Timestamp convertToDatabaseColumn(DateTime attribute) {

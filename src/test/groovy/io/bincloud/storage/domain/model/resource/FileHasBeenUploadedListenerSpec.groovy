@@ -1,6 +1,7 @@
 package io.bincloud.storage.domain.model.resource
 
 import io.bincloud.common.domain.model.event.EventListener
+import io.bincloud.common.domain.model.time.DateTime
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded
 import io.bincloud.storage.domain.model.resource.file.FileHasBeenUploadedListener
 import io.bincloud.storage.domain.model.resource.file.FileUploading
@@ -17,6 +18,7 @@ import spock.lang.Specification
 class FileHasBeenUploadedListenerSpec extends Specification {
 	private static final Long RESOURCE_ID = 1L;
 	private static final String FILE_ID = "12345";
+	private static final DateTime UPLOADING_MOMENT = new DateTime()
 	
 	private FileUploadingRepository fileUploadingRepository
 	private EventListener<FileHasBeenUploaded> eventListener
@@ -29,7 +31,7 @@ class FileHasBeenUploadedListenerSpec extends Specification {
 	def "Scenario: the file has been uploaded event has been published"() {
 		
 		given: "The file has been uploaded event"
-		FileHasBeenUploaded event = new FileHasBeenUploaded(RESOURCE_ID, FILE_ID)
+		FileHasBeenUploaded event = new FileHasBeenUploaded(RESOURCE_ID, FILE_ID, UPLOADING_MOMENT)
 		 
 		when: "The file has been uploaded event has been published"
 		eventListener.onEvent(event)
@@ -39,6 +41,7 @@ class FileHasBeenUploadedListenerSpec extends Specification {
 			FileUploading fileUploading = it[0];
 			fileUploading.resourceId == RESOURCE_ID
 			fileUploading.fileId == FILE_ID 
+			fileUploading.uploadingMoment == UPLOADING_MOMENT
 		}		
 	}
 }

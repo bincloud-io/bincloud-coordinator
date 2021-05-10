@@ -18,6 +18,7 @@ import io.bincloud.common.domain.model.generator.SequentialGenerator
 import io.bincloud.common.domain.model.logging.Loggers
 import io.bincloud.common.domain.model.message.MessageTemplate
 import io.bincloud.common.domain.model.time.DateTime
+import io.bincloud.common.port.adapters.time.JPADateTimeConverter
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileRepository
 import io.bincloud.storage.domain.model.file.FileState
@@ -25,7 +26,6 @@ import io.bincloud.storage.domain.model.file.states.CreatedState
 import io.bincloud.storage.domain.model.file.states.DisposedState
 import io.bincloud.storage.domain.model.file.states.DistributionState
 import io.bincloud.storage.domain.model.file.states.DraftState
-import io.bincloud.storage.port.adapter.file.JPADateTimeConverter
 import io.bincloud.storage.port.adapter.file.JPAFileRepository
 import io.bincloud.storage.port.adapter.file.JPAFileStateConverter
 import io.bincloud.testing.archive.ArchiveBuilder

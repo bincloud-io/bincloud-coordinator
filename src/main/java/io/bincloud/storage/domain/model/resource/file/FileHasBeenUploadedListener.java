@@ -1,6 +1,7 @@
 package io.bincloud.storage.domain.model.resource.file;
 
 import io.bincloud.common.domain.model.event.EventListener;
+import io.bincloud.common.domain.model.time.DateTime;
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
 import io.bincloud.storage.domain.model.resource.file.FileUploading.InitialState;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,11 @@ public class FileHasBeenUploadedListener implements EventListener<FileHasBeenUpl
 		@Override
 		public String getFileId() {
 			return event.getFileId();
+		}
+
+		@Override
+		public DateTime getUploadingMoment() {
+			return event.getUploadingMoment();
 		}
 	}
 }

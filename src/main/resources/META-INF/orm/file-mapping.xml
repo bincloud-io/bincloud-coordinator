@@ -18,15 +18,11 @@
 			<basic name="creationMoment">
 				<column name="CREATION_MOMENT" nullable="false"
 					insertable="true" updatable="false" unique="false" />
-				<convert
-					converter="io.bincloud.storage.port.adapter.file.JPADateTimeConverter" />
 			</basic>
 
 			<basic name="lastModification">
 				<column name="LAST_MODIFICATION" nullable="false"
 					insertable="true" updatable="true" unique="false" />
-				<convert
-					converter="io.bincloud.storage.port.adapter.file.JPADateTimeConverter" />
 			</basic>
 
 			<basic name="state">
@@ -41,6 +37,4 @@
 			</basic>
 		</attributes>
 	</entity>
-	<converter class="io.bincloud.storage.port.adapter.file.JPADateTimeConverter" auto-apply="false"/>
-	<converter class="io.bincloud.storage.port.adapter.file.JPAFileStateConverter" auto-apply="false"/>
 </entity-mappings>

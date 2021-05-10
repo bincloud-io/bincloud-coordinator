@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 import io.bincloud.common.domain.model.logging.Level;
 import io.bincloud.common.domain.model.logging.LogRecord;
@@ -12,6 +13,7 @@ import io.bincloud.common.domain.model.message.templates.TextMessageTemplate;
 import io.bincloud.storage.domain.model.file.FileState;
 import io.bincloud.storage.domain.model.file.states.FileStatus;
 
+@Converter(autoApply = false)
 public class JPAFileStateConverter implements AttributeConverter<FileState, String> {
 	@Override
 	public String convertToDatabaseColumn(FileState attribute) {
