@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapters.file
+package io.bincloud.storage.port.adapters.file.repository
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
@@ -26,8 +26,8 @@ import io.bincloud.storage.domain.model.file.states.CreatedState
 import io.bincloud.storage.domain.model.file.states.DisposedState
 import io.bincloud.storage.domain.model.file.states.DistributionState
 import io.bincloud.storage.domain.model.file.states.DraftState
-import io.bincloud.storage.port.adapter.file.JPAFileRepository
-import io.bincloud.storage.port.adapter.file.JPAFileStateConverter
+import io.bincloud.storage.port.adapter.file.repository.JPAFileRepository
+import io.bincloud.storage.port.adapter.file.repository.JPAFileStateConverter
 import io.bincloud.testing.archive.ArchiveBuilder
 import io.bincloud.testing.database.DatabaseConfigurer
 import io.bincloud.testing.database.jdbc.cdi.JdbcLiquibase
@@ -51,7 +51,8 @@ class FileRepositoryITSpec extends Specification {
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(Loggers.getPackage().getName())
 				.appendPackagesRecursively(MessageTemplate.getPackage().getName())
-				.appendClasses(SequentialGenerator, DateTime, JPAFileRepository, JPADateTimeConverter, JPAFileStateConverter, FileRepositoryITSpecConfig)
+				.appendClasses(DateTime, JPADateTimeConverter)
+				.appendClasses(SequentialGenerator,  JPAFileRepository, JPAFileStateConverter,  FileRepositoryITSpecConfig)
 				.appendResource("liquibase")
 				.appendManifestResource("META-INF/beans.xml", "beans.xml")
 				.appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")

@@ -4,9 +4,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
 	<access>FIELD</access>
-	<named-query name="FileUploadingRepository.findLatestResourceUploading">
-		<query>select fu from FileUploading fu where fu.resourceId = :resourceId order by fu.uploadingMoment desc</query>
-	</named-query>
 	
 	<entity
 		class="io.bincloud.storage.domain.model.resource.Resource">
@@ -20,27 +17,6 @@
 			<basic name="fileName">
 				<column name="FILE_NAME" nullable="false" insertable="true"
 					updatable="true" />
-			</basic>
-		</attributes>
-	</entity>
-	
-	<entity
-		class="io.bincloud.storage.domain.model.resource.file.FileUploading">
-		<table name="FILE_UPLOADING" />
-		<id-class class="io.bincloud.storage.domain.model.resource.file.FileUploadingId"/>
-		
-		<attributes>
-			<id name="resourceId">
-				<column name="RESOURCE_ID" nullable="false" insertable="true"
-					updatable="false" />
-			</id>
-			<id name="fileId">
-				<column name="FILE_ID" nullable="false" insertable="true"
-					updatable="false" />
-			</id>
-			<basic name="uploadingMoment">
-				<column name="UPLOADING_MOMENT" nullable="false"
-					insertable="true" updatable="false" />
 			</basic>
 		</attributes>
 	</entity>

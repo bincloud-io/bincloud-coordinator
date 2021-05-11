@@ -1,7 +1,6 @@
 package io.bincloud.storage.port.adapter.resource;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -19,9 +18,9 @@ public class JPAFileUploadingRepository implements FileUploadingRepository {
 	private final TransactionManager transactionManager;
 
 	@Override
-	public Optional<FileUploading> findById(Long resourceId, UUID fileId) {
-		FileUploadingId fileUploadingId = new FileUploadingId(resourceId, fileId.toString());
-		return Optional.of(entityManager.getReference(FileUploading.class, fileUploadingId));
+	public Optional<FileUploading> findById(Long resourceId, String fileId) {
+		FileUploadingId fileUploadingId = new FileUploadingId(resourceId, fileId);
+		return Optional.ofNullable(entityManager.find(FileUploading.class, fileUploadingId));
 	}
 
 	@Override
@@ -29,7 +28,7 @@ public class JPAFileUploadingRepository implements FileUploadingRepository {
 		TypedQuery<FileUploading> findLatestResourceUploadingQuery = entityManager
 				.createNamedQuery("FileUploadingRepository.findLatestResourceUploading", FileUploading.class);
 		findLatestResourceUploadingQuery.setParameter("resourceId", resourceId);
-		return Optional.ofNullable(findLatestResourceUploadingQuery.getSingleResult());
+		return findLatestResourceUploadingQuery.getResultList().stream().findFirst();
 	}
 
 	@Override

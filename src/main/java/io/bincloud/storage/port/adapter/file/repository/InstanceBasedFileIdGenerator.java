@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapter.file;
+package io.bincloud.storage.port.adapter.file.repository;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public class InstanceBasedFileIdGenerator implements IdGenerator {
 	@Override
 	public String generateId() {
 		String generatedId = String.format("%s-%s--%s", instanceId, Thread.currentThread().getId(), UUID.randomUUID());
-		Loggers.applicationLogger(InstanceBasedFileIdGenerator.class).log(new LogRecord(Level.INFO,
+		Loggers.applicationLogger(InstanceBasedFileIdGenerator.class).log(new LogRecord(Level.TRACE,
 				new TextMessageTemplate("File id {{id}} generated").withParameter("id", generatedId)));
 		return generatedId;
 	}

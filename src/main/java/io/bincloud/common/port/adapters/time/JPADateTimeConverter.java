@@ -12,7 +12,7 @@ import io.bincloud.common.domain.model.logging.Loggers;
 import io.bincloud.common.domain.model.message.templates.TextMessageTemplate;
 import io.bincloud.common.domain.model.time.DateTime;
 
-@Converter(autoApply = true)
+@Converter(autoApply = false)
 public class JPADateTimeConverter implements AttributeConverter<DateTime, Timestamp> {
 	@Override
 	public Timestamp convertToDatabaseColumn(DateTime attribute) {

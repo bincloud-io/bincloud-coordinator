@@ -86,13 +86,13 @@
 		</createTable>
 
 		<addPrimaryKey tableName="FILE" columnNames="FILE_ID"
-			constraintName="PK_FILE"/>
+			constraintName="PK_FILE" />
 	</changeSet>
 
 	<changeSet id="CSET.CREATE_RESOURCE_TABLE"
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="RESOURCE">
-			<column name="ID"  type="java.sql.Types.BIGINT(20)">
+			<column name="ID" type="java.sql.Types.BIGINT(20)">
 				<constraints nullable="false" />
 			</column>
 			<column name="FILE_NAME" type="java.sql.Types.VARCHAR(256)">
@@ -108,15 +108,52 @@
 		author="Dmitry Mikhaylenko">
 		<sql>
 			INSERT INTO `SEQUENCES`(`sequence_name`, `last_history_marker`)
-			SELECT 'RESOURCE_SEQUENCE' as `sequence_name`, UUID() as `last_history_marker`
+			SELECT 'RESOURCE_SEQUENCE' as `sequence_name`, UUID() as
+			`last_history_marker`
 			FROM DUAL;
 		</sql>
 		<rollback>
 			<sql>
-				DELETE FROM `SEQUENCES` WHERE `sequence_name`='RESOURCE_SEQUENCE';
+				DELETE FROM `SEQUENCES` WHERE
+				`sequence_name`='RESOURCE_SEQUENCE';
 			</sql>
 		</rollback>
 	</changeSet>
+
+	<changeSet id="CSET.CREATE_FILE_UPLOADING_TABLE"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="FILE_UPLOADING">
+			<column name="RESOURCE_ID" type="java.sql.Types.BIGINT(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="FILE_ID" type="java.sql.Types.VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="UPLOADING_MOMENT"
+				type="java.sql.Types.TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="FILE_UPLOADING"
+			columnNames="RESOURCE_ID, FILE_ID" />
+
+		<addForeignKeyConstraint
+			constraintName="FK__FILE_UPLOADING$RESOURCE"
+			baseTableName="FILE_UPLOADING"
+			baseColumnNames="RESOURCE_ID"
+			referencedTableName="RESOURCE" 
+			referencedColumnNames="ID" />
+			
+		<addForeignKeyConstraint
+			constraintName="FK__FILE_UPLOADING$FILE"
+			baseTableName="FILE_UPLOADING"
+			baseColumnNames="FILE_ID"
+			referencedTableName="FILE" 
+			referencedColumnNames="FILE_ID" />
+	</changeSet>
+
+
 
 	<changeSet id="CSET.TAG_V_0_0_1" author="Dmitry Mikhaylenko">
 		<tagDatabase tag="v0.0.1" />

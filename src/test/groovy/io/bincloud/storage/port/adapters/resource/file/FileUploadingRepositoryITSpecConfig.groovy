@@ -1,6 +1,5 @@
-package io.bincloud.storage.port.adapters.file
+package io.bincloud.storage.port.adapters.resource.file
 
-import javax.annotation.Resource
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Produces
 import javax.inject.Inject
@@ -8,11 +7,11 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
 
-import io.bincloud.storage.domain.model.file.FileRepository
-import io.bincloud.storage.port.adapter.file.JPAFileRepository
+import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
+import io.bincloud.storage.port.adapter.resource.JPAFileUploadingRepository
 
 @ApplicationScoped
-class FileRepositoryITSpecConfig {
+class FileUploadingRepositoryITSpecConfig {
 	@PersistenceContext(name = "central")
 	private EntityManager entityManager;
 	
@@ -20,8 +19,7 @@ class FileRepositoryITSpecConfig {
 	private TransactionManager transactionManager;
 	
 	@Produces
-	public FileRepository fileRepository() {
-		return new JPAFileRepository(entityManager, transactionManager)
+	public FileUploadingRepository fileUploadingRepository() {
+		return new JPAFileUploadingRepository(entityManager, transactionManager)
 	}
-
 }

@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapter.file;
+package io.bincloud.storage.port.adapter.file.filesystem;
 
 import java.io.File;
 import java.io.FileOutputStream;

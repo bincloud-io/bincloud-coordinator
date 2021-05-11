@@ -1,7 +1,7 @@
-package io.bincloud.storage.port.adapters.file
+package io.bincloud.storage.port.adapters.file.repository
 
 import io.bincloud.storage.domain.model.file.File.IdGenerator
-import io.bincloud.storage.port.adapter.file.InstanceBasedFileIdGenerator
+import io.bincloud.storage.port.adapter.file.repository.InstanceBasedFileIdGenerator
 import spock.lang.Specification
 
 class InstanceBasedFileIdGeneratorSpec extends Specification {

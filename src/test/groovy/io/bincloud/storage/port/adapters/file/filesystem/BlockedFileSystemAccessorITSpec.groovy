@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapters.file
+package io.bincloud.storage.port.adapters.file.filesystem
 
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
@@ -23,9 +23,9 @@ import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileAlreadyExistsException
 import io.bincloud.storage.domain.model.file.FileNotExistException
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
-import io.bincloud.storage.port.adapter.file.BlockedFileSystemAccessor
-import io.bincloud.storage.port.adapter.file.FilesystemStreamDestination
-import io.bincloud.storage.port.adapter.file.FilesystemStreamSource
+import io.bincloud.storage.port.adapter.file.filesystem.BlockedFileSystemAccessor
+import io.bincloud.storage.port.adapter.file.filesystem.FilesystemStreamDestination
+import io.bincloud.storage.port.adapter.file.filesystem.FilesystemStreamSource
 import io.bincloud.testing.archive.ArchiveBuilder
 import javassist.expr.Instanceof
 import net.bytebuddy.asm.Advice.This

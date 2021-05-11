@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	<changeSet id="CSET.__TEST__.PREPARE_FILE_UPLOADINGS" author="Dmitry Mikhaylenko">
+		<sql>
+			INSERT INTO `RESOURCE`(`ID`, `FILE_NAME`) VALUES (1, "filename.txt");
+			INSERT INTO `FILE`(`FILE_ID`, `CREATION_MOMENT`, `LAST_MODIFICATION`, `STATUS`, `SIZE`) VALUES ("file_1", '2021-01-01 12:00:00', '2021-01-01 12:00:01', 'DISTRIBUTION', 1000);
+			INSERT INTO `FILE`(`FILE_ID`, `CREATION_MOMENT`, `LAST_MODIFICATION`, `STATUS`, `SIZE`) VALUES ("file_2", '2021-01-01 12:00:02', '2021-01-01 12:00:03', 'DISTRIBUTION', 1000);
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM `FILE_UPLOADING` WHERE 1=1;
+				DELETE FROM `RESOURCE` WHERE 1=1;
+				DELETE FROM `FILE` WHERE 1=1;
+			</sql>
+		</rollback>
+	</changeSet>
+</databaseChangeLog>

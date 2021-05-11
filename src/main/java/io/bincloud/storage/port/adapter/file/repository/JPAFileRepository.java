@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapter.file;
+package io.bincloud.storage.port.adapter.file.repository;
 
 import java.util.Optional;
 
@@ -23,7 +23,7 @@ public class JPAFileRepository implements FileRepository {
 
 	@Override
 	public Optional<File> findById(String fileId) {
-		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.INFO,
+		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
 				new TextMessageTemplate("Find file with id={{fileId}}").withParameter("fileId", fileId)));
 		return Optional.ofNullable(entityManager.find(File.class, fileId));
 	}
