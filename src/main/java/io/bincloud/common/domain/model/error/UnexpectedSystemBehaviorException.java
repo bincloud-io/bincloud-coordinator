@@ -10,6 +10,10 @@ public class UnexpectedSystemBehaviorException extends ApplicationException {
 		initCause(error);
 	}
 
+	public UnexpectedSystemBehaviorException(@NonNull Exception error) {
+		this("GLOBAL", error);
+	}
+	
 	@Override
 	public String getMessage() {
 		return getCause().getMessage();

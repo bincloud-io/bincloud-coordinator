@@ -8,6 +8,7 @@
 	<groupId>io.bincloud.storage</groupId>
 	<artifactId>bincloud-coordinator</artifactId>
 	<version>1.0-SNAPSHOT</version>
+	<packaging>war</packaging>
 
 	<name>bincloud-coordinator</name>
 	<url>http://www.example.com</url>
@@ -441,10 +442,10 @@
 						</dependency>
 					</dependencies>
 				</plugin>
-
+				
 				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.3.1</version>
 				</plugin>
 
 				<plugin>

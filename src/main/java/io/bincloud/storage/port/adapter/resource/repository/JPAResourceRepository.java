@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapter.resource;
+package io.bincloud.storage.port.adapter.resource.repository;
 
 import java.util.Optional;
 

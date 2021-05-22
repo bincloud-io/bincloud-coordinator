@@ -7,16 +7,19 @@ import io.bincloud.common.domain.model.event.EventPublisher
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback
 import io.bincloud.common.domain.model.io.transfer.SourcePoint
 import io.bincloud.common.domain.model.time.DateTime
-import io.bincloud.storage.application.resource.ResourceManagementService
+import io.bincloud.storage.application.resource.FileUploadingService
 import io.bincloud.storage.domain.model.file.FileDescriptor
 import io.bincloud.storage.domain.model.file.FileStorage
 import io.bincloud.storage.domain.model.file.states.FileStatus
+import io.bincloud.storage.domain.model.resource.Constants
 import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded
 import io.bincloud.storage.domain.model.resource.FileUploader
 import io.bincloud.storage.domain.model.resource.Resource
 import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException
 import io.bincloud.storage.domain.model.resource.ResourceRepository
 import io.bincloud.storage.domain.model.resource.UploadedFileHasNotBeenFoundException
+import io.bincloud.storage.domain.model.resource.FileUploader.UploadedResource
+import io.bincloud.storage.domain.model.resource.FileUploader.UploadingCallback
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -27,6 +30,8 @@ import spock.lang.Specification
 """)
 class UploadFileToResourceFeature extends Specification {
 	private static final Long RESOURCE_ID = 1L
+	private static final Optional<Long> EXISTING_RESOURCE_ID = Optional.of(RESOURCE_ID)
+	private static final Optional<Long> MISSING_RESOURCE_ID = Optional.empty()
 	private static final String FILE_ID = "12345"
 	private static final DateTime CREATION_MOMENT = DateTime.now()
 	private static final DateTime LAST_MODIFICATION = CREATION_MOMENT.plus(1, ChronoUnit.MINUTES)
@@ -36,7 +41,7 @@ class UploadFileToResourceFeature extends Specification {
 	private ResourceRepository resourceRepository;
 	private FileStorage fileStorage;
 	private FileUploadingRepository fileUploadingRepository;
-	private CompletionCallback completionCallback;
+	private UploadingCallback uploadingCallback;
 	private EventPublisher<FileHasBeenUploaded> fileHasBeenUploadedPublisher;
 	private FileUploader fileUploader;
 
@@ -45,9 +50,9 @@ class UploadFileToResourceFeature extends Specification {
 		this.resourceRepository = Mock(ResourceRepository)
 		this.fileStorage = Mock(FileStorage)
 		this.fileUploadingRepository = Mock(FileUploadingRepository)
-		this.completionCallback = Mock(CompletionCallback)
+		this.uploadingCallback = Mock(UploadingCallback)
 		this.fileHasBeenUploadedPublisher = Mock(EventPublisher)
-		this.fileUploader = new ResourceManagementService(resourceRepository, fileStorage, fileHasBeenUploadedPublisher)
+		this.fileUploader = new FileUploadingService(resourceRepository, fileStorage, fileHasBeenUploadedPublisher)
 	}
 
 	def "Scenario: file is successfuly uploaded to the existing resource"() {
@@ -72,10 +77,14 @@ class UploadFileToResourceFeature extends Specification {
 		}
 
 		when: "The file uploading is requested"
-		fileUploader.uploadFile(RESOURCE_ID, source, completionCallback)
+		fileUploader.uploadFile(EXISTING_RESOURCE_ID, source, uploadingCallback)
 		
 		then: "Completion callback should be successfully completed"
-		1 * completionCallback.onSuccess()
+		1 * uploadingCallback.onUpload(_) >> {
+			UploadedResource uploadedResource = it[0]
+			uploadedResource.getResourceId() == EXISTING_RESOURCE_ID
+			uploadedResource.getFileId() == FILE_ID
+		}
 		
 		and: "System should be notified about file uploading to the resource"
 		1 * fileHasBeenUploadedPublisher.publish(_) >> {
@@ -103,11 +112,11 @@ class UploadFileToResourceFeature extends Specification {
 		}
 
 		when: "The file uploading is requested"
-		fileUploader.uploadFile(RESOURCE_ID, source, completionCallback)
+		fileUploader.uploadFile(EXISTING_RESOURCE_ID, source, uploadingCallback)
 		
-		then: "The uploaded file has not been found has been thrown"
+		then: "The uploaded file has not been found should be thrown"
 		UploadedFileHasNotBeenFoundException exception = thrown(UploadedFileHasNotBeenFoundException)
-		exception.getContext() == UploadedFileHasNotBeenFoundException.CONTEXT
+		exception.getContext() == Constants.CONTEXT
 		exception.getErrorCode() == UploadedFileHasNotBeenFoundException.ERROR_CODE
 	}
 
@@ -116,12 +125,25 @@ class UploadFileToResourceFeature extends Specification {
 				resourceRepository.isExists(RESOURCE_ID) >> false
 		
 		when: "The file uploading is requested"
-		fileUploader.uploadFile(RESOURCE_ID, source, completionCallback)
+		fileUploader.uploadFile(EXISTING_RESOURCE_ID, source, uploadingCallback)
 		
-		then: "The file uploading was completed with resource does not exist error"
-		1 * completionCallback.onError(_) >> {
+		then: "The file uploading should be completed with resource does not exist error"
+		1 * uploadingCallback.onError(_) >> {
 			ResourceDoesNotExistException error = it[0]
-			error.context == ResourceDoesNotExistException.CONTEXT
+			error.context == Constants.CONTEXT
+			error.errorCode == ResourceDoesNotExistException.ERROR_CODE
+			error.severity == Severity.INCIDENT
+		}
+	}
+	
+	def "Scenario: file uploading will be completed with resource does not exist error if resource id misses"() {
+		when: "The file uploading is requested for missing resource id"
+		fileUploader.uploadFile(MISSING_RESOURCE_ID, source, uploadingCallback)
+		
+		then: "The file uploading should be completed with resource does not exist error"
+		1 * uploadingCallback.onError(_) >> {
+			ResourceDoesNotExistException error = it[0]
+			error.context == Constants.CONTEXT
 			error.errorCode == ResourceDoesNotExistException.ERROR_CODE
 			error.severity == Severity.INCIDENT
 		}

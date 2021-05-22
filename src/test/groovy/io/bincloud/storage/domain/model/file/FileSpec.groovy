@@ -3,9 +3,9 @@ package io.bincloud.storage.domain.model.file
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import io.bincloud.common.domain.model.generator.SequentialGenerator
 import io.bincloud.common.domain.model.time.DateTime
 import io.bincloud.storage.domain.model.file.File
-import io.bincloud.storage.domain.model.file.File.IdGenerator
 import io.bincloud.storage.domain.model.file.states.CreatedState
 import io.bincloud.storage.domain.model.file.states.DistributionState
 import io.bincloud.storage.domain.model.file.states.DraftState
@@ -26,15 +26,15 @@ class FileSpec extends Specification {
 	private static final DateTime TIMESTAMP_INITIAL_POINT = new DateTime()
 	private static final DateTime TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plus(1, ChronoUnit.MILLIS)
 	
-	private IdGenerator idGenerator;
+	private SequentialGenerator<String> idGenerator;
 
 	def setup() {
-		this.idGenerator = Stub(IdGenerator)
+		this.idGenerator = Stub(SequentialGenerator)
 	}
 
 	def "Scenario: Create entity by constructor"() {
 		given: "The id generator which generates unique file identifier"
-		this.idGenerator.generateId() >> FILE_ID
+		this.idGenerator.nextValue() >> FILE_ID
 
 		when: "The file entity is created by the constructor"
 		File file = new File(idGenerator)

@@ -1,5 +1,6 @@
 package io.bincloud.storage.domain.model.file;
 
+import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.time.DateTime;
 import io.bincloud.storage.domain.model.file.FileState.RootContext;
 import io.bincloud.storage.domain.model.file.states.DisposedState;
@@ -27,9 +28,9 @@ public class File implements FileDescriptor {
 	private FileState state;
 	private Long size;
 
-	public File(@NonNull IdGenerator idGenerator) {
+	public File(@NonNull SequentialGenerator<String> idGenerator) {
 		super();
-		this.fileId = idGenerator.generateId();
+		this.fileId = idGenerator.nextValue();
 		this.state = new DraftState();
 		this.creationMoment = DateTime.now();
 		this.lastModification = this.creationMoment;
@@ -88,9 +89,5 @@ public class File implements FileDescriptor {
 				File.this.state = fileState;
 			}
 		};
-	}
-	
-	public interface IdGenerator {
-		public String generateId();
 	}
 }

@@ -8,7 +8,7 @@ import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
 
 import io.bincloud.storage.domain.model.resource.ResourceRepository
-import io.bincloud.storage.port.adapter.resource.JPAResourceRepository
+import io.bincloud.storage.port.adapter.resource.repository.JPAResourceRepository
 
 @ApplicationScoped
 class ResourceRepositoryITSpecConfig {

@@ -8,7 +8,7 @@ import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
 
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
-import io.bincloud.storage.port.adapter.resource.JPAFileUploadingRepository
+import io.bincloud.storage.port.adapter.resource.repository.JPAFileUploadingRepository
 
 @ApplicationScoped
 class FileUploadingRepositoryITSpecConfig {

@@ -3,13 +3,13 @@ package io.bincloud.storage.domain.model.resource;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
 import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper;
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.common.domain.model.io.transfer.TransferingScheduler;
 import io.bincloud.storage.domain.model.file.File;
-import io.bincloud.storage.domain.model.file.File.IdGenerator;
 import io.bincloud.storage.domain.model.file.FileDescriptor;
 import io.bincloud.storage.domain.model.file.FileDownloadingContext;
 import io.bincloud.storage.domain.model.file.FileNotExistException;
@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class FileManagementService implements FileStorage {
-	private final IdGenerator idGenerator;
+	private final SequentialGenerator<String> idGenerator;
 	private final FileRepository fileRepository;
 	private final FilesystemAccessor filesystemAccessor;
 	private final TransferingScheduler transferingScheduler;

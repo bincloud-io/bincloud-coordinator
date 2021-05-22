@@ -1,23 +1,16 @@
 package io.bincloud.storage.domain.model.file
 
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import io.bincloud.common.domain.model.error.ApplicationException
 import io.bincloud.common.domain.model.error.ApplicationException.Severity
+import io.bincloud.common.domain.model.generator.SequentialGenerator
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint
 import io.bincloud.common.domain.model.io.transfer.SourcePoint
 import io.bincloud.common.domain.model.io.transfer.TransferingScheduler
 import io.bincloud.common.domain.model.io.transfer.Transmitter
 import io.bincloud.common.domain.model.time.DateTime
-import io.bincloud.storage.domain.model.file.File
-import io.bincloud.storage.domain.model.file.FileDescriptor
-import io.bincloud.storage.domain.model.file.FileNotExistException
-import io.bincloud.storage.domain.model.file.FileRepository
-import io.bincloud.storage.domain.model.file.FileStorage
-import io.bincloud.storage.domain.model.file.FilesystemAccessor
-import io.bincloud.storage.domain.model.file.File.IdGenerator
 import io.bincloud.storage.domain.model.file.states.FileStatus
 import io.bincloud.storage.domain.model.resource.FileManagementService
 import spock.lang.Specification
@@ -28,7 +21,7 @@ class FileManagementServiceSpec extends Specification {
 	private static final String FILE_ID = "12345"
 	private static final Long FILE_SIZE = 100L
 
-	private IdGenerator idGenerator;
+	private SequentialGenerator<String> idGenerator;
 	private SourcePoint source;
 	private DestinationPoint destination;
 	private FileRepository fileRepository;
@@ -38,7 +31,7 @@ class FileManagementServiceSpec extends Specification {
 	private FileStorage fileStorage;
 
 	def setup() {
-		this.idGenerator = Stub(IdGenerator)
+		this.idGenerator = Stub(SequentialGenerator)
 		this.source = Stub(SourcePoint)
 		this.destination = Stub(DestinationPoint)
 		this.fileRepository = Mock(FileRepository)
@@ -51,7 +44,7 @@ class FileManagementServiceSpec extends Specification {
 	def "Scenario: file is successfully created"() {
 		File file;
 		given: "The system generates unique id for new file"
-		idGenerator.generateId() >> FILE_ID
+		idGenerator.nextValue() >> FILE_ID
 
 		when: "The file creation is requested"
 		def fileId = fileStorage.createNewFile()

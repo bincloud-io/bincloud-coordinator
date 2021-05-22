@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
 import io.bincloud.common.domain.model.io.transfer.DataTransferingException;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import lombok.NonNull;
@@ -52,7 +53,7 @@ public class StreamSource implements SourcePoint {
 		try {
 			consumerStream.close();
 		} catch (IOException error) {
-			throw new Error("Must never be happened!!!", error);
+			throw new MustNeverBeHappenedError(error);
 		}
 	}
 	

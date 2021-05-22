@@ -21,8 +21,8 @@ import io.bincloud.common.domain.model.time.DateTime
 import io.bincloud.common.port.adapters.time.JPADateTimeConverter
 import io.bincloud.storage.domain.model.resource.file.FileUploading
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
-import io.bincloud.storage.port.adapter.resource.JPAFileUploadingRepository
-import io.bincloud.storage.port.adapter.resource.JPAResourceRepository
+import io.bincloud.storage.port.adapter.resource.repository.JPAFileUploadingRepository
+import io.bincloud.storage.port.adapter.resource.repository.JPAResourceRepository
 import io.bincloud.storage.port.adapters.resource.ResourceRepositoryITSpecConfig
 import io.bincloud.testing.archive.ArchiveBuilder
 import io.bincloud.testing.database.DatabaseConfigurer
