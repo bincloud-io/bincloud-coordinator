@@ -2,9 +2,9 @@ package io.bincloud.storage.domain.model.file;
 
 import java.util.Optional;
 
-import io.bincloud.common.io.transfer.CompletionCallback;
-import io.bincloud.common.io.transfer.DestinationPoint;
-import io.bincloud.common.io.transfer.SourcePoint;
+import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
+import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
+import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 
 public interface FileStorage {
 	public String createNewFile();

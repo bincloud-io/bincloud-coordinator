@@ -1,18 +1,25 @@
 package io.bincloud.storage.application.resource;
 
-import io.bincloud.common.validation.ValidationService;
-import io.bincloud.storage.domain.model.resource.Resource.IdGenerator;
+import io.bincloud.common.domain.model.generator.SequentialGenerator;
+import io.bincloud.common.domain.model.validation.ValidationService;
 import io.bincloud.storage.domain.model.resource.Resource.ResourceDetails;
+import io.bincloud.storage.domain.model.resource.Constants;
+import io.bincloud.storage.domain.model.resource.Resource;
 import io.bincloud.storage.domain.model.resource.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ResourceService {
-	private final IdGenerator idGenerator;
+	private final SequentialGenerator<Long> idGenerator;
 	private final ValidationService validationService;
 	private final ResourceRepository resourceRepository;
-	
+	private final SequentialGenerator<String> defaultFileNameGenerator;
+
 	public Long createNewResource(ResourceDetails resourceDetails) {
-		throw new UnsupportedOperationException();
+		validationService.validate(resourceDetails).checkValidState(Constants.CONTEXT,
+				Constants.INVALID_RESOURCE_DETAILS_ERROR);
+		Resource resource = new Resource(idGenerator, resourceDetails, defaultFileNameGenerator);
+		resourceRepository.save(resource);
+		return resource.getId();
 	}
 }
