@@ -57,6 +57,7 @@ public class ResourceUploadingServlet extends HttpServlet {
 						serverContext.getIOBufferSize());
 				fileUploader.uploadFile(getResourceId(context), sourcePoint, uploadingCallback);
 			} catch (IOException error) {
+				error.printStackTrace();
 				uploadingCallback.onError(error);
 			}
 		});
@@ -89,11 +90,14 @@ public class ResourceUploadingServlet extends HttpServlet {
 			public void onUpload(UploadedResource uploaded) {
 				sendResponse(asyncContext, HttpServletResponse.SC_OK,
 						new ResourceUploadingSuccessResponse(serverContext.getRootURL(), uploaded));
+				asyncContext.complete();
 			}
 
 			@Override
 			public void onError(Exception error) {
+				error.printStackTrace();
 				errorsHandler.handleError(asyncContext, error);
+				asyncContext.complete();
 			}
 		};
 	}

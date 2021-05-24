@@ -21,6 +21,7 @@ public class ServicesConfig {
 	@Inject
 	private ResourceRepository resourceRepository;
 
+	@Inject
 	private FileUploadingRepository fileUploadingsRepository;
 
 	@Produces
