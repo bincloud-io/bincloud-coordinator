@@ -48,31 +48,34 @@ public class FileUploadingService implements FileUploader {
 			public void onError(Exception error) {
 				uploadingCallback.onError(error);
 			}
+			
+			private void notifySystemAboutFileUploading(Long resourceId, String fileId) {
+				Optional<FileDescriptor> foundFileDescriptor = fileStorage.getFileDescriptor(fileId);
+				if (foundFileDescriptor.isPresent()) {
+					FileDescriptor fileDescriptor = foundFileDescriptor.get();
+					fileHasBeenUploadedPublisher
+						.publish(new FileHasBeenUploaded(resourceId, fileId, fileDescriptor.getLastModification()));	
+				} else {
+					onError(new UploadedFileHasNotBeenFoundException());
+				}	
+			}
+			
+			private void completeUploading(Long resourceId, String fileId, UploadingCallback uploadingCallback) {
+				uploadingCallback.onUpload(new UploadedResource() {
+					@Override
+					public Long getResourceId() {
+						return resourceId;
+					}
+					
+					@Override
+					public String getFileId() {
+						return fileId;
+					}
+				});
+			}
 		};
 	}
 	
-	private void completeUploading(Long resourceId, String fileId, UploadingCallback uploadingCallback) {
-		uploadingCallback.onUpload(new UploadedResource() {
-			@Override
-			public Long getResourceId() {
-				return resourceId;
-			}
-			
-			@Override
-			public String getFileId() {
-				return fileId;
-			}
-		});
-	}
-	
-	private void notifySystemAboutFileUploading(Long resourceId, String fileId) {
-		FileDescriptor fileDescriptor = fileStorage.getFileDescriptor(fileId)
-				.orElseThrow(() -> new UploadedFileHasNotBeenFoundException());
-		fileHasBeenUploadedPublisher
-			.publish(new FileHasBeenUploaded(resourceId, fileId, fileDescriptor.getLastModification()));
-	}
-	
-
 	private void checkThatResourceExists(Optional<Long> resourceId, UploadingCallback callback) {
 		resourceId.filter(value -> resourceRepository.isExists(value))
 				.orElseThrow(() -> new ResourceDoesNotExistException());

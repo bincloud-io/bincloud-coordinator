@@ -95,7 +95,7 @@ class UploadFileToResourceFeature extends Specification {
 		}
 	}
 	
-	def "Scenario: file is successfuly uploaded, but won't found by id"() {
+	def "Scenario: file is successfuly uploaded, but file descriptor won't found by id"() {
 		given: "The resource exists in the repository"
 		resourceRepository.isExists(RESOURCE_ID) >> true
 
@@ -115,9 +115,11 @@ class UploadFileToResourceFeature extends Specification {
 		fileUploader.uploadFile(EXISTING_RESOURCE_ID, source, uploadingCallback)
 		
 		then: "The uploaded file has not been found should be thrown"
-		UploadedFileHasNotBeenFoundException exception = thrown(UploadedFileHasNotBeenFoundException)
-		exception.getContext() == Constants.CONTEXT
-		exception.getErrorCode() == UploadedFileHasNotBeenFoundException.ERROR_CODE
+		1 * uploadingCallback.onError(_) >> {
+			UploadedFileHasNotBeenFoundException exception = it[0];
+			exception.getContext() == Constants.CONTEXT
+			exception.getErrorCode() == UploadedFileHasNotBeenFoundException.ERROR_CODE
+		}
 	}
 
 	def "Scenario: file uploading will be completed with resource does not exist error if resource not found"() {

@@ -69,6 +69,7 @@ public class ResourceUploadingServlet extends HttpServlet {
 				.registerDefaultHandler(defaultErrorHandler());
 	}
 
+	
 	private <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> errorHandler(int errorCode) {
 		return (context, error) -> {
 			sendApplicationError(context, errorCode, error);
