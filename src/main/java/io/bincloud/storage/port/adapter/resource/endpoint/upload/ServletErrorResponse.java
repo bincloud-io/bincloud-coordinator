@@ -20,7 +20,7 @@ public class ServletErrorResponse extends Properties {
 	public ServletErrorResponse(ApplicationException error, MessageProcessor messageProcessor) {
 		super();
 		put(ERROR_CONTEXT_PROPERTY, error.getContext());
-		put(ERROR_CODE_PROPERTY, error.getErrorCode());
+		put(ERROR_CODE_PROPERTY, error.getErrorCode().toString());
 		put(ERROR_SEVERITY_PROPERTY, error.getSeverity().name());
 		put(ERROR_DESCRIPTION_PROPERTY, getErrorDescription(error, messageProcessor).orElse(error.getMessage()));
 	}

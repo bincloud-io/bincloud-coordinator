@@ -13,7 +13,7 @@ public class ServerContextProvider {
 	}
 	
 	public String getRootFilesFolderPath() {
-		return String.format("./filestore/%s", getInstanceId());
+		return String.format("/srv/bincloud/wildfly/filestore/%s", getInstanceId());
 	}
 	
 	public String getRootURL() {

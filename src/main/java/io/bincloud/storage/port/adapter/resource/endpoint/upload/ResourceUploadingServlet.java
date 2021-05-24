@@ -40,7 +40,7 @@ public class ResourceUploadingServlet extends HttpServlet {
 	private ServerContextProvider serverContext;
 
 	private AsyncErrorsHandler<AsyncContext> errorsHandler;
-	
+
 	public ResourceUploadingServlet() {
 		super();
 		this.errorsHandler = createServletErrorHandler();
@@ -57,29 +57,29 @@ public class ResourceUploadingServlet extends HttpServlet {
 						serverContext.getIOBufferSize());
 				fileUploader.uploadFile(getResourceId(context), sourcePoint, uploadingCallback);
 			} catch (IOException error) {
-				error.printStackTrace();
 				uploadingCallback.onError(error);
 			}
 		});
 	}
-	
+
 	private AsyncErrorsHandler<AsyncContext> createServletErrorHandler() {
 		return AsyncErrorsHandler.createFor(AsyncContext.class)
-			.registerHandler(ResourceDoesNotExistException.class, errorHandler(HttpServletResponse.SC_BAD_REQUEST))
-			.registerHandler(ApplicationException.class, errorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
-			.registerDefaultHandler(defaultErrorHandler());
+				.registerHandler(ResourceDoesNotExistException.class, errorHandler(HttpServletResponse.SC_BAD_REQUEST))
+				.registerHandler(ApplicationException.class, errorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
+				.registerDefaultHandler(defaultErrorHandler());
 	}
-	
+
 	private <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> errorHandler(int errorCode) {
 		return (context, error) -> {
 			sendApplicationError(context, errorCode, error);
 		};
 	}
-	
+
 	private ErrorInterceptor<AsyncContext, Exception> defaultErrorHandler() {
+		final ErrorInterceptor<AsyncContext, ApplicationException> defaultHandler = errorHandler(
+				HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		return (context, error) -> {
-			sendApplicationError(context, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					new UnexpectedSystemBehaviorException(Constants.CONTEXT, error));
+			defaultHandler.handleError(context, new UnexpectedSystemBehaviorException(Constants.CONTEXT, error));
 		};
 	}
 
@@ -95,7 +95,6 @@ public class ResourceUploadingServlet extends HttpServlet {
 
 			@Override
 			public void onError(Exception error) {
-				error.printStackTrace();
 				errorsHandler.handleError(asyncContext, error);
 				asyncContext.complete();
 			}
@@ -113,8 +112,6 @@ public class ResourceUploadingServlet extends HttpServlet {
 			response.setStatus(code);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			context.complete();
 		}
 	}
 
