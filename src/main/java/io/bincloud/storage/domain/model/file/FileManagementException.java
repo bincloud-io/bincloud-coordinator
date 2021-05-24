@@ -1,6 +1,6 @@
 package io.bincloud.storage.domain.model.file;
 
-import io.bincloud.common.ApplicationException;
+import io.bincloud.common.domain.model.error.ApplicationException;
 import lombok.NonNull;
 
 public abstract class FileManagementException extends ApplicationException {

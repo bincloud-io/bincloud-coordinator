@@ -8,6 +8,7 @@
 	<groupId>io.bincloud.storage</groupId>
 	<artifactId>bincloud-coordinator</artifactId>
 	<version>1.0-SNAPSHOT</version>
+	<packaging>war</packaging>
 
 	<name>bincloud-coordinator</name>
 	<url>http://www.example.com</url>
@@ -15,19 +16,27 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<arquillian.framework.version>1.4.1.Final</arquillian.framework.version>
+		<arquillian.cube.version>1.18.2</arquillian.cube.version>
 		<arquillian.spock.version>1.0.0.CR1</arquillian.spock.version>
 		<spock.reporter.version>1.8.0</spock.reporter.version>
+		<testcontainers.version>1.15.2</testcontainers.version>
 		<junit.version.legacy>4.12</junit.version.legacy>
 		<junit.platform.version>1.7.1</junit.platform.version>
 		<junit.engine.version>5.7.1</junit.engine.version>
 		<bytebuddy.version>1.10.21</bytebuddy.version>
 		<objenesis.version>3.1</objenesis.version>
-		
+
 		<spock.version>1.3-groovy-2.4</spock.version>
 		<groovy.version>2.4.21</groovy.version>
+
+		<liquibase.core.version>4.3.2</liquibase.core.version>
+		<mariadb.client.version>2.6.0</mariadb.client.version>
+
 		<!-- spock.version>1.3-groovy-2.5</spock.version -->
 		<!--groovy.version>2.5.14</groovy.version -->
 		<java.version>14</java.version>
+		<unit.tests.skip>false</unit.tests.skip>
+		<integration.tests.skip>true</integration.tests.skip>
 	</properties>
 
 	<dependencyManagement>
@@ -47,6 +56,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>com.github.jknack</groupId>
+				<artifactId>handlebars</artifactId>
+				<version>4.2.0</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.jboss.arquillian</groupId>
 				<artifactId>arquillian-bom</artifactId>
 				<version>${arquillian.framework.version}</version>
@@ -55,9 +70,11 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.jboss.arquillian.junit5</groupId>
-				<artifactId>arquillian-junit5-container</artifactId>
-				<version>1.7.0.Alpha8</version>
+				<groupId>org.arquillian.cube</groupId>
+				<artifactId>arquillian-cube-bom</artifactId>
+				<version>${arquillian.cube.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 
 			<dependency>
@@ -129,13 +146,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.arquillian.container</groupId>
-				<artifactId>arquillian-container-chameleon</artifactId>
-				<version>${arquillian.chameleon.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version.legacy}</version>
@@ -157,6 +167,13 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>${testcontainers.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
 				<groupId>org.junit.platform</groupId>
 				<artifactId>junit-platform-launcher</artifactId>
 				<version>${junit.platform.version}</version>
@@ -167,6 +184,20 @@
 				<groupId>org.junit.vintage</groupId>
 				<artifactId>junit-vintage-engine</artifactId>
 				<version>${junit.engine.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-core</artifactId>
+				<version>${liquibase.core.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mariadb.jdbc</groupId>
+				<artifactId>mariadb-java-client</artifactId>
+				<version>${mariadb.client.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -181,6 +212,11 @@
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.jknack</groupId>
+			<artifactId>handlebars</artifactId>
 		</dependency>
 
 		<dependency>
@@ -235,16 +271,37 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jboss.arquillian.container</groupId>
-			<artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-			<version>1.0.0.CR4</version>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.arquillian.cube</groupId>
+			<artifactId>arquillian-cube-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish.main.extras</groupId>
-			<artifactId>glassfish-embedded-all</artifactId>
-			<version>3.1.2</version>
+			<groupId>org.arquillian.cube</groupId>
+			<artifactId>arquillian-cube-docker</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.wildfly.arquillian</groupId>
+			<artifactId>wildfly-arquillian-container-remote</artifactId>
+			<version>3.0.1.Final</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -325,26 +382,49 @@
 						</annotationProcessorPaths>
 					</configuration>
 
-					<dependencies>
-						<dependency>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>1.18.18</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.22.1</version>
 
+					<executions>
+						<execution>
+							<id>unit-tests</id>
+							<phase>test</phase>
+							<goals>
+								<goal>test</goal>
+							</goals>
+							<configuration>
+								<skip>${unit.tests.skip}</skip>
+								<includes>
+									<include>**/*Test.java</include>
+									<include>**/*Spec.java</include>
+									<include>**/*Feature.java</include>
+								</includes>
+								<excludes>
+									<exclude>**/*ITSpec.java</exclude>
+								</excludes>
+							</configuration>
+						</execution>
+						<execution>
+							<id>integration-tests</id>
+							<phase>integration-test</phase>
+							<goals>
+								<goal>test</goal>
+							</goals>
+							<configuration>
+								<skip>${integration.tests.skip}</skip>
+								<includes>
+									<include>**/*ITSpec.java</include>
+								</includes>
+							</configuration>
+						</execution>
+					</executions>
+
 					<configuration>
 						<useFile>false</useFile>
-						<includes>
-							<include>**/*Test.java</include>
-							<include>**/*Spec.java</include>
-							<include>**/*Feature.java</include>
-						</includes>
+						<skip>true</skip>
 					</configuration>
 
 					<dependencies>
@@ -355,10 +435,10 @@
 						</dependency>
 					</dependencies>
 				</plugin>
-
+				
 				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.3.1</version>
 				</plugin>
 
 				<plugin>
@@ -380,7 +460,32 @@
 					<artifactId>maven-project-info-reports-plugin</artifactId>
 					<version>3.0.0</version>
 				</plugin>
+
+				<plugin>
+					<groupId>org.liquibase</groupId>
+					<artifactId>liquibase-maven-plugin</artifactId>
+					<version>4.2.0</version>
+					<configuration>
+						<propertyFile>liquibase.properties</propertyFile>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.mariadb.jdbc</groupId>
+							<artifactId>mariadb-java-client</artifactId>
+							<version>${mariadb.client.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
+	<profiles>
+		<profile>
+			<id>it</id>
+			<properties>
+				<unit.tests.skip>false</unit.tests.skip>
+				<integration.tests.skip>false</integration.tests.skip>
+			</properties>
+		</profile>
+	</profiles>
 </project>

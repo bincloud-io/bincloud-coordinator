@@ -6,12 +6,15 @@ import io.bincloud.storage.domain.model.file.FileHasAlreadyBeenUploadedException
 import io.bincloud.storage.domain.model.file.FileState;
 import io.bincloud.storage.domain.model.file.FileUploadingContext;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DistributionState implements FileState {
 	@Override
 	@ToString.Include
+	@EqualsAndHashCode.Include
 	public String getStatus() {
 		return FileStatus.DISTRIBUTION.name();
 	}

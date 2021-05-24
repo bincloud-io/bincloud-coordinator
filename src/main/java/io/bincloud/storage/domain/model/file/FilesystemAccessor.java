@@ -1,7 +1,7 @@
 package io.bincloud.storage.domain.model.file;
 
-import io.bincloud.common.io.transfer.DestinationPoint;
-import io.bincloud.common.io.transfer.SourcePoint;
+import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
+import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 
 public interface FilesystemAccessor {
 	public void createFile(String fileName);

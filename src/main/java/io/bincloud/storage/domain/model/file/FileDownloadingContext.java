@@ -1,10 +1,10 @@
 package io.bincloud.storage.domain.model.file;
 
-import io.bincloud.common.io.transfer.CompletionCallback;
-import io.bincloud.common.io.transfer.DestinationPoint;
-import io.bincloud.common.io.transfer.SourcePoint;
-import io.bincloud.common.io.transfer.TransferingScheduler;
-import io.bincloud.common.io.transfer.Transmitter;
+import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
+import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
+import io.bincloud.common.domain.model.io.transfer.SourcePoint;
+import io.bincloud.common.domain.model.io.transfer.TransferingScheduler;
+import io.bincloud.common.domain.model.io.transfer.Transmitter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
