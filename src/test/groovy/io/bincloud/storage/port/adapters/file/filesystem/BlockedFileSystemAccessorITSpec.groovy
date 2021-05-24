@@ -3,15 +3,12 @@ package io.bincloud.storage.port.adapters.file.filesystem
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
-import org.junit.platform.engine.support.descriptor.DirectorySource
 import org.junit.runner.RunWith
 
 import io.bincloud.common.domain.model.error.ApplicationException
-import io.bincloud.common.domain.model.error.ApplicationException.Severity
 import io.bincloud.common.domain.model.error.MustNeverBeHappenedError
 import io.bincloud.common.domain.model.io.InputOutputException
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback
-import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint
 import io.bincloud.common.domain.model.io.transfer.SourcePoint
 import io.bincloud.common.domain.model.logging.Loggers
@@ -20,15 +17,11 @@ import io.bincloud.common.port.adapters.io.transfer.destinations.StreamDestinati
 import io.bincloud.common.port.adapters.io.transfer.sources.StreamSource
 import io.bincloud.common.port.adapters.io.transfer.transmitter.DirectTransferingScheduler
 import io.bincloud.storage.domain.model.file.File
-import io.bincloud.storage.domain.model.file.FileAlreadyExistsException
-import io.bincloud.storage.domain.model.file.FileNotExistException
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
 import io.bincloud.storage.port.adapter.file.filesystem.BlockedFileSystemAccessor
 import io.bincloud.storage.port.adapter.file.filesystem.FilesystemStreamDestination
 import io.bincloud.storage.port.adapter.file.filesystem.FilesystemStreamSource
 import io.bincloud.testing.archive.ArchiveBuilder
-import javassist.expr.Instanceof
-import net.bytebuddy.asm.Advice.This
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)

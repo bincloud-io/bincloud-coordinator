@@ -1,6 +1,5 @@
 package io.bincloud.storage.port.adapters.file.repository
 
-import javax.annotation.Resource
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Produces
 import javax.inject.Inject
