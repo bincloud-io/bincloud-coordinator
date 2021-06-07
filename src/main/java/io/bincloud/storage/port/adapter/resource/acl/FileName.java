@@ -11,17 +11,18 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.validation.Constraint;
 import javax.validation.Payload;
 import javax.validation.constraints.Pattern;
 
 @Documented
 @Retention(RUNTIME)
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
-
 @Pattern.List({
 	@Pattern(regexp = "\\S+", message = "resource.acl.filename.blank"),
 	@Pattern(regexp = "^[^<>:;,?\"*|/]+$", message = "resource.acl.filename.wrong.format")
 })
+@Constraint(validatedBy = {})
 public @interface FileName {
 	Class<?>[] groups() default {};
 	String message() default "{javax.validation.constraints.NotNull.message}";

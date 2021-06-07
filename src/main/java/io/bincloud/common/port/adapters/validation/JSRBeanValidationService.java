@@ -51,7 +51,7 @@ public class JSRBeanValidationService implements ValidationService {
 	private <V> String createConstraintDescription(ConstraintViolation<V> violation) {
 		ConstraintDescriptor<?> descriptor = violation.getConstraintDescriptor();
 		MessageTemplate descriptionTemplate = new TextMessageTemplate(violation.getMessageTemplate(),
-				descriptor.getAttributes());
+				descriptor.getAttributes()).withParameter("invalidValue", violation.getInvalidValue());
 		return messageProcessor.interpolate(descriptionTemplate);
 	}
 
