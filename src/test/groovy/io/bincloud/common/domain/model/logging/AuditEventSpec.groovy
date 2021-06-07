@@ -3,6 +3,7 @@ package io.bincloud.common.domain.model.logging
 import io.bincloud.common.domain.model.error.ErrorDescriptor
 import io.bincloud.common.domain.model.logging.Level
 import io.bincloud.common.domain.model.logging.LogRecord
+import io.bincloud.common.domain.model.logging.audit.ServiceAuditEvent
 import io.bincloud.common.domain.model.message.MessageTemplate
 import io.bincloud.common.domain.model.message.templates.ErrorDescriptorTemplate
 import io.bincloud.common.domain.model.message.templates.StringifiedObjectTemplate
@@ -28,7 +29,7 @@ class AuditEventSpec extends Specification {
 
 	def "Scenario: initalize from event code and message template"() {
 		given: "The audit event initialized with #logLevel log level by event code and message template"
-		AuditableEvent auditEvent = new AuditableEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
+		ServiceAuditEvent auditEvent = new ServiceAuditEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
 
 		expect:  "The timestamp should be initialized"
 		auditEvent.getAuditLogTimestamp() != null
@@ -55,7 +56,7 @@ class AuditEventSpec extends Specification {
 
 	def "Scenario: initialize from error descriptor"() {
 		given: "The audit event initialized with #logLevel log level by error descriptor"
-		AuditableEvent auditEvent = new AuditableEvent(logLevel, createMockErrorDescriptor(), AUDIT_DETAILS_PARAMETERS)
+		ServiceAuditEvent auditEvent = new ServiceAuditEvent(logLevel, createMockErrorDescriptor(), AUDIT_DETAILS_PARAMETERS)
 
 		expect:  "The timestamp should be initialized"
 		auditEvent.getAuditLogTimestamp() != null
@@ -83,10 +84,10 @@ class AuditEventSpec extends Specification {
 
 	def "Scenario: transform message"() {
 		given: "The source audit event"
-		AuditableEvent sourceEvent = new AuditableEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
+		ServiceAuditEvent sourceEvent = new ServiceAuditEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
 
 		when: "The message transformation has been requested"
-		AuditableEvent transformedEvent = sourceEvent.transformMessage({new StringifiedObjectTemplate("TRANSFORMED_TEXT")})
+		ServiceAuditEvent transformedEvent = sourceEvent.transformMessage({new StringifiedObjectTemplate("TRANSFORMED_TEXT")})
 
 		then: "The new audit event instance should be created based on source audit event"
 		transformedEvent.is(sourceEvent) == false
@@ -112,7 +113,7 @@ class AuditEventSpec extends Specification {
 
 	def "Scenario: get audit log record"() {
 		given: "The audit event"
-		AuditableEvent sourceEvent = new AuditableEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
+		ServiceAuditEvent sourceEvent = new ServiceAuditEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
 
 		when: "The audit log record has been requested"
 		LogRecord auditLogRecord = sourceEvent.getAuditLogRecord()

@@ -1,4 +1,4 @@
-package io.bincloud.common.domain.model.logging;
+package io.bincloud.common.domain.model.logging.audit;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -8,33 +8,35 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import io.bincloud.common.domain.model.error.ErrorDescriptor;
+import io.bincloud.common.domain.model.logging.Level;
+import io.bincloud.common.domain.model.logging.LogRecord;
 import io.bincloud.common.domain.model.message.MessageTemplate;
 import io.bincloud.common.domain.model.message.MessageTransformer;
 import lombok.Getter;
 
-public class AuditableEvent {
+public class ServiceAuditEvent {
 	@Getter	
 	private LogRecord auditLogRecord;
-	private final AuditableEventType auditEventType;
+	private final AuditEventType auditEventType;
 	private final Collection<String> auditParameterNames;
 
-	public AuditableEvent(Level auditLevel, ErrorDescriptor errorDescriptor, Collection<String> auditParameterNames) {
-		this(new AuditableEventType(errorDescriptor), new LogRecord(auditLevel, errorDescriptor), auditParameterNames);
+	public ServiceAuditEvent(Level auditLevel, ErrorDescriptor errorDescriptor, Collection<String> auditParameterNames) {
+		this(new AuditEventType(errorDescriptor), new LogRecord(auditLevel, errorDescriptor), auditParameterNames);
 	}
 
-	public AuditableEvent(String eventCode, Level auditLevel, MessageTemplate messageTemplate,
+	public ServiceAuditEvent(String eventCode, Level auditLevel, MessageTemplate messageTemplate,
 			Collection<String> auditParameterNames) {
-		this(new AuditableEventType(eventCode), new LogRecord(auditLevel, messageTemplate), auditParameterNames);
+		this(new AuditEventType(eventCode), new LogRecord(auditLevel, messageTemplate), auditParameterNames);
 	}
 
-	private AuditableEvent(AuditableEventType auditEvent, LogRecord auditLogRecord, Collection<String> auditParameterNames) {
+	private ServiceAuditEvent(AuditEventType auditEvent, LogRecord auditLogRecord, Collection<String> auditParameterNames) {
 		super();
 		this.auditEventType = auditEvent;
 		this.auditLogRecord = auditLogRecord;
 		this.auditParameterNames = Collections.unmodifiableCollection(auditParameterNames);
 	}
 
-	private AuditableEvent(AuditableEvent proto) {
+	private ServiceAuditEvent(ServiceAuditEvent proto) {
 		super();
 		this.auditEventType = proto.auditEventType;
 		this.auditParameterNames = proto.auditParameterNames;
@@ -67,8 +69,8 @@ public class AuditableEvent {
 				.collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().toString()));
 	}
 
-	public AuditableEvent transformMessage(MessageTransformer messageTransformer) {
-		AuditableEvent derived = new AuditableEvent(this);
+	public ServiceAuditEvent transformMessage(MessageTransformer messageTransformer) {
+		ServiceAuditEvent derived = new ServiceAuditEvent(this);
 		derived.auditLogRecord = derived.auditLogRecord.transformMessage(messageTransformer);
 		return derived;
 	}
