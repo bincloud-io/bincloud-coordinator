@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+	targetNamespace="http://www.bincloud.io/storage/resource-management-types"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bincloud.io/storage/resource-management-types">
+	<annotation>
+		<documentation>
+			The resource management SOAP service xsd-schema describing
+			service protocol
+		</documentation>
+	</annotation>
+
+	<element name="CreateNewResourceRq"
+		type="tns:CreateNewResourceRqType">
+		<annotation>
+			<documentation>Create new resource request</documentation>
+		</annotation>
+	</element>
+
+	<element name="CreateNewResourceRs"
+		type="tns:CreateNewResourceRsType">
+		<annotation>
+			<documentation>Create new resource response</documentation>
+		</annotation>
+	</element>
+
+	<complexType name="CreateNewResourceRqType">
+		<annotation>
+			<documentation>
+				The create new resource request type
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="fileName" minOccurs="0" maxOccurs="1"
+				type="tns:FileNameType">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="CreateNewResourceRsType">
+		<annotation>
+			<documentation>
+				The create new resource response type
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="resourceId" minOccurs="1" maxOccurs="1"
+				type="tns:ResourceIdType">
+			</element>
+			<element name="uploadLink" type="tns:URLType" minOccurs="1"
+				maxOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="FileNameType">
+		<restriction base="string"></restriction>
+	</simpleType>
+
+
+	<simpleType name="URLType">
+		<restriction base="string"></restriction>
+	</simpleType>
+
+
+	<simpleType name="ResourceIdType">
+		<restriction base="long"></restriction>
+	</simpleType>
+
+
+</schema>
