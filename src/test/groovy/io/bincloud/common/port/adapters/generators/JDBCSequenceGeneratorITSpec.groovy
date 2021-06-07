@@ -33,6 +33,11 @@ class JDBCSequenceGeneratorITSpec extends Specification {
 	@Deployment
 	public static Archive "create deployment"() {
 		return ArchiveBuilder.jar("file-repository-spec.jar")
+				.resolveDependencies("pom.xml")
+				.withScopes(COMPILE, RUNTIME, TEST)
+				.resolveDependency("org.liquibase", "liquibase-core")
+				.resolveDependency("org.openclover", "clover")
+				.apply()
 				.appendPackagesRecursively(File.getPackage().getName())
 				.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
@@ -40,10 +45,6 @@ class JDBCSequenceGeneratorITSpec extends Specification {
 				.appendResource("liquibase")
 				.appendResource("liquibase-test")
 				.appendManifestResource("META-INF/beans.xml", "beans.xml")
-				.resolveDependencies("pom.xml")
-				.withScopes(COMPILE, RUNTIME, TEST)
-				.resolveDependency("org.liquibase", "liquibase-core")
-				.apply()
 				.build()
 	}
 

@@ -1,12 +1,9 @@
 package io.bincloud.storage.domain.model.resource.file;
 
-import javax.validation.constraints.NotNull;
-
 import io.bincloud.common.domain.model.time.DateTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
@@ -15,18 +12,13 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public class FileUploading {
-	@NonNull
 	@EqualsAndHashCode.Include
 	private Long resourceId;
-	
-	@NonNull
 	@EqualsAndHashCode.Include
 	private String fileId;
-	
-	@NotNull
 	private DateTime uploadingMoment;
 
-	public FileUploading(@NonNull InitialState initialState) {
+	public FileUploading(InitialState initialState) {
 		super();
 		this.resourceId = initialState.getResourceId();
 		this.fileId = initialState.getFileId();

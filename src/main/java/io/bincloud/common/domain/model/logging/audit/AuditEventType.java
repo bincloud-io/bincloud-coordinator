@@ -1,4 +1,4 @@
-package io.bincloud.common.domain.model.logging;
+package io.bincloud.common.domain.model.logging.audit;
 
 import io.bincloud.common.domain.model.error.ErrorDescriptor;
 import lombok.AccessLevel;
@@ -9,16 +9,16 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class AuditableEventType {
+public class AuditEventType {
 	private static final Long SUCCESS_CODE = 0L;
 	private final String eventCode;
 	private final Long errorCode;
 
-	public AuditableEventType(String eventCode) {
+	public AuditEventType(String eventCode) {
 		this(eventCode, SUCCESS_CODE);
 	}
 
-	public AuditableEventType(ErrorDescriptor errorDescriptor) {
+	public AuditEventType(ErrorDescriptor errorDescriptor) {
 		this(errorDescriptor.getContext(), errorDescriptor.getErrorCode());
 	}
 }

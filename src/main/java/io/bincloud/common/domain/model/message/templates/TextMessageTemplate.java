@@ -5,11 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.validation.constraints.NotNull;
-
 import io.bincloud.common.domain.model.message.MessageTemplate;
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 
 @EqualsAndHashCode
 public class TextMessageTemplate implements MessageTemplate {
@@ -20,7 +17,7 @@ public class TextMessageTemplate implements MessageTemplate {
 		this(textMessage, new LinkedHashMap<String, Object>());
 	}
 	
-	public TextMessageTemplate(String textMessage, @NotNull Map<String, Object> parameters) {
+	public TextMessageTemplate(String textMessage, Map<String, Object> parameters) {
 		super();
 		this.textMessage = textMessage;
 		this.parameters.putAll(parameters);
@@ -40,12 +37,12 @@ public class TextMessageTemplate implements MessageTemplate {
 		return Collections.unmodifiableMap(parameters);
 	}
 
-	public <V> TextMessageTemplate withParameter(@NonNull String name, V value) {
+	public <V> TextMessageTemplate withParameter(String name, V value) {
 		parameters.put(name, value);
 		return this;
 	}
 	
-	public TextMessageTemplate withoutParameter(@NonNull String name) {
+	public TextMessageTemplate withoutParameter(String name) {
 		parameters.remove(name);
 		return this;
 	}

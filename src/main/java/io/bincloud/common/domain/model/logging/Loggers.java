@@ -1,11 +1,13 @@
 package io.bincloud.common.domain.model.logging;
 
+import io.bincloud.common.domain.model.logging.audit.ServiceAuditEvent;
+import io.bincloud.common.domain.model.logging.audit.ServiceAuditLogger;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Loggers {
 	private ApplicationLogger applicationLogger = new NullApplicatioLogger();
-	private EventsAuditLogger eventsLogger = new NullEventsLogger();
+	private ServiceAuditLogger eventsLogger = new NullEventsLogger();
 	
 	public final ApplicationLogger applicationLogger() {
 		return applicationLogger;
@@ -19,7 +21,7 @@ public class Loggers {
 		return applicationLogger(loggerOwner.getName());
 	}
 	
-	public final EventsAuditLogger eventsLogger() {
+	public final ServiceAuditLogger eventsLogger() {
 		return eventsLogger;
 	}
 	
@@ -32,7 +34,7 @@ public class Loggers {
 			}
 
 			@Override
-			public Registry registerEventsLogger(EventsAuditLogger eventsLogger) {
+			public Registry registerEventsLogger(ServiceAuditLogger eventsLogger) {
 				Loggers.eventsLogger = eventsLogger;
 				return this;
 			}		
@@ -41,7 +43,7 @@ public class Loggers {
 	
 	public interface Registry {
 		public Registry registerApplicationLogger(ApplicationLogger applicationLogger);
-		public Registry registerEventsLogger(EventsAuditLogger eventsLogger);
+		public Registry registerEventsLogger(ServiceAuditLogger eventsLogger);
 	}
 	
 	private static class NullApplicatioLogger implements ApplicationLogger {
@@ -54,8 +56,8 @@ public class Loggers {
 		}
 	}
 	
-	private static class NullEventsLogger implements EventsAuditLogger {
+	private static class NullEventsLogger implements ServiceAuditLogger {
 		@Override
-		public void log(AuditableEvent auditEvent) {}
+		public void log(ServiceAuditEvent auditEvent) {}
 	}
 }

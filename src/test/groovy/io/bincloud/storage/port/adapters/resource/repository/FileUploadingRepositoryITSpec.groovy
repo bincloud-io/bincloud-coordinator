@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapters.resource.file
+package io.bincloud.storage.port.adapters.resource.repository
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
@@ -23,7 +23,6 @@ import io.bincloud.storage.domain.model.resource.file.FileUploading
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
 import io.bincloud.storage.port.adapter.resource.repository.JPAFileUploadingRepository
 import io.bincloud.storage.port.adapter.resource.repository.JPAResourceRepository
-import io.bincloud.storage.port.adapters.resource.ResourceRepositoryITSpecConfig
 import io.bincloud.testing.archive.ArchiveBuilder
 import io.bincloud.testing.database.DatabaseConfigurer
 import io.bincloud.testing.database.jdbc.cdi.JdbcLiquibase

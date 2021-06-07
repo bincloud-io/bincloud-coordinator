@@ -1,5 +1,5 @@
 package io.bincloud.common.domain.model.validation;
 
 public interface ValidationService {
-	public <V> void validate(V validatable, Class<?>... groups);
+	public <V> ValidationState validate(V validatable, Class<?>... groups);
 }

@@ -25,6 +25,7 @@ import io.bincloud.storage.domain.model.resource.FileUploader.UploadedResource;
 import io.bincloud.storage.domain.model.resource.FileUploader.UploadingCallback;
 import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException;
 import io.bincloud.storage.port.adapter.ServerContextProvider;
+import io.bincloud.storage.port.adapter.resource.endpoint.ServletErrorResponse;
 
 public class ResourceUploadingServlet extends HttpServlet {
 	private static final long serialVersionUID = -8092602564530445635L;

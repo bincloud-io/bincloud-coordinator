@@ -11,7 +11,7 @@ import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
 import io.bincloud.storage.domain.model.resource.FileUploader;
 import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException;
 import io.bincloud.storage.domain.model.resource.ResourceRepository;
-import io.bincloud.storage.domain.model.resource.UploadedFileHasNotBeenFoundException;
+import io.bincloud.storage.domain.model.resource.UploadedFileDescriptorHasNotBeenFoundException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -56,7 +56,7 @@ public class FileUploadingService implements FileUploader {
 					fileHasBeenUploadedPublisher
 						.publish(new FileHasBeenUploaded(resourceId, fileId, fileDescriptor.getLastModification()));	
 				} else {
-					onError(new UploadedFileHasNotBeenFoundException());
+					onError(new UploadedFileDescriptorHasNotBeenFoundException());
 				}	
 			}
 			

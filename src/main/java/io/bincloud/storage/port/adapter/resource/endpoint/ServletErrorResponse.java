@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapter.resource.endpoint.upload;
+package io.bincloud.storage.port.adapter.resource.endpoint;
 
 import java.util.Optional;
 import java.util.Properties;

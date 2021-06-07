@@ -22,8 +22,6 @@ import org.jboss.shrinkwrap.resolver.api.maven.MavenStrategyStage;
 import org.jboss.shrinkwrap.resolver.api.maven.PomEquippedResolveStage;
 import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
 
-import lombok.NonNull;
-
 public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuilder<A, B>> {
 	protected A archive;
 
@@ -71,9 +69,9 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 			return this;
 		}
 
-		public DependencyResolver resolveAll() {
-			this.resolved.addAll(resolveDependencies(() -> resolver.resolve()));
-			return this;
+		public B resolveAll() {
+			this.resolved.addAll(resolveDependencies(() -> resolver.importRuntimeAndTestDependencies().resolve()));
+			return apply();
 		}
 		
 		public DependencyResolver resolveDependency(String group, String artifact) {
@@ -211,15 +209,15 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
 		}
 	}
 
-	public static final JarArchiveBuilder jar(@NonNull String archiveName) {
+	public static final JarArchiveBuilder jar(String archiveName) {
 		return new JarArchiveBuilder(archiveName);
 	}
 
-	public static final WarArchiveBuilder war(@NonNull String archiveName) {
+	public static final WarArchiveBuilder war(String archiveName) {
 		return new WarArchiveBuilder(archiveName);
 	}
 
-	public static final EarArchiveBuilder ear(@NonNull String archiveName) {
+	public static final EarArchiveBuilder ear(String archiveName) {
 		return new EarArchiveBuilder(archiveName);
 	}
 }

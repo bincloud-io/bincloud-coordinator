@@ -10,7 +10,6 @@ import io.bincloud.common.domain.model.message.templates.ErrorDescriptorTemplate
 import io.bincloud.common.domain.model.message.templates.StringifiedObjectTemplate;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.ToString;
 
 @Getter
@@ -21,20 +20,20 @@ public class LogRecord {
 	@Getter(AccessLevel.NONE)
 	private MessageTemplate message;
 	
-	public LogRecord(@NonNull Level level, Object loggableObject) {
+	public LogRecord(Level level, Object loggableObject) {
 		this(level, new StringifiedObjectTemplate(loggableObject));
 	}
 
-	public LogRecord(@NonNull Level level, String messageText) {
+	public LogRecord(Level level, String messageText) {
 		this(level, new StringifiedObjectTemplate(messageText));
 	}
 	
 	
-	public LogRecord(@NonNull Level level, @NonNull ErrorDescriptor errorDescriptor) {
+	public LogRecord(Level level, ErrorDescriptor errorDescriptor) {
 		this(level, new ErrorDescriptorTemplate(errorDescriptor));
 	}
 	
-	public LogRecord(@NonNull Level level, @NonNull MessageTemplate message) {
+	public LogRecord(Level level, MessageTemplate message) {
 		super();
 		this.level = level;
 		this.message = message;

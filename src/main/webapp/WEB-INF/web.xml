@@ -12,6 +12,6 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ResourceUploadingServlet</servlet-name>
-		<url-pattern>/resource/upload</url-pattern>
+	<url-pattern>/resource/upload</url-pattern>
 	</servlet-mapping>
 </web-app>

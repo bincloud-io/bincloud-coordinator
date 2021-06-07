@@ -47,6 +47,7 @@ class DirectTransmissionSpec extends Specification {
 	}
 
 	def "Scenario: the source point has thrown data transfering exception"() {
+		ApplicationException receivedError
 		CompletionCallback completionCallback = Mock(CompletionCallback);
 		given: "The source point"
 		SourcePoint sourcePoint = Mock(SourcePoint)
@@ -71,15 +72,14 @@ class DirectTransmissionSpec extends Specification {
 		1 * destinationPoint.dispose()
 
 		and: "The system is asynchronously notified about error"
-		1 * completionCallback.onError(_) >> {arguments ->
-			ApplicationException receivedError = arguments[0]
-			receivedError.context == InputOutputException.CONTEXT
-			receivedError.severity == Severity.INCIDENT
-			receivedError.errorCode == DataTransferingException.ERROR_CODE
-		}
+		1 * completionCallback.onError(_) >> {receivedError = it[0]}
+		receivedError.context == InputOutputException.CONTEXT
+		receivedError.severity == Severity.INCIDENT
+		receivedError.errorCode == DataTransferingException.ERROR_CODE
 	}
 
 	def "Scenario: the destination point has thrown data transfering exception"() {
+		ApplicationException receivedError;
 		CompletionCallback completionCallback = Mock(CompletionCallback);
 		given: "The source point"
 		SourcePoint sourcePoint = Mock(SourcePoint)
@@ -105,11 +105,65 @@ class DirectTransmissionSpec extends Specification {
 		1 * destinationPoint.dispose()
 
 		and: "The system is asynchronously notified about error"
-		1 * completionCallback.onError(_) >> {arguments ->
-			ApplicationException receivedError = arguments[0]
-			receivedError.context == InputOutputException.CONTEXT
-			receivedError.severity == Severity.INCIDENT
-			receivedError.errorCode == DataTransferingException.ERROR_CODE
-		}
+		1 * completionCallback.onError(_) >> {receivedError = it[0]}
+		receivedError.context == InputOutputException.CONTEXT
+		receivedError.severity == Severity.INCIDENT
+		receivedError.errorCode == DataTransferingException.ERROR_CODE
+	}
+
+	def "Scenario: input stream reading error during data transferring"() {
+		ApplicationException receivedError;
+		CompletionCallback completionCallback = Mock(CompletionCallback);
+		given: "The wrong opened input stream"
+		InputStream inputStream = Mock(InputStream)
+		SourcePoint sourcePoint = new StreamSource(inputStream, 10);
+		inputStream.read(_, _, _) >> {throw new IOException()}
+
+		and: "The output stream based destination poing"
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		DestinationPoint destinationPoint = new StreamDestination(outputStream)
+
+		and: "The direct transmitter scheduler"
+		TransferingScheduler scheduler = new DirectTransferingScheduler()
+
+		when: "We schedule transfering"
+		Transmitter transmitter = scheduler.schedule(sourcePoint, destinationPoint, completionCallback)
+
+		and: "We start data transferring"
+		transmitter.start()
+
+		then: "The data transferring should be completed with data transferring error"
+		1 * completionCallback.onError(_) >> {receivedError = it[0]}
+		receivedError.context == InputOutputException.CONTEXT
+		receivedError.severity == Severity.INCIDENT
+		receivedError.errorCode == DataTransferingException.ERROR_CODE
+	}
+
+	def "Scenario: output stream writing error during data transferring"() {
+		ApplicationException receivedError;
+		CompletionCallback completionCallback = Mock(CompletionCallback);
+		given: "The input stream based source point"
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(TRANSFERRING_DATA.bytes);
+		SourcePoint sourcePoint = new StreamSource(inputStream, 10);
+
+		and: "The wrong opened output stream"
+		OutputStream outputStream = Mock(OutputStream)
+		DestinationPoint destinationPoint = new StreamDestination(outputStream)
+		outputStream.write(_, _, _) >> {throw new IOException()}
+
+		and: "The direct transmitter scheduler"
+		TransferingScheduler scheduler = new DirectTransferingScheduler()
+
+		when: "We schedule transfering"
+		Transmitter transmitter = scheduler.schedule(sourcePoint, destinationPoint, completionCallback)
+
+		and: "We start data transferring"
+		transmitter.start()
+
+		then: "The data transferring should be completed with data transferring error"
+		1 * completionCallback.onError(_) >> {receivedError = it[0]}
+		receivedError.context == InputOutputException.CONTEXT
+		receivedError.severity == Severity.INCIDENT
+		receivedError.errorCode == DataTransferingException.ERROR_CODE
 	}
 }

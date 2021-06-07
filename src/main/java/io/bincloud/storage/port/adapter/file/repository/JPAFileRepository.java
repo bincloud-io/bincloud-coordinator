@@ -12,7 +12,6 @@ import io.bincloud.common.domain.model.message.templates.StringifiedObjectTempla
 import io.bincloud.common.domain.model.message.templates.TextMessageTemplate;
 import io.bincloud.storage.domain.model.file.File;
 import io.bincloud.storage.domain.model.file.FileRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -30,7 +29,7 @@ public class JPAFileRepository implements FileRepository {
 
 	@Override
 	@SneakyThrows
-	public void save(@NonNull File file) {
+	public void save(File file) {
 		Loggers.applicationLogger(JPAFileRepository.class)
 				.log(new LogRecord(Level.TRACE, new TextMessageTemplate("Save file: {{file}}").withParameter("file",
 						new StringifiedObjectTemplate(file))));

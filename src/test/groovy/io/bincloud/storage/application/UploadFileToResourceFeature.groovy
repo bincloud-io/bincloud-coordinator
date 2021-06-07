@@ -17,7 +17,7 @@ import io.bincloud.storage.domain.model.resource.FileUploader
 import io.bincloud.storage.domain.model.resource.Resource
 import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException
 import io.bincloud.storage.domain.model.resource.ResourceRepository
-import io.bincloud.storage.domain.model.resource.UploadedFileHasNotBeenFoundException
+import io.bincloud.storage.domain.model.resource.UploadedFileDescriptorHasNotBeenFoundException
 import io.bincloud.storage.domain.model.resource.FileUploader.UploadedResource
 import io.bincloud.storage.domain.model.resource.FileUploader.UploadingCallback
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
@@ -116,9 +116,9 @@ class UploadFileToResourceFeature extends Specification {
 		
 		then: "The uploaded file has not been found should be thrown"
 		1 * uploadingCallback.onError(_) >> {
-			UploadedFileHasNotBeenFoundException exception = it[0];
+			UploadedFileDescriptorHasNotBeenFoundException exception = it[0];
 			exception.getContext() == Constants.CONTEXT
-			exception.getErrorCode() == UploadedFileHasNotBeenFoundException.ERROR_CODE
+			exception.getErrorCode() == UploadedFileDescriptorHasNotBeenFoundException.ERROR_CODE
 		}
 	}
 

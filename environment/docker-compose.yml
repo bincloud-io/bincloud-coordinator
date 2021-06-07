@@ -14,6 +14,9 @@ services:
   appserver:
     build: ./appserver
     image: bincloud/appserver:v1.0.0
+  stageserver:
+    build: ./stageserver
+    image: bincloud/stageserver:v1.0.0
     hostname: appserver.bincloud.internal
     restart: always
     expose:
