@@ -9,8 +9,3 @@ ENV DB_CENTRAL_JNDI_NAME  java:/jdbc/BC_CENTRAL
 ENV DB_CENTRAL_CONNECTION_URL jdbc:mariadb://central.bincloud.internal/bc_central
 ENV DB_CENTRAL_USERNAME bincloud
 ENV DB_CENTRAL_PASSWORD bincloud
-
-USER root
-ADD ${DEPLOYMENT_MARIADB_JDBC_CLIENT_URL} /srv/bincloud/wildfly/mariadb-java-client.jar
-RUN chown bincloud:bincloud /srv/bincloud/wildfly/mariadb-java-client.jar
-USER bincloud
