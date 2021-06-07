@@ -5,34 +5,13 @@ services:
     image: bincloud/database:v1.0.0
     hostname: central.bincloud.internal
     restart: always
-    expose:
-      - 3306
-    ports:
-      - 33306:3306
-    volumes:
-      - bc_central:/srv/bincloud/mariadb
   appserver:
     build: ./appserver
     image: bincloud/appserver:v1.0.0
-  stageserver:
-    build: ./stageserver
-    image: bincloud/stageserver:v1.0.0
     hostname: appserver.bincloud.internal
     restart: always
-    expose:
-      - 8080
-      - 9990
-      - 8787
     ports:
-      - 38080:8080
-      - 39990:9990
-      - 38787:8787
-    volumes:
-      - bc_appsrv:/srv/bincloud/wildfly
+      - 8080:8080
+      - 9990:9990
     depends_on:
       - database
-volumes:
-  bc_central:
-    external: true
-  bc_appsrv:
-    external: true
