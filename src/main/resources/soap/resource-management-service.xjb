@@ -1,0 +1,5 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxws"
+	wsdlLocation="../../webapp/WEB-INF/soap/resource-management-service.wsdl" version="2.1">
+	<package
+		name="io.bincloud.storage.port.adapter.resource.endpoint.management" />
+</bindings>

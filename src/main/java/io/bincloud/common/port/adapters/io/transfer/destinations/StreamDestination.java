@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
 import io.bincloud.common.domain.model.io.transfer.DataTransferingException;
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 
@@ -30,7 +31,7 @@ public class StreamDestination implements DestinationPoint {
 		try {
 			outputStream.close();
 		} catch (IOException error) {
-			throw new Error("Must never be happened", error);
+			throw new MustNeverBeHappenedError(error);
 		}
 	}
 

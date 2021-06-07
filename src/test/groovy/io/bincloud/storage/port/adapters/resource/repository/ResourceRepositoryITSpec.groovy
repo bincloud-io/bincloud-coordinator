@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapters.resource
+package io.bincloud.storage.port.adapters.resource.repository
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME

@@ -1,4 +1,4 @@
-package io.bincloud.common.port.adapters.message.interpolators
+package io.bincloud.common.port.adapters.message
 
 import io.bincloud.common.domain.model.message.MessageInterpolator
 import io.bincloud.common.domain.model.message.MessageTemplate

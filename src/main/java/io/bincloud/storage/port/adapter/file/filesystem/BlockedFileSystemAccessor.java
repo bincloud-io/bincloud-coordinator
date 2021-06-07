@@ -9,7 +9,6 @@ import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.storage.domain.model.file.FileManagementException;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 
 public class BlockedFileSystemAccessor implements FilesystemAccessor {
@@ -41,7 +40,7 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 	}
 
 	@Override
-	public SourcePoint getAccessOnRead(String fileName, @NonNull Long offset, @NonNull Long size) {
+	public SourcePoint getAccessOnRead(String fileName, Long offset, Long size) {
 		try {
 			return new FilesystemStreamSource(new File(this.rootFolder, fileName), offset, size, bufferSize);
 		} catch (IOException error) {

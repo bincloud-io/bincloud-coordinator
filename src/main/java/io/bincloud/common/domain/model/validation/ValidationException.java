@@ -6,7 +6,6 @@ import java.util.Map;
 import io.bincloud.common.domain.model.error.ApplicationException;
 import io.bincloud.common.domain.model.validation.ValidationState.ErrorState;
 import lombok.Getter;
-import lombok.NonNull;
 
 @Getter
 public class ValidationException extends ApplicationException {
@@ -20,8 +19,8 @@ public class ValidationException extends ApplicationException {
 	private final Map<String, Object> validationProperties;
 	private final ErrorState errorState;
 
-	public ValidationException(@NonNull String context, @NonNull Long errorNumber,
-			@NonNull ValidationState validationState) {
+	public ValidationException(String context, Long errorNumber,
+			ValidationState validationState) {
 		super(Severity.BUSINESS, context, errorNumber, ERROR_MESSAGE);
 		this.validationProperties = validationState.getAdditionalProperties();
 		this.errorState = validationState.getErrorState();

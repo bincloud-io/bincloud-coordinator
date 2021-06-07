@@ -7,26 +7,23 @@ import java.util.Date;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 
 @EqualsAndHashCode
 public class DateTime implements Comparable<DateTime> {
-	@NonNull
 	private Date unit;
-	@NonNull
 	private Long fraction;
 	
 	public DateTime() {
 		this(Instant.now().truncatedTo(ChronoUnit.SECONDS)); 
 	}
 	
-	public DateTime(@NonNull Instant instant) {
+	public DateTime(Instant instant) {
 		super();
 		this.unit = new Date(instant.getEpochSecond() * 1000);
 		this.fraction = (long) instant.getNano();
 	}
 	
-	public DateTime(@NonNull State internalState) {
+	public DateTime(State internalState) {
 		super();
 		this.unit = internalState.getUnit();
 		this.fraction = internalState.getFraction();

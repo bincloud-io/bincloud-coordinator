@@ -3,14 +3,12 @@ package io.bincloud.common.domain.model.error;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.NonNull;
-
 public class AsyncErrorsHandler<C> {
 	private final Class<C> contextType;
 	private final Map<Class<?>, ErrorInterceptor<C, Exception>> errorHandlers;
 	private ErrorInterceptor<C, Exception> defaultExceptionHandler = (context, error) -> {throw new UnexpectedSystemBehaviorException(error);};
 	
-	private AsyncErrorsHandler(@NonNull Class<C> contextType) {
+	private AsyncErrorsHandler(Class<C> contextType) {
 		super();
 		this.contextType = contextType;
 		this.errorHandlers = new HashMap<>();
@@ -27,7 +25,6 @@ public class AsyncErrorsHandler<C> {
 			checkContextType(context);
 			findErrorHandler(error.getClass()).handleError(context, error);
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	public <E extends Exception> AsyncErrorsHandler<C> registerHandler(Class<E> errorType, ErrorInterceptor<C, E> handler) {

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
-import lombok.NonNull;
 
 @Getter
 public class ApplicationException extends RuntimeException implements ErrorDescriptor {
@@ -15,9 +14,9 @@ public class ApplicationException extends RuntimeException implements ErrorDescr
 	private final Long errorCode;
 	
 	public ApplicationException(
-		@NonNull Severity severity, 
-		@NonNull String context, 
-		@NonNull Long errorNumber, 
+		Severity severity, 
+		String context, 
+		Long errorNumber, 
 		String message) {
 		super(message);
 		this.severity = severity;

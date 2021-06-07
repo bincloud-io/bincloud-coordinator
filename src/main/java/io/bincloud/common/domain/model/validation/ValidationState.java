@@ -18,7 +18,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 
+@ToString
 @NoArgsConstructor
+@EqualsAndHashCode
 public class ValidationState {
 	private static final String UNGROUPED_MESSAGE_GROUP = "$$__UNGROUPED_MESSAGES__$$";
 	private final Map<String, Set<String>> errorMessages = new HashMap<String, Set<String>>();

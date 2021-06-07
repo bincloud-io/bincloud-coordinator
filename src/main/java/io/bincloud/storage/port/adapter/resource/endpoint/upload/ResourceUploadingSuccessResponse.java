@@ -1,10 +1,8 @@
 package io.bincloud.storage.port.adapter.resource.endpoint.upload;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Properties;
 
-import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
+import io.bincloud.common.port.adapters.web.URLAddress;
 import io.bincloud.storage.domain.model.resource.FileUploader.UploadedResource;
 
 public class ResourceUploadingSuccessResponse extends Properties {
@@ -14,24 +12,17 @@ public class ResourceUploadingSuccessResponse extends Properties {
 
 	public ResourceUploadingSuccessResponse(String rootURL, UploadedResource uploadedResource) {
 		super();
-		put(DOWNLOAD_RESOURCE_LINK_PROPERTY, escapeURL(createResourceDownloadLink(rootURL, uploadedResource)));
-		put(DOWNLOAD_RESOURCE_REVISION_LINK_PROPERTY, escapeURL(createRevisionDownloadLink(rootURL, uploadedResource)));
+		put(DOWNLOAD_RESOURCE_LINK_PROPERTY, createResourceDownloadLink(rootURL, uploadedResource).getValue());
+		put(DOWNLOAD_RESOURCE_REVISION_LINK_PROPERTY, createRevisionDownloadLink(rootURL, uploadedResource).getValue());
 	}
 
-	private String createResourceDownloadLink(String rootURL, UploadedResource uploadedResource) {
-		return String.format("%s/resource/download?resourceId=%s", rootURL, uploadedResource.getResourceId());
+	private URLAddress createResourceDownloadLink(String rootURL, UploadedResource uploadedResource) {
+		return new URLAddress(rootURL).append("/resource/download?resourceId=%s", uploadedResource.getResourceId())
+				.escape();
 	}
 
-	private String createRevisionDownloadLink(String rootURL, UploadedResource uploadedResource) {
-		return String.format("%s/resource/revision/download?resourceId=%s&fileId=%s", rootURL,
-				uploadedResource.getResourceId(), uploadedResource.getFileId());
-	}
-
-	private String escapeURL(String unescapedURL) {
-		try {
-			return URLEncoder.encode(unescapedURL, "UTF-8");
-		} catch (UnsupportedEncodingException error) {
-			throw new MustNeverBeHappenedError(error);
-		}
+	private URLAddress createRevisionDownloadLink(String rootURL, UploadedResource uploadedResource) {
+		return new URLAddress(rootURL).append("/resource/revision/download?resourceId=%s&fileId=%s",
+				uploadedResource.getResourceId(), uploadedResource.getFileId()).escape();
 	}
 }

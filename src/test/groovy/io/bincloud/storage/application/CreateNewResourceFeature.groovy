@@ -5,7 +5,7 @@ import io.bincloud.common.domain.model.generator.SequentialGenerator
 import io.bincloud.common.domain.model.validation.ValidationException
 import io.bincloud.common.domain.model.validation.ValidationService
 import io.bincloud.common.domain.model.validation.ValidationState
-import io.bincloud.storage.application.resource.ResourceService
+import io.bincloud.storage.application.resource.ResourceManagementService
 import io.bincloud.storage.domain.model.resource.Constants
 import io.bincloud.storage.domain.model.resource.Resource
 import io.bincloud.storage.domain.model.resource.ResourceRepository
@@ -22,13 +22,13 @@ class CreateNewResourceFeature extends Specification {
 	private SequentialGenerator<Long> resourceIdGenerator;
 	private ValidationService validationService;
 	private ResourceRepository resourceRepository;
-	private ResourceService serviceUnderTest;
+	private ResourceManagementService serviceUnderTest;
 	
 	def setup() {
 		this.resourceIdGenerator = Stub(SequentialGenerator)
 		this.validationService = Stub(ValidationService)
 		this.resourceRepository = Mock(ResourceRepository)
-		this.serviceUnderTest = new ResourceService(
+		this.serviceUnderTest = new ResourceManagementService(
 			this.resourceIdGenerator,
 			this.validationService,
 			this.resourceRepository, 

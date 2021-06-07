@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
@@ -19,7 +18,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class File implements FileDescriptor {
-	@NonNull
 	@EqualsAndHashCode.Include
 	private String fileId;
 	private DateTime creationMoment;
@@ -28,7 +26,7 @@ public class File implements FileDescriptor {
 	private FileState state;
 	private Long size;
 
-	public File(@NonNull SequentialGenerator<String> idGenerator) {
+	public File(SequentialGenerator<String> idGenerator) {
 		super();
 		this.fileId = idGenerator.nextValue();
 		this.state = new DraftState();

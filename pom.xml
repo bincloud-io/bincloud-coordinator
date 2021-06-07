@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -9,7 +8,7 @@
 	<artifactId>bincloud-coordinator</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-
+	
 	<name>bincloud-coordinator</name>
 	<url>http://www.example.com</url>
 
@@ -21,8 +20,6 @@
 		<spock.reporter.version>1.8.0</spock.reporter.version>
 		<testcontainers.version>1.15.2</testcontainers.version>
 		<junit.version.legacy>4.12</junit.version.legacy>
-		<junit.platform.version>1.7.1</junit.platform.version>
-		<junit.engine.version>5.7.1</junit.engine.version>
 		<bytebuddy.version>1.10.21</bytebuddy.version>
 		<objenesis.version>3.1</objenesis.version>
 
@@ -153,37 +150,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit.engine.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-runner</artifactId>
-				<version>${junit.platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers</artifactId>
 				<version>${testcontainers.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-launcher</artifactId>
-				<version>${junit.platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.junit.vintage</groupId>
-				<artifactId>junit-vintage-engine</artifactId>
-				<version>${junit.engine.version}</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -251,26 +220,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-params</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-runner</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-launcher</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
@@ -321,6 +270,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>${artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.projectlombok</groupId>
@@ -348,6 +298,24 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<configuration>
+					<wsdlDirectory>${project.basedir}/src/main/webapp/WEB-INF/soap/</wsdlDirectory>
+					<bindingDirectory>${project.basedir}/src/main/resources/soap/</bindingDirectory>
+					<sourceDestDir>${project.build.directory}/generated-sources/</sourceDestDir>
+					<wsdlFiles>
+						<wsdlFile>resource-management-service.wsdl</wsdlFile>
+					</wsdlFiles>
+					<bindingFiles>
+						<bindingFile>resource-management-service.xjb</bindingFile>
+						<bindingFile>resource-management-types.xjb</bindingFile>
+						<bindingFile>global-types.xjb</bindingFile>
+					</bindingFiles>
+				</configuration>
 			</plugin>
 		</plugins>
 
@@ -381,61 +349,44 @@
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
-
 				</plugin>
 
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.22.1</version>
+					<configuration>
+						<useFile>false</useFile>
+						<includes>
+							<include>**/*Test.java</include>
+							<include>**/*Spec.java</include>
+							<include>**/*Feature.java</include>
+						</includes>
+						<excludes>
+							<exclude>**/*ITSpec.java</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
 
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.22.1</version>
 					<executions>
 						<execution>
-							<id>unit-tests</id>
-							<phase>test</phase>
 							<goals>
-								<goal>test</goal>
+								<goal>integration-test</goal>
+								<goal>verify</goal>
 							</goals>
-							<configuration>
-								<skip>${unit.tests.skip}</skip>
-								<includes>
-									<include>**/*Test.java</include>
-									<include>**/*Spec.java</include>
-									<include>**/*Feature.java</include>
-								</includes>
-								<excludes>
-									<exclude>**/*ITSpec.java</exclude>
-								</excludes>
-							</configuration>
-						</execution>
-						<execution>
-							<id>integration-tests</id>
-							<phase>integration-test</phase>
-							<goals>
-								<goal>test</goal>
-							</goals>
-							<configuration>
-								<skip>${integration.tests.skip}</skip>
-								<includes>
-									<include>**/*ITSpec.java</include>
-								</includes>
-							</configuration>
 						</execution>
 					</executions>
 
 					<configuration>
-						<useFile>false</useFile>
-						<skip>true</skip>
+						<includes>
+							<include>**/*ITSpec.java</include>
+						</includes>
 					</configuration>
-
-					<dependencies>
-						<dependency>
-							<groupId>org.junit.platform</groupId>
-							<artifactId>junit-platform-surefire-provider</artifactId>
-							<version>1.3.2</version>
-						</dependency>
-					</dependencies>
 				</plugin>
-				
+
 				<plugin>
 					<artifactId>maven-war-plugin</artifactId>
 					<version>3.3.1</version>
@@ -462,6 +413,19 @@
 				</plugin>
 
 				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>jaxws-maven-plugin</artifactId>
+					<version>2.6</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>wsimport</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
 					<groupId>org.liquibase</groupId>
 					<artifactId>liquibase-maven-plugin</artifactId>
 					<version>4.2.0</version>
@@ -479,13 +443,19 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
 	<profiles>
 		<profile>
 			<id>it</id>
-			<properties>
-				<unit.tests.skip>false</unit.tests.skip>
-				<integration.tests.skip>false</integration.tests.skip>
-			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
+
 	</profiles>
 </project>

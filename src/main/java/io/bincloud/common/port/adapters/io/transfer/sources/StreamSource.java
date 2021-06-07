@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
 import io.bincloud.common.domain.model.io.transfer.DataTransferingException;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
-import lombok.NonNull;
 
 
 public class StreamSource implements SourcePoint {
@@ -15,7 +14,7 @@ public class StreamSource implements SourcePoint {
 	private final byte[] consumerBuffer;
 	private final int bufferSize;
 
-	public StreamSource(@NonNull InputStream consumerStream, int bufferSize) {
+	public StreamSource(InputStream consumerStream, int bufferSize) {
 		super();
 		this.consumerStream = consumerStream;
 		this.consumerBuffer = new byte[bufferSize];

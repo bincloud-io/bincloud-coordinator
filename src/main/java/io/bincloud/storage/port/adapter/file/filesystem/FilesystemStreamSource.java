@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import io.bincloud.common.port.adapters.io.transfer.sources.StreamSource;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 public class FilesystemStreamSource extends StreamSource {
 	private long left;
 	
-	public FilesystemStreamSource(@NonNull File file, long offset, long size, int bufferSize) throws IOException {
+	public FilesystemStreamSource(File file, long offset, long size, int bufferSize) throws IOException {
 		super(openFileInputStream(file, offset), bufferSize);
 		this.left = size;
 	}
@@ -73,5 +72,4 @@ public class FilesystemStreamSource extends StreamSource {
 			
 		}
 	}
-	
 }

@@ -1,4 +1,4 @@
-package io.bincloud.storage.port.adapters.resource.file
+package io.bincloud.storage.port.adapters.resource.repository
 
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Produces

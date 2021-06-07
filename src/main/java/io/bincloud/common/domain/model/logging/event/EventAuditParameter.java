@@ -11,7 +11,6 @@ import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -31,7 +30,7 @@ public class EventAuditParameter {
 	@Column(name = "detail_value", length = 1024)
 	private String value;
 	
-	public EventAuditParameter(@NonNull SequentialGenerator<Long> idGenerator, @NonNull Entry<String, String> parameterEntry) {
+	public EventAuditParameter(SequentialGenerator<Long> idGenerator, Entry<String, String> parameterEntry) {
 		super();
 		this.id = idGenerator.nextValue();
 		this.key = parameterEntry.getKey();

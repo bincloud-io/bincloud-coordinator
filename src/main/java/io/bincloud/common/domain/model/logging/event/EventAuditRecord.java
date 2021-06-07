@@ -11,7 +11,6 @@ import io.bincloud.common.domain.model.logging.Level;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -27,7 +26,7 @@ public class EventAuditRecord {
 	@Builder.Default
 	private Set<EventAuditParameter> parameters = new HashSet<EventAuditParameter>();
 
-	public EventAuditRecord(@NonNull SequentialGenerator<Long> idGenerator, @NonNull EventDetails auditDetails) {
+	public EventAuditRecord(SequentialGenerator<Long> idGenerator, EventDetails auditDetails) {
 		this();
 		this.id = idGenerator.nextValue();
 		this.auditLevel = auditDetails.getAuditLevel();
