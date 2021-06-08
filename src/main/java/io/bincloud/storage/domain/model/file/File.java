@@ -1,34 +1,36 @@
 package io.bincloud.storage.domain.model.file;
 
-import java.time.Instant;
-
+import io.bincloud.common.domain.model.generator.SequentialGenerator;
+import io.bincloud.common.domain.model.time.DateTime;
 import io.bincloud.storage.domain.model.file.FileState.RootContext;
 import io.bincloud.storage.domain.model.file.states.DisposedState;
 import io.bincloud.storage.domain.model.file.states.DraftState;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 @ToString
 @SuperBuilder
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class File implements FileDescriptor {
 	@EqualsAndHashCode.Include
-	private final String fileId;
-	private Instant creationMoment;
-	private Instant lastModification;
+	private String fileId;
+	private DateTime creationMoment;
+	private DateTime lastModification;
 	@Getter(value = AccessLevel.NONE)
 	private FileState state;
 	private Long size;
 
-	public File(@NonNull IdGenerator idGenerator) {
+	public File(SequentialGenerator<String> idGenerator) {
 		super();
-		this.fileId = idGenerator.generateId();
+		this.fileId = idGenerator.nextValue();
 		this.state = new DraftState();
-		this.creationMoment = Instant.now();
+		this.creationMoment = DateTime.now();
 		this.lastModification = this.creationMoment;
 		this.size = 0L;
 	}
@@ -36,18 +38,18 @@ public class File implements FileDescriptor {
 	public String getStatus() {
 		return state.getStatus();
 	}
-
+	
 	public void createFile(FilesystemAccessor fileSystem) {
-		this.state = state.createFile(createRootContext(), fileSystem);
+		state.createFile(createRootContext(), fileSystem);
 		updateModification();
 	}
 
 	public void uploadFile(FileUploadingContext uploadingContext) {
-		this.state = state.uploadFile(createRootContext(), uploadingContext);
+		state.uploadFile(createRootContext(), uploadingContext);
 	}
 	
 	public void startDistribution(FilesystemAccessor fileSystem) {
-		this.state = state.startDistribution(createRootContext(), fileSystem);
+		state.startDistribution(createRootContext(), fileSystem);
 		updateModification();
 	}
 
@@ -56,7 +58,7 @@ public class File implements FileDescriptor {
 	}
 	
 	public void downloadFileRange(FileDownloadingContext downloadingContext, Long offset, Long size) {
-		this.state = state.downloadFile(createRootContext(), downloadingContext, offset, size);
+		state.downloadFile(createRootContext(), downloadingContext, offset, size);
 	}
 
 	public void dispose() {
@@ -65,7 +67,7 @@ public class File implements FileDescriptor {
 	}
 	
 	private void updateModification() {
-		this.lastModification = Instant.now();
+		this.lastModification = new DateTime();
 	}
 	
 	private RootContext createRootContext() {
@@ -79,10 +81,11 @@ public class File implements FileDescriptor {
 			public void setSize(Long size) {
 				File.this.size = size;
 			}
+
+			@Override
+			public void setState(FileState fileState) {
+				File.this.state = fileState;
+			}
 		};
-	}
-	
-	public interface IdGenerator {
-		public String generateId();
 	}
 }

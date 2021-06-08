@@ -25,5 +25,6 @@ build/
 target/
 .idea/
 .settings/
+.tern-project
 .classpath
 .project

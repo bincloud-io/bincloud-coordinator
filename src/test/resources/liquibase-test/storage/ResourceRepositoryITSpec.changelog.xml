@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	<changeSet id="CSET.__TEST__.PREPARE_RESOURCES" author="Dmitry Mikhaylenko">
+		<sql>
+			INSERT INTO `RESOURCE`(`ID`, `FILE_NAME`) VALUES (3, "filename.txt");
+			INSERT INTO `RESOURCE`(`ID`, `FILE_NAME`) VALUES (4, "file-name.txt");
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM `RESOURCE` WHERE 1=1;
+			</sql>
+		</rollback>
+	</changeSet>
+</databaseChangeLog>

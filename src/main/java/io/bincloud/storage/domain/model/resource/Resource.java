@@ -1,9 +1,11 @@
 package io.bincloud.storage.domain.model.resource;
 
+import java.util.Optional;
+
+import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
@@ -11,23 +13,19 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuperBuilder
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Resource {
-	@NonNull
 	@EqualsAndHashCode.Include
 	private Long id;
 	private String fileName;
 	
-	public Resource(@NonNull IdGenerator idGenerator, @NonNull ResourceDetails resourceDetails) {
+	public Resource(SequentialGenerator<Long> idGenerator, ResourceDetails resourceDetails, SequentialGenerator<String> randomFileNameGenerator) {
 		super();
-		this.id = idGenerator.generateId();
-		this.fileName = resourceDetails.getFileName();
-	}
-
-	public interface IdGenerator {
-		public Long generateId();
+		this.id = idGenerator.nextValue();
+		this.fileName = resourceDetails.getFileName().orElse(randomFileNameGenerator.nextValue());
 	}
 
 	public interface ResourceDetails {
-		public String getFileName();
+		public Optional<String> getFileName();
 	}
 }

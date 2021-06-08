@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+	targetNamespace="http://www.bincloud.io/common/global-types"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bincloud.io/common/global-types">
+
+	<complexType name="ServiceFaultType">
+		<sequence>
+			<element name="severity" minOccurs="1" maxOccurs="1"
+				type="tns:FaultSeverityType">
+			</element>
+			<element name="boundedContext" minOccurs="1" maxOccurs="1"
+				type="tns:BoundedContextType">
+			</element>
+			<element name="errorNumber" minOccurs="1" maxOccurs="1"
+				type="tns:FaultCodeType">
+			</element>
+			<element name="message" minOccurs="1" maxOccurs="1"
+				type="tns:FaultDescription">
+			</element>
+		</sequence>
+	</complexType>
+
+
+    <simpleType name="FaultSeverityType">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+    <element name="ServiceFault" type="tns:ServiceFaultType"></element>
+
+    <complexType name="FaultContextType"></complexType>
+
+    <simpleType name="BoundedContextType">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+
+    <simpleType name="FaultCodeType">
+    	<restriction base="long"></restriction>
+    </simpleType>
+
+    <simpleType name="FaultDescription">
+    	<restriction base="string"></restriction>
+    </simpleType>
+</schema>
