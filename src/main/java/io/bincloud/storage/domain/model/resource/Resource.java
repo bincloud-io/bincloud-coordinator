@@ -19,7 +19,10 @@ public class Resource {
 	private Long id;
 	private String fileName;
 	
-	public Resource(SequentialGenerator<Long> idGenerator, ResourceDetails resourceDetails, SequentialGenerator<String> randomFileNameGenerator) {
+	public Resource(
+			SequentialGenerator<Long> idGenerator, 
+			ResourceDetails resourceDetails, 
+			SequentialGenerator<String> randomFileNameGenerator) {
 		super();
 		this.id = idGenerator.nextValue();
 		this.fileName = resourceDetails.getFileName().orElse(randomFileNameGenerator.nextValue());

@@ -6,10 +6,10 @@ import javax.inject.Inject;
 
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.port.adapters.io.transfer.transmitter.DirectTransferingScheduler;
+import io.bincloud.storage.application.file.FileManagementService;
 import io.bincloud.storage.domain.model.file.FileRepository;
-import io.bincloud.storage.domain.model.file.FileStorage;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
-import io.bincloud.storage.domain.model.resource.FileManagementService;
+import io.bincloud.storage.domain.model.file.facades.FileStorage;
 
 @ApplicationScoped
 public class ServicesConfig {

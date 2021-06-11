@@ -39,4 +39,15 @@ public class JPAFileUploadingRepository implements FileUploadingRepository {
 		transactionManager.commit();
 	}
 
+	@Override
+	public void remove(FileUploadingId id) {
+		Optional.ofNullable(entityManager.getReference(FileUploading.class, id)).ifPresent(this::removeFileUploading);
+	}
+
+	@SneakyThrows
+	private void removeFileUploading(FileUploading uploading) {
+		transactionManager.begin();
+		entityManager.remove(uploading);
+		transactionManager.commit();
+	}
 }

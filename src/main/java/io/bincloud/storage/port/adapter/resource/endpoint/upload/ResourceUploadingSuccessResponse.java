@@ -3,7 +3,7 @@ package io.bincloud.storage.port.adapter.resource.endpoint.upload;
 import java.util.Properties;
 
 import io.bincloud.common.port.adapters.web.URLAddress;
-import io.bincloud.storage.domain.model.resource.FileUploader.UploadedResource;
+import io.bincloud.storage.domain.model.resource.facades.FileUploader.UploadedResource;
 
 public class ResourceUploadingSuccessResponse extends Properties {
 	private static final long serialVersionUID = 3941244708171978393L;

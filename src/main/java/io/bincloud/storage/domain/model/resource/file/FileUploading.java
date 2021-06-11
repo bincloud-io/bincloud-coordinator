@@ -20,14 +20,16 @@ public class FileUploading {
 
 	public FileUploading(InitialState initialState) {
 		super();
-		this.resourceId = initialState.getResourceId();
 		this.fileId = initialState.getFileId();
+		this.resourceId = initialState.getResourceId();
 		this.uploadingMoment = initialState.getUploadingMoment();
 	}
-	
+
 	public interface InitialState {
 		public Long getResourceId();
+
 		public String getFileId();
+
 		public DateTime getUploadingMoment();
 	}
 }

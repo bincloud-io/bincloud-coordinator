@@ -2,10 +2,10 @@ package io.bincloud.storage.domain.model.resource.file;
 
 import io.bincloud.common.domain.model.event.EventListener;
 import io.bincloud.common.domain.model.time.DateTime;
-import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
 import io.bincloud.storage.domain.model.resource.file.FileUploading.InitialState;
 import lombok.RequiredArgsConstructor;
 
+@Deprecated
 @RequiredArgsConstructor
 public class FileHasBeenUploadedListener implements EventListener<FileHasBeenUploaded> {
 	private final FileUploadingRepository fileUploadingRepository;

@@ -11,11 +11,11 @@ import io.bincloud.common.domain.model.io.transfer.TransferingScheduler
 import io.bincloud.common.domain.model.io.transfer.Transmitter
 import io.bincloud.common.domain.model.time.DateTime
 import io.bincloud.storage.domain.model.file.File
-import io.bincloud.storage.domain.model.file.FileAlreadyExistsException
 import io.bincloud.storage.domain.model.file.FileDownloadingContext
-import io.bincloud.storage.domain.model.file.FileHasAlreadyBeenUploadedException
 import io.bincloud.storage.domain.model.file.FileUploadingContext
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
+import io.bincloud.storage.domain.model.file.errors.FileAlreadyExistsException
+import io.bincloud.storage.domain.model.file.errors.FileHasAlreadyBeenUploadedException
 import io.bincloud.storage.domain.model.file.states.DistributionState
 import io.bincloud.storage.domain.model.file.states.FileStatus
 import spock.lang.Specification

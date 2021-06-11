@@ -7,12 +7,12 @@ import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.validation.ValidationService;
 import io.bincloud.storage.domain.model.resource.Constants;
 import io.bincloud.storage.domain.model.resource.Resource;
-import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException;
-import io.bincloud.storage.domain.model.resource.ResourceHasBeenRemoved;
 import io.bincloud.storage.domain.model.resource.Resource.ResourceDetails;
-import io.bincloud.storage.domain.model.resource.ResourceManager;
+import io.bincloud.storage.domain.model.resource.errors.ResourceDoesNotExistException;
+import io.bincloud.storage.domain.model.resource.errors.ResourceHasBeenRemoved;
+import io.bincloud.storage.domain.model.resource.errors.UnspecifiedResourceException;
+import io.bincloud.storage.domain.model.resource.facades.ResourceManager;
 import io.bincloud.storage.domain.model.resource.ResourceRepository;
-import io.bincloud.storage.domain.model.resource.UnspecifiedResourceException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

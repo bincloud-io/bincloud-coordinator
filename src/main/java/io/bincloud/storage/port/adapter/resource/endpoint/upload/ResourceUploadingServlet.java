@@ -20,10 +20,10 @@ import io.bincloud.common.domain.model.message.MessageProcessor;
 import io.bincloud.common.port.adapters.io.transfer.sources.StreamSource;
 import io.bincloud.common.port.adapters.web.AsyncServletOperationExecutor;
 import io.bincloud.storage.domain.model.resource.Constants;
-import io.bincloud.storage.domain.model.resource.FileUploader;
-import io.bincloud.storage.domain.model.resource.FileUploader.UploadedResource;
-import io.bincloud.storage.domain.model.resource.FileUploader.UploadingCallback;
-import io.bincloud.storage.domain.model.resource.ResourceDoesNotExistException;
+import io.bincloud.storage.domain.model.resource.errors.ResourceDoesNotExistException;
+import io.bincloud.storage.domain.model.resource.facades.FileUploader;
+import io.bincloud.storage.domain.model.resource.facades.FileUploader.UploadedResource;
+import io.bincloud.storage.domain.model.resource.facades.FileUploader.UploadingCallback;
 import io.bincloud.storage.port.adapter.ServerContextProvider;
 import io.bincloud.storage.port.adapter.resource.endpoint.ServletErrorResponse;
 

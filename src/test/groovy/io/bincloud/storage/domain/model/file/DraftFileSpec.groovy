@@ -10,10 +10,10 @@ import io.bincloud.common.domain.model.io.transfer.TransferingScheduler
 import io.bincloud.common.domain.model.time.DateTime
 import io.bincloud.storage.domain.model.file.File
 import io.bincloud.storage.domain.model.file.FileDownloadingContext
-import io.bincloud.storage.domain.model.file.FileManagementException
-import io.bincloud.storage.domain.model.file.FileNotExistException
 import io.bincloud.storage.domain.model.file.FileUploadingContext
 import io.bincloud.storage.domain.model.file.FilesystemAccessor
+import io.bincloud.storage.domain.model.file.errors.FileManagementException
+import io.bincloud.storage.domain.model.file.errors.FileNotExistException
 import io.bincloud.storage.domain.model.file.states.DraftState
 import io.bincloud.storage.domain.model.file.states.FileStatus
 import spock.lang.Specification

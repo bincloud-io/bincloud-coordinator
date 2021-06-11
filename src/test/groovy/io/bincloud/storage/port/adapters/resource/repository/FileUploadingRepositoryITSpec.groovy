@@ -20,6 +20,7 @@ import io.bincloud.common.domain.model.message.MessageTemplate
 import io.bincloud.common.domain.model.time.DateTime
 import io.bincloud.common.port.adapters.time.JPADateTimeConverter
 import io.bincloud.storage.domain.model.resource.file.FileUploading
+import io.bincloud.storage.domain.model.resource.file.FileUploadingId
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository
 import io.bincloud.storage.port.adapter.resource.repository.JPAFileUploadingRepository
 import io.bincloud.storage.port.adapter.resource.repository.JPAResourceRepository
@@ -138,6 +139,31 @@ class FileUploadingRepositoryITSpec extends Specification {
 		
 		then: "The file uploading shouldn't be returned"
 		fileUploading.isPresent() == false
+	}
+	
+	def "Scenario: remove existing file uploading"() {
+		given: "The stored resources and files"
+		databaseConfigurer.setup("liquibase-test/storage/FileUploadingRepositoryITSpec.changelog.xml")
+		
+		and: "There is file uploading"
+		fileUploadingRepository.save(createFileUploading(FILE_ID_1, UPLOADING_MOMENT_1))
+		
+		when: "The existing resource remove command has been requested"
+		fileUploadingRepository.remove(new FileUploadingId(RESOURCE_ID, FILE_ID_1))
+		
+		then: "The removed uploading shouldn't be found"
+		fileUploadingRepository.findById(RESOURCE_ID, FILE_ID_1).isPresent() == false
+	}
+	
+	def "Scenario: remove unknown file uploading"() {
+		given: "The stored resources and files"
+		databaseConfigurer.setup("liquibase-test/storage/FileUploadingRepositoryITSpec.changelog.xml")
+		
+		when: "The not existing resource remove command has been requested"
+		fileUploadingRepository.remove(new FileUploadingId("UNKNOWN", "FILE"))
+		
+		then: "The nothing errors should be occurred"
+		noExceptionThrown()
 	}
 
 	private FileUploading createFileUploading(String fileId, DateTime uploadingMoment) {

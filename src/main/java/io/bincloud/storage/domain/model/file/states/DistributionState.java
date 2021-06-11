@@ -1,11 +1,11 @@
 package io.bincloud.storage.domain.model.file.states;
 
-import io.bincloud.storage.domain.model.file.FileAlreadyExistsException;
 import io.bincloud.storage.domain.model.file.FileDownloadingContext;
-import io.bincloud.storage.domain.model.file.FileHasAlreadyBeenUploadedException;
 import io.bincloud.storage.domain.model.file.FileState;
 import io.bincloud.storage.domain.model.file.FileUploadingContext;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
+import io.bincloud.storage.domain.model.file.errors.FileAlreadyExistsException;
+import io.bincloud.storage.domain.model.file.errors.FileHasAlreadyBeenUploadedException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 

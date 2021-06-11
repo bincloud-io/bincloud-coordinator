@@ -34,6 +34,17 @@
 		<wsdl:part name="parameters" element="xsd2:ServiceFault"></wsdl:part>
 	</wsdl:message>
 
+	<wsdl:message name="removeExistingResourceRequest">
+		<wsdl:part name="parameters"
+			element="xsd1:RemoveExistingResourceRq"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="removeExistingResourceResponse">
+		<wsdl:part name="parameters"
+			element="xsd1:RemoveExistingResourceRs"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="removeExistingResourceFault">
+		<wsdl:part name="parameters" element="xsd2:ServiceFault"></wsdl:part>
+	</wsdl:message>
 	<wsdl:portType name="ResourceManagementService">
 		<wsdl:operation name="createNewResource">
 			<wsdl:documentation></wsdl:documentation>
@@ -42,28 +53,39 @@
 			<wsdl:fault name="fault"
 				message="tns:createNewResourceFault"></wsdl:fault>
 		</wsdl:operation>
+		<wsdl:operation name="removeExistingResource">
+			<wsdl:input message="tns:removeExistingResourceRequest"></wsdl:input>
+			<wsdl:output message="tns:removeExistingResourceResponse"></wsdl:output>
+			<wsdl:fault name="fault"
+				message="tns:removeExistingResourceFault"></wsdl:fault>
+		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="ResourceManagementServiceBinding"
 		type="tns:ResourceManagementService">
-
-		<soap:binding style="document"
-			transport="http://schemas.xmlsoap.org/soap/http" />
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
 		<wsdl:operation name="createNewResource">
-
 			<soap:operation
 				soapAction="http://www.bincloud.io/storage/resource-management-service/createNewResource" />
 			<wsdl:input>
-
-
 				<soap:body use="literal" />
 			</wsdl:input>
 			<wsdl:output>
-
-
 				<soap:body use="literal" />
 			</wsdl:output>
 			<wsdl:fault name="fault">
-
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="removeExistingResource">
+			<soap:operation
+				soapAction="http://www.bincloud.io/storage/resource-management-service/removeExistingResource" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="fault">
 				<soap:fault use="literal" name="fault" />
 			</wsdl:fault>
 		</wsdl:operation>

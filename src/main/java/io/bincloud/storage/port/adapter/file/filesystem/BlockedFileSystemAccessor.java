@@ -7,8 +7,8 @@ import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
 import io.bincloud.common.domain.model.error.UnexpectedSystemBehaviorException;
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
-import io.bincloud.storage.domain.model.file.FileManagementException;
 import io.bincloud.storage.domain.model.file.FilesystemAccessor;
+import io.bincloud.storage.domain.model.file.errors.FileManagementException;
 import lombok.SneakyThrows;
 
 public class BlockedFileSystemAccessor implements FilesystemAccessor {

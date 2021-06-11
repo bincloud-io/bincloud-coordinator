@@ -11,11 +11,11 @@ import javax.inject.Named;
 import io.bincloud.common.domain.model.event.LocalEventTransport;
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.validation.ValidationService;
-import io.bincloud.storage.application.resource.FileUploadingService;
 import io.bincloud.storage.application.resource.ResourceManagementService;
-import io.bincloud.storage.domain.model.file.FileStorage;
-import io.bincloud.storage.domain.model.resource.FileHasBeenUploaded;
+import io.bincloud.storage.application.resource.file.FileUploadService;
+import io.bincloud.storage.domain.model.file.facades.FileStorage;
 import io.bincloud.storage.domain.model.resource.ResourceRepository;
+import io.bincloud.storage.domain.model.resource.file.FileHasBeenUploaded;
 import io.bincloud.storage.domain.model.resource.file.FileHasBeenUploadedListener;
 import io.bincloud.storage.domain.model.resource.file.FileUploadingRepository;
 
@@ -38,8 +38,8 @@ public class ServicesConfig {
 	private ValidationService validationService;
 
 	@Produces
-	public FileUploadingService fileUploadingService() {
-		return new FileUploadingService(resourceRepository, fileStorage,
+	public FileUploadService fileUploadingService() {
+		return new FileUploadService(resourceRepository, fileStorage,
 				LocalEventTransport.createGlobalEventPublisher());
 	}
 
