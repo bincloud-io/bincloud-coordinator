@@ -44,7 +44,7 @@ public class ResourceManagementEndpoint implements ResourceManagementService {
 	public ServiceResponseType removeExistingResource(RemoveExistingResourceRqType request)
 			throws RemoveExistingResourceFault {	
 		try {
-			resourceManager.removeExistingResource(Optional.of(request.getResourceId()));
+			resourceManager.removeExistingResource(Optional.ofNullable(request.getResourceId()));
 			return new ResourceRemovingResponse();
 		} catch (ApplicationException error) {
 			throw new ResourceRemovingOperationException(messageProcessor, error);

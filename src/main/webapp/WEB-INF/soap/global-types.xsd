@@ -20,10 +20,10 @@
 						type="tns:FaultSeverityType">
 					</element>
 					<element name="errorNumber" minOccurs="1" maxOccurs="1"
-						type="tns:FaultCodeType">
+						type="tns:FaultCodeType" nillable="false">
 					</element>
 					<element name="message" minOccurs="1" maxOccurs="1"
-						type="tns:FaultDescription">
+						type="tns:FaultDescription" nillable="false">
 					</element>
 				</sequence>
 			</extension>
@@ -32,14 +32,24 @@
 
 
 	<simpleType name="FaultSeverityType">
-		<restriction base="string"></restriction>
+		<restriction base="string">
+
+
+
+			<enumeration value="BUSINESS"></enumeration>
+			<enumeration value="INCIDENT"></enumeration>
+		</restriction>
 	</simpleType>
 
 	<element name="ServiceFault" type="tns:ServiceFaultType"></element>
 
 
 	<simpleType name="BoundedContextType">
-		<restriction base="string"></restriction>
+		<restriction base="string">
+			<whiteSpace value="collapse"></whiteSpace>
+			<minLength value="1"></minLength>
+			<maxLength value="64"></maxLength>
+		</restriction>
 	</simpleType>
 
 
@@ -48,6 +58,8 @@
 	</simpleType>
 
 	<simpleType name="FaultDescription">
-		<restriction base="string"></restriction>
+		<restriction base="string">
+			<whiteSpace value="collapse"></whiteSpace>
+		</restriction>
 	</simpleType>
 </schema>

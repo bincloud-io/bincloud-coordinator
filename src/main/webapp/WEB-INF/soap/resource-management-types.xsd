@@ -80,7 +80,7 @@
 
 	<complexType name="RemoveExistingResourceRqType">
 		<sequence>
-			<element name="resourceId" type="tns:ResourceIdType"></element>
+			<element name="resourceId" type="tns:ResourceIdType" nillable="true"></element>
 		</sequence>
 	</complexType>
 
