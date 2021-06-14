@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema
-	targetNamespace="http://www.bincloud.io/storage/resource-management-types"
+	targetNamespace="http://www.bincloud.io/resources/resource-management-types"
 	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:tns="http://www.bincloud.io/storage/resource-management-types"
+	xmlns:tns="http://www.bincloud.io/resources/resource-management-types"
 	xmlns:gt="http://www.bincloud.io/common/global-types">
 
 	<import schemaLocation="global-types.xsd"
