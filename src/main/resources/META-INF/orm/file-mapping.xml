@@ -6,7 +6,7 @@
 	<access>FIELD</access>
 
 	<!-- FILE ENTITY -->
-	<entity class="io.bincloud.storage.domain.model.file.File">
+	<entity class="io.bincloud.files.domain.model.File">
 		<table name="FILE" />
 
 		<attributes>
@@ -33,7 +33,7 @@
 				<column name="STATUS" nullable="false" insertable="true"
 					updatable="true" unique="false" />
 				<convert
-					converter="io.bincloud.storage.port.adapter.file.repository.JPAFileStateConverter" />
+					converter="io.bincloud.files.port.adapter.file.repository.JPAFileStateConverter" />
 			</basic>
 			<basic name="size">
 				<column name="SIZE" nullable="false" insertable="true"

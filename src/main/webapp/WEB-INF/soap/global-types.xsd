@@ -4,42 +4,62 @@
 	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
 	xmlns:tns="http://www.bincloud.io/common/global-types">
 
-	<complexType name="ServiceFaultType">
+	<complexType name="ServiceResponseType">
 		<sequence>
-			<element name="severity" minOccurs="1" maxOccurs="1"
-				type="tns:FaultSeverityType">
-			</element>
 			<element name="boundedContext" minOccurs="1" maxOccurs="1"
 				type="tns:BoundedContextType">
-			</element>
-			<element name="errorNumber" minOccurs="1" maxOccurs="1"
-				type="tns:FaultCodeType">
-			</element>
-			<element name="message" minOccurs="1" maxOccurs="1"
-				type="tns:FaultDescription">
 			</element>
 		</sequence>
 	</complexType>
 
+	<complexType name="ServiceFaultType">
+		<complexContent>
+			<extension base="tns:ServiceResponseType">
+				<sequence>
+					<element name="severity" minOccurs="1" maxOccurs="1"
+						type="tns:FaultSeverityType">
+					</element>
+					<element name="errorNumber" minOccurs="1" maxOccurs="1"
+						type="tns:FaultCodeType" nillable="false">
+					</element>
+					<element name="message" minOccurs="1" maxOccurs="1"
+						type="tns:FaultDescription" nillable="false">
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
 
-    <simpleType name="FaultSeverityType">
-    	<restriction base="string"></restriction>
-    </simpleType>
 
-    <element name="ServiceFault" type="tns:ServiceFaultType"></element>
-
-    <complexType name="FaultContextType"></complexType>
-
-    <simpleType name="BoundedContextType">
-    	<restriction base="string"></restriction>
-    </simpleType>
+	<simpleType name="FaultSeverityType">
+		<restriction base="string">
 
 
-    <simpleType name="FaultCodeType">
-    	<restriction base="long"></restriction>
-    </simpleType>
 
-    <simpleType name="FaultDescription">
-    	<restriction base="string"></restriction>
-    </simpleType>
+			<enumeration value="BUSINESS"></enumeration>
+			<enumeration value="INCIDENT"></enumeration>
+		</restriction>
+	</simpleType>
+
+	<element name="ServiceFault" type="tns:ServiceFaultType"></element>
+
+
+	<simpleType name="BoundedContextType">
+		<restriction base="string">
+			<whiteSpace value="collapse"></whiteSpace>
+			<minLength value="1"></minLength>
+			<maxLength value="64"></maxLength>
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="FaultCodeType">
+		<restriction base="long"></restriction>
+	</simpleType>
+
+	<simpleType name="FaultDescription">
+		<restriction base="string">
+			<whiteSpace value="collapse"></whiteSpace>
+		</restriction>
+	</simpleType>
 </schema>

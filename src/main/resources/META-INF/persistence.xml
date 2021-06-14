@@ -7,7 +7,7 @@
 		<jta-data-source>java:/jdbc/BC_CENTRAL</jta-data-source>
 		<mapping-file>META-INF/orm/file-mapping.xml</mapping-file>
 		<mapping-file>META-INF/orm/resource-mapping.xml</mapping-file>
-		<mapping-file>META-INF/orm/file-uploading-mapping.xml</mapping-file>
+		<mapping-file>META-INF/orm/file-uploads-mapping.xml</mapping-file>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MariaDB103Dialect"/>
 		</properties>

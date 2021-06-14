@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <wsdl:definitions
 	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-	xmlns:tns="http://www.bincloud.io/storage/resource-management-service/"
+	xmlns:tns="http://www.bincloud.io/resources/resource-management-service/"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	name="resource-management-service"
-	targetNamespace="http://www.bincloud.io/storage/resource-management-service/"
+	targetNamespace="http://www.bincloud.io/resources/resource-management-service/"
 	xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
 	xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
-	xmlns:xsd1="http://www.bincloud.io/storage/resource-management-types"
+	xmlns:xsd1="http://www.bincloud.io/resources/resource-management-types"
 	xmlns:xsd2="http://www.bincloud.io/common/global-types">
 	<wsdl:types>
 		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 			<xsd:import
-				namespace="http://www.bincloud.io/storage/resource-management-types"
+				namespace="http://www.bincloud.io/resources/resource-management-types"
 				schemaLocation="resource-management-types.xsd">
 			</xsd:import>
 			<xsd:import
@@ -34,6 +34,17 @@
 		<wsdl:part name="parameters" element="xsd2:ServiceFault"></wsdl:part>
 	</wsdl:message>
 
+	<wsdl:message name="removeExistingResourceRequest">
+		<wsdl:part name="parameters"
+			element="xsd1:RemoveExistingResourceRq"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="removeExistingResourceResponse">
+		<wsdl:part name="parameters"
+			element="xsd1:RemoveExistingResourceRs"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="removeExistingResourceFault">
+		<wsdl:part name="parameters" element="xsd2:ServiceFault"></wsdl:part>
+	</wsdl:message>
 	<wsdl:portType name="ResourceManagementService">
 		<wsdl:operation name="createNewResource">
 			<wsdl:documentation></wsdl:documentation>
@@ -42,28 +53,39 @@
 			<wsdl:fault name="fault"
 				message="tns:createNewResourceFault"></wsdl:fault>
 		</wsdl:operation>
+		<wsdl:operation name="removeExistingResource">
+			<wsdl:input message="tns:removeExistingResourceRequest"></wsdl:input>
+			<wsdl:output message="tns:removeExistingResourceResponse"></wsdl:output>
+			<wsdl:fault name="fault"
+				message="tns:removeExistingResourceFault"></wsdl:fault>
+		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="ResourceManagementServiceBinding"
 		type="tns:ResourceManagementService">
-
-		<soap:binding style="document"
-			transport="http://schemas.xmlsoap.org/soap/http" />
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
 		<wsdl:operation name="createNewResource">
-
 			<soap:operation
-				soapAction="http://www.bincloud.io/storage/resource-management-service/createNewResource" />
+				soapAction="http://www.bincloud.io/resources/resource-management-service/createNewResource" />
 			<wsdl:input>
-
-
 				<soap:body use="literal" />
 			</wsdl:input>
 			<wsdl:output>
-
-
 				<soap:body use="literal" />
 			</wsdl:output>
 			<wsdl:fault name="fault">
-
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="removeExistingResource">
+			<soap:operation
+				soapAction="http://www.bincloud.io/resources/resource-management-service/removeExistingResource" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="fault">
 				<soap:fault use="literal" name="fault" />
 			</wsdl:fault>
 		</wsdl:operation>
