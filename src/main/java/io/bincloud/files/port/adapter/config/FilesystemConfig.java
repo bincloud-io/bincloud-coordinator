@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import io.bincloud.files.domain.model.FilesystemAccessor;
 import io.bincloud.files.port.adapter.file.filesystem.BlockedFileSystemAccessor;
-import io.bincloud.storage.port.adapter.ServerContextProvider;
+import io.bincloud.resources.port.adapter.ServerContextProvider;
 
 @ApplicationScoped
 public class FilesystemConfig {

@@ -6,7 +6,7 @@
 	<access>FIELD</access>
 	
 	<entity
-		class="io.bincloud.storage.domain.model.Resource">
+		class="io.bincloud.resources.domain.model.Resource">
 		<table name="RESOURCE" />
 
 		<attributes>

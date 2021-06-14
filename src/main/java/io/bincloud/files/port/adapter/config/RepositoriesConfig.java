@@ -11,7 +11,7 @@ import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.files.domain.model.FileRepository;
 import io.bincloud.files.port.adapter.file.repository.InstanceBasedFileIdGenerator;
 import io.bincloud.files.port.adapter.file.repository.JPAFileRepository;
-import io.bincloud.storage.port.adapter.ServerContextProvider;
+import io.bincloud.resources.port.adapter.ServerContextProvider;
 
 @ApplicationScoped
 public class RepositoriesConfig {
