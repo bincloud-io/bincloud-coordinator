@@ -1,4 +1,4 @@
-package io.bincloud.files.domain.model
+package io.bincloud.files.application
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -11,9 +11,9 @@ import io.bincloud.common.domain.model.io.transfer.DestinationPoint
 import io.bincloud.common.domain.model.io.transfer.SourcePoint
 import io.bincloud.common.domain.model.io.transfer.TransferingScheduler
 import io.bincloud.common.domain.model.io.transfer.Transmitter
+import io.bincloud.files.application.FileManagementService
 import io.bincloud.files.domain.model.File
 import io.bincloud.files.domain.model.FileDescriptor
-import io.bincloud.files.domain.model.FileManagementService
 import io.bincloud.files.domain.model.FileRepository
 import io.bincloud.files.domain.model.FilesystemAccessor
 import io.bincloud.files.domain.model.contracts.FileStorage

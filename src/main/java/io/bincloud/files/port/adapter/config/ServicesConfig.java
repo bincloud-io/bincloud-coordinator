@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.port.adapters.io.transfer.transmitter.DirectTransferingScheduler;
-import io.bincloud.files.domain.model.FileManagementService;
+import io.bincloud.files.application.FileManagementService;
 import io.bincloud.files.domain.model.FileRepository;
 import io.bincloud.files.domain.model.FilesystemAccessor;
 import io.bincloud.files.domain.model.contracts.FileStorage;

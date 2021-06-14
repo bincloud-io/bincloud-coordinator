@@ -1,4 +1,4 @@
-package io.bincloud.files.domain.model;
+package io.bincloud.files.application;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -9,6 +9,12 @@ import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper;
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.common.domain.model.io.transfer.TransferingScheduler;
+import io.bincloud.files.domain.model.File;
+import io.bincloud.files.domain.model.FileDescriptor;
+import io.bincloud.files.domain.model.FileDownloadingContext;
+import io.bincloud.files.domain.model.FileRepository;
+import io.bincloud.files.domain.model.FileUploadingContext;
+import io.bincloud.files.domain.model.FilesystemAccessor;
 import io.bincloud.files.domain.model.contracts.FileStorage;
 import io.bincloud.files.domain.model.errors.FileNotExistException;
 import lombok.RequiredArgsConstructor;
