@@ -1,4 +1,4 @@
-package io.bincloud.resources.port.adapter.endpoint.management;
+package io.bincloud.resources.port.adapter.endpoint.resource;
 
 import io.bincloud.common.domain.model.error.ApplicationException;
 import io.bincloud.common.domain.model.message.MessageProcessor;

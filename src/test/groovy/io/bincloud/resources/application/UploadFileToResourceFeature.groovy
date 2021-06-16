@@ -16,6 +16,7 @@ import io.bincloud.resources.domain.model.ResourceRepository
 import io.bincloud.resources.domain.model.contracts.FileUploader
 import io.bincloud.resources.domain.model.contracts.FileUploader.UploadingCallback
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException
+import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException
 import io.bincloud.resources.domain.model.errors.UploadedFileDescriptorHasNotBeenFoundException
 import io.bincloud.resources.domain.model.file.FileUploadId
 import io.bincloud.resources.domain.model.file.FileUploadsHistory
@@ -87,6 +88,36 @@ class UploadFileToResourceFeature extends Specification {
 		and: "The file upload has been registered"
 		1 * fileUploadsHistory.registerFileUpload(RESOURCE_ID, FILE_ID)
 	}
+	
+	def "Scenario: something went wrong during file uploadig"() {
+		Exception error;
+		given: "The resource exists in the repository"
+		resourceRepository.isExists(RESOURCE_ID) >> true
+
+		and: "The file storage will successfully create new resource"
+		fileStorage.createNewFile() >> FILE_ID
+
+		and: "The file descriptor is successfully found by file id"
+		FileDescriptor fileDescriptor = Stub(FileDescriptor)
+		fileDescriptor.getStatus() >> FileStatus.DISTRIBUTION.name()
+		fileDescriptor.getSize() >> FILE_SIZE
+		fileDescriptor.getCreationMoment() >> CREATION_MOMENT
+		fileDescriptor.getLastModification() >> LAST_MODIFICATION
+		fileStorage.getFileDescriptor(FILE_ID) >> Optional.of(fileDescriptor)
+
+		and: "The file upload is completed with error on the storage"
+		1 * fileStorage.uploadFile(FILE_ID, source, _) >> {
+			CompletionCallback callback = it[2]
+			callback.onError(new Exception("ERROR"))
+		}
+
+		when: "The file uploading is requested by uploading callback"
+		fileUploader.uploadFile(EXISTING_RESOURCE_ID, source, uploadingCallback)
+
+		then: "The error should be received"
+		1 * uploadingCallback.onError(_) >> {error = it[0]}
+		error.getMessage() == "ERROR"
+	}
 
 	def "Scenario: file is successfuly uploaded, but file descriptor won't found by id"() {
 		UploadedFileDescriptorHasNotBeenFoundException exception;
@@ -130,14 +161,14 @@ class UploadFileToResourceFeature extends Specification {
 	}
 
 	def "Scenario: file uploading will be completed with resource does not exist error if resource id misses"() {
-		ResourceDoesNotExistException error;
+		UnspecifiedResourceException error;
 		when: "The file uploading is requested for missing resource id"
 		fileUploader.uploadFile(MISSING_RESOURCE_ID, source, uploadingCallback)
 
 		then: "The file uploading should be completed with resource does not exist error"
 		1 * uploadingCallback.onError(_) >> {error = it[0]}
 		error.context == Constants.CONTEXT
-		error.errorCode == ResourceDoesNotExistException.ERROR_CODE
+		error.errorCode == UnspecifiedResourceException.ERROR_CODE
 		error.severity == Severity.BUSINESS
 	}
 

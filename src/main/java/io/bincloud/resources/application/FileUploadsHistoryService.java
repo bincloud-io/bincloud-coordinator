@@ -1,14 +1,15 @@
 package io.bincloud.resources.application;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import io.bincloud.files.domain.model.FileDescriptor;
 import io.bincloud.files.domain.model.contracts.FileStorage;
-import io.bincloud.resources.domain.model.errors.UploadedFileDescriptorHasNotBeenFoundException;
+import io.bincloud.resources.application.providers.ExistingFileDescriptorProvider;
 import io.bincloud.resources.domain.model.file.FileUpload;
+import io.bincloud.resources.domain.model.file.FileUpload.InitialState;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import io.bincloud.resources.domain.model.file.FileUploadsRepository;
-import io.bincloud.resources.domain.model.file.FileUpload.InitialState;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,18 @@ public class FileUploadsHistoryService implements FileUploadsHistory {
 
 	@Override
 	public void registerFileUpload(Long resourceId, String fileId) {
-		FileUpload fileUpload = fileStorage.getFileDescriptor(fileId)
-				.map(descriptor -> new DescriptorBasedFileUploadInitialState(resourceId, fileId, descriptor))
-				.map(initialState -> new FileUpload(initialState))
-				.orElseThrow(() -> new UploadedFileDescriptorHasNotBeenFoundException());
-		fileUploadsRepository.save(fileUpload);
+		InitialState fileUploadInitialState = new DescriptorBasedFileUploadInitialState(resourceId, fileId);
+		fileUploadsRepository.save(new FileUpload(fileUploadInitialState));
+	}
+	
+	@Override
+	public boolean checkFileUploadExistence(Long resourceId, String fileId) {
+		return fileUploadsRepository.findById(resourceId, fileId).isPresent();
+	}
+
+	@Override
+	public Optional<FileUpload> findFileUploadForResource(Long resourceId) {
+		return fileUploadsRepository.findLatestResourceUpload(resourceId);
 	}
 
 	@Override
@@ -43,13 +51,19 @@ public class FileUploadsHistoryService implements FileUploadsHistory {
 	}
 
 	@EqualsAndHashCode
-	@RequiredArgsConstructor
 	private class DescriptorBasedFileUploadInitialState implements InitialState {
 		@Getter
 		private final Long resourceId;
 		@Getter
 		private final String fileId;
 		private final FileDescriptor fileDescriptor;
+
+		public DescriptorBasedFileUploadInitialState(Long resourceId, String fileId) {
+			super();
+			this.resourceId = resourceId;
+			this.fileId = fileId;
+			this.fileDescriptor = new ExistingFileDescriptorProvider(fileId, fileStorage).get();
+		}
 
 		@Override
 		public Instant getUploadMoment() {

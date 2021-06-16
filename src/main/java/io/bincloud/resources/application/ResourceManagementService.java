@@ -1,16 +1,16 @@
 package io.bincloud.resources.application;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.validation.ValidationService;
+import io.bincloud.resources.application.providers.ExistingResourceIdentifierProvider;
 import io.bincloud.resources.domain.model.Constants;
 import io.bincloud.resources.domain.model.Resource;
-import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.Resource.ResourceDetails;
+import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.ResourceManager;
-import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException;
-import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.RequiredArgsConstructor;
 
@@ -33,20 +33,12 @@ public class ResourceManagementService implements ResourceManager {
 
 	@Override
 	public void removeExistingResource(Optional<Long> resourceId) {
-		Long extractedId = extractRemovableResourceId(resourceId);
-		fileUploadsHistory.clearUploadsHistory(extractedId);
-		resourceRepository.remove(extractedId);
+		removeResource(new ExistingResourceIdentifierProvider(resourceId, resourceRepository));
 	}
-
-	private Long extractRemovableResourceId(Optional<Long> resourceId) {
-		Long extractedId = resourceId.orElseThrow(() -> new UnspecifiedResourceException());
-		checkResourceExistence(extractedId);
-		return extractedId;
-	}
-
-	private void checkResourceExistence(Long extractedId) {
-		if (!resourceRepository.isExists(extractedId)) {
-			throw new ResourceDoesNotExistException();
-		}
+	
+	private void removeResource(Supplier<Long> resourceIdProvider) {
+		Long resourceId = resourceIdProvider.get();
+		fileUploadsHistory.clearUploadsHistory(resourceId);
+		resourceRepository.remove(resourceId);
 	}
 }

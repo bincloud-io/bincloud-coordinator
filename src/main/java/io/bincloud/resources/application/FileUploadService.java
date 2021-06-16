@@ -1,13 +1,14 @@
 package io.bincloud.resources.application;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.files.domain.model.contracts.FileStorage;
+import io.bincloud.resources.application.providers.ExistingResourceIdentifierProvider;
 import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.FileUploader;
-import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException;
 import io.bincloud.resources.domain.model.file.FileUploadId;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.RequiredArgsConstructor;
@@ -21,21 +22,20 @@ public class FileUploadService implements FileUploader {
 	@Override
 	public void uploadFile(Optional<Long> resourceId, SourcePoint source, UploadingCallback callback) {
 		try {
-			checkThatResourceExists(resourceId, callback);
-			uploadFileToExistingResource(resourceId.get(), source, callback);
+			uploadFileToExistingResource(new ExistingResourceIdentifierProvider(resourceId, resourceRepository), source, callback);
 		} catch (Exception error) {
 			callback.onError(error);
 		}
 	}
 	
-	private void uploadFileToExistingResource(Long resourceId, SourcePoint source, UploadingCallback callback) {
+	private void uploadFileToExistingResource(Supplier<Long> resourceIdProvider, SourcePoint source, UploadingCallback callback) {
 		String fileId = fileStorage.createNewFile();
-		CompletionCallback completionCallback = createFileUploadingCompletionCallback(resourceId, fileId, callback);
+		CompletionCallback completionCallback = createFileUploadingCompletionCallback(resourceIdProvider.get(), fileId, callback);
 		fileStorage.uploadFile(fileId, source, completionCallback);
 	}
 	
 	
-	private CompletionCallback createFileUploadingCompletionCallback(final Long resourceId, final String fileId, final UploadingCallback uploadingCallback) {
+	private CompletionCallback createFileUploadingCompletionCallback(Long resourceId, String fileId, UploadingCallback uploadingCallback) {
 		return new CompletionCallback() {
 			@Override
 			public void onSuccess() {
@@ -48,10 +48,5 @@ public class FileUploadService implements FileUploader {
 				uploadingCallback.onError(error);
 			}
 		};
-	}
-	
-	private void checkThatResourceExists(Optional<Long> resourceId, UploadingCallback callback) {
-		resourceId.filter(value -> resourceRepository.isExists(value))
-				.orElseThrow(() -> new ResourceDoesNotExistException());
 	}
 }

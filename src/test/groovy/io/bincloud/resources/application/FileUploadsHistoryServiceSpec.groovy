@@ -109,6 +109,32 @@ class FileUploadsHistoryServiceSpec extends Specification {
 		1 * fileStorage.disposeFile(FILE_ID_2)
 	}
 	
+	def "Scenario: find lates uploaded file"() {
+		given: "The repository contains file upload"
+		FileUpload fileUpload = createFileUpload(FILE_ID_2, LAST_MODIFICATION)
+		fileUploadsRepository.findLatestResourceUpload(RESOURCE_ID) >> Optional.of(fileUpload)
+		
+		expect: "The query will be delegated to the repository"
+		fileUploadsHistory.findFileUploadForResource(RESOURCE_ID).get().is(fileUpload)
+	}
+	
+	def "Scenario: check that file exists for existing file"() {
+		given: "The repository contains file upload"
+		FileUpload fileUpload = createFileUpload(FILE_ID_2, LAST_MODIFICATION)
+		fileUploadsRepository.findById(RESOURCE_ID, FILE_ID_2) >> Optional.of(fileUpload)
+		
+		expect: "The file history service should answer that file exists"
+		fileUploadsHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID_2) == true
+	}
+	
+	def "Scenario: check that file doesn't exist for not existing file"() {
+		given: "The repository contains file upload"
+		fileUploadsRepository.findById(RESOURCE_ID, FILE_ID_2) >> Optional.empty()
+		
+		expect: "The file history service should answer that file doesn't exist"
+		fileUploadsHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID_2) == false
+	}
+	
 	private FileUpload createFileUpload(String fileId, Instant uploadMoment) {
 		return FileUpload.builder()
 		.resourceId(RESOURCE_ID)

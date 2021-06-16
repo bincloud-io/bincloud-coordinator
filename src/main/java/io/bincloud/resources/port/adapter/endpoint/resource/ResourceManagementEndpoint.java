@@ -1,4 +1,4 @@
-package io.bincloud.resources.port.adapter.endpoint.management;
+package io.bincloud.resources.port.adapter.endpoint.resource;
 
 import java.util.Optional;
 

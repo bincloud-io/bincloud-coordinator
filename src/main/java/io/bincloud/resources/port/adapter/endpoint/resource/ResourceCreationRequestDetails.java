@@ -1,4 +1,4 @@
-package io.bincloud.resources.port.adapter.endpoint.management;
+package io.bincloud.resources.port.adapter.endpoint.resource;
 
 import io.bincloud.resources.port.adapter.acl.types.ResourceDetailsAcl;
 import io.bincloud.storage.port.adapter.resource.endpoint.management.CreateNewResourceRqType;

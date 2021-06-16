@@ -1,16 +1,16 @@
-package io.bincloud.resources.port.adapter.endpoint.upload;
+package io.bincloud.resources.port.adapter.endpoint.files;
 
 import java.util.Properties;
 
 import io.bincloud.common.port.adapters.web.URLAddress;
 import io.bincloud.resources.domain.model.file.FileUploadId;
 
-public class ResourceUploadingSuccessResponse extends Properties {
+public class ResourceUploadSuccessResponse extends Properties {
 	private static final long serialVersionUID = 3941244708171978393L;
 	private static final String DOWNLOAD_RESOURCE_LINK_PROPERTY = "resource.download.link";
 	private static final String DOWNLOAD_RESOURCE_REVISION_LINK_PROPERTY = "revision.download.link";
 
-	public ResourceUploadingSuccessResponse(String rootURL, FileUploadId uploadedResource) {
+	public ResourceUploadSuccessResponse(String rootURL, FileUploadId uploadedResource) {
 		super();
 		put(DOWNLOAD_RESOURCE_LINK_PROPERTY, createResourceDownloadLink(rootURL, uploadedResource).getValue());
 		put(DOWNLOAD_RESOURCE_REVISION_LINK_PROPERTY, createRevisionDownloadLink(rootURL, uploadedResource).getValue());

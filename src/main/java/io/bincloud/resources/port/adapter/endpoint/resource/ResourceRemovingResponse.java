@@ -1,4 +1,4 @@
-package io.bincloud.resources.port.adapter.endpoint.management;
+package io.bincloud.resources.port.adapter.endpoint.resource;
 
 import io.bincloud.common.port.adapter.integration.global.ServiceResponseType;
 import io.bincloud.resources.domain.model.Constants;

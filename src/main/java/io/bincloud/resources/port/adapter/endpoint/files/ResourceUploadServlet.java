@@ -1,4 +1,4 @@
-package io.bincloud.resources.port.adapter.endpoint.upload;
+package io.bincloud.resources.port.adapter.endpoint.files;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -23,11 +23,12 @@ import io.bincloud.resources.domain.model.Constants;
 import io.bincloud.resources.domain.model.contracts.FileUploader;
 import io.bincloud.resources.domain.model.contracts.FileUploader.UploadingCallback;
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException;
+import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException;
 import io.bincloud.resources.domain.model.file.FileUploadId;
 import io.bincloud.resources.port.adapter.ServerContextProvider;
 import io.bincloud.resources.port.adapter.endpoint.ServletErrorResponse;
 
-public class ResourceUploadingServlet extends HttpServlet {
+public class ResourceUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -8092602564530445635L;
 	private static final String RESOURCE_ID_PARAMETER_NAME = "resourceId";
 
@@ -42,7 +43,7 @@ public class ResourceUploadingServlet extends HttpServlet {
 
 	private AsyncErrorsHandler<AsyncContext> errorsHandler;
 
-	public ResourceUploadingServlet() {
+	public ResourceUploadServlet() {
 		super();
 		this.errorsHandler = createServletErrorHandler();
 	}
@@ -65,6 +66,7 @@ public class ResourceUploadingServlet extends HttpServlet {
 
 	private AsyncErrorsHandler<AsyncContext> createServletErrorHandler() {
 		return AsyncErrorsHandler.createFor(AsyncContext.class)
+				.registerHandler(UnspecifiedResourceException.class, errorHandler(HttpServletResponse.SC_BAD_REQUEST))
 				.registerHandler(ResourceDoesNotExistException.class, errorHandler(HttpServletResponse.SC_BAD_REQUEST))
 				.registerHandler(ApplicationException.class, errorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
 				.registerDefaultHandler(defaultErrorHandler());
@@ -91,7 +93,7 @@ public class ResourceUploadingServlet extends HttpServlet {
 			@Override
 			public void onUpload(FileUploadId uploaded) {
 				sendResponse(asyncContext, HttpServletResponse.SC_OK,
-						new ResourceUploadingSuccessResponse(serverContext.getRootURL(), uploaded));
+						new ResourceUploadSuccessResponse(serverContext.getRootURL(), uploaded));
 				asyncContext.complete();
 			}
 
