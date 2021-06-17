@@ -21,6 +21,7 @@ public interface FileDownloader {
 	
 	public interface DownloadedFile {
 		public String getFileId();
+		public String getFileName();
 		public Long getFileSize();
 	}
 }

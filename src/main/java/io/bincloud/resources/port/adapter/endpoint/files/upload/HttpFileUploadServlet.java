@@ -1,4 +1,4 @@
-package io.bincloud.resources.port.adapter.endpoint.files;
+package io.bincloud.resources.port.adapter.endpoint.files.upload;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import io.bincloud.resources.domain.model.file.FileUploadId;
 import io.bincloud.resources.port.adapter.ServerContextProvider;
 import io.bincloud.resources.port.adapter.endpoint.ServletErrorResponse;
 
-public class ResourceUploadServlet extends HttpServlet {
+public class HttpFileUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -8092602564530445635L;
 	private static final String RESOURCE_ID_PARAMETER_NAME = "resourceId";
 
@@ -43,7 +43,7 @@ public class ResourceUploadServlet extends HttpServlet {
 
 	private AsyncErrorsHandler<AsyncContext> errorsHandler;
 
-	public ResourceUploadServlet() {
+	public HttpFileUploadServlet() {
 		super();
 		this.errorsHandler = createServletErrorHandler();
 	}
@@ -93,7 +93,7 @@ public class ResourceUploadServlet extends HttpServlet {
 			@Override
 			public void onUpload(FileUploadId uploaded) {
 				sendResponse(asyncContext, HttpServletResponse.SC_OK,
-						new ResourceUploadSuccessResponse(serverContext.getRootURL(), uploaded));
+						new HttpFileUploadSuccessResponseProperties(serverContext.getRootURL(), uploaded));
 				asyncContext.complete();
 			}
 

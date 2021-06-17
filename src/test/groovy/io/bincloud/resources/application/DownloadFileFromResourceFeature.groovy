@@ -8,6 +8,7 @@ import io.bincloud.common.domain.model.io.transfer.DestinationPoint
 import io.bincloud.files.domain.model.FileDescriptor
 import io.bincloud.files.domain.model.contracts.FileStorage
 import io.bincloud.resources.domain.model.Constants
+import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
 import io.bincloud.resources.domain.model.contracts.FileDownloader
 import io.bincloud.resources.domain.model.contracts.FileDownloader.DownloadCallback
@@ -25,6 +26,7 @@ class DownloadFileFromResourceFeature extends Specification {
 	private static final Long RESOURCE_ID = 1L
 	private static final String FILE_ID = "12345"
 	private static final Long FILE_SIZE = 10000L
+	private static final String FILE_NAME = "filename.txt"
 
 	private ResourceRepository resourceRepository;
 	private FileUploadsHistory fileUploadHistory;
@@ -63,7 +65,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.empty())
 
 		and: "The resource doesn't exist in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> false
+		resourceRepository.findById(RESOURCE_ID) >> Optional.empty()
 
 		and: "The download callback"
 		DownloadCallback downloadCallback = Mock(DownloadCallback)
@@ -85,7 +87,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
 
 		and: "The resource doesn't exist in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> false
+		resourceRepository.findById(RESOURCE_ID) >> Optional.empty()
 
 		and: "The download callback"
 		DownloadCallback downloadCallback = Mock(DownloadCallback)
@@ -106,7 +108,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.empty())
 
 		and: "The resource exists in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains nothing uploads"
 		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.empty()
@@ -131,7 +133,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
 
 		and: "The resource exists in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history doesn't contain upload"
 		fileUploadHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID) >> false
@@ -155,7 +157,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.empty())
 
 		and: "The resource exists in the store"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains upload"
 		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
@@ -182,7 +184,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
 
 		and: "The resource exists in the store"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains upload"
 		fileUploadHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID) >> true
@@ -210,7 +212,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.empty())
 
 		and: "The resource exists in the store"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains nothing uploads"
 		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
@@ -238,6 +240,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		downloadCallback.onDownload(_) >> {downloadedFile = it[0]}
 		downloadedFile.getFileId() == FILE_ID
 		downloadedFile.getFileSize() == FILE_SIZE
+		downloadedFile.getFileName() == FILE_NAME
 	}
 
 	def "Scenario: successfully download with specified resource id and file id"() {
@@ -247,7 +250,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
 
 		and: "The resource exists in the store"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains upload"
 		fileUploadHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID) >> true
@@ -275,6 +278,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		downloadCallback.onDownload(_) >> {downloadedFile = it[0]}
 		downloadedFile.getFileId() == FILE_ID
 		downloadedFile.getFileSize() == FILE_SIZE
+		downloadedFile.getFileName() == FILE_NAME
 	}
 
 	def "Scenario: failed download for specified resource id and unspecified file id"() {
@@ -284,7 +288,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.empty())
 
 		and: "The resource exists in the store"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains nothing uploads"
 		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
@@ -320,7 +324,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		initMockFileDownloadContext(fileDownloadContext, Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
 
 		and: "The resource exists in the store"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file history contains upload"
 		fileUploadHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID) >> true
@@ -347,6 +351,13 @@ class DownloadFileFromResourceFeature extends Specification {
 		then: "The error should be received by download callback"
 		downloadCallback.onError(_) >> {error = it[0]}
 		error.getMessage() == "DOWNLOAD_ERROR"
+	}
+
+	private Resource createResource() {
+		return Resource.builder()
+				.id(RESOURCE_ID)
+				.fileName(FILE_NAME)
+				.build();
 	}
 
 	private FileUpload createFileUpload() {

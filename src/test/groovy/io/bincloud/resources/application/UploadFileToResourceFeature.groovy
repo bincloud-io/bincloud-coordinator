@@ -33,6 +33,7 @@ class UploadFileToResourceFeature extends Specification {
 	private static final Optional<Long> EXISTING_RESOURCE_ID = Optional.of(RESOURCE_ID)
 	private static final Optional<Long> MISSING_RESOURCE_ID = Optional.empty()
 	private static final String FILE_ID = "12345"
+	private static final String FILE_NAME = "file.txt"
 	private static final Instant CREATION_MOMENT = Instant.now()
 	private static final Instant LAST_MODIFICATION = CREATION_MOMENT.plus(1, ChronoUnit.MINUTES)
 	private static final Long FILE_SIZE = 100L
@@ -58,7 +59,8 @@ class UploadFileToResourceFeature extends Specification {
 	def "Scenario: file is successfuly uploaded to the existing resource"() {
 		FileUploadId uploadedResource;
 		given: "The resource exists in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file storage will successfully create new resource"
 		fileStorage.createNewFile() >> FILE_ID
@@ -92,7 +94,7 @@ class UploadFileToResourceFeature extends Specification {
 	def "Scenario: something went wrong during file uploadig"() {
 		Exception error;
 		given: "The resource exists in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file storage will successfully create new resource"
 		fileStorage.createNewFile() >> FILE_ID
@@ -122,7 +124,7 @@ class UploadFileToResourceFeature extends Specification {
 	def "Scenario: file is successfuly uploaded, but file descriptor won't found by id"() {
 		UploadedFileDescriptorHasNotBeenFoundException exception;
 		given: "The resource exists in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		and: "The file storage will successfully create new resource"
 		fileStorage.createNewFile() >> FILE_ID
@@ -148,7 +150,7 @@ class UploadFileToResourceFeature extends Specification {
 	def "Scenario: resource does not exist error if resource not found"() {
 		ResourceDoesNotExistException error;
 		given: "The doesn't exist in the repository"
-		resourceRepository.isExists(RESOURCE_ID) >> false
+		resourceRepository.findById(RESOURCE_ID) >> Optional.empty()
 
 		when: "The file uploading is requested"
 		fileUploader.uploadFile(EXISTING_RESOURCE_ID, source, uploadingCallback)
@@ -171,10 +173,11 @@ class UploadFileToResourceFeature extends Specification {
 		error.errorCode == UnspecifiedResourceException.ERROR_CODE
 		error.severity == Severity.BUSINESS
 	}
-
+	
 	private def createResource() {
 		return Resource.builder()
 				.id(RESOURCE_ID)
+				.fileName(FILE_NAME)
 				.build()
 	}
 }

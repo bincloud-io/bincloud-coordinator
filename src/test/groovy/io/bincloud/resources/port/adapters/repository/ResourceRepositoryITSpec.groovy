@@ -69,7 +69,7 @@ class ResourceRepositoryITSpec extends Specification {
 		databaseConfigurer.setup("liquibase-test/storage/ResourceRepositoryITSpec.changelog.xml")
 		
 		expect: "The resource existence check result should return #checkResult for resource #resourceId"
-		resourceRepository.isExists(resourceId) == checkResult
+		resourceRepository.findById(resourceId).isPresent() == checkResult
 		
 		where:
 		resourceId        | checkResult
@@ -130,7 +130,7 @@ class ResourceRepositoryITSpec extends Specification {
 		resourceRepository.remove(3L)
 		
 		then: "The existence check shouldn't be passed"
-		resourceRepository.isExists(3L) == false
+		resourceRepository.findById(3L).isPresent() == false
 	}
 	
 	private Resource createResource() {

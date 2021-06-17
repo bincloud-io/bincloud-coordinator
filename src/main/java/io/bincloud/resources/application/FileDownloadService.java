@@ -7,9 +7,10 @@ import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.files.domain.model.FileDescriptor;
 import io.bincloud.files.domain.model.contracts.FileStorage;
 import io.bincloud.resources.application.providers.ExistingFileDescriptorProvider;
-import io.bincloud.resources.application.providers.ExistingResourceIdentifierProvider;
+import io.bincloud.resources.application.providers.ExistingResourceProvider;
 import io.bincloud.resources.application.providers.SpecifiedFileIdentifierProvider;
 import io.bincloud.resources.application.providers.UnspecifiedFileIdentifierProvider;
+import io.bincloud.resources.domain.model.Resource;
 import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.FileDownloader;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
@@ -77,12 +78,14 @@ public class FileDownloadService implements FileDownloader {
 		@EqualsAndHashCode.Include
 		private final String fileId;
 		private final FileDescriptor fileDescriptor;
+		private final Resource resource;
 
 		public DownloadFileDescriptor(FileDownloadContext fileDownloadContext) {
 			super();
-			String fileId = createFileIdentifierProvider(fileDownloadContext).get();
+			
+			this.resource = createResourceProvider(fileDownloadContext).get();
+			this.fileId = createFileIdentifierProvider(fileDownloadContext).get();
 			Supplier<FileDescriptor> fileDescriptorProvider = new ExistingFileDescriptorProvider(fileId, fileStorage);
-			this.fileId = fileId;
 			this.fileDescriptor = fileDescriptorProvider.get();
 		}
 
@@ -90,16 +93,20 @@ public class FileDownloadService implements FileDownloader {
 		public Long getFileSize() {
 			return fileDescriptor.getSize();
 		}
+		
+		@Override
+		public String getFileName() {
+			return resource.getFileName();
+		}
 
-		private Supplier<Long> createResourceIdentifierProvider(FileDownloadContext fileDownloadContext) {
-			return new ExistingResourceIdentifierProvider(fileDownloadContext.getResourceId(), resourceRepository);
+		private Supplier<Resource> createResourceProvider(FileDownloadContext fileDownloadContext) {
+			return new ExistingResourceProvider(fileDownloadContext.getResourceId(), resourceRepository);
 		}
 
 		private Supplier<String> createFileIdentifierProvider(FileDownloadContext fileDownloadContext) {
-			Supplier<Long> resourceIdProvider = createResourceIdentifierProvider(fileDownloadContext);
 			return fileDownloadContext.getFileId().<Supplier<String>>map(
-					fileId -> new SpecifiedFileIdentifierProvider(resourceIdProvider, fileId, fileUploadsHistory))
-					.orElse(new UnspecifiedFileIdentifierProvider(resourceIdProvider, fileUploadsHistory));
-		}
+					fileId -> new SpecifiedFileIdentifierProvider(() -> resource.getId(), fileId, fileUploadsHistory))
+					.orElse(new UnspecifiedFileIdentifierProvider(() -> resource.getId(), fileUploadsHistory));
+		}		
 	}
 }

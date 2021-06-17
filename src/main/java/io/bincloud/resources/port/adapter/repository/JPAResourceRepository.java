@@ -14,12 +14,7 @@ import lombok.SneakyThrows;
 public class JPAResourceRepository implements ResourceRepository {
 	private final EntityManager entityManager;
 	private final TransactionManager transactionManager;
-
-	@Override
-	public boolean isExists(Long id) {
-		return findById(id).isPresent();
-	}
-
+	
 	@Override
 	public Optional<Resource> findById(Long id) {
 		return Optional.ofNullable(entityManager.find(Resource.class, id));

@@ -1,11 +1,14 @@
 package io.bincloud.resources.application
 
+import java.lang.annotation.Retention
+
 import io.bincloud.common.domain.model.error.ApplicationException.Severity
 import io.bincloud.common.domain.model.event.EventPublisher
 import io.bincloud.common.domain.model.generator.SequentialGenerator
 import io.bincloud.common.domain.model.validation.ValidationService
 import io.bincloud.resources.application.ResourceManagementService
 import io.bincloud.resources.domain.model.Constants
+import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
 import io.bincloud.resources.domain.model.contracts.ResourceManager
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException
@@ -20,6 +23,7 @@ import spock.lang.Specification
 """)
 class RemoveExistingResourceFeature extends Specification {
 	private static final Long RESOURCE_ID = 1L
+	private static final String FILE_NAME = "filename.txt"
 	
 	private SequentialGenerator<Long> resourceIdGenerator
 	private ValidationService validationService
@@ -40,7 +44,7 @@ class RemoveExistingResourceFeature extends Specification {
 
 	def "Scenario: remove existing resource"() {
 		given: "The removable resource exists in repository"
-		resourceRepository.isExists(RESOURCE_ID) >> true
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
 
 		when: "The remove existing resource operation has been called"
 		removeResourceService.removeExistingResource(Optional.of(RESOURCE_ID))
@@ -55,10 +59,8 @@ class RemoveExistingResourceFeature extends Specification {
 	}
 
 	def "Scenario: try to remove unknown resource"() {
-		ResourceRepository resourceRepository = Mock(ResourceRepository);
-
 		given: "The removable resource doesn't exist in repository"
-		resourceRepository.isExists(RESOURCE_ID) >> false
+		resourceRepository.findById(RESOURCE_ID) >> Optional.empty()
 
 		when: "The remove existing resource operation has been called"
 		removeResourceService.removeExistingResource(Optional.of(RESOURCE_ID))
@@ -82,5 +84,12 @@ class RemoveExistingResourceFeature extends Specification {
 		error.severity == Severity.BUSINESS
 		error.context == Constants.CONTEXT
 		error.errorCode == UnspecifiedResourceException.ERROR_CODE
+	}
+	
+	private Resource createResource() {
+		return Resource.builder()
+				.id(RESOURCE_ID)
+				.fileName(FILE_NAME)
+				.build();
 	}
 }
