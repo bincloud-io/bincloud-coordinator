@@ -2,7 +2,6 @@ package io.bincloud.resources.port.adapter.endpoint.files.upload;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
@@ -13,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.bincloud.common.domain.model.error.ApplicationException;
 import io.bincloud.common.domain.model.error.AsyncErrorsHandler;
-import io.bincloud.common.domain.model.error.AsyncErrorsHandler.ErrorInterceptor;
-import io.bincloud.common.domain.model.error.UnexpectedSystemBehaviorException;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.common.domain.model.message.MessageProcessor;
 import io.bincloud.common.port.adapters.io.transfer.sources.StreamSource;
@@ -26,7 +23,7 @@ import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException;
 import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException;
 import io.bincloud.resources.domain.model.file.FileUploadId;
 import io.bincloud.resources.port.adapter.ServerContextProvider;
-import io.bincloud.resources.port.adapter.endpoint.ServletErrorResponse;
+import io.bincloud.resources.port.adapter.endpoint.files.ServletResponseHandler;
 
 public class HttpFileUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -8092602564530445635L;
@@ -41,11 +38,8 @@ public class HttpFileUploadServlet extends HttpServlet {
 	@Inject
 	private ServerContextProvider serverContext;
 
-	private AsyncErrorsHandler<AsyncContext> errorsHandler;
-
 	public HttpFileUploadServlet() {
 		super();
-		this.errorsHandler = createServletErrorHandler();
 	}
 
 	@Override
@@ -53,7 +47,7 @@ public class HttpFileUploadServlet extends HttpServlet {
 			throws ServletException, IOException {
 		AsyncServletOperationExecutor asyncOperationExecutor = new AsyncServletOperationExecutor(request, response);
 		asyncOperationExecutor.execute(context -> {
-			UploadingCallback uploadingCallback = createUploadingCallback(context, errorsHandler);
+			UploadingCallback uploadingCallback = new HttpFileUploadCallback(context, new ServletResponseHandler(messageProcessor));
 			try {
 				SourcePoint sourcePoint = new StreamSource(context.getRequest().getInputStream(),
 						serverContext.getIOBufferSize());
@@ -64,58 +58,38 @@ public class HttpFileUploadServlet extends HttpServlet {
 		});
 	}
 
-	private AsyncErrorsHandler<AsyncContext> createServletErrorHandler() {
-		return AsyncErrorsHandler.createFor(AsyncContext.class)
-				.registerHandler(UnspecifiedResourceException.class, errorHandler(HttpServletResponse.SC_BAD_REQUEST))
-				.registerHandler(ResourceDoesNotExistException.class, errorHandler(HttpServletResponse.SC_BAD_REQUEST))
-				.registerHandler(ApplicationException.class, errorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
-				.registerDefaultHandler(defaultErrorHandler());
-	}
+	private class HttpFileUploadCallback implements UploadingCallback {
+		private AsyncContext asyncContext;
+		private ServletResponseHandler responseHandler;
+		private AsyncErrorsHandler<AsyncContext> errorHandler;
 
-	
-	private <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> errorHandler(int errorCode) {
-		return (context, error) -> {
-			sendApplicationError(context, errorCode, error);
-		};
-	}
+		public HttpFileUploadCallback(AsyncContext asyncContext, ServletResponseHandler responseHandler) {
+			super();
+			this.asyncContext = asyncContext;
+			this.responseHandler = responseHandler;
+			this.errorHandler = createServletErrorHandler(responseHandler);
+		}
 
-	private ErrorInterceptor<AsyncContext, Exception> defaultErrorHandler() {
-		final ErrorInterceptor<AsyncContext, ApplicationException> defaultHandler = errorHandler(
-				HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		return (context, error) -> {
-			defaultHandler.handleError(context, new UnexpectedSystemBehaviorException(Constants.CONTEXT, error));
-		};
-	}
+		@Override
+		public void onUpload(FileUploadId uploaded) {
+			responseHandler.sendResponse(asyncContext, HttpServletResponse.SC_OK,
+					new HttpFileUploadSuccessResponseProperties(serverContext.getRootURL(), uploaded));
+		}
 
-	private UploadingCallback createUploadingCallback(AsyncContext asyncContext,
-			AsyncErrorsHandler<AsyncContext> errorsHandler) {
-		return new UploadingCallback() {
-			@Override
-			public void onUpload(FileUploadId uploaded) {
-				sendResponse(asyncContext, HttpServletResponse.SC_OK,
-						new HttpFileUploadSuccessResponseProperties(serverContext.getRootURL(), uploaded));
-				asyncContext.complete();
-			}
+		@Override
+		public void onError(Exception error) {
+			errorHandler.handleError(asyncContext, error);
+		}
 
-			@Override
-			public void onError(Exception error) {
-				errorsHandler.handleError(asyncContext, error);
-				asyncContext.complete();
-			}
-		};
-	}
-
-	private void sendApplicationError(AsyncContext context, int code, ApplicationException applicationError) {
-		sendResponse(context, code, new ServletErrorResponse(applicationError, messageProcessor));
-	}
-
-	private void sendResponse(AsyncContext context, int code, Properties properties) {
-		try {
-			HttpServletResponse response = (HttpServletResponse) context.getResponse();
-			properties.store(response.getWriter(), null);
-			response.setStatus(code);
-		} catch (IOException e) {
-			e.printStackTrace();
+		private AsyncErrorsHandler<AsyncContext> createServletErrorHandler(ServletResponseHandler responseHandler) {
+			return AsyncErrorsHandler.createFor(AsyncContext.class)
+					.registerHandler(UnspecifiedResourceException.class,
+							responseHandler.createErrorHandler(HttpServletResponse.SC_BAD_REQUEST))
+					.registerHandler(ResourceDoesNotExistException.class,
+							responseHandler.createErrorHandler(HttpServletResponse.SC_BAD_REQUEST))
+					.registerHandler(ApplicationException.class,
+							responseHandler.createErrorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
+					.registerDefaultHandler(responseHandler.createDefaultErrorHandler(Constants.CONTEXT));
 		}
 	}
 
