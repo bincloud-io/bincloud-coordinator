@@ -244,8 +244,11 @@ class DownloadOperationContextSpec extends Specification {
 		and: "The destination point should be provided from context"
 		context.getDestinationPoint().is(destintationPoint)
 		
-		and: "The file id should be provided"
+		and: "The file id should be taken from descriptor"
 		context.getFileId() == FILE_ID
+		
+		and: "The file size should be taken from descriptor"
+		context.getFileLength() == FILE_SIZE
 	}
 
 	private Resource createResource() {

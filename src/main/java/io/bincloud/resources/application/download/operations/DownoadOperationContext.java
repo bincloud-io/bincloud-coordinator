@@ -29,4 +29,8 @@ public class DownoadOperationContext {
 	public String getFileId() {
 		return downloadedFile.getFileId();
 	}
+	
+	public Long getFileLength() {
+		return downloadedFile.getTotalLength();
+	}
 }
