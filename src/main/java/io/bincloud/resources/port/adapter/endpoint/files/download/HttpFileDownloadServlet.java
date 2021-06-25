@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.bincloud.common.port.adapters.web.AsyncServletOperationExecutor;
-import io.bincloud.resources.domain.model.contracts.FileDownloader;
+import io.bincloud.resources.domain.model.contracts.download.FileDownloader;
 
 public class HttpFileDownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = -8709972899799498114L;

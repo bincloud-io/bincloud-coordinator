@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import io.bincloud.resources.domain.model.contracts.Range;
 
-class NullRange implements Range {
+public class NullRange implements Range {
 	@Override
 	public Optional<Long> getStart() {
 		return Optional.empty();

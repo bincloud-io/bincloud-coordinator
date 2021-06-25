@@ -13,8 +13,8 @@ import io.bincloud.resources.application.FileUploadService
 import io.bincloud.resources.domain.model.Constants
 import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
-import io.bincloud.resources.domain.model.contracts.FileUploader
-import io.bincloud.resources.domain.model.contracts.FileUploader.UploadingCallback
+import io.bincloud.resources.domain.model.contracts.upload.FileUploader
+import io.bincloud.resources.domain.model.contracts.upload.FileUploader.UploadingCallback
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException
 import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException
 import io.bincloud.resources.domain.model.errors.UploadedFileDescriptorHasNotBeenFoundException

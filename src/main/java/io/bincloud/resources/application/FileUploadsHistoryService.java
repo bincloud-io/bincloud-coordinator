@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import io.bincloud.files.domain.model.FileDescriptor;
 import io.bincloud.files.domain.model.contracts.FileStorage;
-import io.bincloud.resources.application.providers.ExistingFileDescriptorProvider;
 import io.bincloud.resources.domain.model.file.FileUpload;
 import io.bincloud.resources.domain.model.file.FileUpload.InitialState;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;

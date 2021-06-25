@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.validation.ValidationService;
-import io.bincloud.resources.application.providers.ExistingResourceIdentifierProvider;
 import io.bincloud.resources.domain.model.Constants;
 import io.bincloud.resources.domain.model.Resource;
 import io.bincloud.resources.domain.model.Resource.ResourceDetails;

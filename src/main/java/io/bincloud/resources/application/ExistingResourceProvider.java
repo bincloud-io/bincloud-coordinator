@@ -1,4 +1,4 @@
-package io.bincloud.resources.application.providers;
+package io.bincloud.resources.application;
 
 import java.util.Optional;
 import java.util.function.Supplier;

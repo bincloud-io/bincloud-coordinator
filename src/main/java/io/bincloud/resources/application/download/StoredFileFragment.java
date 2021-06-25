@@ -8,7 +8,7 @@ import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatExcepti
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-class StoredFileFragment implements Fragment {
+public class StoredFileFragment implements Fragment {
 	private Long start;
 	private Long end;
 

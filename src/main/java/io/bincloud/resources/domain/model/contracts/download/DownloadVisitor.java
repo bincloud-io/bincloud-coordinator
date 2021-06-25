@@ -1,6 +1,6 @@
-package io.bincloud.resources.domain.model.contracts;
+package io.bincloud.resources.domain.model.contracts.download;
 
-import io.bincloud.resources.domain.model.file.FileRevisionDescriptor;
+import io.bincloud.resources.domain.model.contracts.Fragment;
 
 public interface DownloadVisitor {
 	public void onStart(FileRevisionDescriptor revisionDescriptor);

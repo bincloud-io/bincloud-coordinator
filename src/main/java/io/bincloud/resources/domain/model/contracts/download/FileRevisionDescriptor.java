@@ -1,4 +1,4 @@
-package io.bincloud.resources.domain.model.file;
+package io.bincloud.resources.domain.model.contracts.download;
 
 import java.time.Instant;
 

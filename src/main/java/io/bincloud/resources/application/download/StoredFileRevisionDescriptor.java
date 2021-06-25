@@ -5,18 +5,18 @@ import java.util.function.Supplier;
 
 import io.bincloud.files.domain.model.FileDescriptor;
 import io.bincloud.files.domain.model.contracts.FileStorage;
-import io.bincloud.resources.application.providers.ExistingFileDescriptorProvider;
-import io.bincloud.resources.application.providers.ExistingResourceProvider;
-import io.bincloud.resources.application.providers.SpecifiedFileIdentifierProvider;
-import io.bincloud.resources.application.providers.UnspecifiedFileIdentifierProvider;
+import io.bincloud.resources.application.ExistingFileDescriptorProvider;
+import io.bincloud.resources.application.ExistingResourceProvider;
+import io.bincloud.resources.application.SpecifiedFileIdentifierProvider;
+import io.bincloud.resources.application.UnspecifiedFileIdentifierProvider;
 import io.bincloud.resources.domain.model.Resource;
 import io.bincloud.resources.domain.model.ResourceRepository;
-import io.bincloud.resources.domain.model.contracts.RevisionPointer;
-import io.bincloud.resources.domain.model.file.FileRevisionDescriptor;
+import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
+import io.bincloud.resources.domain.model.contracts.download.RevisionPointer;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.Getter;
 
-class StoredFileRevisionDescriptor implements FileRevisionDescriptor {
+public class StoredFileRevisionDescriptor implements FileRevisionDescriptor {
 	@Getter
 	private String fileId;
 	private Resource resource;

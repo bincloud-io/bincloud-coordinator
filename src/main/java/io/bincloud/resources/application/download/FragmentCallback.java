@@ -1,9 +1,9 @@
 package io.bincloud.resources.application.download;
 
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
-import io.bincloud.resources.domain.model.contracts.DownloadVisitor;
 import io.bincloud.resources.domain.model.contracts.Fragment;
-import io.bincloud.resources.domain.model.file.FileRevisionDescriptor;
+import io.bincloud.resources.domain.model.contracts.download.DownloadVisitor;
+import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

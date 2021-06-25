@@ -1,10 +1,9 @@
-package io.bincloud.resources.domain.model.contracts;
+package io.bincloud.resources.domain.model.contracts.download;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
-import io.bincloud.resources.application.download.DownloadOperation;
+import io.bincloud.resources.domain.model.contracts.Range;
 
 public interface FileDownloader {
 
