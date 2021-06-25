@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
+import io.bincloud.common.domain.model.io.transfer.CloseableDestinationPoint;
 import io.bincloud.common.domain.model.io.transfer.DataTransferingException;
-import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 
-public class StreamDestination implements DestinationPoint {
+public class StreamDestination implements CloseableDestinationPoint {
 	private final OutputStream outputStream;
-	
+
 	public StreamDestination(OutputStream outputStream) {
 		super();
 		this.outputStream = outputStream;
@@ -28,11 +27,10 @@ public class StreamDestination implements DestinationPoint {
 
 	@Override
 	public void dispose() {
-		try {
-			outputStream.close();
-		} catch (IOException error) {
-			throw new MustNeverBeHappenedError(error);
-		}
 	}
-
+	
+	@Override
+	public void close() throws Exception {
+		outputStream.close();
+	}
 }

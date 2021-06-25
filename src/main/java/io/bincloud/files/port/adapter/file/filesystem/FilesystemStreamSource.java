@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import io.bincloud.common.port.adapters.io.transfer.sources.StreamSource;
+import io.bincloud.common.port.adapters.io.transfer.sources.CloseOnDisposeStreamSource;
 import lombok.RequiredArgsConstructor;
 
-public class FilesystemStreamSource extends StreamSource {
+public class FilesystemStreamSource extends CloseOnDisposeStreamSource {
 	private long left;
 	
 	public FilesystemStreamSource(File file, long offset, long size, int bufferSize) throws IOException {

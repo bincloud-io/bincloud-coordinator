@@ -34,7 +34,7 @@ class JSRBeanValidationServiceITSpec extends Specification {
 
 	@Deployment
 	public static final Archive "create deployment"() {
-		return ArchiveBuilder.jar("file-repository-spec.jar")
+		return ArchiveBuilder.jar("jsr-bean-validation-spec.jar")
 				.resolveDependencies("pom.xml")
 				.withScopes(COMPILE, RUNTIME, TEST)
 				.resolveDependency("com.github.jknack", "handlebars")

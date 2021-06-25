@@ -5,6 +5,7 @@
 	version="3.1">
 	<display-name>bincloud-coordinator</display-name>
 	<module-name>coordinator</module-name>
+	
 	<servlet>
 		<servlet-name>FileUploadServlet</servlet-name>
 		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.upload.HttpFileUploadServlet</servlet-class>
@@ -14,6 +15,7 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/resource/upload</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>FileDownloadServlet</servlet-name>
 		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.HttpFileDownloadServlet</servlet-class>
@@ -22,5 +24,15 @@
 	<servlet-mapping>
 		<servlet-name>FileDownloadServlet</servlet-name>
 		<url-pattern>/resource/download</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>FileRevisionDownloadServlet</servlet-name>
+		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.HttpFileRevisionDownloadServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileRevisionDownloadServlet</servlet-name>
+		<url-pattern>/resource/revision/download</url-pattern>
 	</servlet-mapping>
 </web-app>

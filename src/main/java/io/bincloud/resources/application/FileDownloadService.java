@@ -2,9 +2,8 @@ package io.bincloud.resources.application;
 
 import io.bincloud.files.domain.model.contracts.FileStorage;
 import io.bincloud.resources.application.download.DownloadOperation;
-import io.bincloud.resources.application.download.operations.ErrorSafeDownloadOperation;
-import io.bincloud.resources.application.download.operations.FileDownloadOperation;
 import io.bincloud.resources.domain.model.ResourceRepository;
+import io.bincloud.resources.domain.model.contracts.DownloadVisitor;
 import io.bincloud.resources.domain.model.contracts.FileDownloader;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.RequiredArgsConstructor;
@@ -16,18 +15,7 @@ public class FileDownloadService implements FileDownloader {
 	private final FileStorage fileStorage;
 
 	@Override
-	public DownloadOperation downloadFile(FileDownloadContext fileDownloadRequest, DownloadCallback downloadCallback) {
-		return new ErrorSafeDownloadOperation(() -> new FileDownloadOperation(fileDownloadRequest, downloadCallback,
-				fileStorage, fileUploadsHistory, resourceRepository), downloadCallback);
+	public DownloadOperation downloadFile(FileDownloadContext fileDownloadRequest, DownloadVisitor downloadCallback) {
+		return null;
 	}
-
-	@Override
-	public DownloadOperation downloadFileRange(FileRangeDownloadContext fileRangeDownloadRequest,
-			DownloadCallback downloadCallback) {
-//		DownloadOperation downloadOperation = createFileRangeDownloader(fileRangeDownloadRequest, downloadCallback);
-//		downloadOperation = createErrorSafeDownloadFileOperation(downloadOperation, downloadCallback);
-//		downloadOperation.downloadFile();
-		throw new UnsupportedOperationException();
-	}
-
 }

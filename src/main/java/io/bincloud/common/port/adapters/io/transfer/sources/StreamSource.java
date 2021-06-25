@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
+import io.bincloud.common.domain.model.io.transfer.CloseableSourcePoint;
 import io.bincloud.common.domain.model.io.transfer.DataTransferingException;
-import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 
 
-public class StreamSource implements SourcePoint {
+public class StreamSource implements CloseableSourcePoint {
+	
 	private final InputStream consumerStream;
 	private final byte[] consumerBuffer;
 	private final int bufferSize;
@@ -49,12 +49,10 @@ public class StreamSource implements SourcePoint {
 
 	@Override
 	public void dispose() {
-		try {
-			consumerStream.close();
-		} catch (IOException error) {
-			throw new MustNeverBeHappenedError(error);
-		}
 	}
 	
-	 
+	@Override
+	public void close() throws Exception {
+		consumerStream.close();
+	} 
 }
