@@ -1,6 +1,5 @@
 package io.bincloud.resources.application.download;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -14,6 +13,7 @@ import io.bincloud.resources.domain.model.contracts.Range;
 import io.bincloud.resources.domain.model.contracts.download.DownloadOperation;
 import io.bincloud.resources.domain.model.contracts.download.DownloadVisitor;
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
+import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadVisitor;
 import io.bincloud.resources.domain.model.contracts.download.RevisionPointer;
 import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
@@ -34,28 +34,41 @@ public class FileRevisionAccessor {
 				resourceRepository);
 	}
 	
-	public DownloadOperation doFwnload(DestinationPoint destinationPoint, DownloadVisitor downloadVisitor) {
-		return this.download(Arrays.asList(new NullRange()), destinationPoint, downloadVisitor);
+	public DownloadOperation download(DestinationPoint destinationPoint, DownloadVisitor downloadVisitor) {
+		return () -> {
+			downloadVisitor.onDownloadStart(revisionDescriptor);
+			fileStorage.downloadFile(getFileId(), destinationPoint, new CompletionCallback() {
+				@Override
+				public void onSuccess() {
+					downloadVisitor.onDownloadComplete(revisionDescriptor);
+				}
+				
+				@Override
+				public void onError(Exception error) {
+					downloadVisitor.onDownloadError(revisionDescriptor, error);
+				}
+			});
+		};
 	}
 	
 	public DownloadOperation download(Collection<Range> ranges, DestinationPoint destinationPoint,
-			DownloadVisitor downloadVisitor) {
+			MultiRangeDownloadVisitor downloadVisitor) {
 		DownloadOperation downloadOperation = buildDownloadOperation(ranges, destinationPoint, downloadVisitor);
 		return () -> {
 			try {
 				downloadOperation.downloadFile();
 			} catch (Exception error) {
-				downloadVisitor.onError(revisionDescriptor, error);
+				downloadVisitor.onDownloadError(revisionDescriptor, error);
 			}
 		};
 	}
 
 	private DownloadOperation buildDownloadOperation(Collection<Range> ranges, DestinationPoint destinationPoint,
-			DownloadVisitor downloadVisitor) {
+			MultiRangeDownloadVisitor downloadVisitor) {
 		return () -> {
-			downloadVisitor.onStart(revisionDescriptor);
+			downloadVisitor.onDownloadStart(revisionDescriptor);
 			checkRangesCount(ranges);
-			createFragments(ranges)
+			createFragments(ranges).sorted((a, b) -> -1)
 					.<DownloadProcessStepCreator>map(
 							fragment -> new FragmentDownloaderCreator(fragment, destinationPoint, downloadVisitor))
 					.reduce(createDownloadCompleteStep(downloadVisitor), (result, current) -> {
@@ -70,9 +83,9 @@ public class FileRevisionAccessor {
 		}
 	}
 
-	private DownloadProcessStepCreator createDownloadCompleteStep(DownloadVisitor downloadVisitor) {
+	private DownloadProcessStepCreator createDownloadCompleteStep(MultiRangeDownloadVisitor downloadVisitor) {
 		return () -> {
-			return () -> downloadVisitor.onEnd(revisionDescriptor);
+			return () -> downloadVisitor.onDownloadComplete(revisionDescriptor);
 		};
 	}
 
@@ -99,7 +112,7 @@ public class FileRevisionAccessor {
 		private final CompletionCallback callback;
 
 		public FragmentDownloaderCreator(Fragment fragment, DestinationPoint destinationPoint,
-				DownloadVisitor downloadVisitor) {
+				MultiRangeDownloadVisitor downloadVisitor) {
 			this(fragment, destinationPoint, new FragmentCallback(revisionDescriptor, downloadVisitor, fragment));
 		}
 

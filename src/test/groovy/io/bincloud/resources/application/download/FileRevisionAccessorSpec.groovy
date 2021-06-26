@@ -3,18 +3,24 @@ package io.bincloud.resources.application.download
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import io.bincloud.common.domain.model.error.ApplicationException.Severity
+import io.bincloud.common.domain.model.io.transfer.CompletionCallback
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint
 import io.bincloud.files.domain.model.FileDescriptor
 import io.bincloud.files.domain.model.contracts.FileStorage
 import io.bincloud.resources.domain.model.Constants
 import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
+import io.bincloud.resources.domain.model.contracts.Fragment
+import io.bincloud.resources.domain.model.contracts.Range
+import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadVisitor
 import io.bincloud.resources.domain.model.contracts.download.DownloadVisitor
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor
 import io.bincloud.resources.domain.model.contracts.download.RevisionPointer
 import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadContext
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotHaveUploadsException
+import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException
 import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException
 import io.bincloud.resources.domain.model.errors.UploadedFileDescriptorHasNotBeenFoundException
 import io.bincloud.resources.domain.model.file.FileUpload
@@ -219,18 +225,269 @@ class FileRevisionAccessorSpec extends Specification {
 		fileRevisionDescriptor.getLastModification() == LAST_MODIFICATION_MOMENT
 	}
 
-//	def "Scenario: download empty range collection"() {
-//		
-//		given: "The file revision accessor"
-//		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.empty())
-//		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
-//		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
-//		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
-//		FileRevisionAccessor fileRevisionAccessor = new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadHistory, resourceRepository)
-//
-//		when: "The download command is received for empty ranges count"
-//		fileRevisionAccessor.download(Collections.emptyList(), destintationPoint, )
-//	}
+	def "Scenario: download empty range collection"() {
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnStart
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnError
+		UnsatisfiableRangeFormatException exception;
+
+		given: "The file revision accessor"
+		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.empty())
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
+		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
+		FileRevisionAccessor fileRevisionAccessor = new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadHistory, resourceRepository)
+
+		and: "The download visitor"
+		MultiRangeDownloadVisitor downloadVisitor = Mock(MultiRangeDownloadVisitor)
+
+		when: "The download command is received for empty ranges count"
+		fileRevisionAccessor.download(Collections.emptyList(), destintationPoint, downloadVisitor).downloadFile()
+
+		then: "The download visitor should be notified about start"
+		1 * downloadVisitor.onDownloadStart(_) >> {fileRevisionDescriptorReceivedOnStart = it[0]}
+
+		and: "The download visitor should be notified about error"
+		1 * downloadVisitor.onDownloadError(_, _) >> {
+			fileRevisionDescriptorReceivedOnError = it[0]
+			exception = it[1]
+		}
+
+		and: "The download visitor shouldn't be notified about end of process"
+		0 * downloadVisitor.onDownloadComplete(_)
+
+		and: "The received descriptors on start and on error should be the same object instance"
+		fileRevisionDescriptorReceivedOnStart.is(fileRevisionDescriptorReceivedOnError)
+
+		and: "The unsatisfiable range format exception should be received"
+		exception.getContext() == Constants.CONTEXT
+		exception.getErrorCode() == UnsatisfiableRangeFormatException.ERROR_CODE
+		exception.getSeverity() == Severity.BUSINESS
+	}
+
+	def "Scenario: multi-range download with error on one of range"() {
+		Exception exception = new Exception("SOME ERROR")
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnStart
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnFirstSuccess
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnSecondError
+		Fragment downloadedFragment;
+
+		given: "The file revision accessor"
+		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.empty())
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
+		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
+		FileRevisionAccessor fileRevisionAccessor = new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadHistory, resourceRepository)
+
+		and: "The ranges collection of 3 range"
+		Collection<Range> ranges = [createRange(0, 0), createRange(1, 1), createRange(2, 2)]
+
+		and: "The download visitor"
+		MultiRangeDownloadVisitor downloadVisitor = Mock(MultiRangeDownloadVisitor)
+
+		and: "The first range is completed successfully"
+		fileStorage.downloadFileRange(FILE_ID, destintationPoint, _, 0L, 1L) >> {
+			CompletionCallback callback = it[2]
+			callback.onSuccess()
+		}
+
+		and: "The second range is completed with failure"
+		fileStorage.downloadFileRange(FILE_ID, destintationPoint, _, 1L, 1L) >> {
+			CompletionCallback callback = it[2]
+			callback.onError(exception)
+		}
+
+		when: "The download command is happened"
+		fileRevisionAccessor.download(ranges, destintationPoint, downloadVisitor).downloadFile()
+
+		then: "The download visitor should be notified about start"
+		1 * downloadVisitor.onDownloadStart(_) >> {fileRevisionDescriptorReceivedOnStart = it[0]}
+
+		and: "The download visitor should be notified about first range sucessful download"
+		1 * downloadVisitor.onFragmentDownloadComplete(_, _) >> {
+			fileRevisionDescriptorReceivedOnFirstSuccess = it[0]
+			downloadedFragment = it[1]
+		}
+		
+		downloadedFragment.getStart() == 0L
+		downloadedFragment.getSize() == 1L
+
+		and: "The download visitor should be notified about error"
+		1 * downloadVisitor.onDownloadError(_, exception) >> {fileRevisionDescriptorReceivedOnSecondError = it[0]}
+
+		and: "The download visitor shouldn't be notified about end of process"
+		0 * downloadVisitor.onDownloadComplete(_)
+
+		and: "The ranges after failure shouldn't be requested"
+		0 * fileStorage.downloadFileRange(FILE_ID, destintationPoint, _, 2L, 1L);
+
+		and: "The received download descriptors should be the same instance"
+		fileRevisionDescriptorReceivedOnFirstSuccess
+				.is(fileRevisionDescriptorReceivedOnFirstSuccess)
+				
+		fileRevisionDescriptorReceivedOnFirstSuccess
+				.is(fileRevisionDescriptorReceivedOnSecondError)
+	}
+	
+	def "Scenario: multi-range successful download"() {
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnStart
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnFirstSuccess
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnSecondSuccess
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnThirdSuccess
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnEnd
+		Fragment firstDownloadedFragment;
+		Fragment secondDownloadedFragment;
+		Fragment thirdDownloadedFragment;
+
+		given: "The file revision accessor"
+		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.empty())
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
+		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
+		FileRevisionAccessor fileRevisionAccessor = new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadHistory, resourceRepository)
+
+		and: "The ranges collection of 3 range"
+		Collection<Range> ranges = [createRange(0, 0), createRange(1, 1), createRange(2, 2)]
+
+		and: "The download visitor"
+		MultiRangeDownloadVisitor downloadVisitor = Mock(MultiRangeDownloadVisitor)
+
+		and: "All ranges downloads are completed successfully"
+		fileStorage.downloadFileRange(FILE_ID, destintationPoint, _, _, _) >> {
+			CompletionCallback callback = it[2]
+			callback.onSuccess()
+		}
+		
+		when: "The download command is happened"
+		fileRevisionAccessor.download(ranges, destintationPoint, downloadVisitor).downloadFile()
+
+		then: "The download visitor should be notified about start"
+		1 * downloadVisitor.onDownloadStart(_) >> {fileRevisionDescriptorReceivedOnStart = it[0]}
+
+		and: "The download visitor should be notified about first range sucessful download"
+		1 * downloadVisitor.onFragmentDownloadComplete(_, _) >> {
+			fileRevisionDescriptorReceivedOnFirstSuccess = it[0]
+			firstDownloadedFragment = it[1]
+		}
+		
+		firstDownloadedFragment.getStart() == 0L
+		firstDownloadedFragment.getSize() == 1L
+		
+		and: "The download visitor should be notified about second range sucessful download"
+		1 * downloadVisitor.onFragmentDownloadComplete(_, _) >> {
+			fileRevisionDescriptorReceivedOnSecondSuccess = it[0]
+			secondDownloadedFragment = it[1]
+		}
+		
+		secondDownloadedFragment.getStart() == 1L
+		secondDownloadedFragment.getSize() == 1L
+		
+		and: "The download visitor should be notified about third range sucessful download"
+		1 * downloadVisitor.onFragmentDownloadComplete(_, _) >> {
+			fileRevisionDescriptorReceivedOnThirdSuccess = it[0]
+			thirdDownloadedFragment = it[1]
+		}
+		
+		thirdDownloadedFragment.getStart() == 2L
+		thirdDownloadedFragment.getSize() == 1L
+		
+		and: "The download visitor should be notified about end of process"
+		1 * downloadVisitor.onDownloadComplete(_) >> {fileRevisionDescriptorReceivedOnEnd = it[0]} 
+		
+		and: "The download visitor shouldn't be notified about errors"
+		0 * downloadVisitor.onDownloadError(_, _)
+
+		and: "The received download descriptors should be the same instance"
+		fileRevisionDescriptorReceivedOnStart
+				.is(fileRevisionDescriptorReceivedOnFirstSuccess)
+				
+		fileRevisionDescriptorReceivedOnFirstSuccess
+				.is(fileRevisionDescriptorReceivedOnSecondSuccess)
+				
+		fileRevisionDescriptorReceivedOnFirstSuccess
+				.is(fileRevisionDescriptorReceivedOnThirdSuccess)
+				
+		fileRevisionDescriptorReceivedOnFirstSuccess
+				.is(fileRevisionDescriptorReceivedOnEnd)
+	}
+	
+	
+	def "Scenario: download whole file successfully"() {
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnStart
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnEnd
+		given: "The file revision accessor"
+		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.empty())
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
+		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
+		FileRevisionAccessor fileRevisionAccessor = new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadHistory, resourceRepository)
+		
+		and: "The download visitor"
+		DownloadVisitor downloadVisitor = Mock(DownloadVisitor)
+		
+		and: "The file download from storage is completed with success"
+		fileStorage.downloadFile(FILE_ID, destintationPoint, _) >> {
+			CompletionCallback callback = it[2]
+			callback.onSuccess()
+		}
+		
+		when: "The download whole file command is happened"
+		fileRevisionAccessor.download(destintationPoint, downloadVisitor).downloadFile()
+		
+		then: "The download visitor should be notified about start"
+		1 * downloadVisitor.onDownloadStart(_) >> {fileRevisionDescriptorReceivedOnStart = it[0]}
+		
+		and: "The download visitor should be notified about end of process"
+		1 * downloadVisitor.onDownloadComplete(_) >> {fileRevisionDescriptorReceivedOnEnd = it[0]} 
+		
+		and: "The download visitor shouldn't be notified about errors"
+		0 * downloadVisitor.onDownloadError(_, _)
+		
+		and: "The received download descriptors should be the same instance"
+		fileRevisionDescriptorReceivedOnStart.is(fileRevisionDescriptorReceivedOnEnd)
+	}
+	
+	def "Scenario: download whole file with failure"() {
+		Exception error = new Exception("ERROR!!!");
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnStart
+		FileRevisionDescriptor fileRevisionDescriptorReceivedOnError
+		given: "The file revision accessor"
+		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.empty())
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.of(createFileUpload())
+		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
+		FileRevisionAccessor fileRevisionAccessor = new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadHistory, resourceRepository)
+		
+		and: "The download visitor"
+		DownloadVisitor downloadVisitor = Mock(DownloadVisitor)
+		
+		and: "The file download from storage is completed with error"
+		fileStorage.downloadFile(FILE_ID, destintationPoint, _) >> {
+			CompletionCallback callback = it[2]
+			callback.onError(error)
+		}
+		
+		when: "The download whole file command is happened"
+		fileRevisionAccessor.download(destintationPoint, downloadVisitor).downloadFile()
+		
+		then: "The download visitor should be notified about start"
+		1 * downloadVisitor.onDownloadStart(_) >> {fileRevisionDescriptorReceivedOnStart = it[0]}
+		
+		and: "The download visitor should be notified about end of process"
+		0 * downloadVisitor.onDownloadComplete(_)
+		
+		and: "The download visitor shouldn't be notified about errors"
+		1 * downloadVisitor.onDownloadError(_, error) >> {fileRevisionDescriptorReceivedOnError = it[0]}
+		
+		and: "The received download descriptors should be the same instance"
+		fileRevisionDescriptorReceivedOnStart.is(fileRevisionDescriptorReceivedOnError)
+	}
+
+	private Range createRange(Long start, Long end) {
+		Range range = Stub(Range)
+		range.getStart() >> Optional.ofNullable(start)
+		range.getEnd() >> Optional.ofNullable(end)
+		return range
+	}
 
 	private Resource createResource() {
 		return Resource.builder()
