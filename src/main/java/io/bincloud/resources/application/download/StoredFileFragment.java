@@ -2,8 +2,8 @@ package io.bincloud.resources.application.download;
 
 import java.util.Optional;
 
-import io.bincloud.resources.domain.model.contracts.Fragment;
-import io.bincloud.resources.domain.model.contracts.Range;
+import io.bincloud.resources.domain.model.contracts.download.Fragment;
+import io.bincloud.resources.domain.model.contracts.download.Range;
 import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException;
 import lombok.EqualsAndHashCode;
 

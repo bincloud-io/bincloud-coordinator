@@ -2,7 +2,7 @@ package io.bincloud.resources.application.download
 
 import io.bincloud.common.domain.model.error.ApplicationException.Severity
 import io.bincloud.resources.domain.model.Constants
-import io.bincloud.resources.domain.model.contracts.Range
+import io.bincloud.resources.domain.model.contracts.download.Range
 import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException
 import spock.lang.Specification
 import spock.lang.Unroll

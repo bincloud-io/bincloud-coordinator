@@ -1,4 +1,4 @@
-package io.bincloud.resources.application
+package io.bincloud.resources.application.upload
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -9,7 +9,7 @@ import io.bincloud.common.domain.model.io.transfer.SourcePoint
 import io.bincloud.files.domain.model.FileDescriptor
 import io.bincloud.files.domain.model.contracts.FileStorage
 import io.bincloud.files.domain.model.states.FileStatus
-import io.bincloud.resources.application.FileUploadService
+import io.bincloud.resources.application.upload.FileUploadService
 import io.bincloud.resources.domain.model.Constants
 import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository

@@ -1,4 +1,4 @@
-package io.bincloud.resources.application;
+package io.bincloud.resources.application.upload;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.files.domain.model.contracts.FileStorage;
+import io.bincloud.resources.application.ExistingResourceIdentifierProvider;
 import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.upload.FileUploader;
 import io.bincloud.resources.domain.model.file.FileUploadId;

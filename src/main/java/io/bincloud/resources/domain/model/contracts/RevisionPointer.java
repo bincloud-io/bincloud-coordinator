@@ -1,4 +1,4 @@
-package io.bincloud.resources.domain.model.contracts.download;
+package io.bincloud.resources.domain.model.contracts;
 
 import java.util.Optional;
 

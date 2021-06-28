@@ -1,10 +1,11 @@
-package io.bincloud.resources.application;
+package io.bincloud.resources.application.management;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.domain.model.validation.ValidationService;
+import io.bincloud.resources.application.ExistingResourceIdentifierProvider;
 import io.bincloud.resources.domain.model.Constants;
 import io.bincloud.resources.domain.model.Resource;
 import io.bincloud.resources.domain.model.Resource.ResourceDetails;

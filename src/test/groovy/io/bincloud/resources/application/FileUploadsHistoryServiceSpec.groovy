@@ -7,7 +7,6 @@ import io.bincloud.common.domain.model.error.ApplicationException.Severity
 import io.bincloud.files.domain.model.FileDescriptor
 import io.bincloud.files.domain.model.contracts.FileStorage
 import io.bincloud.files.domain.model.states.FileStatus
-import io.bincloud.resources.application.FileUploadsHistoryService
 import io.bincloud.resources.domain.model.Constants
 import io.bincloud.resources.domain.model.errors.UploadedFileDescriptorHasNotBeenFoundException
 import io.bincloud.resources.domain.model.file.FileUpload

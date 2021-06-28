@@ -11,8 +11,8 @@ import io.bincloud.resources.application.SpecifiedFileIdentifierProvider;
 import io.bincloud.resources.application.UnspecifiedFileIdentifierProvider;
 import io.bincloud.resources.domain.model.Resource;
 import io.bincloud.resources.domain.model.ResourceRepository;
+import io.bincloud.resources.domain.model.contracts.RevisionPointer;
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
-import io.bincloud.resources.domain.model.contracts.download.RevisionPointer;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.Getter;
 
