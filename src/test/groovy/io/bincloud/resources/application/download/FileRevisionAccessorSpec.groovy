@@ -11,13 +11,13 @@ import io.bincloud.files.domain.model.contracts.FileStorage
 import io.bincloud.resources.domain.model.Constants
 import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadVisitor
+import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener
 import io.bincloud.resources.domain.model.contracts.download.Range
 import io.bincloud.resources.domain.model.contracts.RevisionPointer
-import io.bincloud.resources.domain.model.contracts.download.DownloadVisitor
+import io.bincloud.resources.domain.model.contracts.download.DownloadListener
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor
 import io.bincloud.resources.domain.model.contracts.download.Fragment
-import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadContext
+import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadRequest
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotHaveUploadsException
 import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException

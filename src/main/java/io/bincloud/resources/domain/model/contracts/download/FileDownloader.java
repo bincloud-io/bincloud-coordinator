@@ -7,11 +7,11 @@ import io.bincloud.resources.domain.model.contracts.RevisionPointer;
 
 public interface FileDownloader {
 
-	public DownloadOperation downloadFile(FileDownloadContext fileDownloadRequest, DownloadVisitor downloadCallback);
+	public DownloadOperation downloadFile(FileDownloadRequest fileDownloadRequest, DownloadListener downloadCallback);
 	
-	public DownloadOperation downloadFileRanges(FileDownloadContext fileDownloadRequest, MultiRangeDownloadVisitor downloadCallback);
+	public DownloadOperation downloadFileRanges(FileDownloadRequest fileDownloadRequest, MultiRangeDownloadListener downloadCallback);
 
-	public interface FileDownloadContext {
+	public interface FileDownloadRequest {
 		public RevisionPointer getRevision();
 
 		public Collection<Range> getRanges();

@@ -1,7 +1,7 @@
 package io.bincloud.resources.application.download;
 
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadVisitor;
+import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener;
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
 import io.bincloud.resources.domain.model.contracts.download.Fragment;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FragmentCallback implements CompletionCallback {
 	private final FileRevisionDescriptor fileRevisionDescriptor;
-	private final MultiRangeDownloadVisitor downloadVisitor;
+	private final MultiRangeDownloadListener downloadVisitor;
 	private final Fragment fragment;
 	
 	@Override

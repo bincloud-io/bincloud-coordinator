@@ -1,9 +1,9 @@
 package io.bincloud.resources.domain.model.contracts.download;
 
-import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadContext;
+import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadRequest;
 
-public interface DownloadVisitor {
-	public void onRequestError(FileDownloadContext request, Exception error);
+public interface DownloadListener {
+	public void onRequestError(FileDownloadRequest request, Exception error);
 	
 	public void onDownloadStart(FileRevisionDescriptor revisionDescriptor);
 

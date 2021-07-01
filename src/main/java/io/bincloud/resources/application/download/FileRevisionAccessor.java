@@ -10,10 +10,10 @@ import io.bincloud.files.domain.model.contracts.FileStorage;
 import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.RevisionPointer;
 import io.bincloud.resources.domain.model.contracts.download.DownloadOperation;
-import io.bincloud.resources.domain.model.contracts.download.DownloadVisitor;
+import io.bincloud.resources.domain.model.contracts.download.DownloadListener;
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
 import io.bincloud.resources.domain.model.contracts.download.Fragment;
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadVisitor;
+import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener;
 import io.bincloud.resources.domain.model.contracts.download.Range;
 import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
@@ -34,7 +34,7 @@ public class FileRevisionAccessor {
 				resourceRepository);
 	}
 	
-	public DownloadOperation download(DestinationPoint destinationPoint, DownloadVisitor downloadVisitor) {
+	public DownloadOperation download(DestinationPoint destinationPoint, DownloadListener downloadVisitor) {
 		return () -> {
 			downloadVisitor.onDownloadStart(revisionDescriptor);
 			fileStorage.downloadFile(getFileId(), destinationPoint, new CompletionCallback() {
@@ -52,7 +52,7 @@ public class FileRevisionAccessor {
 	}
 	
 	public DownloadOperation download(Collection<Range> ranges, DestinationPoint destinationPoint,
-			MultiRangeDownloadVisitor downloadVisitor) {
+			MultiRangeDownloadListener downloadVisitor) {
 		DownloadOperation downloadOperation = buildDownloadOperation(ranges, destinationPoint, downloadVisitor);
 		return () -> {
 			try {
@@ -64,7 +64,7 @@ public class FileRevisionAccessor {
 	}
 
 	private DownloadOperation buildDownloadOperation(Collection<Range> ranges, DestinationPoint destinationPoint,
-			MultiRangeDownloadVisitor downloadVisitor) {
+			MultiRangeDownloadListener downloadVisitor) {
 		return () -> {
 			downloadVisitor.onDownloadStart(revisionDescriptor);
 			checkRangesCount(ranges);
@@ -83,7 +83,7 @@ public class FileRevisionAccessor {
 		}
 	}
 
-	private DownloadProcessStepCreator createDownloadCompleteStep(MultiRangeDownloadVisitor downloadVisitor) {
+	private DownloadProcessStepCreator createDownloadCompleteStep(MultiRangeDownloadListener downloadVisitor) {
 		return () -> {
 			return () -> downloadVisitor.onDownloadComplete(revisionDescriptor);
 		};
@@ -112,7 +112,7 @@ public class FileRevisionAccessor {
 		private final CompletionCallback callback;
 
 		public FragmentDownloaderCreator(Fragment fragment, DestinationPoint destinationPoint,
-				MultiRangeDownloadVisitor downloadVisitor) {
+				MultiRangeDownloadListener downloadVisitor) {
 			this(fragment, destinationPoint, new FragmentCallback(revisionDescriptor, downloadVisitor, fragment));
 		}
 

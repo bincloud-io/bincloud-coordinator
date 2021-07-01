@@ -18,7 +18,7 @@
 	
 	<servlet>
 		<servlet-name>FileDownloadServlet</servlet-name>
-		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.HttpFileDownloadServlet</servlet-class>
+		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.servlet.HttpLatestRevisionDownloadServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
@@ -28,7 +28,7 @@
 	
 	<servlet>
 		<servlet-name>FileRevisionDownloadServlet</servlet-name>
-		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.HttpFileRevisionDownloadServlet</servlet-class>
+		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.servlet.HttpSpecifiedRevisionDownloadServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>

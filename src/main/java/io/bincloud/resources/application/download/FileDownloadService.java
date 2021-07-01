@@ -7,9 +7,9 @@ import io.bincloud.files.domain.model.contracts.FileStorage;
 import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.RevisionPointer;
 import io.bincloud.resources.domain.model.contracts.download.DownloadOperation;
-import io.bincloud.resources.domain.model.contracts.download.DownloadVisitor;
+import io.bincloud.resources.domain.model.contracts.download.DownloadListener;
 import io.bincloud.resources.domain.model.contracts.download.FileDownloader;
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadVisitor;
+import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener;
 import io.bincloud.resources.domain.model.contracts.download.Range;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class FileDownloadService implements FileDownloader {
 	private final FileStorage fileStorage;
 
 	@Override
-	public DownloadOperation downloadFile(FileDownloadContext fileDownloadRequest, DownloadVisitor downloadCallback) {
+	public DownloadOperation downloadFile(FileDownloadRequest fileDownloadRequest, DownloadListener downloadCallback) {
 		return () -> {
 			try {
 				DestinationPoint destinationPoint = fileDownloadRequest.getDestinationPoint();
@@ -34,7 +34,7 @@ public class FileDownloadService implements FileDownloader {
 	}
 
 	@Override
-	public DownloadOperation downloadFileRanges(FileDownloadContext fileDownloadRequest, MultiRangeDownloadVisitor downloadCallback) {
+	public DownloadOperation downloadFileRanges(FileDownloadRequest fileDownloadRequest, MultiRangeDownloadListener downloadCallback) {
 		return () -> {
 			try {
 				Collection<Range> ranges = fileDownloadRequest.getRanges();
@@ -47,7 +47,7 @@ public class FileDownloadService implements FileDownloader {
 		};
 	}
 	
-	private FileRevisionAccessor createFileRevisionAccessor(FileDownloadContext fileDownloadRequest) {
+	private FileRevisionAccessor createFileRevisionAccessor(FileDownloadRequest fileDownloadRequest) {
 		RevisionPointer revisionPointer = fileDownloadRequest.getRevision();
 		return new FileRevisionAccessor(revisionPointer, fileStorage, fileUploadsHistory, resourceRepository);
 	}
