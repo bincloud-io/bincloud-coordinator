@@ -13,6 +13,7 @@ import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
 import io.bincloud.resources.domain.model.contracts.RevisionPointer
 import io.bincloud.resources.domain.model.contracts.download.DownloadListener
+import io.bincloud.resources.domain.model.contracts.download.DownloadListener.DownloadProcessType
 import io.bincloud.resources.domain.model.contracts.download.FileDownloader
 import io.bincloud.resources.domain.model.contracts.download.Fragment
 import io.bincloud.resources.domain.model.contracts.download.Range
@@ -365,7 +366,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download visitor should be notified about start"
-		1 * downloadListener.onDownloadStart(_)
+		1 * downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, _)
 
 		and: "The download visitor should be notified about error"
 		1 * downloadListener.onDownloadComplete(_)
@@ -407,7 +408,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download process should be started"
-		1 * downloadListener.onDownloadStart(_)
+		1 * downloadListener.onDownloadStart(DownloadProcessType.PARTIAL, _)
 
 		and: "The first fragment should be successfully transferred"
 		1 * downloadListener.onFragmentDownloadComplete(_, _) >> {
@@ -457,7 +458,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download process should be started"
-		1 * downloadListener.onDownloadStart(_)
+		1 * downloadListener.onDownloadStart(DownloadProcessType.PARTIAL, _)
 
 		and: "The first fragment transferring should be successfully started"
 		and: "The first fragment transferring should be successfully completed"
@@ -525,7 +526,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download process should be started"
-		1 * downloadListener.onDownloadStart(_)
+		1 * downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, _)
 
 
 		and: "The second fragment shouldn't be completed with failure"
@@ -563,7 +564,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download process should be started"
-		1 * downloadListener.onDownloadStart(_)
+		1 * downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, _)
 
 
 		and: "The second fragment should be completed with failure"
@@ -598,7 +599,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download process should be started"
-		1 * downloadListener.onDownloadStart(_)
+		1 * downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, _)
 
 
 		and: "The second fragment should be completed with failure"

@@ -21,7 +21,7 @@ public class FileDownloadService implements FileDownloader {
 			DestinationPoint destinationPoint = fileDownloadRequest.getDestinationPoint();
 			DownloadRequestDetails requestDetails = fileDownloadRequest.getRequestDetails();
 			FileRevisionAccessor revisionAccessor = createFileRevisionAccessor(fileDownloadRequest);
-			revisionAccessor.download(requestDetails, destinationPoint, downloadCallback);
+			revisionAccessor.downloadContent(requestDetails, destinationPoint, downloadCallback);
 		} catch (Exception error) {
 			downloadCallback.onRequestError(fileDownloadRequest, error);
 		}

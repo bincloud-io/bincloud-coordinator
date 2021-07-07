@@ -5,7 +5,7 @@ import io.bincloud.resources.domain.model.contracts.download.FileDownloader.File
 public interface DownloadListener {
 	public void onRequestError(FileDownloadRequest request, Exception error);
 	
-	public void onDownloadStart(FileRevisionDescriptor revisionDescriptor);
+	public void onDownloadStart(DownloadProcessType type, FileRevisionDescriptor revisionDescriptor);
 
 	public void onDownloadError(FileRevisionDescriptor revisionDescriptor, Exception error);
 
@@ -14,4 +14,9 @@ public interface DownloadListener {
 	public void onFragmentDownloadStart(FileRevisionDescriptor revisionDescriptor, Fragment fragment);
 	
 	public void onFragmentDownloadComplete(FileRevisionDescriptor revisionDescriptor, Fragment fragment);
+	
+	public enum DownloadProcessType {
+		FULL_SIZE,
+		PARTIAL;
+	}
 }

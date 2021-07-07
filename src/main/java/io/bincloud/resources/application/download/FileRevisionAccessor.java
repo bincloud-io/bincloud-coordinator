@@ -11,6 +11,7 @@ import io.bincloud.resources.domain.model.contracts.download.DownloadListener;
 import io.bincloud.resources.domain.model.contracts.download.FileDownloader.DownloadRequestDetails;
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
 import io.bincloud.resources.domain.model.contracts.download.Fragment;
+import io.bincloud.resources.domain.model.contracts.download.DownloadListener.DownloadProcessType;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +29,15 @@ public class FileRevisionAccessor {
 				resourceRepository);
 	}
 
-	public void download(DownloadRequestDetails downloadRequest, DestinationPoint destinationPoint,
+	public void describeContent(DownloadRequestDetails downloadRequest, DownloadListener downloadListener) {
+
+		completeDownloadProcess(downloadListener);
+	}
+
+	public void downloadContent(DownloadRequestDetails downloadRequest, DestinationPoint destinationPoint,
 			DownloadListener downloadListener) {
 		try {
-			startDownloadProcess(downloadListener);
+			startDownloadProcess(downloadRequest, downloadListener);
 			transferFileContent(downloadRequest, destinationPoint, downloadListener);
 		} catch (ContentPartTransferringFailedException error) {
 			failDownloadProcess(downloadListener, error.getCauseError());
@@ -42,8 +48,7 @@ public class FileRevisionAccessor {
 
 	private void transferFileContent(DownloadRequestDetails downloadRequest, DestinationPoint destinationPoint,
 			DownloadListener downloadListener) {
-		FileFragments requestedFragments = new FileFragments(downloadRequest.getRanges(),
-				revisionDescriptor.getFileSize());
+		FileFragments requestedFragments = createFileFragments(downloadRequest);
 		if (requestedFragments.isRequestedMultipleFragments()) {
 			transferPartialContent(requestedFragments.getParts(), destinationPoint, downloadListener);
 			completeDownloadProcess(downloadListener);
@@ -78,8 +83,16 @@ public class FileRevisionAccessor {
 		return revisionDescriptor.getFileId();
 	}
 
-	private void startDownloadProcess(DownloadListener downloadListener) {
-		downloadListener.onDownloadStart(revisionDescriptor);
+	private void startDownloadProcess(DownloadRequestDetails requestDetails, DownloadListener downloadListener) {
+		if (createFileFragments(requestDetails).isRequestedMultipleFragments()) {
+			downloadListener.onDownloadStart(DownloadProcessType.PARTIAL, revisionDescriptor);
+		} else {
+			downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, revisionDescriptor);
+		}
+	}
+
+	private FileFragments createFileFragments(DownloadRequestDetails requestDetails) {
+		return new FileFragments(requestDetails.getRanges(), revisionDescriptor.getFileSize());
 	}
 
 	private void completeDownloadProcess(DownloadListener downloadListener) {
