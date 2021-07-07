@@ -1,23 +1,17 @@
 package io.bincloud.resources.application.download;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
-import io.bincloud.common.domain.model.io.transfer.CompletionCallbackWrapper;
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.files.domain.model.contracts.FileStorage;
 import io.bincloud.resources.domain.model.ResourceRepository;
 import io.bincloud.resources.domain.model.contracts.RevisionPointer;
-import io.bincloud.resources.domain.model.contracts.download.DownloadOperation;
 import io.bincloud.resources.domain.model.contracts.download.DownloadListener;
+import io.bincloud.resources.domain.model.contracts.download.FileDownloader.DownloadRequestDetails;
 import io.bincloud.resources.domain.model.contracts.download.FileRevisionDescriptor;
 import io.bincloud.resources.domain.model.contracts.download.Fragment;
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener;
-import io.bincloud.resources.domain.model.contracts.download.Range;
-import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException;
 import io.bincloud.resources.domain.model.file.FileUploadsHistory;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -33,111 +27,117 @@ public class FileRevisionAccessor {
 		this.revisionDescriptor = new StoredFileRevisionDescriptor(revisionPointer, fileStorage, fileUploadHistory,
 				resourceRepository);
 	}
-	
-	public DownloadOperation download(DestinationPoint destinationPoint, DownloadListener downloadVisitor) {
-		return () -> {
-			downloadVisitor.onDownloadStart(revisionDescriptor);
-			fileStorage.downloadFile(getFileId(), destinationPoint, new CompletionCallback() {
-				@Override
-				public void onSuccess() {
-					downloadVisitor.onDownloadComplete(revisionDescriptor);
-				}
-				
-				@Override
-				public void onError(Exception error) {
-					downloadVisitor.onDownloadError(revisionDescriptor, error);
-				}
-			});
-		};
-	}
-	
-	public DownloadOperation download(Collection<Range> ranges, DestinationPoint destinationPoint,
-			MultiRangeDownloadListener downloadVisitor) {
-		DownloadOperation downloadOperation = buildDownloadOperation(ranges, destinationPoint, downloadVisitor);
-		return () -> {
-			try {
-				downloadOperation.downloadFile();
-			} catch (Exception error) {
-				downloadVisitor.onDownloadError(revisionDescriptor, error);
-			}
-		};
-	}
 
-	private DownloadOperation buildDownloadOperation(Collection<Range> ranges, DestinationPoint destinationPoint,
-			MultiRangeDownloadListener downloadVisitor) {
-		return () -> {
-			downloadVisitor.onDownloadStart(revisionDescriptor);
-			checkRangesCount(ranges);
-			createFragments(ranges).sorted((a, b) -> -1)
-					.<DownloadProcessStepCreator>map(
-							fragment -> new FragmentDownloaderCreator(fragment, destinationPoint, downloadVisitor))
-					.reduce(createDownloadCompleteStep(downloadVisitor), (result, current) -> {
-						return ((FragmentDownloaderCreator) current).chain(result.createStep());
-					}).createStep().downloadFile();
-		};
-	}
-
-	private void checkRangesCount(Collection<Range> ranges) {
-		if (ranges.isEmpty()) {
-			throw new UnsatisfiableRangeFormatException();
+	public void download(DownloadRequestDetails downloadRequest, DestinationPoint destinationPoint,
+			DownloadListener downloadListener) {
+		try {
+			startDownloadProcess(downloadListener);
+			transferFileContent(downloadRequest, destinationPoint, downloadListener);
+		} catch (ContentPartTransferringFailedException error) {
+			failDownloadProcess(downloadListener, error.getCauseError());
+		} catch (Exception error) {
+			failDownloadProcess(downloadListener, error);
 		}
 	}
 
-	private DownloadProcessStepCreator createDownloadCompleteStep(MultiRangeDownloadListener downloadVisitor) {
-		return () -> {
-			return () -> downloadVisitor.onDownloadComplete(revisionDescriptor);
-		};
+	private void transferFileContent(DownloadRequestDetails downloadRequest, DestinationPoint destinationPoint,
+			DownloadListener downloadListener) {
+		FileFragments requestedFragments = new FileFragments(downloadRequest.getRanges(),
+				revisionDescriptor.getFileSize());
+		if (requestedFragments.isRequestedMultipleFragments()) {
+			transferPartialContent(requestedFragments.getParts(), destinationPoint, downloadListener);
+			completeDownloadProcess(downloadListener);
+		} else {
+			transferSizedContent(requestedFragments.getSinglePart(), destinationPoint, downloadListener);
+		}
 	}
 
-	private Stream<Fragment> createFragments(Collection<Range> ranges) {
-		return ranges.stream().map(range -> new StoredFileFragment(range, getFileSize()));
+	private void transferPartialContent(Collection<Fragment> requestedFragments, DestinationPoint destinationPoint,
+			DownloadListener downloadListener) {
+		for (Fragment fragment : requestedFragments) {
+			startFragmentDownloadProcess(downloadListener, fragment);
+			transferFragmentContent(fragment, destinationPoint, downloadListener);
+		}
 	}
 
-	private Long getFileSize() {
-		return revisionDescriptor.getFileSize();
+	private void transferSizedContent(Fragment fragment, DestinationPoint destinationPoint,
+			DownloadListener downloadListener) {
+		CompletionCallback completionCallback = new SizedContentDownloadCallback(downloadListener);
+		fileStorage.downloadFileContent(getFileId(), destinationPoint, completionCallback, fragment.getStart(),
+				fragment.getSize());
+	}
+
+	private void transferFragmentContent(Fragment fragment, DestinationPoint destinationPoint,
+			DownloadListener downloadListener) {
+		CompletionCallback completionCallback = new PartialContentDownloadCallback(fragment, downloadListener);
+		fileStorage.downloadFileContent(getFileId(), destinationPoint, completionCallback, fragment.getStart(),
+				fragment.getSize());
 	}
 
 	private String getFileId() {
 		return revisionDescriptor.getFileId();
 	}
 
-	private interface DownloadProcessStepCreator {
-		public DownloadOperation createStep();
+	private void startDownloadProcess(DownloadListener downloadListener) {
+		downloadListener.onDownloadStart(revisionDescriptor);
 	}
 
-	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-	private class FragmentDownloaderCreator implements DownloadProcessStepCreator {
+	private void completeDownloadProcess(DownloadListener downloadListener) {
+		downloadListener.onDownloadComplete(revisionDescriptor);
+	}
+
+	private void failDownloadProcess(DownloadListener downloadListener, Exception error) {
+		downloadListener.onDownloadError(revisionDescriptor, error);
+	}
+
+	private void startFragmentDownloadProcess(DownloadListener downloadListener, Fragment fragment) {
+		downloadListener.onFragmentDownloadStart(revisionDescriptor, fragment);
+	}
+
+	private void completeFragmentDownloadProcess(DownloadListener downloadListener, Fragment fragment) {
+		downloadListener.onFragmentDownloadComplete(revisionDescriptor, fragment);
+	}
+
+	@RequiredArgsConstructor
+	private class SizedContentDownloadCallback implements CompletionCallback {
+		private final DownloadListener downloadListener;
+
+		@Override
+		public void onSuccess() {
+			completeDownloadProcess(downloadListener);
+		}
+
+		@Override
+		public void onError(Exception error) {
+			failDownloadProcess(downloadListener, error);
+		}
+	}
+
+	@RequiredArgsConstructor
+	private class PartialContentDownloadCallback implements CompletionCallback {
 		private final Fragment fragment;
-		private final DestinationPoint destinationPoint;
-		private final CompletionCallback callback;
+		private final DownloadListener downloadListener;
 
-		public FragmentDownloaderCreator(Fragment fragment, DestinationPoint destinationPoint,
-				MultiRangeDownloadListener downloadVisitor) {
-			this(fragment, destinationPoint, new FragmentCallback(revisionDescriptor, downloadVisitor, fragment));
+		@Override
+		public void onSuccess() {
+			completeFragmentDownloadProcess(downloadListener, fragment);
 		}
 
-		public DownloadOperation createStep() {
-			return () -> {
-				fileStorage.downloadFileRange(getFileId(), destinationPoint, callback, getStart(), getSize());
-			};
+		@Override
+		public void onError(Exception error) {
+			throw new ContentPartTransferringFailedException(error);
+		}
+	}
+
+	private class ContentPartTransferringFailedException extends RuntimeException {
+		private static final long serialVersionUID = 5750180811153214306L;
+
+		public ContentPartTransferringFailedException(Exception cause) {
+			super(cause);
 		}
 
-		public FragmentDownloaderCreator chain(DownloadOperation fragmentDownloader) {
-			return new FragmentDownloaderCreator(fragment, destinationPoint, new CompletionCallbackWrapper(callback) {
-				@Override
-				public void onSuccess() {
-					super.onSuccess();
-					fragmentDownloader.downloadFile();
-				}
-			});
-		}
-
-		private Long getStart() {
-			return fragment.getStart();
-		}
-
-		private Long getSize() {
-			return fragment.getSize();
+		public Exception getCauseError() {
+			return (Exception) super.getCause();
 		}
 	}
 }

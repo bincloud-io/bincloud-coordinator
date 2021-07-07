@@ -17,6 +17,8 @@ import io.bincloud.resources.domain.model.file.FileUploadsHistory;
 import lombok.Getter;
 
 public class StoredFileRevisionDescriptor implements FileRevisionDescriptor {
+	
+	
 	@Getter
 	private String fileId;
 	private Resource resource;
@@ -51,7 +53,17 @@ public class StoredFileRevisionDescriptor implements FileRevisionDescriptor {
 	public Long getFileSize() {
 		return fileDescriptor.getSize();
 	}
+	
+	@Override
+	public String getMediaType() {
+		return resource.getMediaType();
+	}
 
+	@Override
+	public String getDefaultContentDisposition() {
+		return resource.getContentDisposition();
+	}
+	
 	public StoredFileRevisionDescriptor(RevisionPointer fileDownloadContext, FileStorage fileStorage,
 			FileUploadsHistory fileUploadHistory, ResourceRepository resourceRepository) {
 		super();

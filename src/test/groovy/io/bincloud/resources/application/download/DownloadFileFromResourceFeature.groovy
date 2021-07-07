@@ -14,10 +14,10 @@ import io.bincloud.resources.domain.model.ResourceRepository
 import io.bincloud.resources.domain.model.contracts.RevisionPointer
 import io.bincloud.resources.domain.model.contracts.download.DownloadListener
 import io.bincloud.resources.domain.model.contracts.download.FileDownloader
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener
-import io.bincloud.resources.domain.model.contracts.download.Range
-import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadRequest
 import io.bincloud.resources.domain.model.contracts.download.Fragment
+import io.bincloud.resources.domain.model.contracts.download.Range
+import io.bincloud.resources.domain.model.contracts.download.FileDownloader.DownloadRequestDetails
+import io.bincloud.resources.domain.model.contracts.download.FileDownloader.FileDownloadRequest
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException
 import io.bincloud.resources.domain.model.errors.ResourceDoesNotHaveUploadsException
 import io.bincloud.resources.domain.model.errors.UnsatisfiableRangeFormatException
@@ -62,7 +62,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -77,10 +77,10 @@ class DownloadFileFromResourceFeature extends Specification {
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L)])
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -101,7 +101,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't exist exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -119,10 +119,10 @@ class DownloadFileFromResourceFeature extends Specification {
 		resourceRepository.findById(RESOURCE_ID) >> Optional.empty()
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't exist exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -146,7 +146,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 
 		then: "The resource doesn't have uploads exception should be thrown"
@@ -168,10 +168,10 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileUploadHistory.findFileUploadForResource(RESOURCE_ID) >> Optional.empty()
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 
 		then: "The resource doesn't have uploads exception should be thrown"
@@ -196,7 +196,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 
 		then: "The resource doesn't have uploads exception should be thrown"
@@ -218,10 +218,10 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileUploadHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID) >> false
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't have uploads exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -248,7 +248,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't have uploads exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -272,17 +272,17 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileStorage.getFileDescriptor(FILE_ID) >> Optional.empty()
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't have uploads exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
 		error.getContext() == Constants.CONTEXT
 		error.getErrorCode() == UploadedFileDescriptorHasNotBeenFoundException.ERROR_CODE
 	}
-	
+
 	def "Scenario: download specified file revision when file descriptor isn't found in the store"() {
 		UploadedFileDescriptorHasNotBeenFoundException error;
 		given: "The file download request"
@@ -302,7 +302,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't have uploads exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
@@ -326,17 +326,17 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileStorage.getFileDescriptor(FILE_ID) >> Optional.empty()
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The resource doesn't have uploads exception should be thrown"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
 		error.getContext() == Constants.CONTEXT
 		error.getErrorCode() == UploadedFileDescriptorHasNotBeenFoundException.ERROR_CODE
 	}
-	
+
 	def "Scenario: download empty range collection"() {
 		UnsatisfiableRangeFormatException exception;
 		given: "The file download request"
@@ -352,38 +352,32 @@ class DownloadFileFromResourceFeature extends Specification {
 		and: "The file descriptor exists in the storage"
 		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
 
+		and: "File range transferring successfully completes"
+		fileStorage.downloadFileContent(FILE_ID, _, _, 0L, FILE_SIZE) >> {
+			CompletionCallback callback = it[2]
+			callback.onSuccess()
+		}
+
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
 
 		then: "The download visitor should be notified about start"
 		1 * downloadListener.onDownloadStart(_)
 
 		and: "The download visitor should be notified about error"
-		1 * downloadListener.onDownloadError(_, _) >> {
-			exception = it[1]
-		}
-
-		and: "The download visitor shouldn't be notified about end of process"
-		0 * downloadListener.onDownloadComplete(_)
-
-		and: "The unsatisfiable range format exception should be received"
-		exception.getContext() == Constants.CONTEXT
-		exception.getErrorCode() == UnsatisfiableRangeFormatException.ERROR_CODE
-		exception.getSeverity() == Severity.BUSINESS
+		1 * downloadListener.onDownloadComplete(_)
 	}
-	
-	
+
+
 	def "Scenario: error during ranges download process"() {
 		Exception exception = new Exception();
 		Fragment downloadedFragment;
 		given: "The file download request"
 		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
-		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [
-			createRange(0L, 0L),createRange(1L, 1L),createRange(2L, 2L)
-		])
+		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 0L), createRange(1L, 1L), createRange(2L, 2L)])
 
 		and: "The resource exists in the store"
 		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
@@ -395,53 +389,51 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The first range download is completed successfully"
-		fileStorage.downloadFileRange(FILE_ID, destinationPoint, _, 0L, 1L) >> {
+		fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, 0L, 1L) >> {
 			CompletionCallback callback = it[2]
 			callback.onSuccess()
 		}
-		
+
 		and: "The second range download is completed with failure"
-		fileStorage.downloadFileRange(FILE_ID, destinationPoint, _, 1L, 1L) >> {
+		fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, 1L, 1L) >> {
 			CompletionCallback callback = it[2]
 			callback.onError(exception)
 		}
-		
+
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
-		
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
+
 		then: "The download process should be started"
 		1 * downloadListener.onDownloadStart(_)
-		
+
 		and: "The first fragment should be successfully transferred"
 		1 * downloadListener.onFragmentDownloadComplete(_, _) >> {
 			downloadedFragment = it[1]
 		}
 		downloadedFragment.getStart() == 0L
 		downloadedFragment.getSize() == 1L
-		
+
 		and: "The second fragment should be completed with failure"
 		1 * downloadListener.onDownloadError(_, exception)
-		
+
 		and: "The process shouldn't be completed successfully"
 		0 * downloadListener.onDownloadComplete(_)
-		
+
 		and: "The download process should be broken after first failure"
-		0 * fileStorage.downloadFileRange(FILE_ID, destinationPoint, _, 2L, 1L)
+		0 * fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, 2L, 1L)
 	}
-	
-	
+
+
 	def "Scenario: successfully downloaded ranges"() {
 		Fragment firstFragment;
 		Fragment secondFragment;
 		Fragment thirdFragment;
 		given: "The file download request"
 		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
-		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [
-			createRange(0L, 0L),createRange(1L, 1L),createRange(2L, 2L)
-		])
+		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 0L), createRange(1L, 1L), createRange(2L, 2L)])
 
 		and: "The resource exists in the store"
 		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
@@ -453,48 +445,59 @@ class DownloadFileFromResourceFeature extends Specification {
 		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
 
 		and: "The file download listener"
-		MultiRangeDownloadListener downloadListener = Mock(MultiRangeDownloadListener)
+		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The ranges download is completed successfully"
-		fileStorage.downloadFileRange(FILE_ID, destinationPoint, _, _, _) >> {
+		fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, _, _) >> {
 			CompletionCallback callback = it[2]
 			callback.onSuccess()
 		}
-		
+
 		when: "The file download is requested"
-		fileDownloader.downloadFileRanges(downloadRequest, downloadListener).downloadFile()
-		
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
+
 		then: "The download process should be started"
 		1 * downloadListener.onDownloadStart(_)
-		
-		and: "The first fragment should be successfully transferred"
-		1 * downloadListener.onFragmentDownloadComplete(_, _) >> {
-			firstFragment = it[1]
-		}
-		firstFragment.getStart() == 0L
-		firstFragment.getSize() == 1L
 
-		and: "The second fragment should be successfully transferred"
-		1 * downloadListener.onFragmentDownloadComplete(_, _) >> {
+		and: "The first fragment transferring should be successfully started"
+		and: "The first fragment transferring should be successfully completed"
+		and: "The second fragment transferring should be successfully started"
+		and: "The second fragment transferring should be successfully completed"
+
+		3 * downloadListener.onFragmentDownloadStart(_, _) >> {
+			firstFragment = it[1]
+		} >> {
 			secondFragment = it[1]
-		}
-		secondFragment.getStart() == 1L
-		secondFragment.getSize() == 1L
-		
-		and: "The third fragment should be successfully transferred"
-		1 * downloadListener.onFragmentDownloadComplete(_, _) >> {
+		} >> {
 			thirdFragment = it[1]
 		}
+
+		firstFragment.getStart() == 0L
+		firstFragment.getSize() == 1L
+		secondFragment.getStart() == 1L
+		secondFragment.getSize() == 1L
 		thirdFragment.getStart() == 2L
 		thirdFragment.getSize() == 1L
-				
-		and: "The second fragment shouldn't be completed with failure"
-		0 * downloadListener.onDownloadError(_, _)
-		
+
+		3 * downloadListener.onFragmentDownloadComplete(_, _) >> {
+			firstFragment = it[1]
+		} >> {
+			secondFragment = it[1]
+		} >> {
+			thirdFragment = it[1]
+		}
+
+		firstFragment.getStart() == 0L
+		firstFragment.getSize() == 1L
+		secondFragment.getStart() == 1L
+		secondFragment.getSize() == 1L
+		thirdFragment.getStart() == 2L
+		thirdFragment.getSize() == 1L
+
 		and: "The process should be completed successfully"
-		1 * downloadListener.onDownloadComplete(_)		
+		1 * downloadListener.onDownloadComplete(_)
 	}
-	
+
 	def "Scenario: download whole file successfully"() {
 		given: "The file download request"
 		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
@@ -513,25 +516,25 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The ranges download is completed successfully"
-		fileStorage.downloadFile(FILE_ID, destinationPoint, _) >> {
+		fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, _, _) >> {
 			CompletionCallback callback = it[2]
 			callback.onSuccess()
 		}
-		
+
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
-		
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
+
 		then: "The download process should be started"
 		1 * downloadListener.onDownloadStart(_)
-		
-						
+
+
 		and: "The second fragment shouldn't be completed with failure"
 		0 * downloadListener.onDownloadError(_, _)
-		
+
 		and: "The process should be completed successfully"
 		1 * downloadListener.onDownloadComplete(_)
 	}
-	
+
 	def "Scenario: download whole file with error"() {
 		Exception error = new Exception()
 		given: "The file download request"
@@ -551,33 +554,70 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The ranges download is completed successfully"
-		fileStorage.downloadFile(FILE_ID, destinationPoint, _) >> {
+		fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, _, _) >> {
 			CompletionCallback callback = it[2]
 			callback.onError(error)
 		}
-		
+
 		when: "The file download is requested"
-		fileDownloader.downloadFile(downloadRequest, downloadListener).downloadFile()
-		
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
+
 		then: "The download process should be started"
 		1 * downloadListener.onDownloadStart(_)
-		
-						
+
+
 		and: "The second fragment should be completed with failure"
 		1 * downloadListener.onDownloadError(_, _)
-		
+
+		and: "The process shouldn't be completed successfully"
+		0 * downloadListener.onDownloadComplete(_)
+	}
+	
+	def "Scenario: exception thrown during download process"() {
+		RuntimeException error = new RuntimeException()
+		given: "The file download request"
+		RevisionPointer revisionPointer = createRevisionPointer(Optional.of(RESOURCE_ID), Optional.of(FILE_ID))
+		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
+
+		and: "The resource exists in the store"
+		resourceRepository.findById(RESOURCE_ID) >> Optional.of(createResource())
+
+		and: "The file history contains upload"
+		fileUploadHistory.checkFileUploadExistence(RESOURCE_ID, FILE_ID) >> true
+
+		and: "The file descriptor exists in the storage"
+		fileStorage.getFileDescriptor(FILE_ID) >> createFileRescriptor()
+
+		and: "The file download listener"
+		DownloadListener downloadListener = Mock(DownloadListener)
+
+		and: "The ranges download is completed successfully"
+		fileStorage.downloadFileContent(FILE_ID, destinationPoint, _, _, _) >> {throw error;}
+
+		when: "The file download is requested"
+		fileDownloader.downloadFile(downloadRequest, downloadListener)
+
+		then: "The download process should be started"
+		1 * downloadListener.onDownloadStart(_)
+
+
+		and: "The second fragment should be completed with failure"
+		1 * downloadListener.onDownloadError(_, error)
+
 		and: "The process shouldn't be completed successfully"
 		0 * downloadListener.onDownloadComplete(_)
 	}
 
 	private FileDownloadRequest createDownloadRequest(RevisionPointer revisionPointer, Collection<Range> ranges) {
 		FileDownloadRequest fileDownloadContext = Stub(FileDownloadRequest)
-		fileDownloadContext.getDestinationPoint() >> destinationPoint
-		fileDownloadContext.getRanges() >> ranges
+		DownloadRequestDetails downloadRequestDetails = Stub(DownloadRequestDetails)
 		fileDownloadContext.getRevision() >> revisionPointer
+		fileDownloadContext.getDestinationPoint() >> destinationPoint
+		fileDownloadContext.getRequestDetails() >> downloadRequestDetails
+		downloadRequestDetails.getRanges() >> ranges
 		return fileDownloadContext
 	}
-	
+
 	private Range createRange(Long start, Long end) {
 		Range range = Stub(Range)
 		range.getStart() >> Optional.ofNullable(start)
@@ -599,7 +639,7 @@ class DownloadFileFromResourceFeature extends Specification {
 				.uploadMoment(LAST_MODIFICATION_MOMENT)
 				.build()
 	}
-	
+
 	private Optional<FileDescriptor> createFileRescriptor() {
 		FileDescriptor fileDescriptor = Stub(FileDescriptor)
 		fileDescriptor.getStatus() >> "DISTRIBUTION"

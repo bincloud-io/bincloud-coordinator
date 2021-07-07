@@ -62,29 +62,12 @@ class DisposedFileSpec extends Specification {
 		file.status == FileStatus.DISPOSED.name()
 	}
 
-	def "Scenario: file can not be downloaded in the disposed state"() {
+	def "Scenario: file content can not be downloaded in the disposed state"() {
 		given: "The file in disposed state"
 		File file =  createDisposedFile()
 
 		when: "The file downloading is requested"
-		file.downloadFile(createDownloadingContext())
-
-		then: "The file has been disposed should be thrown"
-		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
-		error.context == FileHasAlreadyBeenDisposedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenDisposedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
-
-		and: "The file status should not be changed"
-		file.status == FileStatus.DISPOSED.name()
-	}
-
-	def "Scenario: file range can not be downloaded in the disposed state"() {
-		given: "The file in disposed state"
-		File file =  createDisposedFile()
-
-		when: "The file downloading is requested"
-		file.downloadFileRange(createDownloadingContext(), 0, 100)
+		file.downloadFileContent(createDownloadingContext(), 0, 100)
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)

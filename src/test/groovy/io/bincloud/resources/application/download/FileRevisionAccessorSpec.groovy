@@ -11,7 +11,6 @@ import io.bincloud.files.domain.model.contracts.FileStorage
 import io.bincloud.resources.domain.model.Constants
 import io.bincloud.resources.domain.model.Resource
 import io.bincloud.resources.domain.model.ResourceRepository
-import io.bincloud.resources.domain.model.contracts.download.MultiRangeDownloadListener
 import io.bincloud.resources.domain.model.contracts.download.Range
 import io.bincloud.resources.domain.model.contracts.RevisionPointer
 import io.bincloud.resources.domain.model.contracts.download.DownloadListener
@@ -70,6 +69,8 @@ class FileRevisionAccessorSpec extends Specification {
 		fileRevisionDescriptor.getFileName() == FILE_NAME
 		fileRevisionDescriptor.getFileSize() == FILE_SIZE
 		fileRevisionDescriptor.getLastModification() == LAST_MODIFICATION_MOMENT
+		fileRevisionDescriptor.getDefaultContentDisposition() == "inline"
+		fileRevisionDescriptor.getMediaType() == "application/octet-stream"
 	}
 
 	def "Scenario: get file revision by file revision accessor about latest file revision in history"() {
@@ -89,6 +90,9 @@ class FileRevisionAccessorSpec extends Specification {
 		fileRevisionDescriptor.getFileName() == FILE_NAME
 		fileRevisionDescriptor.getFileSize() == FILE_SIZE
 		fileRevisionDescriptor.getLastModification() == LAST_MODIFICATION_MOMENT
+		fileRevisionDescriptor.getDefaultContentDisposition() == "inline"
+		fileRevisionDescriptor.getMediaType() == "application/octet-stream"
+		
 	}
 
 	private Range createRange(Long start, Long end) {

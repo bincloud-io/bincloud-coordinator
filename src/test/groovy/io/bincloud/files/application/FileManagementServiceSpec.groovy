@@ -107,22 +107,7 @@ class FileManagementServiceSpec extends Specification {
 		1 * callback.onSuccess()
 	}
 
-	def "Scenario: file is successfully downloaded"() {
-		given: "The distribution file is stored in the repository"
-		1 * fileRepository.findById(FILE_ID) >> Optional.of(createFile(FileStatus.DISTRIBUTION, FILE_SIZE))
-
-		and: "There is access on read from the file on a filesystem"
-		filesystemAccessor.getAccessOnRead(FILE_ID, 0, FILE_SIZE) >> source
-		stubCompleteTransferringScenario()
-
-		when: "The downloading is requested"
-		fileStorage.downloadFile(FILE_ID, destination, callback)
-
-		then: "The downloading will be successfully completed"
-		1 * callback.onSuccess()
-	}
-
-	def "Scenario: file range is successfully downloaded"() {
+	def "Scenario: file content is successfully downloaded"() {
 		given: "The distribution file is stored in the repository"
 		fileRepository.findById(FILE_ID) >> Optional.of(createFile(FileStatus.DISTRIBUTION, FILE_SIZE))
 
@@ -131,7 +116,7 @@ class FileManagementServiceSpec extends Specification {
 		stubCompleteTransferringScenario()
 
 		when: "The downloading is requested"
-		fileStorage.downloadFileRange(FILE_ID, destination, callback, 10, 20)
+		fileStorage.downloadFileContent(FILE_ID, destination, callback, 10, 20)
 
 		then: "The downloading will be successfully completed"
 		1 * callback.onSuccess()
@@ -167,28 +152,12 @@ class FileManagementServiceSpec extends Specification {
 		}
 	}
 
-	def "Scenario: file downoading is completed with file not exists error when file is unknown"() {
+	def "Scenario: file content downoading is completed with file not exists error when file is unknown"() {
 		given: "The file isn't stored in the repository"
 		fileRepository.findById(_) >> Optional.empty()
 
 		when: "The file downloading is requested"
-		fileStorage.downloadFile(FILE_ID, destination, callback)
-
-		then: "The file not exist error should be sent to callback"
-		1 * callback.onError(_) >> {
-			ApplicationException error = it[0]
-			error.context == FileNotExistException.CONTEXT
-			error.errorCode == FileNotExistException.ERROR_CODE
-			error.severity == Severity.INCIDENT
-		}
-	}
-
-	def "Scenario: file range downoading is completed with file not exists error when file is unknown"() {
-		given: "The file isn't stored in the repository"
-		fileRepository.findById(_) >> Optional.empty()
-
-		when: "The file downloading is requested"
-		fileStorage.downloadFileRange(FILE_ID, destination, callback, 10, 20)
+		fileStorage.downloadFileContent(FILE_ID, destination, callback, 10, 20)
 
 		then: "The file not exist error should be sent to callback"
 		1 * callback.onError(_) >> {

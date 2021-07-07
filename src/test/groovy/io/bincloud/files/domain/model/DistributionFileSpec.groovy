@@ -75,35 +75,8 @@ class DistributionFileSpec extends Specification {
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISTRIBUTION.name()
 	}
-
-	def "Scenario: whole file successfully downloaded"() {
-		given: "The file in distribution state"
-		File file =  createDistributionFile()
-
-		and: "There is access on read to the file on a file system"
-		1 * filesystem.getAccessOnRead(file.fileId, 0, file.size) >> sourcePoint
-
-		and: "There is access on write to the file on a filesystem"
-		filesystem.getAccessOnWrite(file.fileId) >> destinationPoint
-
-		and: "The file transfering can be scheduled"
-		scheduler.schedule(sourcePoint, destinationPoint, completionCallback) >> transmitter
-
-		when: "The whole file downloading is requested"
-		FileDownloadingContext downloadingContext = createDownloadingContext()
-		file.downloadFile(downloadingContext)
-
-		then: "The transmission should be started"
-		1 * transmitter.start()
-
-		and: "The modification time should be changed"
-		file.lastModification == TIMESTAMP_NEXT_POINT
-
-		and: "The status should not be changed"
-		file.status == FileStatus.DISTRIBUTION.name()
-	}
-
-	def "Scenario: file range can not be downloaded in the disposed state"() {
+	
+	def "Scenario: file content can not be downloaded in the disposed state"() {
 		given: "The file in distribution state"
 		File file =  createDistributionFile()
 
@@ -116,9 +89,9 @@ class DistributionFileSpec extends Specification {
 		and: "The file transfering can be scheduled"
 		scheduler.schedule(sourcePoint, destinationPoint, completionCallback) >> transmitter
 
-		when: "The file file range 10..20 downloading is requested"
+		when: "The file file content 10..20 downloading is requested"
 		FileDownloadingContext downloadingContext = createDownloadingContext()
-		file.downloadFileRange(downloadingContext, 10, 20)
+		file.downloadFileContent(downloadingContext, 10, 20)
 
 		then: "The transmission should be started"
 		1 * transmitter.start()

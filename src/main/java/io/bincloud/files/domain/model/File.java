@@ -53,12 +53,8 @@ public class File implements FileDescriptor {
 		state.startDistribution(createRootContext(), fileSystem);
 		updateModification();
 	}
-
-	public void downloadFile(FileDownloadingContext downloadingContext) {
-		downloadFileRange(downloadingContext, 0L, getSize());
-	}
 	
-	public void downloadFileRange(FileDownloadingContext downloadingContext, Long offset, Long size) {
+	public void downloadFileContent(FileDownloadingContext downloadingContext, Long offset, Long size) {
 		state.downloadFile(createRootContext(), downloadingContext, offset, size);
 	}
 

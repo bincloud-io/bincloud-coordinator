@@ -99,30 +99,13 @@ class CreatedFileSpec extends Specification {
 		error.severity == Severity.BUSINESS
 	}
 	
-	
-
-	def "Scenario: file can not be downloaded in the created state"() {
-		given: "The file in created state"
-		File file = createFileInCreatedState()
-
-		when: "The downloading is requested"
-		FileDownloadingContext downloadingContext = createDownloadingContext()
-		file.downloadFile(downloadingContext)
-
-		then: "The file has not been uploaded error should be thrown"
-		ApplicationException error = thrown(FileHasNotBeenUploadedException)
-		error.context == FileHasNotBeenUploadedException.CONTEXT
-		error.errorCode == FileHasNotBeenUploadedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
-	}
-	
-	def "Scenario: file range can not be downloaded in the created state"() {
+	def "Scenario: file content can not be downloaded in the created state"() {
 		given: "The file in created state"
 		File file = createFileInCreatedState()
 
 		when: "The downloading is requested"
 		FileDownloadingContext downloadingContext = new FileDownloadingContext(destinationPoint, scheduler, filesystem, completionCallback)
-		file.downloadFileRange(downloadingContext, 0, 10)
+		file.downloadFileContent(downloadingContext, 0, 10)
 
 		then: "The file has not been uploaded error should be thrown"
 		ApplicationException error = thrown(FileHasNotBeenUploadedException)

@@ -2,6 +2,7 @@ package io.bincloud.resources.port.adapter.endpoint.files.upload;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
@@ -12,10 +13,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.bincloud.common.domain.model.error.ApplicationException;
 import io.bincloud.common.domain.model.error.AsyncErrorsHandler;
+import io.bincloud.common.domain.model.error.AsyncErrorsHandler.ErrorInterceptor;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
 import io.bincloud.common.domain.model.message.MessageProcessor;
 import io.bincloud.common.port.adapters.io.transfer.sources.StreamSource;
 import io.bincloud.common.port.adapters.web.AsyncServletOperationExecutor;
+import io.bincloud.common.port.adapters.web.HttpServletAppliactionExceptionHandler;
 import io.bincloud.resources.domain.model.Constants;
 import io.bincloud.resources.domain.model.contracts.upload.FileUploader;
 import io.bincloud.resources.domain.model.contracts.upload.FileUploader.UploadingCallback;
@@ -23,7 +26,6 @@ import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException;
 import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException;
 import io.bincloud.resources.domain.model.file.FileUploadId;
 import io.bincloud.resources.port.adapter.ServerContextProvider;
-import io.bincloud.resources.port.adapter.endpoint.files.ServletResponseHandler;
 
 public class HttpFileUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -8092602564530445635L;
@@ -47,7 +49,7 @@ public class HttpFileUploadServlet extends HttpServlet {
 			throws ServletException, IOException {
 		AsyncServletOperationExecutor asyncOperationExecutor = new AsyncServletOperationExecutor(request, response);
 		asyncOperationExecutor.execute(context -> {
-			UploadingCallback uploadingCallback = new HttpFileUploadCallback(context, new ServletResponseHandler(messageProcessor));
+			UploadingCallback uploadingCallback = new HttpFileUploadCallback(context);
 			try {
 				SourcePoint sourcePoint = new StreamSource(context.getRequest().getInputStream(),
 						serverContext.getIOBufferSize());
@@ -60,19 +62,17 @@ public class HttpFileUploadServlet extends HttpServlet {
 
 	private class HttpFileUploadCallback implements UploadingCallback {
 		private AsyncContext asyncContext;
-		private ServletResponseHandler responseHandler;
 		private AsyncErrorsHandler<AsyncContext> errorHandler;
 
-		public HttpFileUploadCallback(AsyncContext asyncContext, ServletResponseHandler responseHandler) {
+		public HttpFileUploadCallback(AsyncContext asyncContext) {
 			super();
 			this.asyncContext = asyncContext;
-			this.responseHandler = responseHandler;
-			this.errorHandler = createServletErrorHandler(responseHandler);
+			this.errorHandler = createServletErrorHandler();
 		}
 
 		@Override
 		public void onUpload(FileUploadId uploaded) {
-			responseHandler.sendResponse(asyncContext, HttpServletResponse.SC_OK,
+			sendResponse(asyncContext, HttpServletResponse.SC_OK,
 					new HttpFileUploadSuccessResponseProperties(serverContext.getRootURL(), uploaded));
 		}
 
@@ -81,15 +81,15 @@ public class HttpFileUploadServlet extends HttpServlet {
 			errorHandler.handleError(asyncContext, error);
 		}
 
-		private AsyncErrorsHandler<AsyncContext> createServletErrorHandler(ServletResponseHandler responseHandler) {
+		private AsyncErrorsHandler<AsyncContext> createServletErrorHandler() {
 			return AsyncErrorsHandler.createFor(AsyncContext.class)
 					.registerHandler(UnspecifiedResourceException.class,
-							responseHandler.createErrorHandler(HttpServletResponse.SC_BAD_REQUEST))
+							createErrorHandler(HttpServletResponse.SC_BAD_REQUEST))
 					.registerHandler(ResourceDoesNotExistException.class,
-							responseHandler.createErrorHandler(HttpServletResponse.SC_BAD_REQUEST))
+							createErrorHandler(HttpServletResponse.SC_BAD_REQUEST))
 					.registerHandler(ApplicationException.class,
-							responseHandler.createErrorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
-					.registerDefaultHandler(responseHandler.createDefaultErrorHandler(Constants.CONTEXT));
+							createErrorHandler(HttpServletResponse.SC_INTERNAL_SERVER_ERROR))
+					.registerDefaultHandler(createDefaultErrorHandler(Constants.CONTEXT));
 		}
 	}
 
@@ -99,6 +99,26 @@ public class HttpFileUploadServlet extends HttpServlet {
 					.map(value -> Long.valueOf(value));
 		} catch (NumberFormatException error) {
 			return Optional.empty();
+		}
+	}
+	
+	private ErrorInterceptor<AsyncContext, Exception> createDefaultErrorHandler(String context) {
+		return HttpServletAppliactionExceptionHandler.defaultErrorHandler(messageProcessor, context);
+	}
+	
+	private <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> createErrorHandler(int httpCode) {
+		return HttpServletAppliactionExceptionHandler.applicationErrorHandler(messageProcessor, httpCode);
+	}
+	
+	private void sendResponse(AsyncContext asyncContext, int code, Properties properties) {
+		try {
+			HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+			properties.store(response.getWriter(), null);
+			response.setStatus(code);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			asyncContext.complete();
 		}
 	}
 }

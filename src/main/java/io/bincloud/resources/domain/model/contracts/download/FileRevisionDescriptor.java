@@ -16,4 +16,8 @@ public interface FileRevisionDescriptor {
 	public Instant getLastModification();
 
 	public Long getFileSize();
+	
+	public String getMediaType();
+	
+	public String getDefaultContentDisposition();
 }

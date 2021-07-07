@@ -15,6 +15,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Resource {
+	public static final String APPLICATION_OCTET_STREAM_MEDIA_TYPE = "application/octet-stream";
+	public static final String DEFAULT_CONTENT_DISPOSITION = "inline";
+	
 	@EqualsAndHashCode.Include
 	private Long id;
 	private String fileName;
@@ -26,6 +29,14 @@ public class Resource {
 		super();
 		this.id = idGenerator.nextValue();
 		this.fileName = resourceDetails.getFileName().orElse(randomFileNameGenerator.nextValue());
+	}
+	
+	public String getMediaType() {
+		return APPLICATION_OCTET_STREAM_MEDIA_TYPE;
+	}
+	
+	public String getContentDisposition() {
+		return DEFAULT_CONTENT_DISPOSITION;
 	}
 
 	public interface ResourceDetails {

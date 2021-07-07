@@ -55,16 +55,10 @@ public class FileManagementService implements FileStorage {
 	}
 
 	@Override
-	public void downloadFile(String fileId, DestinationPoint destination, CompletionCallback callback) {
-		consumeExistingFileAsync(fileId, callback,
-				file -> file.downloadFile(createDownloadingContext(destination, callback)));
-	}
-
-	@Override
-	public void downloadFileRange(String fileId, DestinationPoint destination, CompletionCallback callback, Long offset,
+	public void downloadFileContent(String fileId, DestinationPoint destination, CompletionCallback callback, Long offset,
 			Long size) {
 		consumeExistingFileAsync(fileId, callback,
-				file -> file.downloadFileRange(createDownloadingContext(destination, callback), offset, size));
+				file -> file.downloadFileContent(createDownloadingContext(destination, callback), offset, size));
 	}
 
 	private FileDownloadingContext createDownloadingContext(DestinationPoint destination, CompletionCallback callback) {

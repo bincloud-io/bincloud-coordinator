@@ -11,4 +11,7 @@ public interface DownloadListener {
 
 	public void onDownloadComplete(FileRevisionDescriptor revisionDescriptor);
 	
+	public void onFragmentDownloadStart(FileRevisionDescriptor revisionDescriptor, Fragment fragment);
+	
+	public void onFragmentDownloadComplete(FileRevisionDescriptor revisionDescriptor, Fragment fragment);
 }

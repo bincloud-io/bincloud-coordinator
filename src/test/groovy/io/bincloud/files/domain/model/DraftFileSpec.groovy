@@ -65,7 +65,7 @@ class DraftFileSpec extends Specification {
 		File file = createInitialFile()
 
 		when: "The file downloading is requested"
-		file.downloadFileRange(createDummyDownloadingContext(), 0, 100)
+		file.downloadFileContent(createDummyDownloadingContext(), 0, 100)
 
 		then: "The file not exists error should be thrown"
 		FileNotExistException thrownError = thrown(FileNotExistException)
