@@ -5,8 +5,8 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.transaction.TransactionManager;
 
-import io.bincloud.resources.domain.model.Resource;
-import io.bincloud.resources.domain.model.ResourceRepository;
+import io.bincloud.resources.domain.model.resource.Resource;
+import io.bincloud.resources.domain.model.resource.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

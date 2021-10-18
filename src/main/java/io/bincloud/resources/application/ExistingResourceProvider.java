@@ -3,10 +3,10 @@ package io.bincloud.resources.application;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import io.bincloud.resources.domain.model.Resource;
-import io.bincloud.resources.domain.model.ResourceRepository;
-import io.bincloud.resources.domain.model.errors.ResourceDoesNotExistException;
-import io.bincloud.resources.domain.model.errors.UnspecifiedResourceException;
+import io.bincloud.resources.domain.model.resource.Resource;
+import io.bincloud.resources.domain.model.resource.ResourceDoesNotExistException;
+import io.bincloud.resources.domain.model.resource.ResourceRepository;
+import io.bincloud.resources.domain.model.resource.UnspecifiedResourceException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

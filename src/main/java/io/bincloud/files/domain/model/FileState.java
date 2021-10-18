@@ -4,7 +4,7 @@ public interface FileState {
 	public String getStatus();
 	public void createFile(RootContext context, FilesystemAccessor fileSystem);
 	public void uploadFile(RootContext context, FileUploadingContext uploadingContext);
-	public void startDistribution(RootContext context, FilesystemAccessor fileSystem);
+	public void startDistribution(RootContext context);
 	public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size);
 	
 	public interface RootContext {

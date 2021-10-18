@@ -7,7 +7,7 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
 
-import io.bincloud.resources.domain.model.file.FileUploadsRepository
+import io.bincloud.resources.domain.model.resource.history.UploadedFileRepository
 import io.bincloud.resources.port.adapter.repository.JPAFileUploadsRepository
 
 @ApplicationScoped
@@ -19,7 +19,7 @@ class FileUploadsRepositoryITSpecConfig {
 	private TransactionManager transactionManager;
 	
 	@Produces
-	public FileUploadsRepository fileUploadingRepository() {
+	public UploadedFileRepository fileUploadingRepository() {
 		return new JPAFileUploadsRepository(entityManager, transactionManager)
 	}
 }

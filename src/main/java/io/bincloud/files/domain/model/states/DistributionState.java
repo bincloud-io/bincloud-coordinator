@@ -1,5 +1,10 @@
 package io.bincloud.files.domain.model.states;
 
+import io.bincloud.common.domain.model.io.transfer.CompletionCallback;
+import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
+import io.bincloud.common.domain.model.io.transfer.SourcePoint;
+import io.bincloud.common.domain.model.io.transfer.TransferingScheduler;
+import io.bincloud.common.domain.model.io.transfer.Transmitter;
 import io.bincloud.files.domain.model.FileDownloadingContext;
 import io.bincloud.files.domain.model.FileState;
 import io.bincloud.files.domain.model.FileUploadingContext;
@@ -30,12 +35,18 @@ public class DistributionState implements FileState {
 	}
 
 	@Override
-	public void startDistribution(RootContext context, FilesystemAccessor fileSystem) {
+	public void startDistribution(RootContext context) {
 		throw new FileHasAlreadyBeenUploadedException();
 	}
 
 	@Override
-	public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
-		downloadingContext.download(context.getFileName(), offset, size);
+	public void downloadFile(RootContext context, FileDownloadingContext downloadContext, Long offset, Long size) {		
+		TransferingScheduler scheduler = downloadContext.getScheduler(); 
+		DestinationPoint destination = downloadContext.getDestination();
+		CompletionCallback callback = downloadContext.getCompletionCallback(); 
+		FilesystemAccessor filesystemAccessor = downloadContext.getFileSystemAccessor();
+		SourcePoint source = filesystemAccessor.getAccessOnRead(context.getFileName(), offset, size);
+		Transmitter transmitter = scheduler.schedule(source, destination, callback);
+		transmitter.start();
 	}
 }

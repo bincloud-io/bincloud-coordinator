@@ -1,14 +1,12 @@
 package io.bincloud.resources.port.adapter.endpoint.resource;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.jws.WebService;
 
 import io.bincloud.common.domain.model.error.ApplicationException;
 import io.bincloud.common.domain.model.message.MessageProcessor;
 import io.bincloud.common.port.adapter.integration.global.ServiceResponseType;
-import io.bincloud.resources.domain.model.contracts.ResourceManager;
+import io.bincloud.resources.domain.model.resource.ResourceManager;
 import io.bincloud.resources.port.adapter.ServerContextProvider;
 import io.bincloud.storage.port.adapter.resource.endpoint.management.CreateNewResourceFault;
 import io.bincloud.storage.port.adapter.resource.endpoint.management.CreateNewResourceRqType;
@@ -31,12 +29,12 @@ public class ResourceManagementEndpoint implements ResourceManagementService {
 	@Override
 	public CreateNewResourceRsType createNewResource(CreateNewResourceRqType request) throws CreateNewResourceFault {
 		try {
-			Long resourceId = resourceManager.createNewResource(new ResourceCreationRequestDetails(request));
-			return new ResourceCreationResponse(serverContext.getRootURL(), resourceId);
+			Long resourceId = resourceManager.createNewResource(new WSCreateNewResourceCommand(request));
+			return new WSCreateNewResourceResponse(serverContext.getRootURL(), resourceId);
 		} catch (ApplicationException error) {
-			throw new ResourceCreationOperationException(messageProcessor, error);
+			throw new WSCreateNewResourceFaultException(messageProcessor, error);
 		} catch (Exception error) {
-			throw new ResourceCreationOperationException(messageProcessor, error);
+			throw new WSCreateNewResourceFaultException(messageProcessor, error);
 		}
 	}
 
@@ -44,12 +42,12 @@ public class ResourceManagementEndpoint implements ResourceManagementService {
 	public ServiceResponseType removeExistingResource(RemoveExistingResourceRqType request)
 			throws RemoveExistingResourceFault {	
 		try {
-			resourceManager.removeExistingResource(Optional.ofNullable(request.getResourceId()));
-			return new ResourceRemovingResponse();
+			resourceManager.removeExistingResource(new WSRemoveExistingResource(request));
+			return new WSRemoveExistingResourceResponse();
 		} catch (ApplicationException error) {
-			throw new ResourceRemovingOperationException(messageProcessor, error);
+			throw new WSRemoveExistingResourceFaultException(messageProcessor, error);
 		} catch (Exception error) {
-			throw new ResourceRemovingOperationException(messageProcessor, error);
+			throw new WSRemoveExistingResourceFaultException(messageProcessor, error);
 		}	
 	}
 }

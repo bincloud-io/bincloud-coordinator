@@ -11,21 +11,35 @@ import io.bincloud.common.domain.model.logging.Loggers;
 import io.bincloud.common.domain.model.message.templates.StringifiedObjectTemplate;
 import io.bincloud.common.domain.model.message.templates.TextMessageTemplate;
 import io.bincloud.files.domain.model.File;
+import io.bincloud.files.domain.model.FileId;
 import io.bincloud.files.domain.model.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
 public class JPAFileRepository implements FileRepository {
+//	private static final String FIND_LATEST_RESOURCE_UPLOAD_NAMED_QUERY = "FileRepository.findLatestResourceUpload";
 	private final EntityManager entityManager;
 	private final TransactionManager transactionManager;
 
 	@Override
 	public Optional<File> findById(String fileId) {
-		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
-				new TextMessageTemplate("Find file with id={{fileId}}").withParameter("fileId", fileId)));
-		return Optional.ofNullable(entityManager.find(File.class, fileId));
+		Loggers.applicationLogger(JPAFileRepository.class)
+				.log(new LogRecord(Level.TRACE,
+						new TextMessageTemplate("Find file with fileId={{fileId}}")
+								.withParameter("fileId", fileId)));
+		return Optional.ofNullable(entityManager.find(File.class, new FileId(fileId)));
 	}
+
+//	@Override
+//	public Optional<File> findLatestResourceUpload(Long resourceId) {
+//		Loggers.applicationLogger(JPAFileRepository.class).log(
+//				new LogRecord(Level.TRACE, new TextMessageTemplate("Find latest file with resourceId={{resourceId}}")
+//						.withParameter("resourceId", resourceId)));
+//		TypedQuery<File> findLatestFileQuery = entityManager.createNamedQuery(FIND_LATEST_RESOURCE_UPLOAD_NAMED_QUERY, File.class);
+//		findLatestFileQuery.setParameter("resourceId", resourceId);
+//		return Optional.ofNullable(findLatestFileQuery.getSingleResult());
+//	}
 
 	@Override
 	@SneakyThrows
@@ -37,4 +51,5 @@ public class JPAFileRepository implements FileRepository {
 		this.entityManager.merge(file);
 		transactionManager.commit();
 	}
+
 }

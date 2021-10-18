@@ -19,7 +19,6 @@ public class RepositoriesConfig {
 	private EntityManager centralContext;
 	
 	@Inject
-	@SuppressWarnings("cdi-ambiguous-dependency")
 	private TransactionManager transactionManager;
 	
 	@Inject

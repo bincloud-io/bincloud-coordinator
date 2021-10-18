@@ -7,9 +7,9 @@ import io.bincloud.common.domain.model.error.MustNeverBeHappenedError;
 import io.bincloud.common.domain.model.error.UnexpectedSystemBehaviorException;
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint;
 import io.bincloud.common.domain.model.io.transfer.SourcePoint;
+import io.bincloud.files.domain.model.Constants;
 import io.bincloud.files.domain.model.FilesystemAccessor;
 import io.bincloud.files.domain.model.errors.FileManagementException;
-import lombok.SneakyThrows;
 
 public class BlockedFileSystemAccessor implements FilesystemAccessor {
 	private final File rootFolder;
@@ -22,23 +22,17 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 	}
 
 	@Override
-	@SneakyThrows
 	public void createFile(String fileName) {
 		File file = new File(this.rootFolder, fileName);
-		if (!file.createNewFile()) {
-			throw new MustNeverBeHappenedError("Existing file mustn't created twice");
+		try {
+			if (!file.createNewFile()) {
+				throw new MustNeverBeHappenedError("Existing file mustn't created twice");
+			}
+		} catch (IOException error) {
+			throw new UnexpectedSystemBehaviorException(Constants.CONTEXT, error);
 		}
 	}
-
-	@Override
-	public Long getFileSize(String fileName) {
-		File file = new File(this.rootFolder, fileName);
-		if (!file.exists()) {
-			throw new MustNeverBeHappenedError("It is allowable to get size for existing files only");
-		}
-		return file.length();
-	}
-
+	
 	@Override
 	public SourcePoint getAccessOnRead(String fileName, Long offset, Long size) {
 		try {
@@ -49,7 +43,7 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 	}
 
 	@Override
-	public DestinationPoint getAccessOnWrite(String fileName) {
+	public DestinationPoint getAccessOnWrite(String fileName, Long contentSize) {
 		try {
 			return new FilesystemStreamDestination(new File(this.rootFolder, fileName));
 		} catch (IOException error) {
@@ -57,6 +51,14 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 		}
 	}
 
+	@Override
+	public void removeFile(String fileName) {
+		File file = new File(this.rootFolder, fileName);
+		if (!file.delete()) {
+			throw new MustNeverBeHappenedError("Existing file mustn't created twice");
+		}
+	}
+	
 	private File createRootDirectoryFile(String filesFolderPath) {
 		File file = new File(filesFolderPath);
 		checkRootFolderExistence(file);

@@ -77,20 +77,23 @@ class BlockedFileSystemAccessorITSpec extends Specification {
 		then: "The file already exists should be thrown"
 		thrown(MustNeverBeHappenedError)
 	}
-
-	def "Scenario: get file size for existing file"() {
-		given: "The existing file"
-		createFile("file.txt")
-
-		expect: "The file size should be zero"
-		this.filesystemAccessor.getFileSize("file.txt") == 0L
+	
+	def "Scenario: delete existing file"() {
+		given: "The file exists on the filesystem"
+		new java.io.File(openRootDirectory(), "file.txt").createNewFile()
+		
+		when: "The file is deleted by filesystem accessor"
+		this.filesystemAccessor.removeFile("file.txt")
+		
+		then: "The file should be deleted from the filesystem"
+		new java.io.File(openRootDirectory(), "file.txt").exists() == false
 	}
-
-	def "Scenario: get file size for not existing file"() {
-		when: "The file size has been requested for not existing file"
-		this.filesystemAccessor.getFileSize("file.txt")
-
-		then: "The file not exists exception should be thrown"
+	
+	def "Scenario: delete not existing file"() {
+		when: "The unknown file is deleted by filesystem accessor"
+		this.filesystemAccessor.removeFile("file.txt")
+		
+		then: "The file already exists should be thrown"
 		thrown(MustNeverBeHappenedError)
 	}
 
@@ -105,9 +108,8 @@ class BlockedFileSystemAccessorITSpec extends Specification {
 
 		when: "The transmission has been completed"
 		DirectTransferingScheduler scheduler = new DirectTransferingScheduler()
-		Long fileSize = this.filesystemAccessor.getFileSize("source-file.txt") - 15
-		SourcePoint sourcePoint = this.filesystemAccessor.getAccessOnRead("source-file.txt", 0, fileSize)
-		DestinationPoint destinationPoint = this.filesystemAccessor.getAccessOnWrite("destination-file.txt")
+		SourcePoint sourcePoint = this.filesystemAccessor.getAccessOnRead("source-file.txt", 0, 33)
+		DestinationPoint destinationPoint = this.filesystemAccessor.getAccessOnWrite("destination-file.txt", 33)
 		scheduler.schedule(sourcePoint, destinationPoint, callback).start()
 
 		then: "These file must contain the same data"

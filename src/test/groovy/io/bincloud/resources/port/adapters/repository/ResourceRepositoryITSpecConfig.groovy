@@ -7,7 +7,7 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
 
-import io.bincloud.resources.domain.model.ResourceRepository
+import io.bincloud.resources.domain.model.resource.ResourceRepository
 import io.bincloud.resources.port.adapter.repository.JPAResourceRepository
 
 @ApplicationScoped

@@ -9,17 +9,16 @@ import io.bincloud.common.domain.model.io.transfer.CompletionCallback
 import io.bincloud.common.domain.model.io.transfer.DestinationPoint
 import io.bincloud.common.domain.model.io.transfer.SourcePoint
 import io.bincloud.common.domain.model.io.transfer.TransferingScheduler
-import io.bincloud.files.domain.model.File
-import io.bincloud.files.domain.model.FileDownloadingContext
-import io.bincloud.files.domain.model.FileUploadingContext
-import io.bincloud.files.domain.model.FilesystemAccessor
 import io.bincloud.files.domain.model.errors.FileHasAlreadyBeenDisposedException
 import io.bincloud.files.domain.model.states.DisposedState
 import io.bincloud.files.domain.model.states.FileStatus
 import spock.lang.Specification
 
 class DisposedFileSpec extends Specification {
-	private static final String FILE_ID = "12345"
+	private static final String FILESYSTEM_NAME = "12345"
+	private static final String FILE_NAME = "file.txt"
+	private static final String FILE_MEDIA_TYPE = "application/media"
+	private static final String FILE_DISPOSITION = "inline"
 	private static final Instant TIMESTAMP_INITIAL_POINT = Instant.now()
 	private static final Instant TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plus(1, ChronoUnit.MILLIS)
 	private FilesystemAccessor filesystem;
@@ -50,7 +49,7 @@ class DisposedFileSpec extends Specification {
 		File file =  createDisposedFile()
 
 		when: "The file uploading is requested"
-		file.uploadFile(createUploadingContext())
+		file.uploadFileContent(createUploadingContext())
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
@@ -84,7 +83,7 @@ class DisposedFileSpec extends Specification {
 		File file =  createDisposedFile()
 
 		when: "The file distribution start is requested"
-		file.startDistribution(filesystem)
+		file.startDistribution()
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
@@ -101,16 +100,19 @@ class DisposedFileSpec extends Specification {
 	}
 
 	def createUploadingContext() {
-		return new FileUploadingContext(Stub(SourcePoint), Stub(TransferingScheduler), filesystem, Stub(CompletionCallback))
+		return new FileUploadingContext(1000L, Stub(SourcePoint), Stub(TransferingScheduler), filesystem, Stub(CompletionCallback))
 	}
 
-	private def createDisposedFile() {
+	def createDisposedFile() {
 		return File.builder()
-				.fileId(FILE_ID)
+				.filesystemName(FILESYSTEM_NAME)
+				.fileName(FILE_NAME)
+				.mediaType(FILE_MEDIA_TYPE)
+				.contentDisposition(FILE_DISPOSITION)
 				.creationMoment(TIMESTAMP_INITIAL_POINT)
 				.lastModification(TIMESTAMP_NEXT_POINT)
 				.state(new DisposedState())
-				.size(0L)
+				.fileSize(0L)
 				.build()
 	}
 }

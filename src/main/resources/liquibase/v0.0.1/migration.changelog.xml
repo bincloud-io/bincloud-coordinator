@@ -62,31 +62,59 @@
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="FILE"
 			remarks="The table storing data about physical files">
-			<column name="FILE_ID" type="java.sql.Types.VARCHAR(256)"
+			<column name="RESOURCE_ID" type="java.sql.Types.BIGINT(20)"
+				remarks="The resource identifier for which the file creates">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="FILESYSTEM_NAME"
+				type="java.sql.Types.VARCHAR(256)"
 				remarks="The physical file identifier on a filesystem. Should be the same as the file name.">
 				<constraints nullable="false" />
 			</column>
+			
+			<column name="FILE_NAME"
+				type="java.sql.Types.VARCHAR(256)"
+				remarks="The file name which will assigned to the file on download.">
+				<constraints nullable="false" />
+			</column>
+			
+			<column name="MEDIA_TYPE"
+				type="java.sql.Types.VARCHAR(256)"
+				remarks="The media type which will assigned to the file on download.">
+				<constraints nullable="false" />
+			</column>
+			
+			<column name="CONTENT_DISPOSITION"
+				type="java.sql.Types.VARCHAR(256)"
+				remarks="The content disposition which will assigned to the file on download.">
+				<constraints nullable="false" />
+			</column>
+
 			<column name="CREATION_MOMENT" type="java.sql.Types.TIMESTAMP"
 				remarks="The file creation time multiple of a second">
 				<constraints nullable="false" />
 			</column>
+
 			<column name="LAST_MODIFICATION"
 				type="java.sql.Types.TIMESTAMP"
 				remarks="The file creation time multiple of a second">
 				<constraints nullable="false" />
 			</column>
+
 			<column name="STATUS" type="java.sql.Types.VARCHAR(16)"
 				remarks="The current file status">
 				<constraints nullable="false" />
 			</column>
-			<column name="SIZE" type="java.sql.Types.BIGINT(20)"
+			
+			<column name="FILE_SIZE" type="java.sql.Types.BIGINT(20)"
 				remarks="The file size in bytes">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
 
-		<addPrimaryKey tableName="FILE" columnNames="FILE_ID"
-			constraintName="PK_FILE" />
+		<addPrimaryKey tableName="FILE"
+			columnNames="RESOURCE_ID,FILESYSTEM_NAME" constraintName="PK_FILE" />
 	</changeSet>
 
 	<changeSet id="CSET.CREATE_RESOURCE_TABLE"
@@ -137,20 +165,6 @@
 
 		<addPrimaryKey tableName="FILE_UPLOADING"
 			columnNames="RESOURCE_ID, FILE_ID" />
-
-		<addForeignKeyConstraint
-			constraintName="FK__FILE_UPLOADING$RESOURCE"
-			baseTableName="FILE_UPLOADING"
-			baseColumnNames="RESOURCE_ID"
-			referencedTableName="RESOURCE" 
-			referencedColumnNames="ID" />
-			
-		<addForeignKeyConstraint
-			constraintName="FK__FILE_UPLOADING$FILE"
-			baseTableName="FILE_UPLOADING"
-			baseColumnNames="FILE_ID"
-			referencedTableName="FILE" 
-			referencedColumnNames="FILE_ID" />
 	</changeSet>
 
 

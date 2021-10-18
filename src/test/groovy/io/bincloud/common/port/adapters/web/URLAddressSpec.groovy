@@ -1,5 +1,6 @@
 package io.bincloud.common.port.adapters.web
 
+import io.bincloud.common.domain.model.web.URLAddress
 import spock.lang.Narrative
 import spock.lang.Specification
 

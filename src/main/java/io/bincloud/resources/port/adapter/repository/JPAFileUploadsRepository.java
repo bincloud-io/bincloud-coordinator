@@ -7,33 +7,33 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.TransactionManager;
 
-import io.bincloud.resources.domain.model.file.FileUpload;
-import io.bincloud.resources.domain.model.file.FileUploadId;
-import io.bincloud.resources.domain.model.file.FileUploadsRepository;
+import io.bincloud.resources.domain.model.resource.history.UploadedFile;
+import io.bincloud.resources.domain.model.resource.history.UploadedFileId;
+import io.bincloud.resources.domain.model.resource.history.UploadedFileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
-public class JPAFileUploadsRepository implements FileUploadsRepository {
+public class JPAFileUploadsRepository implements UploadedFileRepository {
 	private final EntityManager entityManager;
 	private final TransactionManager transactionManager;
 
 	@Override
-	public Optional<FileUpload> findById(Long resourceId, String fileId) {
-		FileUploadId fileUploadingId = new FileUploadId(resourceId, fileId);
-		return Optional.ofNullable(entityManager.find(FileUpload.class, fileUploadingId));
+	public Optional<UploadedFile> findById(Long resourceId, String fileId) {
+		UploadedFileId fileUploadingId = new UploadedFileId(resourceId, fileId);
+		return Optional.ofNullable(entityManager.find(UploadedFile.class, fileUploadingId));
 	}
 
 	@Override
-	public Optional<FileUpload> findLatestResourceUpload(Long resourceId) {
-		TypedQuery<FileUpload> findLatestResourceUploadingQuery = createFindAllResourceUploadsQuery(resourceId);
+	public Optional<UploadedFile> findLatestResourceUpload(Long resourceId) {
+		TypedQuery<UploadedFile> findLatestResourceUploadingQuery = createFindAllResourceUploadsQuery(resourceId);
 		findLatestResourceUploadingQuery.setMaxResults(1);
 		return findLatestResourceUploadingQuery.getResultList().stream().findFirst();
 	}
 
 	@Override
 	@SneakyThrows
-	public void save(FileUpload fileUploading) {
+	public void save(UploadedFile fileUploading) {
 		transactionManager.begin();
 		entityManager.merge(fileUploading);
 		transactionManager.commit();
@@ -48,13 +48,13 @@ public class JPAFileUploadsRepository implements FileUploadsRepository {
 	}
 
 	@Override
-	public Stream<FileUpload> findAllResourceUploads(Long resourceId) {
+	public Stream<UploadedFile> findAllResourceUploads(Long resourceId) {
 		return createFindAllResourceUploadsQuery(resourceId).getResultList().stream();
 	}
 	
-	private TypedQuery<FileUpload> createFindAllResourceUploadsQuery(Long resourceId) {
-		TypedQuery<FileUpload> findLatestResourceUploadingQuery = entityManager
-				.createNamedQuery("FileUploadingRepository.findAllResourceUploads", FileUpload.class);
+	private TypedQuery<UploadedFile> createFindAllResourceUploadsQuery(Long resourceId) {
+		TypedQuery<UploadedFile> findLatestResourceUploadingQuery = entityManager
+				.createNamedQuery("FileUploadingRepository.findAllResourceUploads", UploadedFile.class);
 		findLatestResourceUploadingQuery.setParameter("resourceId", resourceId);
 		return findLatestResourceUploadingQuery;
 	}

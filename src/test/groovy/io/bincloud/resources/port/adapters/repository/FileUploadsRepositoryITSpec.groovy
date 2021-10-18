@@ -20,8 +20,8 @@ import io.bincloud.common.domain.model.generator.SequentialGenerator
 import io.bincloud.common.domain.model.logging.Loggers
 import io.bincloud.common.domain.model.message.MessageTemplate
 import io.bincloud.common.port.adapters.time.JPADateTimeConverter
-import io.bincloud.resources.domain.model.file.FileUpload
-import io.bincloud.resources.domain.model.file.FileUploadsRepository
+import io.bincloud.resources.domain.model.resource.history.UploadedFile
+import io.bincloud.resources.domain.model.resource.history.UploadedFileRepository
 import io.bincloud.resources.port.adapter.repository.JPAFileUploadsRepository
 import io.bincloud.testing.archive.ArchiveBuilder
 import io.bincloud.testing.database.DatabaseConfigurer
@@ -43,7 +43,7 @@ class FileUploadsRepositoryITSpec extends Specification {
 				.withScopes(COMPILE, RUNTIME, TEST)
 				.resolveDependency("org.liquibase", "liquibase-core")
 				.apply()
-				.appendPackagesRecursively(FileUpload.getPackage().getName())
+				.appendPackagesRecursively(UploadedFile.getPackage().getName())
 				.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(JPADateTimeConverter.getPackage().getName())
@@ -64,7 +64,7 @@ class FileUploadsRepositoryITSpec extends Specification {
 	private DatabaseConfigurer databaseConfigurer;
 
 	@Inject
-	private FileUploadsRepository fileUploadRepository;
+	private UploadedFileRepository fileUploadRepository;
 
 	def setup() {
 		databaseConfigurer.setup("liquibase/master.changelog.xml")
@@ -79,7 +79,7 @@ class FileUploadsRepositoryITSpec extends Specification {
 		databaseConfigurer.setup("liquibase-test/storage/FileUploadsRepositoryITSpec.changelog.xml")
 
 		and: "The file upload"
-		FileUpload fileupload = createFileUpload(FILE_ID_1, UPLOAD_MOMENT_1)
+		UploadedFile fileupload = createFileUpload(FILE_ID_1, UPLOAD_MOMENT_1)
 
 		when: "The file upload has been stored to the database"
 		fileUploadRepository.save(fileupload)
@@ -99,7 +99,7 @@ class FileUploadsRepositoryITSpec extends Specification {
 		and: "There are no file uploads"
 
 		when: "The file upload has been requested by id"
-		Optional<FileUpload> fileupload = fileUploadRepository.findById(RESOURCE_ID, FILE_ID_1)
+		Optional<UploadedFile> fileupload = fileUploadRepository.findById(RESOURCE_ID, FILE_ID_1)
 
 		then: "The file upload shouldn't be returned"
 		fileupload.isPresent() == false
@@ -110,15 +110,15 @@ class FileUploadsRepositoryITSpec extends Specification {
 		databaseConfigurer.setup("liquibase-test/storage/FileUploadsRepositoryITSpec.changelog.xml")
 
 		and: "The two file uploads for the same resource, but with different upload moments"
-		FileUpload fileUploadFirst = createFileUpload(FILE_ID_1, UPLOAD_MOMENT_1)
-		FileUpload fileUploadSecond = createFileUpload(FILE_ID_2, UPLOAD_MOMENT_2)
+		UploadedFile fileUploadFirst = createFileUpload(FILE_ID_1, UPLOAD_MOMENT_1)
+		UploadedFile fileUploadSecond = createFileUpload(FILE_ID_2, UPLOAD_MOMENT_2)
 
 		when: "The file uploads has been stored to the database"
 		fileUploadRepository.save(fileUploadFirst)
 		fileUploadRepository.save(fileUploadSecond)
 
 		and: "The latest upload has been requested"
-		FileUpload obtainedFileupload = fileUploadRepository.findLatestResourceUpload(RESOURCE_ID).get()
+		UploadedFile obtainedFileupload = fileUploadRepository.findLatestResourceUpload(RESOURCE_ID).get()
 
 		then: "The latest file upload should be obtained"
 		obtainedFileupload.getFileId() == FILE_ID_2
@@ -132,7 +132,7 @@ class FileUploadsRepositoryITSpec extends Specification {
 		and: "There are no file uploads"
 
 		when: "The latest file upload has been requested for resource"
-		Optional<FileUpload> fileupload = fileUploadRepository.findLatestResourceUpload(RESOURCE_ID)
+		Optional<UploadedFile> fileupload = fileUploadRepository.findLatestResourceUpload(RESOURCE_ID)
 
 		then: "The file upload shouldn't be returned"
 		fileupload.isPresent() == false
@@ -143,8 +143,8 @@ class FileUploadsRepositoryITSpec extends Specification {
 		databaseConfigurer.setup("liquibase-test/storage/FileUploadsRepositoryITSpec.changelog.xml")
 
 		and: "The two file uploads for the same resource, but with different upload moments"
-		FileUpload fileUploadFirst = createFileUpload(FILE_ID_1, UPLOAD_MOMENT_1)
-		FileUpload fileUploadSecond = createFileUpload(FILE_ID_2, UPLOAD_MOMENT_2)
+		UploadedFile fileUploadFirst = createFileUpload(FILE_ID_1, UPLOAD_MOMENT_1)
+		UploadedFile fileUploadSecond = createFileUpload(FILE_ID_2, UPLOAD_MOMENT_2)
 
 		when: "The file uploads has been stored to the database"
 		fileUploadRepository.save(fileUploadFirst)
@@ -199,8 +199,8 @@ class FileUploadsRepositoryITSpec extends Specification {
 		return source.truncatedTo(ChronoUnit.SECONDS);
 	}
 
-	private FileUpload createFileUpload(String fileId, Instant uploadMoment) {
-		return FileUpload.builder()
+	private UploadedFile createFileUpload(String fileId, Instant uploadMoment) {
+		return UploadedFile.builder()
 				.resourceId(RESOURCE_ID)
 				.fileId(fileId)
 				.uploadMoment(uploadMoment)

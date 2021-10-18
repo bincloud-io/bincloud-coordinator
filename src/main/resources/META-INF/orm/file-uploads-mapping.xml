@@ -10,10 +10,10 @@
 	</named-query>
 
 	<entity
-		class="io.bincloud.resources.domain.model.file.FileUpload">
+		class="io.bincloud.resources.domain.model.resource.history.UploadedFile">
 		<table name="FILE_UPLOADING" />
 		<id-class
-			class="io.bincloud.resources.domain.model.file.FileUploadId" />
+			class="io.bincloud.resources.domain.model.resource.history.UploadedFileId" />
 
 		<attributes>
 			<id name="resourceId">

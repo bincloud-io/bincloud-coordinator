@@ -34,7 +34,7 @@ public class DisposedState implements FileState {
 	}
 
 	@Override
-	public void startDistribution(RootContext context, FilesystemAccessor fileSystem) {
+	public void startDistribution(RootContext context) {
 		throw new FileHasAlreadyBeenDisposedException();
 	}
 }

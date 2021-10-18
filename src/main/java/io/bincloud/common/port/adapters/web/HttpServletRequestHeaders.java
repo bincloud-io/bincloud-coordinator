@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import io.bincloud.common.domain.model.web.KeyValueParameters;
+
 public class HttpServletRequestHeaders extends KeyValueParameters {
 	public HttpServletRequestHeaders(HttpServletRequest servletRequest) {
 		super(extractFromServletRequest(servletRequest));

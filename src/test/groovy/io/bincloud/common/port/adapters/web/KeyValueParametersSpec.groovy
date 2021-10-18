@@ -1,6 +1,7 @@
 package io.bincloud.common.port.adapters.web
 
 
+import io.bincloud.common.domain.model.web.KeyValueParameters
 import spock.lang.Specification
 
 class KeyValueParametersSpec extends Specification {

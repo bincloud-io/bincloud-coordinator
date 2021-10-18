@@ -12,8 +12,8 @@ import javax.transaction.TransactionManager;
 
 import io.bincloud.common.domain.model.generator.SequentialGenerator;
 import io.bincloud.common.port.adapters.generators.JDBCSequenceGenerator;
-import io.bincloud.resources.domain.model.ResourceRepository;
-import io.bincloud.resources.domain.model.file.FileUploadsRepository;
+import io.bincloud.resources.domain.model.resource.ResourceRepository;
+import io.bincloud.resources.domain.model.resource.history.UploadedFileRepository;
 import io.bincloud.resources.port.adapter.repository.JPAFileUploadsRepository;
 import io.bincloud.resources.port.adapter.repository.JPAResourceRepository;
 
@@ -26,7 +26,6 @@ public class RepositoriesConfig {
 	private DataSource dataSource;
 	
 	@Inject
-	@SuppressWarnings("cdi-ambiguous-dependency")
 	private TransactionManager transactionManager;
 	
 	@Produces
@@ -35,7 +34,7 @@ public class RepositoriesConfig {
 	}
 	
 	@Produces
-	public FileUploadsRepository fileUploadingRepository() {
+	public UploadedFileRepository fileUploadingRepository() {
 		return new JPAFileUploadsRepository(centralContext, transactionManager);
 	}
 	

@@ -4,7 +4,7 @@ import io.bincloud.files.domain.model.FileDownloadingContext;
 import io.bincloud.files.domain.model.FileState;
 import io.bincloud.files.domain.model.FileUploadingContext;
 import io.bincloud.files.domain.model.FilesystemAccessor;
-import io.bincloud.files.domain.model.errors.FileNotExistException;
+import io.bincloud.files.domain.model.errors.FileDoesNotExistException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -27,16 +27,16 @@ public class DraftState implements FileState {
 
 	@Override
 	public void uploadFile(RootContext context, FileUploadingContext uploadingContext) {
-		throw new FileNotExistException();
+		throw new FileDoesNotExistException();
 	}
 
 	@Override
-	public void startDistribution(RootContext context, FilesystemAccessor fileSystem) {
-		throw new FileNotExistException();
+	public void startDistribution(RootContext context) {
+		throw new FileDoesNotExistException();
 	}
 
 	@Override
 	public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {
-		throw new FileNotExistException();
+		throw new FileDoesNotExistException();
 	}
 }

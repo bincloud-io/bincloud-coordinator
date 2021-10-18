@@ -17,8 +17,8 @@ import io.bincloud.common.domain.model.logging.Loggers
 import io.bincloud.common.domain.model.message.MessageTemplate
 import io.bincloud.common.port.adapters.time.JPADateTimeConverter
 import io.bincloud.files.port.adapter.file.repository.JPAFileStateConverter
-import io.bincloud.resources.domain.model.Resource
-import io.bincloud.resources.domain.model.ResourceRepository
+import io.bincloud.resources.domain.model.resource.Resource
+import io.bincloud.resources.domain.model.resource.ResourceRepository
 import io.bincloud.resources.port.adapter.repository.JPAResourceRepository
 import io.bincloud.testing.archive.ArchiveBuilder
 import io.bincloud.testing.database.DatabaseConfigurer
