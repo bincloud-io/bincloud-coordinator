@@ -4,26 +4,26 @@
 	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
 	xmlns:tns="http://www.bincloud.io/common/global-types">
 
-	<complexType name="ServiceResponseType">
+	<complexType name="ServiceResponse_Type">
 		<sequence>
 			<element name="boundedContext" minOccurs="1" maxOccurs="1"
-				type="tns:BoundedContextType">
+				type="tns:BoundedContext_Type">
 			</element>
 		</sequence>
 	</complexType>
 
-	<complexType name="ServiceFaultType">
+	<complexType name="ServiceFault_Type">
 		<complexContent>
-			<extension base="tns:ServiceResponseType">
+			<extension base="tns:ServiceResponse_Type">
 				<sequence>
 					<element name="severity" minOccurs="1" maxOccurs="1"
-						type="tns:FaultSeverityType">
+						type="tns:FaultSeverity_Type">
 					</element>
 					<element name="errorNumber" minOccurs="1" maxOccurs="1"
-						type="tns:FaultCodeType" nillable="false">
+						type="tns:FaultCode_Type" nillable="false">
 					</element>
 					<element name="message" minOccurs="1" maxOccurs="1"
-						type="tns:FaultDescription" nillable="false">
+						type="tns:FaultDescription_Type" nillable="false">
 					</element>
 				</sequence>
 			</extension>
@@ -31,7 +31,7 @@
 	</complexType>
 
 
-	<simpleType name="FaultSeverityType">
+	<simpleType name="FaultSeverity_Type">
 		<restriction base="string">
 
 
@@ -41,10 +41,10 @@
 		</restriction>
 	</simpleType>
 
-	<element name="ServiceFault" type="tns:ServiceFaultType"></element>
+	<element name="ServiceFault" type="tns:ServiceFault_Type"></element>
 
 
-	<simpleType name="BoundedContextType">
+	<simpleType name="BoundedContext_Type">
 		<restriction base="string">
 			<whiteSpace value="collapse"></whiteSpace>
 			<minLength value="1"></minLength>
@@ -53,11 +53,11 @@
 	</simpleType>
 
 
-	<simpleType name="FaultCodeType">
+	<simpleType name="FaultCode_Type">
 		<restriction base="long"></restriction>
 	</simpleType>
 
-	<simpleType name="FaultDescription">
+	<simpleType name="FaultDescription_Type">
 		<restriction base="string">
 			<whiteSpace value="collapse"></whiteSpace>
 		</restriction>

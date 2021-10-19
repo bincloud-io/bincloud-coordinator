@@ -116,59 +116,7 @@
 		<addPrimaryKey tableName="FILE"
 			columnNames="RESOURCE_ID,FILESYSTEM_NAME" constraintName="PK_FILE" />
 	</changeSet>
-
-	<changeSet id="CSET.CREATE_RESOURCE_TABLE"
-		author="Dmitry Mikhaylenko">
-		<createTable tableName="RESOURCE">
-			<column name="ID" type="java.sql.Types.BIGINT(20)">
-				<constraints nullable="false" />
-			</column>
-			<column name="FILE_NAME" type="java.sql.Types.VARCHAR(256)">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="RESOURCE" columnNames="ID"
-			constraintName="PK_RESOURCE" />
-	</changeSet>
-
-	<changeSet id="CSET.CREATE_RESOURCE_SEQUENCE"
-		author="Dmitry Mikhaylenko">
-		<sql>
-			INSERT INTO `SEQUENCES`(`sequence_name`, `last_history_marker`)
-			SELECT 'RESOURCE_SEQUENCE' as `sequence_name`, UUID() as
-			`last_history_marker`
-			FROM DUAL;
-		</sql>
-		<rollback>
-			<sql>
-				DELETE FROM `SEQUENCES` WHERE
-				`sequence_name`='RESOURCE_SEQUENCE';
-			</sql>
-		</rollback>
-	</changeSet>
-
-	<changeSet id="CSET.CREATE_FILE_UPLOADING_TABLE"
-		author="Dmitry Mikhaylenko">
-		<createTable tableName="FILE_UPLOADING">
-			<column name="RESOURCE_ID" type="java.sql.Types.BIGINT(20)">
-				<constraints nullable="false" />
-			</column>
-			<column name="FILE_ID" type="java.sql.Types.VARCHAR(256)">
-				<constraints nullable="false" />
-			</column>
-			<column name="UPLOADING_MOMENT"
-				type="java.sql.Types.TIMESTAMP">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="FILE_UPLOADING"
-			columnNames="RESOURCE_ID, FILE_ID" />
-	</changeSet>
-
-
-
+	
 	<changeSet id="CSET.TAG_V_0_0_1" author="Dmitry Mikhaylenko">
 		<tagDatabase tag="v0.0.1" />
 	</changeSet>

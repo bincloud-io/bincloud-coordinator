@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+	targetNamespace="http://www.bincloud.io/storage/file-storage-types/"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bincloud.io/storage/file-storage-types/"
+	xmlns:global="http://www.bincloud.io/common/global-types">
+
+	<import schemaLocation="global-types.xsd"
+		namespace="http://www.bincloud.io/common/global-types"></import>
+	<complexType name="CreateFileRevisionRq_Type">
+		<sequence>
+			<element name="attributes" type="tns:FileAttributes_Type"></element>
+		</sequence>
+	</complexType>
+
+	<element name="CreateFileRevisionRq"
+		type="tns:CreateFileRevisionRq_Type"></element>
+
+	<complexType name="CreateFileRevisionRs_Type">
+		<complexContent>
+			<extension base="global:ServiceResponse_Type">
+				<sequence>
+					<element name="revisionPointer" type="tns:RevisionPointer_Type"></element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<element name="CreateFileRevisionRs"
+		type="tns:CreateFileRevisionRs_Type"></element>
+
+	<complexType name="FileAttributes_Type">
+		<sequence>
+			<element name="fileName" type="tns:FileName_Type"></element>
+			<element name="mediaType" type="tns:MimeType_Type"></element>
+			<element name="contentDisposition" type="tns:ContentDisposition_Type"></element>
+		</sequence>
+	</complexType>
+	
+    <simpleType name="FileName_Type">
+    	<restriction base="string">
+    		<minLength value="1"></minLength>
+    		<maxLength value="256"></maxLength>
+    	</restriction>
+    </simpleType>
+
+    <simpleType name="RevisionPointer_Type">
+    	<restriction base="string">
+    		<length value="64"></length>
+    	</restriction>
+    </simpleType>
+
+    <simpleType name="MimeType_Type">
+    	<restriction base="string">
+    		<minLength value="1"></minLength>
+    		<maxLength value="20"></maxLength>
+    	</restriction>
+    </simpleType>
+
+    <simpleType name="ContentDisposition_Type">
+    	<restriction base="string">
+    		<enumeration value="INLINE"></enumeration>
+    		<enumeration value="ATTACHMENT"></enumeration>
+    	</restriction>
+    </simpleType>
+</schema>
