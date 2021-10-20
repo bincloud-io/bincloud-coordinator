@@ -1,12 +1,14 @@
-package io.bcs.common.domain.model.error;
+package io.bce.domain;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import io.bce.domain.errors.UnexpectedErrorException;
+
 public class AsyncErrorsHandler<C> {
 	private final Class<C> contextType;
 	private final Map<Class<?>, ErrorInterceptor<C, Exception>> errorHandlers;
-	private ErrorInterceptor<C, Exception> defaultExceptionHandler = (context, error) -> {throw new UnexpectedSystemBehaviorException(error);};
+	private ErrorInterceptor<C, Exception> defaultExceptionHandler = (context, error) -> {throw new UnexpectedErrorException(error);};
 	
 	private AsyncErrorsHandler(Class<C> contextType) {
 		super();

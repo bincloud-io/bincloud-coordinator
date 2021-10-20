@@ -5,11 +5,10 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.transaction.TransactionManager;
 
+import io.bce.text.TextTemplates;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
 import io.bcs.common.domain.model.logging.Loggers;
-import io.bcs.common.domain.model.message.templates.StringifiedObjectTemplate;
-import io.bcs.common.domain.model.message.templates.TextMessageTemplate;
 import io.bcs.storage.domain.model.File;
 import io.bcs.storage.domain.model.FileId;
 import io.bcs.storage.domain.model.FileRepository;
@@ -24,10 +23,9 @@ public class JPAFileRepository implements FileRepository {
 
 	@Override
 	public Optional<File> findById(String fileId) {
-		Loggers.applicationLogger(JPAFileRepository.class)
-				.log(new LogRecord(Level.TRACE,
-						new TextMessageTemplate("Find file with fileId={{fileId}}")
-								.withParameter("fileId", fileId)));
+		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
+				TextTemplates.createBy("Find file with fileId={{fileId}}").withParameter("fileId", fileId)));
+
 		return Optional.ofNullable(entityManager.find(File.class, new FileId(fileId)));
 	}
 
@@ -44,9 +42,8 @@ public class JPAFileRepository implements FileRepository {
 	@Override
 	@SneakyThrows
 	public void save(File file) {
-		Loggers.applicationLogger(JPAFileRepository.class)
-				.log(new LogRecord(Level.TRACE, new TextMessageTemplate("Save file: {{file}}").withParameter("file",
-						new StringifiedObjectTemplate(file))));
+		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
+				TextTemplates.createBy("Save file: {{file}}").withParameter("file", TextTemplates.createBy(file))));
 		transactionManager.begin();
 		this.entityManager.merge(file);
 		transactionManager.commit();

@@ -1,8 +1,7 @@
-package io.bcs.common.domain.model.error
+package io.bce.domain
 
-import io.bcs.common.domain.model.error.AsyncErrorsHandler
-import io.bcs.common.domain.model.error.UnexpectedSystemBehaviorException
-import io.bcs.common.domain.model.error.AsyncErrorsHandler.ErrorInterceptor
+import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor
+import io.bce.domain.errors.UnexpectedErrorException
 import spock.lang.Specification
 
 class AsyncErrorsHandlerSpec extends Specification {
@@ -31,7 +30,7 @@ class AsyncErrorsHandlerSpec extends Specification {
 		errorHandler.handleError(context, error)
 		
 		then: "The received error should be rethrown"
-		Exception thrownException = thrown(UnexpectedSystemBehaviorException)
+		Exception thrownException = thrown(UnexpectedErrorException)
 		error.is(thrownException.cause)
 	}
 	

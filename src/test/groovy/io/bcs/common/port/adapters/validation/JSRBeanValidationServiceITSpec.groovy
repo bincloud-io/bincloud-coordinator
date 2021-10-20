@@ -12,15 +12,16 @@ import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 
-import io.bcs.common.domain.model.error.ApplicationException
+import io.bce.domain.errors.ApplicationException
+import io.bce.text.TextProcessor
+import io.bce.text.TextTemplate
+import io.bce.text.TextTemplates
+import io.bce.text.transformers.TemplateCompilingTransformer
+import io.bce.text.transformers.compilers.HandlebarsTemplateCompiler
+import io.bce.validation.JSRBeanValidationService
+import io.bce.validation.ValidationService
+import io.bce.validation.ValidationState
 import io.bcs.common.domain.model.logging.Loggers
-import io.bcs.common.domain.model.message.MessageProcessor
-import io.bcs.common.domain.model.message.MessageTemplate
-import io.bcs.common.domain.model.message.templates.MessageTextResolvingTemplate
-import io.bcs.common.domain.model.validation.ValidationService
-import io.bcs.common.domain.model.validation.ValidationState
-import io.bcs.common.port.adapters.messages.MustacheInterpolator
-import io.bcs.common.port.adapters.validation.JSRBeanValidationService
 import io.bcs.testing.archive.ArchiveBuilder
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -42,20 +43,18 @@ class JSRBeanValidationServiceITSpec extends Specification {
 				.apply()
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(Loggers.getPackage().getName())
-				.appendPackagesRecursively(MessageTemplate.getPackage().getName())
+				.appendPackagesRecursively(TextTemplate.getPackage().getName())
 				.appendPackagesRecursively(ValidationService.getPackage().getName())
-				.appendClasses(AlwaysFailed, AlwaysFailedValidator, JSRBeanValidationService, MustacheInterpolator)
+				.appendClasses(AlwaysFailed, AlwaysFailedValidator, JSRBeanValidationService, HandlebarsTemplateCompiler)
 				.appendManifestResource("META-INF/beans.xml", "beans.xml")
 				.build()
 	}
 
-	private final MessageProcessor messageProcessor = new MessageProcessor().configure()
-		.withTransformation({template -> new MessageTextResolvingTemplate(template, new MustacheInterpolator())})
-		.apply();
+	private final TextProcessor messageProcessor = TextProcessor.create().withTransformer(new TemplateCompilingTransformer(new HandlebarsTemplateCompiler()))
 
 	@Inject
 	private Validator validator;
-	
+
 	def "Scenario: validate object with validation framework"() {
 		given: "The wrong bean"
 		WrongBean wrongBean = new WrongBean()
@@ -64,23 +63,21 @@ class JSRBeanValidationServiceITSpec extends Specification {
 		ValidationService validationService = new JSRBeanValidationService(validator, messageProcessor)
 
 		when: "The validation has been requested"
-		ValidationState validationState = validationService.validate(wrongBean, ValidationGroup)
+		ValidationState validationState = validationService.validate(wrongBean)
 
 		then: "The result validation state will contain all expected constraints"
 		validationState == createExpectedValidationState()
 	}
-	
+
 	private ValidationState createExpectedValidationState() {
 		return new ValidationState()
 				.withUngrouped("Violation constraint: Ungrouped property")
 				.withGrouped("stringValue", "Violation constraint: Grouped property")
 	}
 
-	interface ValidationGroup {}
-
-	@AlwaysFailed(passedProperty="Ungrouped property", message="Violation constraint: {{passedProperty}}", groups=[ValidationGroup])
+	@AlwaysFailed(passedProperty="Ungrouped property", message="Violation constraint: {{passedProperty}}")
 	class WrongBean {
-		@AlwaysFailed(passedProperty="Grouped property", message="Violation constraint: {{passedProperty}}", groups=[ValidationGroup])
+		@AlwaysFailed(passedProperty="Grouped property", message="Violation constraint: {{passedProperty}}")
 		private String stringValue;
 
 		public WrongBean() {

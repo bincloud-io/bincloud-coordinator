@@ -3,11 +3,11 @@ package io.bcs.common.domain.model.logging;
 import java.time.Instant;
 import java.util.Map;
 
-import io.bcs.common.domain.model.error.ErrorDescriptor;
-import io.bcs.common.domain.model.message.MessageTemplate;
-import io.bcs.common.domain.model.message.MessageTransformer;
-import io.bcs.common.domain.model.message.templates.ErrorDescriptorTemplate;
-import io.bcs.common.domain.model.message.templates.StringifiedObjectTemplate;
+import io.bce.domain.ErrorDescriptorTemplate;
+import io.bce.domain.errors.ErrorDescriptor;
+import io.bce.text.TextTemplate;
+import io.bce.text.TextTemplate.Transformer;
+import io.bce.text.TextTemplates;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
@@ -18,22 +18,22 @@ public class LogRecord {
 	private Level level;
 	private Instant timestamp;
 	@Getter(AccessLevel.NONE)
-	private MessageTemplate message;
+	private TextTemplate message;
 	
-	public LogRecord(Level level, Object loggableObject) {
-		this(level, new StringifiedObjectTemplate(loggableObject));
+	public LogRecord(Level level, Object loggableObject) {		
+		this(level, TextTemplates.createBy(loggableObject));
 	}
 
 	public LogRecord(Level level, String messageText) {
-		this(level, new StringifiedObjectTemplate(messageText));
+		this(level, TextTemplates.createBy(messageText));
 	}
 	
 	
-	public LogRecord(Level level, ErrorDescriptor errorDescriptor) {
-		this(level, new ErrorDescriptorTemplate(errorDescriptor));
+	public LogRecord(Level level, ErrorDescriptor errorDescriptor) {	
+		this(level, ErrorDescriptorTemplate.createFor(errorDescriptor));
 	}
 	
-	public LogRecord(Level level, MessageTemplate message) {
+	public LogRecord(Level level, TextTemplate message) {
 		super();
 		this.level = level;
 		this.message = message;
@@ -47,14 +47,14 @@ public class LogRecord {
 		this.message = proto.message;
 	}
 	
-	public LogRecord transformMessage(MessageTransformer transformer) {
+	public LogRecord transformMessage(Transformer transformer) {
 		LogRecord derived = new LogRecord(this);
-		derived.message = transformer.transformMessage(message);
+		derived.message = transformer.transform(message);
 		return derived;
 	}
 	
 	public String getMessageText() {
-		return message.getText();
+		return message.getTemplateText();
 	}
 	
 	public Map<String, Object> getMessageParameters() {

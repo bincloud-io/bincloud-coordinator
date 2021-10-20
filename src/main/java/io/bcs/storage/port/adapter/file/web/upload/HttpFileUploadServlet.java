@@ -10,11 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.bcs.common.domain.model.error.ApplicationException;
-import io.bcs.common.domain.model.error.AsyncErrorsHandler;
-import io.bcs.common.domain.model.error.AsyncErrorsHandler.ErrorInterceptor;
+import io.bce.domain.AsyncErrorsHandler;
+import io.bce.domain.BoundedContextId;
+import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor;
+import io.bce.domain.errors.ApplicationException;
+import io.bce.text.TextProcessor;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
-import io.bcs.common.domain.model.message.MessageProcessor;
 import io.bcs.common.domain.model.web.KeyValueParameters;
 import io.bcs.common.port.adapters.io.transfer.sources.StreamSource;
 import io.bcs.common.port.adapters.web.AsyncServletOperationExecutor;
@@ -35,7 +36,7 @@ public class HttpFileUploadServlet extends HttpServlet {
 	private FileUploader fileUploader;
 
 	@Inject
-	private MessageProcessor messageProcessor;
+	private TextProcessor textProcessor;
 
 	@Inject
 	private ServerContextProvider serverContext;
@@ -110,11 +111,11 @@ public class HttpFileUploadServlet extends HttpServlet {
 		return asyncContext.getRequest().getContentLengthLong();
 	}
 
-	private ErrorInterceptor<AsyncContext, Exception> createDefaultErrorHandler(String context) {
-		return HttpServletAppliactionExceptionHandler.defaultErrorHandler(messageProcessor, context);
+	private ErrorInterceptor<AsyncContext, Exception> createDefaultErrorHandler(BoundedContextId context) {
+		return HttpServletAppliactionExceptionHandler.defaultErrorHandler(textProcessor, context);
 	}
 
 	private <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> createErrorHandler(int httpCode) {
-		return HttpServletAppliactionExceptionHandler.applicationErrorHandler(messageProcessor, httpCode);
+		return HttpServletAppliactionExceptionHandler.applicationErrorHandler(textProcessor, httpCode);
 	}
 }

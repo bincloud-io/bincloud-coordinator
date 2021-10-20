@@ -5,11 +5,12 @@ import java.io.IOException;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-import io.bcs.common.domain.model.error.ApplicationException;
-import io.bcs.common.domain.model.error.UnexpectedSystemBehaviorException;
-import io.bcs.common.domain.model.error.AsyncErrorsHandler.ErrorInterceptor;
-import io.bcs.common.domain.model.message.MessageProcessor;
-import io.bcs.common.domain.model.message.templates.ErrorDescriptorTemplate;
+import io.bce.domain.BoundedContextId;
+import io.bce.domain.ErrorDescriptorTemplate;
+import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor;
+import io.bce.domain.errors.ApplicationException;
+import io.bce.domain.errors.UnexpectedErrorException;
+import io.bce.text.TextProcessor;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -20,34 +21,36 @@ public class HttpServletAppliactionExceptionHandler<E extends ApplicationExcepti
 	public static final String ERROR_CODE_HTTP_HEADER = "X-ERR-CODE";
 	public static final String ERROR_SEVERITY_HEADER = "X-ERR-SEVERITY";
 
-	private final MessageProcessor messageProcessor;
+	private final TextProcessor textProcessor;
 	private final Integer errorCode;
 
 	@Override
 	public void handleError(AsyncContext context, E error) {
 		HttpServletResponse response = (HttpServletResponse) context.getResponse();
 		try {
-			response.setHeader(ERROR_BOUNDED_CONTEXT_HTTP_HEADER, error.getContext());
+			response.setHeader(ERROR_BOUNDED_CONTEXT_HTTP_HEADER, error.getContextId().toString());
 			response.setHeader(ERROR_CODE_HTTP_HEADER, String.valueOf(error.getErrorCode()));
-			response.setHeader(ERROR_SEVERITY_HEADER, error.getSeverity().name());
-			response.sendError(errorCode, messageProcessor.interpolate(new ErrorDescriptorTemplate(error)));
+			response.setHeader(ERROR_SEVERITY_HEADER, error.getErrorSeverity().name());
+			response.sendError(errorCode, textProcessor.interpolate(ErrorDescriptorTemplate.createFor(error)));
 		} catch (IOException ioError) {
-			throw new UnexpectedSystemBehaviorException(error);
+			throw new UnexpectedErrorException(ioError);
 		} finally {
 			context.complete();
 		}
 	}
-	
-	public static final <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> applicationErrorHandler(MessageProcessor messageProcessor, int errorCode) {
+
+	public static final <E extends ApplicationException> ErrorInterceptor<AsyncContext, E> applicationErrorHandler(
+			TextProcessor messageProcessor, int errorCode) {
 		return new HttpServletAppliactionExceptionHandler<>(messageProcessor, errorCode);
 	}
 
-	public static final ErrorInterceptor<AsyncContext, Exception> defaultErrorHandler(MessageProcessor messageProcessor,
-			String boundedContext) {
-		HttpServletAppliactionExceptionHandler<UnexpectedSystemBehaviorException> applicationErrorHandler = new HttpServletAppliactionExceptionHandler<>(
-				messageProcessor, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	public static final ErrorInterceptor<AsyncContext, Exception> defaultErrorHandler(TextProcessor textProcessor,
+			BoundedContextId boundedContext) {
+		HttpServletAppliactionExceptionHandler<UnexpectedErrorException> applicationErrorHandler = new HttpServletAppliactionExceptionHandler<>(
+				textProcessor, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		return (context, error) -> {
-			applicationErrorHandler.handleError(context, new UnexpectedSystemBehaviorException(boundedContext, error));
+			applicationErrorHandler.handleError(context,
+					new UnexpectedErrorException(boundedContext, error));
 		};
 	}
 }

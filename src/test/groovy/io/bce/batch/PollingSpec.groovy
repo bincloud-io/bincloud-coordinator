@@ -1,11 +1,11 @@
-package io.bcs.common.domain.model.batch
+package io.bce.batch
 
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-import io.bcs.common.domain.model.batch.BatchPoller
-import io.bcs.common.domain.model.batch.PolledElement
-import io.bcs.common.domain.model.batch.Polling
+import io.bce.batch.BatchPoller
+import io.bce.batch.PolledElement
+import io.bce.batch.Polling
 import spock.lang.Narrative
 import spock.lang.Specification
 

@@ -4,38 +4,41 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import io.bce.text.TextProcessor;
+import io.bce.text.TextTemplates;
 import io.bcs.common.domain.model.logging.ApplicationLogger;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
-import io.bcs.common.domain.model.message.MessageProcessor;
 
 public class JULLogger implements ApplicationLogger {
 	private Logger logger;
-	private MessageProcessor messageProcessor;
+	private TextProcessor messageProcessor;
 
-	public JULLogger(MessageProcessor messageProcessor) {
+	public JULLogger(TextProcessor messageProcessor) {
 		super();
 		this.logger = Logger.getAnonymousLogger();
 		this.messageProcessor = messageProcessor;
 	}
 
-	private JULLogger(MessageProcessor messageProcessor, String name) {
+	private JULLogger(TextProcessor messageProcessor, String name) {
 		super();
 		this.messageProcessor = messageProcessor;
-		
+
 		this.logger = Logger.getLogger(name);
 	}
 
 	@Override
 	public void log(LogRecord logRecord) {
-		this.logger.log(new JULRecord(logRecord.transformMessage(messageProcessor::process)));
+		LogRecord transformedRecord = logRecord.transformMessage(
+				template -> TextTemplates.createBy(messageProcessor.interpolate(template), template.getParameters()));
+		this.logger.log(new JULRecord(transformedRecord));
 	}
 
 	@Override
 	public ApplicationLogger named(String loggerName) {
 		return new JULLogger(messageProcessor, loggerName);
 	}
-	
+
 	private static class JULRecord extends java.util.logging.LogRecord {
 		private static final long serialVersionUID = 196133523390302741L;
 
@@ -47,12 +50,13 @@ public class JULLogger implements ApplicationLogger {
 
 	private static class JULLevel extends java.util.logging.Level {
 		private static final long serialVersionUID = -6609526190118526044L;
-		private static final Map<Level, Integer> SEVERITY_FACTOR_MAP = createSeverityFactorMap();   
+		private static final Map<Level, Integer> SEVERITY_FACTOR_MAP = createSeverityFactorMap();
+
 		public JULLevel(Level level) {
 			super(level.name(), SEVERITY_FACTOR_MAP.getOrDefault(level, INFO.intValue()));
-		}	
+		}
 	}
-	
+
 	private static Map<Level, Integer> createSeverityFactorMap() {
 		Map<Level, Integer> result = new HashMap<>();
 		result.put(Level.CRITIC, java.util.logging.Level.SEVERE.intValue());

@@ -1,29 +1,23 @@
 package io.bcs.common.domain.model.logging
 
-import io.bcs.common.domain.model.error.ErrorDescriptor
-import io.bcs.common.domain.model.logging.Level
-import io.bcs.common.domain.model.logging.LogRecord
+import io.bce.domain.BoundedContextId
+import io.bce.domain.ErrorDescriptorTemplate
+import io.bce.domain.errors.ErrorDescriptor
+import io.bce.domain.errors.ErrorDescriptor.ErrorCode
+import io.bce.text.TextTemplate
+import io.bce.text.TextTemplates
 import io.bcs.common.domain.model.logging.audit.ServiceAuditEvent
-import io.bcs.common.domain.model.message.MessageTemplate
-import io.bcs.common.domain.model.message.templates.ErrorDescriptorTemplate
-import io.bcs.common.domain.model.message.templates.StringifiedObjectTemplate
 import spock.lang.Narrative
 import spock.lang.Specification
 
-@Narrative("""
-	To make audit logging simpler and be possible aggregate attributes related
-	to audit logging (don't confuse with system logging), as a developer I am 
-	needed in component which will aggregate audit event data and declare behavior 
-	to transform them.
-""")
 class AuditEventSpec extends Specification {
 	private static final String RANDOM_TEXT = "RANDOM TEXT"
 	private static final String PARAM_KEY_1 = "KEY_1"
 	private static final String PARAM_VALUE_1 = "VALUE_1"
 	private static final String PARAM_KEY_2 = "KEY_2"
 	private static final String PARAM_VALUE_2 = "VALUE_2"
-	private static final String EVENT_CONTEXT = "ERRCTX"
-	private static final Long ERROR_CODE = 100L
+	private static final BoundedContextId EVENT_CONTEXT = BoundedContextId.createFor(PARAM_VALUE_2)
+	private static final ErrorCode ERROR_CODE = ErrorCode.createFor(100L)
 	private static final Collection<String> AUDIT_DETAILS_PARAMETERS = Arrays.asList(PARAM_KEY_2)
 
 
@@ -45,10 +39,10 @@ class AuditEventSpec extends Specification {
 		auditEvent.getAuditDetailsParameters().containsKey(PARAM_KEY_1) == false
 
 		and: "The event context should be initialized without changings"
-		auditEvent.getEventCode() == EVENT_CONTEXT
+		auditEvent.getContextId() == EVENT_CONTEXT
 
 		and: "The error code should be zero"
-		auditEvent.getErrorCode() == 0L
+		auditEvent.getErrorCode() == ErrorCode.SUCCESSFUL_COMPLETED_CODE
 
 		where:
 		logLevel << [Level.CRITIC, Level.DEBUG, Level.ERROR, Level.INFO, Level.TRACE, Level.WARN]
@@ -66,14 +60,14 @@ class AuditEventSpec extends Specification {
 
 		and: "The log message text should be initialized from error descriptor"
 		ErrorDescriptorTemplate  expectedTemplate = new ErrorDescriptorTemplate(createMockErrorDescriptor())
-		auditEvent.getAuditLogMessageText() == expectedTemplate.getText()
+		auditEvent.getAuditLogMessageText() == expectedTemplate.getTemplateText()
 
 		and: "Audit details parameters should be strictly contain parameters with names enumerated in audit parameter names"
 		auditEvent.getAuditDetailsParameters().get(PARAM_KEY_2) == PARAM_VALUE_2
 		auditEvent.getAuditDetailsParameters().containsKey(PARAM_KEY_1) == false
 
 		and: "The event context should be initialized from error descriptor"
-		auditEvent.getEventCode() == EVENT_CONTEXT
+		auditEvent.getContextId() == EVENT_CONTEXT
 
 		and: "The error code  should be initialized from error descriptor"
 		auditEvent.getErrorCode() == ERROR_CODE
@@ -87,7 +81,7 @@ class AuditEventSpec extends Specification {
 		ServiceAuditEvent sourceEvent = new ServiceAuditEvent(EVENT_CONTEXT, logLevel, createMockMessageTemplate(), AUDIT_DETAILS_PARAMETERS)
 
 		when: "The message transformation has been requested"
-		ServiceAuditEvent transformedEvent = sourceEvent.transformMessage({new StringifiedObjectTemplate("TRANSFORMED_TEXT")})
+		ServiceAuditEvent transformedEvent = sourceEvent.transformMessage({TextTemplates.createBy("TRANSFORMED_TEXT")})
 
 		then: "The new audit event instance should be created based on source audit event"
 		transformedEvent.is(sourceEvent) == false
@@ -99,7 +93,7 @@ class AuditEventSpec extends Specification {
 		transformedEvent.getAuditLogTimestamp() == sourceEvent.getAuditLogTimestamp()
 
 		and: "Their event codes should be the same"
-		transformedEvent.getEventCode() == sourceEvent.getEventCode()
+		transformedEvent.getContextId() == sourceEvent.getContextId()
 
 		and: "Their error codes should be the same"
 		transformedEvent.getErrorCode() == sourceEvent.getErrorCode()
@@ -134,9 +128,9 @@ class AuditEventSpec extends Specification {
 		logLevel << [Level.CRITIC, Level.DEBUG, Level.ERROR, Level.INFO, Level.TRACE, Level.WARN]
 	}
 
-	private MessageTemplate createMockMessageTemplate() {
-		MessageTemplate messageTemplate = Stub(MessageTemplate)
-		messageTemplate.getText() >> RANDOM_TEXT
+	private TextTemplate createMockMessageTemplate() {
+		TextTemplate messageTemplate = Stub(TextTemplate)
+		messageTemplate.getTemplateText() >> RANDOM_TEXT
 		Map<String, Object> parameters = new HashMap()
 		messageTemplate.getParameters() >> parameters
 		parameters.put(PARAM_KEY_1, PARAM_VALUE_1)
@@ -146,10 +140,10 @@ class AuditEventSpec extends Specification {
 
 	private ErrorDescriptor createMockErrorDescriptor() {
 		ErrorDescriptor errorDescriptor = Stub(ErrorDescriptor)
-		errorDescriptor.getContext() >> EVENT_CONTEXT
+		errorDescriptor.getContextId() >> EVENT_CONTEXT
 		errorDescriptor.getErrorCode() >> ERROR_CODE
 		Map<String, Object> parameters = new HashMap()
-		errorDescriptor.getDetails() >> parameters
+		errorDescriptor.getErrorDetails() >> parameters
 		parameters.put(PARAM_KEY_1, PARAM_VALUE_1)
 		parameters.put(PARAM_KEY_2, PARAM_VALUE_2)
 		return errorDescriptor

@@ -6,10 +6,11 @@ import java.util.Optional;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
+import io.bce.text.TextTemplate;
+import io.bce.text.TextTemplates;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
 import io.bcs.common.domain.model.logging.Loggers;
-import io.bcs.common.domain.model.message.templates.TextMessageTemplate;
 import io.bcs.storage.domain.model.FileState;
 import io.bcs.storage.domain.model.states.FileStatus;
 
@@ -19,7 +20,7 @@ public class JPAFileStateConverter implements AttributeConverter<FileState, Stri
 	public String convertToDatabaseColumn(FileState attribute) {
 		String dbColumn = Optional.ofNullable(attribute).map(state -> state.getStatus()).orElse(null);
 		Loggers.applicationLogger(JPAFileStateConverter.class).log(new LogRecord(Level.TRACE,
-				new LogMessage("Convert JPA -> JDBC: [{{jpaAttribute}}] -> [{{dbColumn}}]", attribute, dbColumn)));
+				logMessageText("Convert JPA -> JDBC: [{{jpaAttribute}}] -> [{{dbColumn}}]", attribute, dbColumn)));
 		return dbColumn;
 	}
 
@@ -27,7 +28,7 @@ public class JPAFileStateConverter implements AttributeConverter<FileState, Stri
 	public FileState convertToEntityAttribute(String dbData) {
 		FileState fileState = Optional.ofNullable(dbData).map(status -> extractFileState(status)).orElse(null);
 		Loggers.applicationLogger(JPAFileStateConverter.class).log(new LogRecord(Level.TRACE,
-				new LogMessage("Convert JDBC -> JPA: [{{dbColumn}}] -> [{{jpaAttribute}}]", fileState, dbData)));
+				logMessageText("Convert JDBC -> JPA: [{{dbColumn}}] -> [{{jpaAttribute}}]", fileState, dbData)));
 		return fileState;
 	}
 
@@ -36,10 +37,8 @@ public class JPAFileStateConverter implements AttributeConverter<FileState, Stri
 				.findFirst().map(FileStatus::getFileState).orElseThrow(() -> new Error("Must never be happened."));
 	}
 
-	private class LogMessage extends TextMessageTemplate {
-		public LogMessage(String textMessage, FileState attribute, String dbColumn) {
-			super(new TextMessageTemplate(textMessage).withParameter("jpaAttribute", attribute)
-					.withParameter("dbColumn", dbColumn));
-		}
+	private TextTemplate logMessageText(String textMessage, FileState attribute, String dbColumn) {
+		return TextTemplates.createBy(textMessage).withParameter("jpaAttribute", attribute).withParameter("dbColumn",
+				dbColumn);
 	}
 }

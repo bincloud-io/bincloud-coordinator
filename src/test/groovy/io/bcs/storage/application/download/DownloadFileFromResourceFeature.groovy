@@ -246,7 +246,7 @@ class DownloadFileFromResourceFeature extends Specification {
 
 		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
-		error.getContext() == FileDoesNotExistException.CONTEXT
+		error.getContextId() == FileDoesNotExistException.CONTEXT
 		error.getErrorCode() == FileDoesNotExistException.ERROR_CODE
 	}
 	
@@ -268,7 +268,7 @@ class DownloadFileFromResourceFeature extends Specification {
 
 		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
 		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
-		error.getContext() == FileDoesNotExistException.CONTEXT
+		error.getContextId() == FileDoesNotExistException.CONTEXT
 		error.getErrorCode() == FileDoesNotExistException.ERROR_CODE
 	}
 	

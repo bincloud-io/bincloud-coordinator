@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import io.bcs.common.domain.model.error.MustNeverBeHappenedError;
+import io.bce.MustNeverBeHappenedError;
 import io.bcs.common.domain.model.generator.SequentialGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

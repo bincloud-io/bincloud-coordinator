@@ -3,14 +3,13 @@ package io.bcs.storage.application.upload
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ApplicationException
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
-import io.bcs.storage.application.upload.FileUploadService
 import io.bcs.storage.domain.model.File
 import io.bcs.storage.domain.model.FileRepository
 import io.bcs.storage.domain.model.FileState
@@ -80,8 +79,8 @@ class UploadFileToResourceFeature extends Specification {
 
 		then: "The wrong file pointer format error should be passed to the upload listener"
 		1 * uploadListener.onError(_) >> {error = it[0]}
-		error.getSeverity() == Severity.BUSINESS
-		error.getContext() == UnspecifiedFilesystemNameException.CONTEXT
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
+		error.getContextId() == UnspecifiedFilesystemNameException.CONTEXT
 		error.getErrorCode() == UnspecifiedFilesystemNameException.ERROR_CODE
 	}
 
@@ -98,8 +97,8 @@ class UploadFileToResourceFeature extends Specification {
 
 		then: "The wrong file pointer format error should be passed to the upload listener"
 		1 * uploadListener.onError(_) >> {error = it[0]}
-		error.getSeverity() == Severity.BUSINESS
-		error.getContext() == FileDoesNotExistException.CONTEXT
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
+		error.getContextId() == FileDoesNotExistException.CONTEXT
 		error.getErrorCode() == FileDoesNotExistException.ERROR_CODE
 	}
 
@@ -160,17 +159,17 @@ class UploadFileToResourceFeature extends Specification {
 
 		then: "Upload listener should be completed with error"
 		1 * uploadListener.onError(_) >> {error = it[0]}
-		error.getSeverity() == errorSeverity
-		error.getContext() == errorContext
+		error.getErrorSeverity() == errorSeverity
+		error.getContextId() == errorContext
 		error.getErrorCode() == errorCode
 
 		and: "File shouldn't be stored to the repository"
 		0 * fileRepository.save(_)
 		
 		where:
-		fileState                 | errorSeverity      | errorContext                                | errorCode
-		new DistributionState()   | Severity.BUSINESS  | FileHasAlreadyBeenUploadedException.CONTEXT | FileHasAlreadyBeenUploadedException.ERROR_CODE
-		new DisposedState()       | Severity.BUSINESS  | FileHasAlreadyBeenDisposedException.CONTEXT | FileHasAlreadyBeenDisposedException.ERROR_CODE
+		fileState                 | errorSeverity           | errorContext                                | errorCode
+		new DistributionState()   | ErrorSeverity.BUSINESS  | FileHasAlreadyBeenUploadedException.CONTEXT | FileHasAlreadyBeenUploadedException.ERROR_CODE
+		new DisposedState()       | ErrorSeverity.BUSINESS  | FileHasAlreadyBeenDisposedException.CONTEXT | FileHasAlreadyBeenDisposedException.ERROR_CODE
 		     
 	}
 

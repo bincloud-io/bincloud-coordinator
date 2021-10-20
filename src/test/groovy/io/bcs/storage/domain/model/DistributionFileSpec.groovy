@@ -3,8 +3,8 @@ package io.bcs.storage.domain.model
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ApplicationException
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
@@ -53,9 +53,9 @@ class DistributionFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileAlreadyExistsException)
-		error.context == FileAlreadyExistsException.CONTEXT
-		error.errorCode == FileAlreadyExistsException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileAlreadyExistsException.CONTEXT
+		error.getErrorCode() == FileAlreadyExistsException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISTRIBUTION.name()
@@ -70,9 +70,9 @@ class DistributionFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenUploadedException)
-		error.context == FileHasAlreadyBeenUploadedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenUploadedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasAlreadyBeenUploadedException.CONTEXT
+		error.getErrorCode() == FileHasAlreadyBeenUploadedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISTRIBUTION.name()
@@ -130,9 +130,9 @@ class DistributionFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenUploadedException)
-		error.context == FileHasAlreadyBeenUploadedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenUploadedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasAlreadyBeenUploadedException.CONTEXT
+		error.getErrorCode() == FileHasAlreadyBeenUploadedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISTRIBUTION.name()

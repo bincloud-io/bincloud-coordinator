@@ -3,8 +3,8 @@ package io.bcs.storage.port.adapter.file.filesystem;
 import java.io.File;
 import java.io.IOException;
 
-import io.bcs.common.domain.model.error.MustNeverBeHappenedError;
-import io.bcs.common.domain.model.error.UnexpectedSystemBehaviorException;
+import io.bce.MustNeverBeHappenedError;
+import io.bce.domain.errors.UnexpectedErrorException;
 import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
 import io.bcs.storage.domain.model.Constants;
@@ -29,7 +29,7 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 				throw new MustNeverBeHappenedError("Existing file mustn't created twice");
 			}
 		} catch (IOException error) {
-			throw new UnexpectedSystemBehaviorException(Constants.CONTEXT, error);
+			throw new UnexpectedErrorException(Constants.CONTEXT, error);
 		}
 	}
 	
@@ -38,7 +38,7 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 		try {
 			return new FilesystemStreamSource(new File(this.rootFolder, fileName), offset, size, bufferSize);
 		} catch (IOException error) {
-			throw new UnexpectedSystemBehaviorException(FileManagementException.CONTEXT, error);
+			throw new UnexpectedErrorException(FileManagementException.CONTEXT, error);
 		}
 	}
 
@@ -47,7 +47,7 @@ public class BlockedFileSystemAccessor implements FilesystemAccessor {
 		try {
 			return new FilesystemStreamDestination(new File(this.rootFolder, fileName));
 		} catch (IOException error) {
-			throw new UnexpectedSystemBehaviorException(FileManagementException.CONTEXT, error);
+			throw new UnexpectedErrorException(FileManagementException.CONTEXT, error);
 		}
 	}
 

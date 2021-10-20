@@ -7,10 +7,11 @@ import java.util.Optional;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
+import io.bce.text.TextTemplate;
+import io.bce.text.TextTemplates;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
 import io.bcs.common.domain.model.logging.Loggers;
-import io.bcs.common.domain.model.message.templates.TextMessageTemplate;
 
 @Converter(autoApply = false)
 public class JPADateTimeConverter implements AttributeConverter<Instant, Timestamp> {
@@ -18,7 +19,7 @@ public class JPADateTimeConverter implements AttributeConverter<Instant, Timesta
 	public Timestamp convertToDatabaseColumn(Instant attribute) {
 		Timestamp converted = Optional.ofNullable(attribute).map(Timestamp::from).orElse(null);
 		Loggers.applicationLogger(JPADateTimeConverter.class).log(new LogRecord(Level.TRACE,
-				new LogMessage("Convert JPA -> JDBC: [{{jpaAttribute}}] -> [{{dbAttribute}}]", attribute, converted)));
+				logMessageText("Convert JPA -> JDBC: [{{jpaAttribute}}] -> [{{dbAttribute}}]", attribute, converted)));
 		return converted;
 	}
 
@@ -26,15 +27,12 @@ public class JPADateTimeConverter implements AttributeConverter<Instant, Timesta
 	public Instant convertToEntityAttribute(Timestamp dbData) {
 		Instant converted = Optional.ofNullable(dbData).map(Timestamp::toInstant).orElse(null);
 		Loggers.applicationLogger(JPADateTimeConverter.class).log(new LogRecord(Level.TRACE,
-				new LogMessage("Convert JDBC -> JPA: [{{dbAttribute}}] -> [{{jpaAttribute}}]", converted, dbData)));
+				logMessageText("Convert JDBC -> JPA: [{{dbAttribute}}] -> [{{jpaAttribute}}]", converted, dbData)));
 		return converted;
 	}
 
-	private class LogMessage extends TextMessageTemplate {
-		public LogMessage(String textMessage, Instant jpaAttribute, Timestamp dbAttribute) {
-			super(new TextMessageTemplate(textMessage).withParameter("jpaAttribute", jpaAttribute)
-					.withParameter("dbAttribute", dbAttribute));
-		}
-
+	private TextTemplate logMessageText(String textMessage, Instant attribute, Timestamp dbColumn) {
+		return TextTemplates.createBy(textMessage).withParameter("jpaAttribute", attribute).withParameter("dbAttribute",
+				dbColumn);
 	}
 }

@@ -6,7 +6,6 @@ import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Formatter.DateTime
 
 import javax.inject.Inject
 
@@ -15,10 +14,10 @@ import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 
-import io.bcs.common.domain.model.error.ApplicationException
+import io.bce.domain.errors.ApplicationException
+import io.bce.text.TextTemplate
 import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.common.domain.model.logging.Loggers
-import io.bcs.common.domain.model.message.MessageTemplate
 import io.bcs.common.port.adapters.time.JPADateTimeConverter
 import io.bcs.storage.domain.model.File
 import io.bcs.storage.domain.model.FileRepository
@@ -51,7 +50,7 @@ class FileRepositoryITSpec extends Specification {
 				.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(Loggers.getPackage().getName())
-				.appendPackagesRecursively(MessageTemplate.getPackage().getName())
+				.appendPackagesRecursively(TextTemplate.getPackage().getName())
 				.appendClasses(JPADateTimeConverter)
 				.appendClasses(SequentialGenerator,  JPAFileRepository, JPAFileStateConverter,  FileRepositoryITSpecConfig)
 				.appendResource("liquibase")

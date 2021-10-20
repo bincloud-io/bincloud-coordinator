@@ -3,7 +3,7 @@ package io.bcs.storage.domain.model
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
@@ -71,9 +71,9 @@ class DraftFileSpec extends Specification {
 
 		then: "The file not exists error has been thrown"
 		FileDoesNotExistException thrownError = thrown(FileDoesNotExistException)
-		thrownError.context == FileManagementException.CONTEXT
-		thrownError.errorCode == FileDoesNotExistException.ERROR_CODE
-		thrownError.severity == Severity.BUSINESS
+		thrownError.getContextId() == FileManagementException.CONTEXT
+		thrownError.getErrorCode() == FileDoesNotExistException.ERROR_CODE
+		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
 	}
 
 	def "Scenario: file can not be downloaded in the draft state"() {
@@ -85,9 +85,9 @@ class DraftFileSpec extends Specification {
 
 		then: "The file not exists error should be thrown"
 		FileDoesNotExistException thrownError = thrown(FileDoesNotExistException)
-		thrownError.context == FileManagementException.CONTEXT
-		thrownError.errorCode == FileDoesNotExistException.ERROR_CODE
-		thrownError.severity == Severity.BUSINESS
+		thrownError.getContextId() == FileManagementException.CONTEXT
+		thrownError.getErrorCode() == FileDoesNotExistException.ERROR_CODE
+		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
 	}
 
 	def "Scenario: file distribution can not be started in the draft state"() {
@@ -99,9 +99,9 @@ class DraftFileSpec extends Specification {
 
 		then: "The file not exists error should be thrown"
 		FileDoesNotExistException thrownError = thrown(FileDoesNotExistException)
-		thrownError.context == FileManagementException.CONTEXT
-		thrownError.errorCode == FileDoesNotExistException.ERROR_CODE
-		thrownError.severity == Severity.BUSINESS
+		thrownError.getContextId() == FileManagementException.CONTEXT
+		thrownError.getErrorCode() == FileDoesNotExistException.ERROR_CODE
+		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
 	}
 
 	def createDummyDownloadContext() {

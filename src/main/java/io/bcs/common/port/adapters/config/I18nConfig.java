@@ -5,7 +5,8 @@ import java.util.Locale;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
-import io.bcs.common.port.adapters.messages.LocaleProvider;
+import io.bce.text.transformers.resolvers.ResourceBundleResolver.LocaleProvider;
+
 
 @ApplicationScoped
 public class I18nConfig {

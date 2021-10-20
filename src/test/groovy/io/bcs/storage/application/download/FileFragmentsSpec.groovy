@@ -1,6 +1,6 @@
 package io.bcs.storage.application.download
 
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.storage.application.download.FileFragments
 import io.bcs.storage.domain.model.contracts.download.Fragment
 import io.bcs.storage.domain.model.contracts.download.Range
@@ -46,9 +46,9 @@ class FileFragmentsSpec extends Specification {
 		
 		then: "The wrong file range exception should be thrown"
 		UnsatisfiableRangeFormatException error = thrown()
-		error.getContext() == UnsatisfiableRangeFormatException.CONTEXT
+		error.getContextId() == UnsatisfiableRangeFormatException.CONTEXT
 		error.getErrorCode() == UnsatisfiableRangeFormatException.ERROR_CODE
-		error.getSeverity() == Severity.BUSINESS
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 		
 		where:
 		start | end  | totalSize 

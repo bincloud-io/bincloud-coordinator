@@ -2,7 +2,7 @@ package io.bcs.common.port.adapters.io.transfer.destinations;
 
 import java.nio.ByteBuffer;
 
-import io.bcs.common.domain.model.error.MustNeverBeHappenedError;
+import io.bce.MustNeverBeHappenedError;
 import io.bcs.common.domain.model.io.transfer.CloseableDestinationPoint;
 import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import lombok.RequiredArgsConstructor;

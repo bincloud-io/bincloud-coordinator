@@ -1,4 +1,4 @@
-package io.bcs.common.domain.model.batch;
+package io.bce.batch;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;

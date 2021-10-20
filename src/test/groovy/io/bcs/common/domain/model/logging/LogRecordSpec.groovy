@@ -1,27 +1,20 @@
 package io.bcs.common.domain.model.logging
 
-import io.bcs.common.domain.model.error.ErrorDescriptor
-import io.bcs.common.domain.model.logging.Level
-import io.bcs.common.domain.model.logging.LogRecord
-import io.bcs.common.domain.model.message.MessageTemplate
-import io.bcs.common.domain.model.message.templates.ErrorDescriptorTemplate
-import io.bcs.common.domain.model.message.templates.StringifiedObjectTemplate
-import spock.lang.Narrative
+import io.bce.domain.BoundedContextId
+import io.bce.domain.ErrorDescriptorTemplate
+import io.bce.domain.errors.ErrorDescriptor
+import io.bce.domain.errors.ErrorDescriptor.ErrorCode
+import io.bce.text.TextTemplate
+import io.bce.text.TextTemplates
 import spock.lang.Specification
 
-@Narrative("""
-	To make logging simpler and be possible aggregate attributes related to logging 
-	and work with them, as a developer I am needed in component which will aggregate 
-	logging data and declare behavior to transform them. 
-""")
 class LogRecordSpec extends Specification {
 	private static final Object RANDOM_OBJECT = new Object()
 	private static final String RANDOM_TEXT = "RANDOM TEXT"
 	private static final String PARAM_KEY = "KEY"
 	private static final String PARAM_VALUE = "VALUE"
-	private static final String ERROR_CONTEXT = "ERRCTX"
-	private static final Long ERROR_CODE = 100L
-
+	private static final BoundedContextId ERROR_CONTEXT = BoundedContextId.createFor("ERRCTX")
+	private static final ErrorCode ERROR_CODE = ErrorCode.createFor(100L)
 
 	def "Scenario: initialize from random object"() {
 		given: "The log record initialized by #logLevel level and random object"
@@ -80,7 +73,7 @@ class LogRecordSpec extends Specification {
 
 		and: "The log message text should be converted to the error descriptor message template "
 		ErrorDescriptorTemplate  expectedTemplate = new ErrorDescriptorTemplate(errorDescriptor)
-		logRecord.getMessageText() == expectedTemplate.getText()
+		logRecord.getMessageText() == expectedTemplate.getTemplateText()
 		logRecord.getMessageParameters() == expectedTemplate.getParameters()
 
 		where:
@@ -89,7 +82,7 @@ class LogRecordSpec extends Specification {
 
 	def "Scenario: initialize from message template"() {
 		given: "The message template"
-		MessageTemplate messageTemplate = createMockMessageTemplate()
+		TextTemplate messageTemplate = createMockMessageTemplate()
 
 		and: "The log record initialized by #logLevel level and error descriptor"
 		LogRecord logRecord = new LogRecord(logLevel, messageTemplate)
@@ -113,7 +106,7 @@ class LogRecordSpec extends Specification {
 		LogRecord sourceRecord = new LogRecord(logLevel, RANDOM_OBJECT);
 		
 		when: "The message transformation has been requested"
-		LogRecord transformedRecord = sourceRecord.transformMessage({new StringifiedObjectTemplate(RANDOM_TEXT)})
+		LogRecord transformedRecord = sourceRecord.transformMessage({TextTemplates.createBy(RANDOM_TEXT)})
 
 		then: "The new log record instance should be created based on source log record"
 		sourceRecord.is(transformedRecord) == false
@@ -131,9 +124,9 @@ class LogRecordSpec extends Specification {
 		logLevel << [Level.CRITIC, Level.DEBUG, Level.ERROR, Level.INFO, Level.TRACE, Level.WARN]
 	}
 
-	private MessageTemplate createMockMessageTemplate() {
-		MessageTemplate messageTemplate = Stub(MessageTemplate)
-		messageTemplate.getText() >> RANDOM_TEXT
+	private TextTemplate createMockMessageTemplate() {
+		TextTemplate messageTemplate = Stub(TextTemplate)
+		messageTemplate.getTemplateText() >> RANDOM_TEXT
 		Map<String, Object> parameters = new HashMap()
 		messageTemplate.getParameters() >> parameters
 		parameters.put(PARAM_KEY, PARAM_VALUE)
@@ -142,10 +135,10 @@ class LogRecordSpec extends Specification {
 
 	private ErrorDescriptor createMockErrorDescriptor() {
 		ErrorDescriptor errorDescriptor = Stub(ErrorDescriptor)
-		errorDescriptor.getContext() >> ERROR_CONTEXT
+		errorDescriptor.getContextId() >> ERROR_CONTEXT
 		errorDescriptor.getErrorCode() >> ERROR_CODE
 		Map<String, Object> parameters = new HashMap()
-		errorDescriptor.getDetails() >> parameters
+		errorDescriptor.getErrorDetails() >> parameters
 		parameters.put(PARAM_KEY, PARAM_VALUE)
 		return errorDescriptor
 	}

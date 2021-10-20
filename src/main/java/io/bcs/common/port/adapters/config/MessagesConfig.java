@@ -1,18 +1,22 @@
 package io.bcs.common.port.adapters.config;
 
+import static io.bce.text.TextTransformers.chain;
+import static io.bce.text.TextTransformers.deepDive;
+import static io.bce.text.TextTransformers.trimming;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
-import io.bcs.common.domain.model.message.MessageInterpolator;
-import io.bcs.common.domain.model.message.MessageProcessor;
-import io.bcs.common.domain.model.message.MessageTransformer;
-import io.bcs.common.domain.model.message.templates.BundleResolvingTemplate;
-import io.bcs.common.domain.model.message.templates.MessageTextResolvingTemplate;
-import io.bcs.common.domain.model.message.templates.BundleResolvingTemplate.BundleResolver;
-import io.bcs.common.port.adapters.messages.LocaleProvider;
-import io.bcs.common.port.adapters.messages.MustacheInterpolator;
-import io.bcs.common.port.adapters.messages.ResourceBundleResolver;
+import io.bce.text.TextProcessor;
+import io.bce.text.TextTemplate.Transformer;
+import io.bce.text.transformers.BundleResolvingTransformer;
+import io.bce.text.transformers.BundleResolvingTransformer.BundleResolver;
+import io.bce.text.transformers.TemplateCompilingTransformer;
+import io.bce.text.transformers.TemplateCompilingTransformer.TemplateCompiler;
+import io.bce.text.transformers.compilers.HandlebarsTemplateCompiler;
+import io.bce.text.transformers.resolvers.ResourceBundleResolver;
+import io.bce.text.transformers.resolvers.ResourceBundleResolver.LocaleProvider;
 
 @ApplicationScoped
 public class MessagesConfig {
@@ -20,29 +24,51 @@ public class MessagesConfig {
 	private LocaleProvider localeProvider;
 	
 	@Produces
-	public MessageProcessor messageProcessor() {
-		return new MessageProcessor().configure()
-				.withTransformation(bundleResolverTransformer())
-				.withTransformation(messageInterpolatorTransformer())
-				.apply();
+	public TextProcessor textProcessor() {
+		return TextProcessor.create()
+				.withTransformer(combinedTransformer());
 	}
 	
-	private MessageTransformer bundleResolverTransformer() {
-		final BundleResolver bundleResolver = bundleResolver();
-		return messageTemplate -> new BundleResolvingTemplate(messageTemplate, bundleResolver);
+	private Transformer combinedTransformer() {
+		Transformer combined = trimming();
+		combined = chain(combined, bundleResolverTransformer());
+		combined = chain(combined, templateCompilerTransformer());
+		return deepDive(combined);	
 	}
 	
-	private MessageTransformer messageInterpolatorTransformer() {
-		final MessageInterpolator messageInterpolator = messageInterpolator();
-		return messageTemplate -> new MessageTextResolvingTemplate(messageTemplate, messageInterpolator);
+	private Transformer templateCompilerTransformer() {
+		return new TemplateCompilingTransformer(templateCompiler());
 	}
 	
-	private MessageInterpolator messageInterpolator() {
-		return new MustacheInterpolator();
+	private TemplateCompiler templateCompiler() {
+		return new HandlebarsTemplateCompiler();
+	}
+	
+	private Transformer bundleResolverTransformer() {
+		return new BundleResolvingTransformer(bundleResolver());
 	}
 	
 	private BundleResolver bundleResolver() {
 		return new ResourceBundleResolver(localeProvider)
-			.withResourceBundle("i18n/messages");
+				.withResourceBundle("i18n/messages");
 	}
+	
+//	private MessageTransformer bundleResolverTransformer() {
+//		final BundleResolver bundleResolver = bundleResolver();
+//		return messageTemplate -> new BundleResolvingTemplate(messageTemplate, bundleResolver);
+//	}
+//	
+//	private MessageTransformer messageInterpolatorTransformer() {
+//		final MessageInterpolator messageInterpolator = messageInterpolator();
+//		return messageTemplate -> new MessageTextResolvingTemplate(messageTemplate, messageInterpolator);
+//	}
+//	
+//	private MessageInterpolator messageInterpolator() {
+//		return new MustacheInterpolator();
+//	}
+//	
+//	private BundleResolver bundleResolver() {
+//		return new ResourceBundleResolver(localeProvider)
+//			.withResourceBundle("i18n/messages");
+//	}
 }

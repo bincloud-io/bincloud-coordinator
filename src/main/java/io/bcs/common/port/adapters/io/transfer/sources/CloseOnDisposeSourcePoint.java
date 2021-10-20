@@ -1,6 +1,6 @@
 package io.bcs.common.port.adapters.io.transfer.sources;
 
-import io.bcs.common.domain.model.error.MustNeverBeHappenedError;
+import io.bce.MustNeverBeHappenedError;
 import io.bcs.common.domain.model.io.transfer.CloseableSourcePoint;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
 import lombok.RequiredArgsConstructor;

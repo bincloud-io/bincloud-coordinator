@@ -3,7 +3,7 @@ package io.bcs.common.domain.model.web;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import io.bcs.common.domain.model.error.MustNeverBeHappenedError;
+import io.bce.MustNeverBeHappenedError;
 
 public class URLAddress {
 	private String url;

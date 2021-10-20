@@ -1,4 +1,4 @@
-package io.bcs.common.port.adapters.validation;
+package io.bce.validation;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,23 +9,21 @@ import javax.validation.Path.Node;
 import javax.validation.Validator;
 import javax.validation.metadata.ConstraintDescriptor;
 
-import io.bcs.common.domain.model.message.MessageProcessor;
-import io.bcs.common.domain.model.message.MessageTemplate;
-import io.bcs.common.domain.model.message.templates.TextMessageTemplate;
-import io.bcs.common.domain.model.validation.ValidationService;
-import io.bcs.common.domain.model.validation.ValidationState;
+import io.bce.text.TextProcessor;
+import io.bce.text.TextTemplate;
+import io.bce.text.TextTemplates;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class JSRBeanValidationService implements ValidationService {
 	private static final String NULL_STRING_JOINT_VALUE = "null";
 	private final Validator beanValidator;
-	private final MessageProcessor messageProcessor;
+	private final TextProcessor messageProcessor;
 
 	@Override
-	public <V> ValidationState validate(V validatable, Class<?>... groups) {
+	public <V> ValidationState validate(V validatable) {
 		ValidationState validationResult = new ValidationState();
-		for (ConstraintViolation<V> violation : beanValidator.validate(validatable, groups)) {
+		for (ConstraintViolation<V> violation : beanValidator.validate(validatable)) {
 			validationResult = appendError(validationResult, violation);
 		}
 		return validationResult;
@@ -45,14 +43,16 @@ public class JSRBeanValidationService implements ValidationService {
 
 	private <V> ValidationState appendGroupedError(ValidationState currentState, String group,
 			ConstraintViolation<V> violation) {
-		return currentState.withGrouped(group, createConstraintDescription(violation));
+		return currentState.withGrouped(ValidationGroup.createFor(group), createConstraintDescription(violation));
 	}
 
-	private <V> String createConstraintDescription(ConstraintViolation<V> violation) {
+	private <V> TextTemplate createConstraintDescription(ConstraintViolation<V> violation) {
 		ConstraintDescriptor<?> descriptor = violation.getConstraintDescriptor();
-		MessageTemplate descriptionTemplate = new TextMessageTemplate(violation.getMessageTemplate(),
-				descriptor.getAttributes()).withParameter("invalidValue", violation.getInvalidValue());
-		return messageProcessor.interpolate(descriptionTemplate);
+		TextTemplate violationDescription = TextTemplates
+				.createBy(violation.getMessageTemplate(), descriptor.getAttributes())
+				.withParameter("invalidValue", violation.getInvalidValue());
+		return violationDescription.transformBy(
+				template -> TextTemplates.createBy(messageProcessor.interpolate(template), template.getParameters()));
 	}
 
 	private <V> Optional<String> getConstraintViolationGroup(ConstraintViolation<V> violation) {

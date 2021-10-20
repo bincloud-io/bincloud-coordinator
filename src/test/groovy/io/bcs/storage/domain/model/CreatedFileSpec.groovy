@@ -3,8 +3,8 @@ package io.bcs.storage.domain.model
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ApplicationException
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
@@ -123,9 +123,9 @@ class CreatedFileSpec extends Specification {
 
 		then: "The file already exists error should be thrown"
 		ApplicationException error = thrown(FileAlreadyExistsException)
-		error.context == FileAlreadyExistsException.CONTEXT
-		error.errorCode == FileAlreadyExistsException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileAlreadyExistsException.CONTEXT
+		error.getErrorCode() == FileAlreadyExistsException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 	}
 	
 	def "Scenario: file content can not be downloaded in the created state"() {
@@ -138,9 +138,9 @@ class CreatedFileSpec extends Specification {
 
 		then: "The file has not been uploaded error should be thrown"
 		ApplicationException error = thrown(FileHasNotBeenUploadedException)
-		error.context == FileHasNotBeenUploadedException.CONTEXT
-		error.errorCode == FileHasNotBeenUploadedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasNotBeenUploadedException.CONTEXT
+		error.getErrorCode() == FileHasNotBeenUploadedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 	}
 
 	private def createUploadingContext(Long contentLength) {

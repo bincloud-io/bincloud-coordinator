@@ -2,8 +2,8 @@ package io.bcs.common.domain.model.io
 
 import java.nio.ByteBuffer
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ApplicationException
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.common.domain.model.io.InputOutputException
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DataTransferingException
@@ -148,9 +148,9 @@ class DirectTransmissionSpec extends Specification {
 
 		and: "The system is asynchronously notified about error"
 		1 * completionCallback.onError(_) >> {receivedError = it[0]}
-		receivedError.context == InputOutputException.CONTEXT
-		receivedError.severity == Severity.INCIDENT
-		receivedError.errorCode == DataTransferingException.ERROR_CODE
+		receivedError.getContextId() == InputOutputException.CONTEXT
+		receivedError.getErrorSeverity() == ErrorSeverity.INCIDENT
+		receivedError.getErrorCode() == DataTransferingException.ERROR_CODE
 	}
 
 	def "Scenario: the destination point has thrown data transfering exception"() {
@@ -181,9 +181,9 @@ class DirectTransmissionSpec extends Specification {
 
 		and: "The system is asynchronously notified about error"
 		1 * completionCallback.onError(_) >> {receivedError = it[0]}
-		receivedError.context == InputOutputException.CONTEXT
-		receivedError.severity == Severity.INCIDENT
-		receivedError.errorCode == DataTransferingException.ERROR_CODE
+		receivedError.getContextId() == InputOutputException.CONTEXT
+		receivedError.getErrorSeverity() == ErrorSeverity.INCIDENT
+		receivedError.getErrorCode() == DataTransferingException.ERROR_CODE
 	}
 
 	def "Scenario: input stream reading error during data transferring"() {
@@ -209,9 +209,9 @@ class DirectTransmissionSpec extends Specification {
 
 		then: "The data transferring should be completed with data transferring error"
 		1 * completionCallback.onError(_) >> {receivedError = it[0]}
-		receivedError.context == InputOutputException.CONTEXT
-		receivedError.severity == Severity.INCIDENT
-		receivedError.errorCode == DataTransferingException.ERROR_CODE
+		receivedError.getContextId() == InputOutputException.CONTEXT
+		receivedError.getErrorSeverity() == ErrorSeverity.INCIDENT
+		receivedError.getErrorCode() == DataTransferingException.ERROR_CODE
 	}
 
 	def "Scenario: output stream writing error during data transferring"() {
@@ -237,8 +237,8 @@ class DirectTransmissionSpec extends Specification {
 
 		then: "The data transferring should be completed with data transferring error"
 		1 * completionCallback.onError(_) >> {receivedError = it[0]}
-		receivedError.context == InputOutputException.CONTEXT
-		receivedError.severity == Severity.INCIDENT
-		receivedError.errorCode == DataTransferingException.ERROR_CODE
+		receivedError.getContextId() == InputOutputException.CONTEXT
+		receivedError.getErrorSeverity() == ErrorSeverity.INCIDENT
+		receivedError.getErrorCode() == DataTransferingException.ERROR_CODE
 	}
 }

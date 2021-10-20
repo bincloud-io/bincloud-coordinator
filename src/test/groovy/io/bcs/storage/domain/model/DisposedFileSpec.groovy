@@ -3,8 +3,8 @@ package io.bcs.storage.domain.model
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.ApplicationException.Severity
+import io.bce.domain.errors.ApplicationException
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
@@ -40,9 +40,9 @@ class DisposedFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
-		error.context == FileHasAlreadyBeenDisposedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenDisposedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasAlreadyBeenDisposedException.CONTEXT
+		error.getErrorCode() == FileHasAlreadyBeenDisposedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISPOSED.name()
@@ -57,9 +57,9 @@ class DisposedFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
-		error.context == FileHasAlreadyBeenDisposedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenDisposedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasAlreadyBeenDisposedException.CONTEXT
+		error.getErrorCode() == FileHasAlreadyBeenDisposedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISPOSED.name()
@@ -74,9 +74,9 @@ class DisposedFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
-		error.context == FileHasAlreadyBeenDisposedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenDisposedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasAlreadyBeenDisposedException.CONTEXT
+		error.getErrorCode() == FileHasAlreadyBeenDisposedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISPOSED.name()
@@ -91,9 +91,9 @@ class DisposedFileSpec extends Specification {
 
 		then: "The file has been disposed should be thrown"
 		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
-		error.context == FileHasAlreadyBeenDisposedException.CONTEXT
-		error.errorCode == FileHasAlreadyBeenDisposedException.ERROR_CODE
-		error.severity == Severity.BUSINESS
+		error.getContextId() == FileHasAlreadyBeenDisposedException.CONTEXT
+		error.getErrorCode() == FileHasAlreadyBeenDisposedException.ERROR_CODE
+		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileStatus.DISPOSED.name()

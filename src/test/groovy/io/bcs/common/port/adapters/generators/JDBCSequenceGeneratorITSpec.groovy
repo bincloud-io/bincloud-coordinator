@@ -15,7 +15,7 @@ import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 
-import io.bcs.common.domain.model.error.ApplicationException
+import io.bce.domain.errors.ApplicationException
 import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.common.port.adapters.generators.JDBCSequenceGenerator
 import io.bcs.testing.archive.ArchiveBuilder

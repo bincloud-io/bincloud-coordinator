@@ -27,11 +27,17 @@ public class ApplicationException extends RuntimeException implements ErrorDescr
 	private final ErrorCode errorCode;
 
 	public ApplicationException(@NonNull BoundedContextId contextId, @NonNull ErrorSeverity errorSeverity,
-			@NonNull ErrorCode errorCode) {
-		super();
+			@NonNull ErrorCode errorCode, String errorMessage) {
+		super(errorMessage);
 		this.contextId = contextId;
 		this.errorSeverity = errorSeverity;
 		this.errorCode = errorCode;
+	}
+
+	public ApplicationException(@NonNull BoundedContextId contextId, @NonNull ErrorSeverity errorSeverity,
+			@NonNull ErrorCode errorCode) {
+		this(contextId, errorSeverity, errorCode, "");
+
 	}
 
 	@Override
@@ -42,4 +48,11 @@ public class ApplicationException extends RuntimeException implements ErrorDescr
 		errorDetails.put(ERROR_STACKTRACE_DETAIL_NAME, new ErrorStackTrace(this));
 		return errorDetails;
 	}
+
+	@Override
+	public final String toString() {
+		return getMessage();
+	}
+	
+	
 }

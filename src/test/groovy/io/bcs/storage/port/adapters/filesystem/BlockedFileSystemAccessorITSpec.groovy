@@ -1,20 +1,18 @@
 package io.bcs.storage.port.adapters.filesystem
 
-import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
-
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.MustNeverBeHappenedError
+import io.bce.MustNeverBeHappenedError
+import io.bce.domain.errors.ApplicationException
+import io.bce.text.TextTemplate
 import io.bcs.common.domain.model.io.InputOutputException
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.logging.Loggers
-import io.bcs.common.domain.model.message.MessageTemplate
 import io.bcs.common.port.adapters.io.transfer.destinations.StreamDestination
 import io.bcs.common.port.adapters.io.transfer.sources.StreamSource
 import io.bcs.common.port.adapters.io.transfer.transmitter.DirectTransferingScheduler
@@ -37,7 +35,7 @@ class BlockedFileSystemAccessorITSpec extends Specification {
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(InputOutputException.getPackage().getName())
 				.appendPackagesRecursively(Loggers.getPackage().getName())
-				.appendPackagesRecursively(MessageTemplate.getPackage().getName())
+				.appendPackagesRecursively(TextTemplate.getPackage().getName())
 				.appendPackagesRecursively(DirectTransferingScheduler.getPackage().getName())
 				.appendPackagesRecursively(StreamSource.getPackage().getName())
 				.appendPackagesRecursively(StreamDestination.getPackage().getName())

@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import io.bcs.common.domain.model.error.ErrorDescriptor;
+import io.bce.domain.BoundedContextId;
+import io.bce.domain.errors.ErrorDescriptor;
+import io.bce.domain.errors.ErrorDescriptor.ErrorCode;
+import io.bce.text.TextTemplate;
+import io.bce.text.TextTemplate.Transformer;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
-import io.bcs.common.domain.model.message.MessageTemplate;
-import io.bcs.common.domain.model.message.MessageTransformer;
 import lombok.Getter;
 
 public class ServiceAuditEvent {
@@ -24,9 +26,9 @@ public class ServiceAuditEvent {
 		this(new AuditEventType(errorDescriptor), new LogRecord(auditLevel, errorDescriptor), auditParameterNames);
 	}
 
-	public ServiceAuditEvent(String eventCode, Level auditLevel, MessageTemplate messageTemplate,
+	public ServiceAuditEvent(BoundedContextId contextId, Level auditLevel, TextTemplate messageTemplate,
 			Collection<String> auditParameterNames) {
-		this(new AuditEventType(eventCode), new LogRecord(auditLevel, messageTemplate), auditParameterNames);
+		this(new AuditEventType(contextId), new LogRecord(auditLevel, messageTemplate), auditParameterNames);
 	}
 
 	private ServiceAuditEvent(AuditEventType auditEvent, LogRecord auditLogRecord, Collection<String> auditParameterNames) {
@@ -43,11 +45,11 @@ public class ServiceAuditEvent {
 		this.auditLogRecord = proto.auditLogRecord;
 	}
 	
-	public String getEventCode() {
-		return auditEventType.getEventCode();
+	public BoundedContextId getContextId() {
+		return auditEventType.getContextId();
 	}
 
-	public Long getErrorCode() {
+	public ErrorCode getErrorCode() {
 		return auditEventType.getErrorCode();
 	}
 	
@@ -69,7 +71,7 @@ public class ServiceAuditEvent {
 				.collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().toString()));
 	}
 
-	public ServiceAuditEvent transformMessage(MessageTransformer messageTransformer) {
+	public ServiceAuditEvent transformMessage(Transformer messageTransformer) {
 		ServiceAuditEvent derived = new ServiceAuditEvent(this);
 		derived.auditLogRecord = derived.auditLogRecord.transformMessage(messageTransformer);
 		return derived;

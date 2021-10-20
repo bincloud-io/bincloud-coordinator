@@ -1,41 +1,37 @@
 package io.bcs.common.port.adapters.web
 
-import static io.bcs.common.domain.model.error.ApplicationException.Severity.BUSINESS
 
 import javax.servlet.AsyncContext
 import javax.servlet.http.HttpServletResponse
 
-import io.bcs.common.domain.model.error.ApplicationException
-import io.bcs.common.domain.model.error.UnexpectedSystemBehaviorException
-import io.bcs.common.domain.model.error.ApplicationException.Severity
-import io.bcs.common.domain.model.error.AsyncErrorsHandler.ErrorInterceptor
-import io.bcs.common.domain.model.message.MessageProcessor
-import io.bcs.common.domain.model.message.templates.TextMessageTemplate
-import io.bcs.common.port.adapters.web.HttpServletAppliactionExceptionHandler
+import io.bce.domain.BoundedContextId
+import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor
+import io.bce.domain.errors.ApplicationException
+import io.bce.domain.errors.UnexpectedErrorException
+import io.bce.domain.errors.ErrorDescriptor.ErrorCode
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
+import io.bce.text.TextProcessor
+import io.bce.text.TextTemplates
 import spock.lang.Specification
 
 class HttpServletApplicatonExceptionHandlerSpec extends Specification {
 	private HttpServletResponse response;
 	private AsyncContext asyncContext;
-	private MessageProcessor messageProcessor;
+	private TextProcessor textProcessor;
 
 	def setup() {
 		this.response = Mock(HttpServletResponse)
 		this.asyncContext = Mock(AsyncContext)
 		this.asyncContext.getResponse() >> response
-		this.messageProcessor = new MessageProcessor().configure()
-				.withTransformation({messageTemplate ->
-					new TextMessageTemplate(String.format("%s__%s", "TRANSFORMED", messageTemplate.getText()))
-				})
-				.apply();
+		this.textProcessor = TextProcessor.create().withTransformer({template -> TextTemplates.createBy(String.format("%s__%s", "TRANSFORMED", template.getTemplateText()))})
 	}
 
 	def "Scenario: handle application exception"() {
 		given: "The application error"
-		ApplicationException error = new ApplicationException(BUSINESS, "CTX", -100L, "Smth went wrong!!!");
+		ApplicationException error = new ApplicationException(BoundedContextId.createFor("CTX"), ErrorSeverity.BUSINESS, ErrorCode.createFor(-100L), "Smth went wrong!!!");
 
 		and: "The configured error handler"
-		ErrorInterceptor<AsyncContext, ApplicationException> errorHandler = HttpServletAppliactionExceptionHandler.applicationErrorHandler(messageProcessor, 404)
+		ErrorInterceptor<AsyncContext, ApplicationException> errorHandler = HttpServletAppliactionExceptionHandler.applicationErrorHandler(textProcessor, 404)
 
 		when: "The application error is sent to handler"
 		errorHandler.handleError(asyncContext, error)
@@ -58,10 +54,10 @@ class HttpServletApplicatonExceptionHandlerSpec extends Specification {
 
 	def "Scenario: handle application exception with wrong servlet response"() {
 		given: "The application error"
-		ApplicationException error = new ApplicationException(BUSINESS, "CTX", -1L, "Smth went wrong!!!");
+		ApplicationException error = new ApplicationException(BoundedContextId.createFor("CTX"), ErrorSeverity.BUSINESS, ErrorCode.createFor(-1L), "Smth went wrong!!!");
 
 		and: "The configured error handler"
-		ErrorInterceptor<AsyncContext, ApplicationException> errorHandler = HttpServletAppliactionExceptionHandler.applicationErrorHandler(messageProcessor, 404)
+		ErrorInterceptor<AsyncContext, ApplicationException> errorHandler = HttpServletAppliactionExceptionHandler.applicationErrorHandler(textProcessor, 404)
 
 		and: "The servlet response object is wrong"
 		response.sendError(_, _) >> {throw new IOException("WRONG RESPONSE")}
@@ -70,9 +66,9 @@ class HttpServletApplicatonExceptionHandlerSpec extends Specification {
 		errorHandler.handleError(asyncContext, error)
 
 		then: "The unexpected system behavior error should be happened"
-		UnexpectedSystemBehaviorException reThrownError = thrown()
-		reThrownError.getContext() == "GLOBAL"
-		reThrownError.getErrorCode() == -1L
+		UnexpectedErrorException reThrownError = thrown()
+		reThrownError.getContextId() == BoundedContextId.PLATFORM_CONTEXT
+		reThrownError.getErrorCode() == ErrorCode.UNRECOGNIZED_ERROR_CODE
 
 		and: "The error context should be completed"
 		1 * asyncContext.complete()
@@ -83,7 +79,7 @@ class HttpServletApplicatonExceptionHandlerSpec extends Specification {
 		Exception error = new Exception("SMTH WENT WRONG")
 
 		and: "The default error handler configured for \"BC\" bounded context"
-		ErrorInterceptor<AsyncContext, Exception> errorHandler = HttpServletAppliactionExceptionHandler.defaultErrorHandler(messageProcessor, "BC")
+		ErrorInterceptor<AsyncContext, Exception> errorHandler = HttpServletAppliactionExceptionHandler.defaultErrorHandler(textProcessor, BoundedContextId.createFor("BC"))
 
 		when: "The error is sent to handler"
 		errorHandler.handleError(asyncContext, error)
