@@ -1,16 +1,9 @@
-package io.bcs.common.port.adapters.message
+package io.bce.text.transformers.resolvers
 
-import io.bcs.common.domain.model.message.templates.BundleResolvingTemplate.BundleResolver
-import io.bcs.common.port.adapters.messages.LocaleProvider
-import io.bcs.common.port.adapters.messages.ResourceBundleResolver
-import spock.lang.Narrative
+import io.bce.text.transformers.BundleResolvingTransformer.BundleResolver
+import io.bce.text.transformers.resolvers.ResourceBundleResolver.LocaleProvider
 import spock.lang.Specification
 
-@Narrative("""
-	To use Java SE resource bundles for message bundle resolving,
-	as a developer I am needed in the component which will make it 
-	compatible with internal abstractions 
-""")
 class ResourceBundleResolverSpec extends Specification {
 	private static final String TEST_BUNDLE_NAME = "bundles/simple-bundle"
 	
@@ -27,14 +20,14 @@ class ResourceBundleResolverSpec extends Specification {
 			.withResourceBundle(TEST_BUNDLE_NAME)
 			
 		expect: "The bundle id will resolved using resource bundle"
-		bundleResolver.resolveBundle(templateId) == resolvedText
+		bundleResolver.resolve(templateId) == resolvedText
 		
 		where:
 		templateId           | resolvedText
 		"unknown"            | Optional.empty()
 		"message.empty"      | Optional.of("")
 		"message.default"    | Optional.of("DEFAULT MESSAGE")
-		"message.old.localized"  | Optional.of("СООБЩЕНИЕ С ЛОКАЛИЗАЦИЕЙ")
+		"message.localized"  | Optional.of("СООБЩЕНИЕ С ЛОКАЛИЗАЦИЕЙ")
 		
 	}
 }
