@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
+	
 	<groupId>io.bincloud.storage</groupId>
 	<artifactId>bincloud-coordinator</artifactId>
 	<version>1.0-SNAPSHOT</version>
@@ -14,7 +14,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
 		<arquillian.framework.version>1.4.1.Final</arquillian.framework.version>
 		<arquillian.cube.version>1.18.2</arquillian.cube.version>
 		<arquillian.spock.version>1.0.0.CR1</arquillian.spock.version>
@@ -138,7 +137,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -262,7 +261,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxws-maven-plugin</artifactId>
@@ -414,7 +413,7 @@
 					<artifactId>maven-project-info-reports-plugin</artifactId>
 					<version>3.0.0</version>
 				</plugin>
-
+				
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>jaxws-maven-plugin</artifactId>
@@ -466,7 +465,7 @@
 			</plugin>
 		</plugins>
 	</reporting>
-
+	
 	<profiles>
 		<profile>
 			<id>it</id>

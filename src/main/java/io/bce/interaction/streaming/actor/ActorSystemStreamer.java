@@ -1,0 +1,212 @@
+package io.bce.interaction.streaming.actor;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+import io.bce.actor.Actor;
+import io.bce.actor.ActorAddress;
+import io.bce.actor.ActorName;
+import io.bce.actor.ActorSystem;
+import io.bce.actor.Message;
+import io.bce.interaction.AsyncResolverProxy;
+import io.bce.interaction.Promise;
+import io.bce.interaction.Promise.Deferred;
+import io.bce.interaction.streaming.Destination;
+import io.bce.interaction.streaming.Destination.SourceConnection;
+import io.bce.interaction.streaming.Source;
+import io.bce.interaction.streaming.Source.DestinationConnection;
+import io.bce.interaction.streaming.Stream;
+import io.bce.interaction.streaming.Streamer;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class ActorSystemStreamer implements Streamer {
+	private final ActorSystem actorSystem;
+	private final AtomicLong sequence = new AtomicLong(0L);
+
+	@Override
+	public <T> Stream<T> createStream(Source<T> source, Destination<T> destination) {
+		return new ActorSystemStream<T>(source, destination);
+	}
+
+	private interface StreamCommand<T> {
+		public void apply(Transmitter<T> transmitter, Message<Object> message);
+	}
+
+	private interface Transmitter<T> {
+		public void start(Message<Object> message);
+		public void receive(Message<Object> message);
+		public void submit(Message<Object> message, T data, int size);
+		public void complete(Message<Object> message, Long count);
+		public void fail(Message<Object> message, Throwable error);
+	}
+
+	@RequiredArgsConstructor
+	private final class ActorSystemStream<T> implements Stream<T> {
+		@NonNull
+		private final Source<T> source;
+		@NonNull
+		private final Destination<T> destination;
+
+		@Override
+		public Promise<Stat> start() {
+			return new Promise<>(resolver -> {
+				ActorAddress streamActorAddress = actorSystem.actorOf(generateActorName(),
+						context -> new StreamingActor(context, source, destination, resolver));
+				actorSystem.tell(Message.createFor(streamActorAddress, new Start()));
+			});
+		}
+		
+		private ActorName generateActorName() {
+			return ActorName.wrap(String.format("STREAM--%S", sequence.incrementAndGet()));
+		}
+
+		private final class Start implements StreamCommand<T> {
+			@Override
+			public void apply(Transmitter<T> transmitter, Message<Object> message) {
+				transmitter.start(message);
+			}
+		}
+
+		private final class Receive implements StreamCommand<T> {
+			@Override
+			public void apply(Transmitter<T> transmitter, Message<Object> message) {
+				transmitter.receive(message);
+			}
+		}
+
+		@RequiredArgsConstructor
+		private final class Submit implements StreamCommand<T> {
+			private final T data;
+			private final int size;
+			
+			@Override
+			public void apply(Transmitter<T> transmitter, Message<Object> message) {
+				transmitter.submit(message, data, size);
+			}
+		}
+
+		@RequiredArgsConstructor
+		private final class Complete implements StreamCommand<T> {
+			private final Long count;
+
+			@Override
+			public void apply(Transmitter<T> transmitter, Message<Object> message) {
+				transmitter.complete(message, count);
+			}
+		}
+		
+		@RequiredArgsConstructor
+		private final class Fail implements StreamCommand<T> {
+			private final Throwable error;
+
+			@Override
+			public void apply(Transmitter<T> transmitter, Message<Object> message) {
+				transmitter.fail(message, error);
+			}
+		}
+
+		private final class StreamingActor extends Actor<Object> {
+			private final Transmitter<T> transmitter;
+
+			public StreamingActor(@NonNull Context context, @NonNull Source<T> source,
+					@NonNull Destination<T> destination, @NonNull Deferred<Stat> resolver) {
+				super(context);
+				this.transmitter = new StreamingTranmitter(source, destination, new AsyncResolverProxy<>(resolver));
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			protected void receive(Message<Object> message) throws Throwable {
+				message.whenIsMatchedTo(StreamCommand.class, command -> command.apply(transmitter, message));
+			}
+			
+			@Override
+			protected FaultResolver<Object> getFaultResover() {
+				FaultResolver<Object> original = super.getFaultResover(); 
+				return new FaultResolver<Object>() {
+					@Override
+					public void resolveError(LifecycleController lifecycle, Message<Object> message, Throwable error) {
+						tell(message.map(body -> new Fail(error)));
+						original.resolveError(lifecycle, message, error);
+					}
+				};
+			}
+			
+			@RequiredArgsConstructor
+			private class StreamingTranmitter implements Transmitter<T> {
+				private final Source<T> source;
+				private final Destination<T> destination;
+				private final Deferred<Stat> resolver;
+				private Long totalSize = 0L;
+
+				@Override
+				public void start(Message<Object> message) {
+					tell(message.map(body -> new Receive()));
+				}
+
+				@Override
+				public void receive(Message<Object> message) {
+					source.read(createDestinationConnection(message));
+				}
+
+				@Override
+				public void submit(Message<Object> message, T data, int size) {
+					destination.write(createSourceConnection(message), data, size);
+					updateTotalSize(size);
+					
+				}
+
+				@Override
+				public void complete(Message<Object> message, Long count) {					
+					resolver.resolve(new Stat() {	
+						@Override
+						public Long getSize() {
+							return count;
+						}
+					});
+					completeStreaming();
+				}
+				
+				@Override
+				public void fail(Message<Object> message, Throwable error) {
+					resolver.reject(error);
+					completeStreaming();	
+				}
+
+				private void updateTotalSize(int transmittedSize) {
+					this.totalSize += transmittedSize;
+				}
+				
+				private void completeStreaming() {
+					destination.release();
+					source.release();
+					stop(self());
+				}
+
+				private DestinationConnection<T> createDestinationConnection(Message<Object> message) {
+					return new DestinationConnection<T>() {
+						@Override
+						public void submit(T data, Integer size) {
+							tell(message.map(body -> new Submit(data, size)));
+						}
+
+						@Override
+						public void complete() {
+							tell(message.map(body -> new Complete(totalSize)));
+						}
+					};
+				}
+
+				private SourceConnection createSourceConnection(Message<Object> message) {
+					return new SourceConnection() {
+						@Override
+						public void receive() {
+							tell(message.map(body -> new Receive()));
+						}
+					};
+				}
+			}
+		}
+	}
+}
