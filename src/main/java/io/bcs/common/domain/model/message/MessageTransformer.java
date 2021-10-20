@@ -1,5 +1,6 @@
 package io.bcs.common.domain.model.message;
 
+@Deprecated
 @FunctionalInterface
 public interface MessageTransformer {
 	/**

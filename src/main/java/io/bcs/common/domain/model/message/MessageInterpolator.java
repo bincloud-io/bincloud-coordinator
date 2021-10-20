@@ -7,6 +7,7 @@ package io.bcs.common.domain.model.message;
  * @author Dmitry Mikhaylenko
  *
  */
+@Deprecated
 public interface MessageInterpolator {
 	/**
 	 * Interpolate the message template to string using template tool

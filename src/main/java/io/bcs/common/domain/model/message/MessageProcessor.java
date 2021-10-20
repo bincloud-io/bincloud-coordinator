@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
+@Deprecated
 public class MessageProcessor {
 	private final List<MessageTransformer> transformers = new ArrayList<MessageTransformer>();
 	

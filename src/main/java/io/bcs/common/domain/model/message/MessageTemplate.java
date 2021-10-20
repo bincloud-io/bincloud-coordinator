@@ -10,6 +10,7 @@ import java.util.Map;
  * @author Dmitry Mikhaylenko
  *
  */
+@Deprecated
 public interface MessageTemplate {
 	/**
 	 * Get the message template text. It might be bundle id, template to text
