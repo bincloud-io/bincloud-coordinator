@@ -1,4 +1,4 @@
-package io.bce.batch;
+package io.bce.interaction.polling;
 
 import java.util.Collection;
 import java.util.Collections;

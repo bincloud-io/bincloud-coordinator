@@ -1,4 +1,4 @@
-package io.bce.batch;
+package io.bce.interaction.polling;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

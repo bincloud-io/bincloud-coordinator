@@ -1,11 +1,11 @@
-package io.bce.batch
+package io.bce.interaction.polling
 
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-import io.bce.batch.BatchPoller
-import io.bce.batch.PolledElement
-import io.bce.batch.Polling
+import io.bce.interaction.polling.BatchPoller
+import io.bce.interaction.polling.PolledElement
+import io.bce.interaction.polling.Polling
 import spock.lang.Narrative
 import spock.lang.Specification
 
