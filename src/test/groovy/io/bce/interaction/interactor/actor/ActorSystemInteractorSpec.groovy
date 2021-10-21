@@ -13,15 +13,13 @@ import io.bce.actor.Message
 import io.bce.actor.Actor.Context
 import io.bce.actor.Actors.SystemConfigurer
 import io.bce.actor.EventLoop.Dispatcher
-import io.bce.interaction.Promise
-import io.bce.interaction.Promise.ErrorHandler
-import io.bce.interaction.Promise.ResponseHandler
 import io.bce.interaction.interactor.Interactor
 import io.bce.interaction.interactor.TargetAddress
 import io.bce.interaction.interactor.Interactor.Factory
 import io.bce.interaction.interactor.Interactor.WrongRequestTypeException
 import io.bce.interaction.interactor.Interactor.WrongResponseTypeException
-import io.bce.interaction.interactor.actor.ActorSystemInteractor
+import io.bce.interaction.promises.Promise.ErrorHandler
+import io.bce.interaction.promises.Promise.ResponseHandler
 import io.bce.timer.Timeout
 import io.bce.timer.TimeoutException
 import lombok.NonNull

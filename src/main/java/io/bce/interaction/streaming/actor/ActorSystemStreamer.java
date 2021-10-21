@@ -8,8 +8,9 @@ import io.bce.actor.ActorName;
 import io.bce.actor.ActorSystem;
 import io.bce.actor.Message;
 import io.bce.interaction.AsyncResolverProxy;
-import io.bce.interaction.Promise;
-import io.bce.interaction.Promise.Deferred;
+import io.bce.interaction.promises.Deferred;
+import io.bce.interaction.promises.Promise;
+import io.bce.interaction.promises.Promises;
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Destination.SourceConnection;
 import io.bce.interaction.streaming.Source;
@@ -35,9 +36,13 @@ public class ActorSystemStreamer implements Streamer {
 
 	private interface Transmitter<T> {
 		public void start(Message<Object> message);
+
 		public void receive(Message<Object> message);
+
 		public void submit(Message<Object> message, T data, int size);
+
 		public void complete(Message<Object> message, Long count);
+
 		public void fail(Message<Object> message, Throwable error);
 	}
 
@@ -50,13 +55,13 @@ public class ActorSystemStreamer implements Streamer {
 
 		@Override
 		public Promise<Stat> start() {
-			return new Promise<>(resolver -> {
+			return Promises.of(resolver -> {
 				ActorAddress streamActorAddress = actorSystem.actorOf(generateActorName(),
 						context -> new StreamingActor(context, source, destination, resolver));
 				actorSystem.tell(Message.createFor(streamActorAddress, new Start()));
 			});
 		}
-		
+
 		private ActorName generateActorName() {
 			return ActorName.wrap(String.format("STREAM--%S", sequence.incrementAndGet()));
 		}
@@ -79,7 +84,7 @@ public class ActorSystemStreamer implements Streamer {
 		private final class Submit implements StreamCommand<T> {
 			private final T data;
 			private final int size;
-			
+
 			@Override
 			public void apply(Transmitter<T> transmitter, Message<Object> message) {
 				transmitter.submit(message, data, size);
@@ -95,7 +100,7 @@ public class ActorSystemStreamer implements Streamer {
 				transmitter.complete(message, count);
 			}
 		}
-		
+
 		@RequiredArgsConstructor
 		private final class Fail implements StreamCommand<T> {
 			private final Throwable error;
@@ -120,10 +125,10 @@ public class ActorSystemStreamer implements Streamer {
 			protected void receive(Message<Object> message) throws Throwable {
 				message.whenIsMatchedTo(StreamCommand.class, command -> command.apply(transmitter, message));
 			}
-			
+
 			@Override
 			protected FaultResolver<Object> getFaultResover() {
-				FaultResolver<Object> original = super.getFaultResover(); 
+				FaultResolver<Object> original = super.getFaultResover();
 				return new FaultResolver<Object>() {
 					@Override
 					public void resolveError(LifecycleController lifecycle, Message<Object> message, Throwable error) {
@@ -132,7 +137,7 @@ public class ActorSystemStreamer implements Streamer {
 					}
 				};
 			}
-			
+
 			@RequiredArgsConstructor
 			private class StreamingTranmitter implements Transmitter<T> {
 				private final Source<T> source;
@@ -154,12 +159,12 @@ public class ActorSystemStreamer implements Streamer {
 				public void submit(Message<Object> message, T data, int size) {
 					destination.write(createSourceConnection(message), data, size);
 					updateTotalSize(size);
-					
+
 				}
 
 				@Override
-				public void complete(Message<Object> message, Long count) {					
-					resolver.resolve(new Stat() {	
+				public void complete(Message<Object> message, Long count) {
+					resolver.resolve(new Stat() {
 						@Override
 						public Long getSize() {
 							return count;
@@ -167,17 +172,17 @@ public class ActorSystemStreamer implements Streamer {
 					});
 					completeStreaming();
 				}
-				
+
 				@Override
 				public void fail(Message<Object> message, Throwable error) {
 					resolver.reject(error);
-					completeStreaming();	
+					completeStreaming();
 				}
 
 				private void updateTotalSize(int transmittedSize) {
 					this.totalSize += transmittedSize;
 				}
-				
+
 				private void completeStreaming() {
 					destination.release();
 					source.release();

@@ -1,6 +1,6 @@
 package io.bce.interaction.streaming;
 
-import io.bce.interaction.Promise;
+import io.bce.interaction.promises.Promise;
 
 /**
  * This interface describes the data stream abstraction. Data stream is the functional element,

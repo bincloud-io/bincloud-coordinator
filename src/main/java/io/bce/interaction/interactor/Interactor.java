@@ -1,6 +1,6 @@
 package io.bce.interaction.interactor;
 
-import io.bce.interaction.Promise;
+import io.bce.interaction.promises.Promise;
 import io.bce.timer.Timeout;
 import lombok.NonNull;
 

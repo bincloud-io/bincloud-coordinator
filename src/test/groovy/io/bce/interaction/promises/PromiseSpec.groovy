@@ -1,13 +1,11 @@
-package io.bce.interaction
+package io.bce.interaction.promises
 
 import java.util.concurrent.CountDownLatch
 
-import io.bce.interaction.Promise
-import io.bce.interaction.Promise.Deferred
-import io.bce.interaction.Promise.ErrorHandler
-import io.bce.interaction.Promise.PromiseHasAlreadyBeenRejectedException
-import io.bce.interaction.Promise.PromiseHasAlreadyBeenResolvedException
-import io.bce.interaction.Promise.ResponseHandler
+import io.bce.interaction.promises.Promise.ErrorHandler
+import io.bce.interaction.promises.Promise.ResponseHandler
+import io.bce.interaction.promises.Promises.PromiseHasAlreadyBeenRejectedException
+import io.bce.interaction.promises.Promises.PromiseHasAlreadyBeenResolvedException
 import spock.lang.Specification
 
 class PromiseSpec extends Specification {
@@ -27,7 +25,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			System.sleep(1000)
 			resolver.resolve(RESPONSE)
 			latch.countDown()
@@ -61,7 +59,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			System.sleep(1000)
 			resolver.reject(TYPED_EXCEPTION)
 			latch.countDown()
@@ -97,7 +95,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			System.sleep(1000)
 			resolver.reject(UNTYPED_EXCEPTION)
 			latch.countDown()
@@ -131,7 +129,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created and it is resolved twice"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.resolve(RESPONSE)
 				resolver.resolve(RESPONSE)
@@ -161,7 +159,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created and it is rejected twice"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.reject(UNTYPED_EXCEPTION)
 				resolver.reject(UNTYPED_EXCEPTION)
@@ -191,7 +189,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created and it is rejected after resolving"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.resolve(RESPONSE)
 				resolver.reject(UNTYPED_EXCEPTION)
@@ -221,7 +219,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
 		when: "The promise is created and it is resolved after rejection"
-		Promise<String> promise = new Promise({Deferred<String> resolver ->
+		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.reject(UNTYPED_EXCEPTION)
 				resolver.resolve(RESPONSE)

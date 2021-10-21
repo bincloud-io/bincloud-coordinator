@@ -9,10 +9,11 @@ import io.bce.actor.ActorSystem;
 import io.bce.actor.CorrelationKey;
 import io.bce.actor.Message;
 import io.bce.interaction.AsyncResolverProxy;
-import io.bce.interaction.Promise;
-import io.bce.interaction.Promise.Deferred;
 import io.bce.interaction.interactor.Interactor;
 import io.bce.interaction.interactor.TargetAddress;
+import io.bce.interaction.promises.Deferred;
+import io.bce.interaction.promises.Promise;
+import io.bce.interaction.promises.Promises;
 import io.bce.timer.Timeout;
 import io.bce.timer.TimeoutException;
 import io.bce.timer.TimeoutSupervisor;
@@ -27,14 +28,14 @@ public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
 	private final Class<S> repsponseType;
 	private final TargetAddress target;
 	private final Timeout timeout;
-	
+
 	public static final Factory factory(@NonNull ActorSystem actorSystem) {
 		return new ActorInteractorFactory(actorSystem);
 	}
-	
+
 	@Override
-	public final Promise<S> invoke(Q request ) {
-		return new Promise<S>(resolver -> {
+	public final Promise<S> invoke(Q request) {
+		return Promises.of(resolver -> {
 			ActorAddress interactorActor = actorSystem.actorOf(generateActorName(),
 					context -> new InteractorActor(context, createTargetAddress(target), timeout,
 							new AsyncResolverProxy<>(resolver)));
@@ -49,12 +50,12 @@ public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
 	private ActorName generateActorName() {
 		return ActorName.wrap(String.format("INTERACTION--%s", UUID.randomUUID()));
 	}
-	
+
 	@RequiredArgsConstructor
 	private static class ActorInteractorFactory implements Factory {
 		@NonNull
 		private final ActorSystem actorSystem;
-		
+
 		@Override
 		public <Q, S> Interactor<Q, S> createInteractor(TargetAddress target, Class<Q> requestType,
 				Class<S> responseType, Timeout timeout) {
@@ -83,11 +84,11 @@ public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
 		@Override
 		protected void receive(Message<Object> message) throws Throwable {
 			rethrowIfErrorReceived(message.getBody());
-			message.whenIsMatchedTo(body -> stage.isRequestWaitingStage(), body -> processRequest(message), v -> {				
-				message.whenIsMatchedTo(body -> stage.isResponseWaitingStage(), body -> processResponse(message));	
+			message.whenIsMatchedTo(body -> stage.isRequestWaitingStage(), body -> processRequest(message), v -> {
+				message.whenIsMatchedTo(body -> stage.isResponseWaitingStage(), body -> processResponse(message));
 			});
 		}
-		
+
 		@Override
 		protected FaultResolver<Object> getFaultResover() {
 			return new FaultResolver<Object>() {
@@ -98,13 +99,13 @@ public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
 				}
 			};
 		}
-		
+
 		private void rethrowIfErrorReceived(Object body) throws Throwable {
 			if (body instanceof Throwable) {
 				throw (Throwable) body;
 			}
 		}
-		
+
 		private void processRequest(Message<Object> requestMessage) {
 			requestMessage.whenIsMatchedTo(requestType, requestBody -> {
 				handleRequest(requestMessage.map(v -> requestBody));
