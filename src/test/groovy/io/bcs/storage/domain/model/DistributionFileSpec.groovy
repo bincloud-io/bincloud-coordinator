@@ -10,15 +10,15 @@ import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
-import io.bcs.storage.domain.model.File
-import io.bcs.storage.domain.model.FileDownloadingContext
-import io.bcs.storage.domain.model.FileUploadingContext
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
-import io.bcs.storage.domain.model.errors.FileAlreadyExistsException
-import io.bcs.storage.domain.model.errors.FileHasAlreadyBeenUploadedException
-import io.bcs.storage.domain.model.states.CreatedState
-import io.bcs.storage.domain.model.states.DistributionState
-import io.bcs.storage.domain.model.states.FileStatus
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext
+import io.bcs.storage.domain.model.contexts.FileUploadingContext
+import io.bcs.storage.domain.model.states.CreatedFileRevisionState
+import io.bcs.storage.domain.model.states.DistributionFileRevisionState
+import io.bcs.storage.domain.model.states.FileAlreadyExistsException
+import io.bcs.storage.domain.model.states.FileHasAlreadyBeenUploadedException
+import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DistributionFileSpec extends Specification {
@@ -46,7 +46,7 @@ class DistributionFileSpec extends Specification {
 
 	def "Scenario: file can not be created in the distribution state"() {
 		given: "The file in distribution state"
-		File file =  createDistributionFile()
+		FileRevision file =  createDistributionFile()
 
 		when: "The file creation is requested"
 		file.createFile(filesystem)
@@ -58,12 +58,12 @@ class DistributionFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISTRIBUTION.name()
+		file.status == FileRevisionStatus.DISTRIBUTION.name()
 	}
 
 	def "Scenario: file can not be uploaded in the distribution state"() {
 		given: "The file in distribution state"
-		File file =  createDistributionFile()
+		FileRevision file =  createDistributionFile()
 
 		when: "The file uploading is requested"
 		file.uploadFileContent(createUploadingContext())
@@ -75,12 +75,12 @@ class DistributionFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISTRIBUTION.name()
+		file.status == FileRevisionStatus.DISTRIBUTION.name()
 	}
 
 	def "Scenario: file content can not be downloaded in the disposed state"() {
 		given: "The file in distribution state"
-		File file =  createDistributionFile()
+		FileRevision file =  createDistributionFile()
 
 		and: "There is access on read to the file on a file system for range 10..20"
 		1 * filesystem.getAccessOnRead(file.getFilesystemName(), 10, 20) >> sourcePoint
@@ -106,7 +106,7 @@ class DistributionFileSpec extends Specification {
 		file.lastModification == TIMESTAMP_NEXT_POINT
 
 		and: "The status should not be changed"
-		file.status == FileStatus.DISTRIBUTION.name()
+		file.status == FileRevisionStatus.DISTRIBUTION.name()
 		
 		and: "The filesystem name should be generated"
 		file.getFilesystemName() == FILESYSTEM_NAME
@@ -123,7 +123,7 @@ class DistributionFileSpec extends Specification {
 
 	def "Scenario: file distribution can not be started in the distribution state"() {
 		given: "The disposed file"
-		File file =  createDistributionFile()
+		FileRevision file =  createDistributionFile()
 
 		when: "The file distribution start is requested"
 		file.startDistribution()
@@ -135,7 +135,7 @@ class DistributionFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISTRIBUTION.name()
+		file.status == FileRevisionStatus.DISTRIBUTION.name()
 	}
 
 	private def createUploadingContext() {
@@ -147,14 +147,14 @@ class DistributionFileSpec extends Specification {
 	}
 
 	def createDistributionFile() {
-		return File.builder()
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)
 				.creationMoment(TIMESTAMP_INITIAL_POINT)
 				.lastModification(TIMESTAMP_NEXT_POINT)
-				.state(new DistributionState())
+				.state(new DistributionFileRevisionState())
 				.fileSize(0L)
 				.build()
 	}

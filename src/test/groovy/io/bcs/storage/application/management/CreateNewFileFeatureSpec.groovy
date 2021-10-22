@@ -2,13 +2,13 @@ package io.bcs.storage.application.management
 
 import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.storage.application.management.FileManagementService
-import io.bcs.storage.domain.model.File
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FileId
-import io.bcs.storage.domain.model.FileRepository
+import io.bcs.storage.domain.model.FileRevisionRepository
 import io.bcs.storage.domain.model.FilesystemAccessor
 import io.bcs.storage.domain.model.contracts.FileManager
 import io.bcs.storage.domain.model.contracts.upload.FileAttributes
-import io.bcs.storage.domain.model.states.FileStatus
+import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class CreateNewFileFeatureSpec extends Specification {
@@ -18,21 +18,21 @@ class CreateNewFileFeatureSpec extends Specification {
 	private static final String FILE_DISPOSITION = "inline"
 	
 	private SequentialGenerator<String> filesystemNameGenerator
-	private FileRepository fileRepository
+	private FileRevisionRepository fileRepository
 	private FilesystemAccessor filesystemAccessor
 	private FileManager fileManager
 	private FileAttributes fileAttributes
 	
 	def setup() {
 		this.filesystemNameGenerator = Stub(SequentialGenerator)
-		this.fileRepository = Mock(FileRepository)
+		this.fileRepository = Mock(FileRevisionRepository)
 		this.filesystemAccessor = Mock(FilesystemAccessor)
 		this.fileAttributes = Stub(FileAttributes)
 		this.fileManager = new FileManagementService(filesystemNameGenerator, fileRepository, filesystemAccessor);
 	}
 	
 	def "Scenario: create a new file"() {
-		File file;
+		FileRevision file;
 		given: "The filesystem name generator generates unique name"
 		filesystemNameGenerator.nextValue() >> FILESYSTEM_NAME
 		
@@ -46,7 +46,7 @@ class CreateNewFileFeatureSpec extends Specification {
 		
 		then: "The file entity should be created and stored to the repository in created state"
 		1 * fileRepository.save(_) >> {file = it[0]}
-		file.getStatus() == FileStatus.CREATED.name()
+		file.getStatus() == FileRevisionStatus.CREATED.name()
 		
 		and: "The file should be created on a filesystem"
 		1 * this.filesystemAccessor.createFile(FILESYSTEM_NAME)

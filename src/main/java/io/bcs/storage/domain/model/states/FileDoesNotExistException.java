@@ -1,4 +1,4 @@
-package io.bcs.storage.domain.model.errors;
+package io.bcs.storage.domain.model.states;
 
 import io.bcs.storage.domain.model.Constants;
 

@@ -8,7 +8,7 @@ import io.bcs.common.domain.model.generator.SequentialGenerator;
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler;
 import io.bcs.storage.application.download.FileDownloadService;
 import io.bcs.storage.application.upload.FileUploadService;
-import io.bcs.storage.domain.model.FileRepository;
+import io.bcs.storage.domain.model.FileRevisionRepository;
 import io.bcs.storage.domain.model.FilesystemAccessor;
 import io.bcs.storage.domain.model.contracts.download.FileDownloader;
 import io.bcs.storage.domain.model.contracts.upload.FileUploader;
@@ -19,7 +19,7 @@ public class ServicesConfig {
 	private FilesystemAccessor filesystemAccessor;
 	
 	@Inject
-	private FileRepository fileRepository;
+	private FileRevisionRepository fileRepository;
 	
 	@Inject
 	@FileIdGenerator

@@ -9,7 +9,7 @@ import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
 import io.bcs.storage.domain.model.Constants;
 import io.bcs.storage.domain.model.FilesystemAccessor;
-import io.bcs.storage.domain.model.errors.FileManagementException;
+import io.bcs.storage.domain.model.states.FileManagementException;
 
 public class BlockedFileSystemAccessor implements FilesystemAccessor {
 	private final File rootFolder;

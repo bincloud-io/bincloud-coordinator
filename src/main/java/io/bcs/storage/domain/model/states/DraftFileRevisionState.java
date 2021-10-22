@@ -1,28 +1,27 @@
 package io.bcs.storage.domain.model.states;
 
-import io.bcs.storage.domain.model.FileDownloadingContext;
-import io.bcs.storage.domain.model.FileState;
-import io.bcs.storage.domain.model.FileUploadingContext;
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState;
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
+import io.bcs.storage.domain.model.contexts.FileUploadingContext;
 import io.bcs.storage.domain.model.FilesystemAccessor;
-import io.bcs.storage.domain.model.errors.FileDoesNotExistException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class DraftState implements FileState {
+public class DraftFileRevisionState implements FileRevisionState {
 
 	@Override
 	@ToString.Include
 	@EqualsAndHashCode.Include
 	public String getStatus() {
-		return FileStatus.DRAFT.name();
+		return FileRevisionStatus.DRAFT.name();
 	}
 
 	@Override
 	public void createFile(RootContext context, FilesystemAccessor fileSystem) {
 		fileSystem.createFile(context.getFileName());
-		context.setState(new CreatedState());
+		context.setState(new CreatedFileRevisionState());
 	}
 
 	@Override

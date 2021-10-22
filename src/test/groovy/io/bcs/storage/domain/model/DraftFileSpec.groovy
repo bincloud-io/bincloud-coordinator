@@ -8,15 +8,15 @@ import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
-import io.bcs.storage.domain.model.File
-import io.bcs.storage.domain.model.FileDownloadingContext
-import io.bcs.storage.domain.model.FileUploadingContext
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext
+import io.bcs.storage.domain.model.contexts.FileUploadingContext
 import io.bcs.storage.domain.model.contracts.upload.FileAttributes
-import io.bcs.storage.domain.model.errors.FileDoesNotExistException
-import io.bcs.storage.domain.model.errors.FileManagementException
-import io.bcs.storage.domain.model.states.DraftState
-import io.bcs.storage.domain.model.states.FileStatus
+import io.bcs.storage.domain.model.states.DraftFileRevisionState
+import io.bcs.storage.domain.model.states.FileDoesNotExistException
+import io.bcs.storage.domain.model.states.FileManagementException
+import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DraftFileSpec extends Specification {
@@ -35,7 +35,7 @@ class DraftFileSpec extends Specification {
 
 	def "Scenario: new file successfully created in the filesystem"() {
 		given: "The draft file"
-		File file = createInitialFile()
+		FileRevision file = createInitialFile()
 
 		when: "The file creation in the filesystem is requested"
 		file.createFile(filesystem)
@@ -44,7 +44,7 @@ class DraftFileSpec extends Specification {
 		1 * filesystem.createFile(FILESYSTEM_NAME)
 
 		and: "The file entity status should be changed to created"
-		file.status == FileStatus.CREATED.name()
+		file.status == FileRevisionStatus.CREATED.name()
 
 		and: "The last modification time should be updated"
 		file.lastModification != TIMESTAMP_INITIAL_POINT
@@ -64,7 +64,7 @@ class DraftFileSpec extends Specification {
 
 	def "Scenario: file can not be uploaded in the draft state"() {
 		given: "The draft file"
-		File file = createInitialFile()
+		FileRevision file = createInitialFile()
 
 		when: "The file uploading is requested"
 		file.uploadFileContent(createDummyUploadContext())
@@ -78,7 +78,7 @@ class DraftFileSpec extends Specification {
 
 	def "Scenario: file can not be downloaded in the draft state"() {
 		given: "The draft file"
-		File file = createInitialFile()
+		FileRevision file = createInitialFile()
 
 		when: "The file downloading is requested"
 		file.downloadFileContent(createDummyDownloadContext(), 0, 100)
@@ -92,7 +92,7 @@ class DraftFileSpec extends Specification {
 
 	def "Scenario: file distribution can not be started in the draft state"() {
 		given: "The draft file"
-		File file = createInitialFile()
+		FileRevision file = createInitialFile()
 
 		when: "The file distribution start is requested"
 		file.startDistribution()
@@ -113,14 +113,14 @@ class DraftFileSpec extends Specification {
 	}
 
 	def createInitialFile() {
-		return File.builder()
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)
 				.creationMoment(TIMESTAMP_INITIAL_POINT)
 				.lastModification(TIMESTAMP_INITIAL_POINT)
-				.state(new DraftState())
+				.state(new DraftFileRevisionState())
 				.fileSize(0L)
 				.build()
 	}

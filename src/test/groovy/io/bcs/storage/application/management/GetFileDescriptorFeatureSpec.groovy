@@ -5,13 +5,13 @@ import java.time.temporal.ChronoUnit
 
 import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.storage.application.management.FileManagementService
-import io.bcs.storage.domain.model.File
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FileId
-import io.bcs.storage.domain.model.FileRepository
+import io.bcs.storage.domain.model.FileRevisionRepository
 import io.bcs.storage.domain.model.FilesystemAccessor
 import io.bcs.storage.domain.model.contracts.FileDescriptor
 import io.bcs.storage.domain.model.contracts.FileManager
-import io.bcs.storage.domain.model.states.DistributionState
+import io.bcs.storage.domain.model.states.DistributionFileRevisionState
 import spock.lang.Specification
 
 class GetFileDescriptorFeatureSpec extends Specification {
@@ -24,17 +24,17 @@ class GetFileDescriptorFeatureSpec extends Specification {
 	private static final Instant TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plus(1, ChronoUnit.MILLIS)
 	private static final FileId FILE_ID = new FileId(FILESYSTEM_NAME)
 
-	private FileRepository fileRepository
+	private FileRevisionRepository fileRepository
 	private FileManager fileManager
 	
 	def setup() {
-		this.fileRepository = Mock(FileRepository)
+		this.fileRepository = Mock(FileRevisionRepository)
 		this.fileManager = new FileManagementService(Stub(SequentialGenerator), fileRepository, Stub(FilesystemAccessor))
 	}
 	
 	def "Scenario: get non empty descriptor for existing file"() {
 		given: "The file exists in the repository"
-		File file = createFile()
+		FileRevision file = createFile()
 		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(file)
 		
 		when: "The file descriptor is requested by file id"
@@ -67,14 +67,14 @@ class GetFileDescriptorFeatureSpec extends Specification {
 	}
 	
 	def createFile() {
-		return File.builder()
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)
 				.creationMoment(TIMESTAMP_INITIAL_POINT)
 				.lastModification(TIMESTAMP_NEXT_POINT)
-				.state(new DistributionState())
+				.state(new DistributionFileRevisionState())
 				.fileSize(1000L)
 				.build()
 	}

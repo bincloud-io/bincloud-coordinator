@@ -8,7 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.TransactionManager;
 
 import io.bcs.common.domain.model.generator.SequentialGenerator;
-import io.bcs.storage.domain.model.FileRepository;
+import io.bcs.storage.domain.model.FileRevisionRepository;
 import io.bcs.storage.port.adapter.ServerContextProvider;
 import io.bcs.storage.port.adapter.file.repository.InstanceBasedFileIdGenerator;
 import io.bcs.storage.port.adapter.file.repository.JPAFileRepository;
@@ -31,7 +31,7 @@ public class RepositoriesConfig {
 	}
 	
 	@Produces
-	public FileRepository fileRepository() {
+	public FileRevisionRepository fileRepository() {
 		return new JPAFileRepository(centralContext, transactionManager);
 	}
 }

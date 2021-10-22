@@ -1,6 +1,7 @@
 package io.bcs.storage.domain.model.errors;
 
 import io.bcs.storage.domain.model.Constants;
+import io.bcs.storage.domain.model.states.FileManagementException;
 
 public class UnsatisfiableRangeFormatException extends FileManagementException {
 	private static final long serialVersionUID = 7769850795657374683L;

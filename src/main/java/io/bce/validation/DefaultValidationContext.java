@@ -125,11 +125,11 @@ public final class DefaultValidationContext implements ValidationContext {
 	}
 	
 	private ValidationContext validate(ValidationGroup group, Validatable validatable, DerivationPolicy derivationPolicy) {
-		DefaultValidationContext subContext = validatable.validate(new DefaultValidationContext(group, derivationPolicy, new ValidationState()));
+		ValidationContext subContext = validatable.validate(new DefaultValidationContext(group, derivationPolicy, new ValidationState()));
 		return merge(subContext);
 	}
 	
-	private ValidationContext merge(DefaultValidationContext subContext) {
+	private ValidationContext merge(ValidationContext subContext) {
 		return new DefaultValidationContext(this.group, this.derivation, this.validationState.merge(subContext.getState()));
 	}
 

@@ -4,10 +4,10 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import io.bcs.common.domain.model.generator.SequentialGenerator
-import io.bcs.storage.domain.model.File
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
 import io.bcs.storage.domain.model.contracts.upload.FileAttributes
-import io.bcs.storage.domain.model.states.FileStatus
+import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -39,10 +39,10 @@ class FileSpec extends Specification {
 		this.filesystemNameGenerator.nextValue() >> FILESYSTEM_NAME
 
 		when: "The file entity is created by the constructor"
-		File file = new File(filesystemNameGenerator, fileAttributes)
+		FileRevision file = new FileRevision(filesystemNameGenerator, fileAttributes)
 
 		then: "The file status should be draft"
-		file.status == FileStatus.DRAFT.name()
+		file.status == FileRevisionStatus.DRAFT.name()
 
 		and: "The file size should be zero"
 		file.getFileSize() == 0L
@@ -72,7 +72,7 @@ class FileSpec extends Specification {
 	@Unroll
 	def "Scenario: dispose file"() {
 		given: "The #fileStatus.name() file"
-		File file = File.builder()
+		FileRevision file = FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
@@ -88,7 +88,7 @@ class FileSpec extends Specification {
 		file.dispose(filesystemAccessor)
 
 		then: "The file status should be disposed"
-		file.status == FileStatus.DISPOSED.name()
+		file.status == FileRevisionStatus.DISPOSED.name()
 
 		and: "The creation moment should be changed"
 		file.lastModification != TIMESTAMP_NEXT_POINT
@@ -97,6 +97,6 @@ class FileSpec extends Specification {
 		1 * filesystemAccessor.removeFile(FILESYSTEM_NAME)
 
 		where:
-		fileStatus << [FileStatus.DRAFT, FileStatus.CREATED, FileStatus.DISTRIBUTION]
+		fileStatus << [FileRevisionStatus.DRAFT, FileRevisionStatus.CREATED, FileRevisionStatus.DISTRIBUTION]
 	}
 }

@@ -5,6 +5,13 @@ import java.util.Collection;
 import io.bce.text.TextTemplate;
 
 public interface ValidationContext {
+	
+	/**
+	 * Get the result validation state
+	 * 
+	 * @return The validation state
+	 */
+	public ValidationState getState();
 
 	/**
 	 * Validate an object, implementing the {@link Validatable} interface
@@ -12,7 +19,7 @@ public interface ValidationContext {
 	 * @param validatable The validatable object
 	 * @return The derived context
 	 */
-	ValidationContext validate(Validatable validatable);
+	public ValidationContext validate(Validatable validatable);
 
 	/**
 	 * Validate an object, implementing the {@link Validatable} interface using
@@ -22,7 +29,7 @@ public interface ValidationContext {
 	 * @param derivationPolicy The derivation policy
 	 * @return The derived context
 	 */
-	ValidationContext validate(Validatable validatable, DerivationPolicy derivationPolicy);
+	public ValidationContext validate(Validatable validatable, DerivationPolicy derivationPolicy);
 
 	/**
 	 * Validate an object, implementing the {@link Validatable} interface, grouped
@@ -32,7 +39,7 @@ public interface ValidationContext {
 	 * @param validatable The validatable object
 	 * @return The derived context
 	 */
-	ValidationContext validate(String groupName, Validatable validatable);
+	public ValidationContext validate(String groupName, Validatable validatable);
 
 	/**
 	 * Validate an object, implementing the {@link Validatable} interface, grouped
@@ -43,7 +50,7 @@ public interface ValidationContext {
 	 * @param derivationPolicy The derivation policy
 	 * @return The derived context
 	 */
-	ValidationContext validate(String groupName, Validatable validatable, DerivationPolicy derivationPolicy);
+	public ValidationContext validate(String groupName, Validatable validatable, DerivationPolicy derivationPolicy);
 
 	<T> ValidationContext withRule(ValueProvider<T> valueProvider, Rule<T> rule);
 
@@ -66,7 +73,7 @@ public interface ValidationContext {
 		 * @param context The validation context
 		 * @return The derived context with applied validations
 		 */
-		public DefaultValidationContext validate(ValidationContext context);
+		public ValidationContext validate(ValidationContext context);
 	}
 
 	/**

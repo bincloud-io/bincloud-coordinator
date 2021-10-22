@@ -1,21 +1,20 @@
 package io.bcs.storage.domain.model.states;
 
-import io.bcs.storage.domain.model.FileDownloadingContext;
-import io.bcs.storage.domain.model.FileState;
-import io.bcs.storage.domain.model.FileUploadingContext;
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState;
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
+import io.bcs.storage.domain.model.contexts.FileUploadingContext;
 import io.bcs.storage.domain.model.FilesystemAccessor;
-import io.bcs.storage.domain.model.errors.FileHasAlreadyBeenDisposedException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class DisposedState implements FileState {
+public class DisposedFileRevisionState implements FileRevisionState {
 	@Override
 	@ToString.Include
 	@EqualsAndHashCode.Include
 	public String getStatus() {
-		return FileStatus.DISPOSED.name();
+		return FileRevisionStatus.DISPOSED.name();
 	}
 
 	@Override

@@ -19,15 +19,15 @@ import io.bce.text.TextTemplate
 import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.common.domain.model.logging.Loggers
 import io.bcs.common.port.adapters.time.JPADateTimeConverter
-import io.bcs.storage.domain.model.File
-import io.bcs.storage.domain.model.FileRepository
-import io.bcs.storage.domain.model.FileState
-import io.bcs.storage.domain.model.states.CreatedState
-import io.bcs.storage.domain.model.states.DisposedState
-import io.bcs.storage.domain.model.states.DistributionState
-import io.bcs.storage.domain.model.states.DraftState
+import io.bcs.storage.domain.model.FileRevisionRepository
+import io.bcs.storage.domain.model.FileRevision
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState
+import io.bcs.storage.domain.model.states.CreatedFileRevisionState
+import io.bcs.storage.domain.model.states.DisposedFileRevisionState
+import io.bcs.storage.domain.model.states.DistributionFileRevisionState
+import io.bcs.storage.domain.model.states.DraftFileRevisionState
 import io.bcs.storage.port.adapter.file.repository.JPAFileRepository
-import io.bcs.storage.port.adapter.file.repository.JPAFileStateConverter
+import io.bcs.storage.port.adapter.file.repository.JPAFileRevisionStateConverter
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
@@ -46,13 +46,13 @@ class FileRepositoryITSpec extends Specification {
 				.withScopes(COMPILE, RUNTIME, TEST)
 				.resolveDependency("org.liquibase", "liquibase-core")
 				.apply()
-				.appendPackagesRecursively(File.getPackage().getName())
+				.appendPackagesRecursively(FileRevision.getPackage().getName())
 				.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(Loggers.getPackage().getName())
 				.appendPackagesRecursively(TextTemplate.getPackage().getName())
 				.appendClasses(JPADateTimeConverter)
-				.appendClasses(SequentialGenerator,  JPAFileRepository, JPAFileStateConverter,  FileRepositoryITSpecConfig)
+				.appendClasses(SequentialGenerator,  JPAFileRepository, JPAFileRevisionStateConverter,  FileRepositoryITSpecConfig)
 				.appendResource("liquibase")
 				.appendManifestResource("META-INF/beans.xml", "beans.xml")
 				.appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
@@ -65,7 +65,7 @@ class FileRepositoryITSpec extends Specification {
 	private DatabaseConfigurer databaseConfigurer;
 
 	@Inject
-	private FileRepository fileRepository;
+	private FileRevisionRepository fileRepository;
 
 	def setup() {
 		databaseConfigurer.setup("liquibase/master.changelog.xml")
@@ -77,19 +77,19 @@ class FileRepositoryITSpec extends Specification {
 
 	def "Scenario: save file entity and obtain by id"() {
 		given: "The file entity"
-		File file = createFileForState(fileState, fileSize)
+		FileRevision file = createFileForState(fileState, fileSize)
 
 		when: "The file entity has been saved to the repository"
 		fileRepository.save(file)
 
 		and: "After that this file has been obtained by id"
-		Optional<File> obtainedOptionalFile = fileRepository.findById(FILE_ID)
+		Optional<FileRevision> obtainedOptionalFile = fileRepository.findById(FILE_ID)
 
 		then: "The file should be found into repository"
 		obtainedOptionalFile.isPresent() == true
 
 		and: "Their structure should be fully equivalent"
-		File obtainedFile = obtainedOptionalFile.get()
+		FileRevision obtainedFile = obtainedOptionalFile.get()
 		file == obtainedFile
 		truncate(file.getCreationMoment()) == truncate(obtainedFile.getCreationMoment())
 		truncate(file.getLastModification()) == truncate(obtainedFile.getLastModification())
@@ -98,18 +98,18 @@ class FileRepositoryITSpec extends Specification {
 
 		where:
 		fileState               | fileSize
-		new DraftState()        | 0L
-		new CreatedState()      | 0L
-		new DistributionState() | 40000000L
-		new DisposedState()     | 40000000L
+		new DraftFileRevisionState()        | 0L
+		new CreatedFileRevisionState()      | 0L
+		new DistributionFileRevisionState() | 40000000L
+		new DisposedFileRevisionState()     | 40000000L
 	}
 	
 	private Instant truncate(Instant source) {
 		return source.truncatedTo(ChronoUnit.SECONDS);
 	}
 
-	private File createFileForState(FileState fileState, Long fileSize) {
-		return File.builder()
+	private FileRevision createFileForState(FileRevisionState fileState, Long fileSize) {
+		return FileRevision.builder()
 				.fileId(FILE_ID)
 				.lastModification(LAST_MODIFICATION)
 				.creationMoment(CREATION_MOMENT)

@@ -9,13 +9,13 @@ import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
-import io.bcs.storage.domain.model.File
-import io.bcs.storage.domain.model.FileDownloadingContext
-import io.bcs.storage.domain.model.FileUploadingContext
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
-import io.bcs.storage.domain.model.errors.FileHasAlreadyBeenDisposedException
-import io.bcs.storage.domain.model.states.DisposedState
-import io.bcs.storage.domain.model.states.FileStatus
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext
+import io.bcs.storage.domain.model.contexts.FileUploadingContext
+import io.bcs.storage.domain.model.states.DisposedFileRevisionState
+import io.bcs.storage.domain.model.states.FileHasAlreadyBeenDisposedException
+import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DisposedFileSpec extends Specification {
@@ -33,7 +33,7 @@ class DisposedFileSpec extends Specification {
 
 	def "Scenario: file can not be created in the disposed state"() {
 		given: "The file in disposed state"
-		File file =  createDisposedFile()
+		FileRevision file =  createDisposedFile()
 
 		when: "The file creation is requested"
 		file.createFile(filesystem)
@@ -45,12 +45,12 @@ class DisposedFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISPOSED.name()
+		file.status == FileRevisionStatus.DISPOSED.name()
 	}
 
 	def "Scenario: file can not be uploaded in the disposed state"() {
 		given: "The file in disposed state"
-		File file =  createDisposedFile()
+		FileRevision file =  createDisposedFile()
 
 		when: "The file uploading is requested"
 		file.uploadFileContent(createUploadingContext())
@@ -62,12 +62,12 @@ class DisposedFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISPOSED.name()
+		file.status == FileRevisionStatus.DISPOSED.name()
 	}
 
 	def "Scenario: file content can not be downloaded in the disposed state"() {
 		given: "The file in disposed state"
-		File file =  createDisposedFile()
+		FileRevision file =  createDisposedFile()
 
 		when: "The file downloading is requested"
 		file.downloadFileContent(createDownloadingContext(), 0, 100)
@@ -79,12 +79,12 @@ class DisposedFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISPOSED.name()
+		file.status == FileRevisionStatus.DISPOSED.name()
 	}
 
 	def "Scenario: file distribution can not be started in the disposed state"() {
 		given: "The file in disposed state"
-		File file =  createDisposedFile()
+		FileRevision file =  createDisposedFile()
 
 		when: "The file distribution start is requested"
 		file.startDistribution()
@@ -96,7 +96,7 @@ class DisposedFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
-		file.status == FileStatus.DISPOSED.name()
+		file.status == FileRevisionStatus.DISPOSED.name()
 	}
 
 	def createDownloadingContext() {
@@ -108,14 +108,14 @@ class DisposedFileSpec extends Specification {
 	}
 
 	def createDisposedFile() {
-		return File.builder()
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)
 				.creationMoment(TIMESTAMP_INITIAL_POINT)
 				.lastModification(TIMESTAMP_NEXT_POINT)
-				.state(new DisposedState())
+				.state(new DisposedFileRevisionState())
 				.fileSize(0L)
 				.build()
 	}

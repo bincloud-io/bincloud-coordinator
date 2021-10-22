@@ -5,13 +5,13 @@ import java.time.temporal.ChronoUnit
 
 import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.storage.application.management.FileManagementService
-import io.bcs.storage.domain.model.File
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FileId
-import io.bcs.storage.domain.model.FileRepository
+import io.bcs.storage.domain.model.FileRevisionRepository
 import io.bcs.storage.domain.model.FilesystemAccessor
 import io.bcs.storage.domain.model.contracts.FileManager
-import io.bcs.storage.domain.model.states.DistributionState
-import io.bcs.storage.domain.model.states.FileStatus
+import io.bcs.storage.domain.model.states.DistributionFileRevisionState
+import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DisposeExistingFileFeatureSpec extends Specification {
@@ -23,18 +23,18 @@ class DisposeExistingFileFeatureSpec extends Specification {
 	private static final Instant TIMESTAMP_INITIAL_POINT = Instant.now()
 	private static final Instant TIMESTAMP_NEXT_POINT = TIMESTAMP_INITIAL_POINT.plus(1, ChronoUnit.MILLIS)
 
-	private FileRepository fileRepository
+	private FileRevisionRepository fileRepository
 	private FilesystemAccessor filesystemAccessor;
 	private FileManager fileManager
 
 	def setup() {
-		this.fileRepository = Mock(FileRepository)
+		this.fileRepository = Mock(FileRevisionRepository)
 		this.filesystemAccessor = Mock(FilesystemAccessor)
 		this.fileManager = new FileManagementService(Stub(SequentialGenerator), fileRepository, filesystemAccessor)
 	}
 	
 	def "Scenario: file is successfully disposed"() {
-		File storedFile;
+		FileRevision storedFile;
 		given: "The file is stored in the repository"
 		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createDistributionFile())
 
@@ -43,21 +43,21 @@ class DisposeExistingFileFeatureSpec extends Specification {
 
 		then: "The file should be stored with disposed state"
 		1 * fileRepository.save(_) >> {storedFile = it[0]}
-		storedFile.getStatus() == FileStatus.DISPOSED.name()
+		storedFile.getStatus() == FileRevisionStatus.DISPOSED.name()
 		
 		and: "The physical file should be removed from the filesystem"
 		1 * filesystemAccessor.removeFile(FILESYSTEM_NAME)
 	}
 
 	def createDistributionFile() {
-		return File.builder()
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)
 				.creationMoment(TIMESTAMP_INITIAL_POINT)
 				.lastModification(TIMESTAMP_NEXT_POINT)
-				.state(new DistributionState())
+				.state(new DistributionFileRevisionState())
 				.fileSize(1000L)
 				.build()
 	}

@@ -6,24 +6,22 @@ import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler;
 import io.bcs.common.domain.model.io.transfer.Transmitter;
-import io.bcs.storage.domain.model.FileDownloadingContext;
-import io.bcs.storage.domain.model.FileState;
-import io.bcs.storage.domain.model.FileUploadingContext;
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState;
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
+import io.bcs.storage.domain.model.contexts.FileUploadingContext;
 import io.bcs.storage.domain.model.FilesystemAccessor;
-import io.bcs.storage.domain.model.errors.FileAlreadyExistsException;
-import io.bcs.storage.domain.model.errors.FileHasNotBeenUploadedException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class CreatedState implements FileState {
+public class CreatedFileRevisionState implements FileRevisionState {
 
 	@Override
 	@ToString.Include
 	@EqualsAndHashCode.Include
 	public String getStatus() {
-		return FileStatus.CREATED.name();
+		return FileRevisionStatus.CREATED.name();
 	}
 
 	@Override
@@ -46,7 +44,7 @@ public class CreatedState implements FileState {
 
 	@Override
 	public void startDistribution(RootContext context) {
-		context.setState(new DistributionState());
+		context.setState(new DistributionFileRevisionState());
 	}
 
 	@Override

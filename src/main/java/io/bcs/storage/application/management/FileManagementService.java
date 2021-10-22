@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import io.bcs.common.domain.model.generator.SequentialGenerator;
 import io.bcs.storage.application.ExistingFileProvider;
-import io.bcs.storage.domain.model.File;
+import io.bcs.storage.domain.model.FileRevision;
 import io.bcs.storage.domain.model.FileId;
-import io.bcs.storage.domain.model.FileRepository;
+import io.bcs.storage.domain.model.FileRevisionRepository;
 import io.bcs.storage.domain.model.FilesystemAccessor;
 import io.bcs.storage.domain.model.contracts.FileDescriptor;
 import io.bcs.storage.domain.model.contracts.FileManager;
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FileManagementService implements FileManager {
 	private final SequentialGenerator<String> filesystemNameGenerator;
-	private final FileRepository fileRepository;
+	private final FileRevisionRepository fileRepository;
 	private final FilesystemAccessor filesystemAccessor;
 
 	@Override
@@ -26,7 +26,7 @@ public class FileManagementService implements FileManager {
 
 	@Override
 	public FileId createFileRevision(FileAttributes fileAttributes) {
-		File file = new File(filesystemNameGenerator, fileAttributes);
+		FileRevision file = new FileRevision(filesystemNameGenerator, fileAttributes);
 		file.createFile(filesystemAccessor);
 		fileRepository.save(file);
 		return new FileId(file.getFilesystemName());
@@ -34,7 +34,7 @@ public class FileManagementService implements FileManager {
 
 	@Override
 	public void disposeFile(FileId replicaGroup) {
-		File file = new ExistingFileProvider(replicaGroup, fileRepository).get();
+		FileRevision file = new ExistingFileProvider(replicaGroup, fileRepository).get();
 		file.dispose(filesystemAccessor);
 		fileRepository.save(file);
 	}

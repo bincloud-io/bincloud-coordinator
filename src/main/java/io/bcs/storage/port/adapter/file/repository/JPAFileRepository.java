@@ -9,24 +9,24 @@ import io.bce.text.TextTemplates;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
 import io.bcs.common.domain.model.logging.Loggers;
-import io.bcs.storage.domain.model.File;
+import io.bcs.storage.domain.model.FileRevision;
 import io.bcs.storage.domain.model.FileId;
-import io.bcs.storage.domain.model.FileRepository;
+import io.bcs.storage.domain.model.FileRevisionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
-public class JPAFileRepository implements FileRepository {
+public class JPAFileRepository implements FileRevisionRepository {
 //	private static final String FIND_LATEST_RESOURCE_UPLOAD_NAMED_QUERY = "FileRepository.findLatestResourceUpload";
 	private final EntityManager entityManager;
 	private final TransactionManager transactionManager;
 
 	@Override
-	public Optional<File> findById(String fileId) {
+	public Optional<FileRevision> findById(String fileId) {
 		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
 				TextTemplates.createBy("Find file with fileId={{fileId}}").withParameter("fileId", fileId)));
 
-		return Optional.ofNullable(entityManager.find(File.class, new FileId(fileId)));
+		return Optional.ofNullable(entityManager.find(FileRevision.class, new FileId(fileId)));
 	}
 
 //	@Override
@@ -41,7 +41,7 @@ public class JPAFileRepository implements FileRepository {
 
 	@Override
 	@SneakyThrows
-	public void save(File file) {
+	public void save(FileRevision file) {
 		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
 				TextTemplates.createBy("Save file: {{file}}").withParameter("file", TextTemplates.createBy(file))));
 		transactionManager.begin();

@@ -7,7 +7,7 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
 
-import io.bcs.storage.domain.model.FileRepository
+import io.bcs.storage.domain.model.FileRevisionRepository
 import io.bcs.storage.port.adapter.file.repository.JPAFileRepository
 
 @ApplicationScoped
@@ -19,7 +19,7 @@ class FileRepositoryITSpecConfig {
 	private TransactionManager transactionManager;
 	
 	@Produces
-	public FileRepository fileRepository() {
+	public FileRevisionRepository fileRepository() {
 		return new JPAFileRepository(entityManager, transactionManager)
 	}
 

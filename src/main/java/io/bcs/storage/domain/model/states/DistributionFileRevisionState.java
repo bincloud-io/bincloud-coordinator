@@ -5,23 +5,21 @@ import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler;
 import io.bcs.common.domain.model.io.transfer.Transmitter;
-import io.bcs.storage.domain.model.FileDownloadingContext;
-import io.bcs.storage.domain.model.FileState;
-import io.bcs.storage.domain.model.FileUploadingContext;
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState;
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
+import io.bcs.storage.domain.model.contexts.FileUploadingContext;
 import io.bcs.storage.domain.model.FilesystemAccessor;
-import io.bcs.storage.domain.model.errors.FileAlreadyExistsException;
-import io.bcs.storage.domain.model.errors.FileHasAlreadyBeenUploadedException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class DistributionState implements FileState {
+public class DistributionFileRevisionState implements FileRevisionState {
 	@Override
 	@ToString.Include
 	@EqualsAndHashCode.Include
 	public String getStatus() {
-		return FileStatus.DISTRIBUTION.name();
+		return FileRevisionStatus.DISTRIBUTION.name();
 	}
 
 	@Override

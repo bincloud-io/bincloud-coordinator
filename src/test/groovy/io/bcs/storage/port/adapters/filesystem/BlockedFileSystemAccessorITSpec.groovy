@@ -16,7 +16,7 @@ import io.bcs.common.domain.model.logging.Loggers
 import io.bcs.common.port.adapters.io.transfer.destinations.StreamDestination
 import io.bcs.common.port.adapters.io.transfer.sources.StreamSource
 import io.bcs.common.port.adapters.io.transfer.transmitter.DirectTransferingScheduler
-import io.bcs.storage.domain.model.File
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
 import io.bcs.storage.port.adapter.file.filesystem.BlockedFileSystemAccessor
 import io.bcs.storage.port.adapter.file.filesystem.FilesystemStreamDestination
@@ -31,7 +31,7 @@ class BlockedFileSystemAccessorITSpec extends Specification {
 	@Deployment
 	public static Archive "create deployment"() {
 		return ArchiveBuilder.jar("blocked-filesystem-accessor-spec.jar")
-				.appendPackageNonRecursively(File.getPackage().getName())
+				.appendPackageNonRecursively(FileRevision.getPackage().getName())
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
 				.appendPackagesRecursively(InputOutputException.getPackage().getName())
 				.appendPackagesRecursively(Loggers.getPackage().getName())

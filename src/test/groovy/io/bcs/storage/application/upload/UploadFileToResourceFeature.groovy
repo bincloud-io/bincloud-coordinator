@@ -10,21 +10,21 @@ import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
-import io.bcs.storage.domain.model.File
-import io.bcs.storage.domain.model.FileRepository
-import io.bcs.storage.domain.model.FileState
+import io.bcs.storage.domain.model.FileRevisionRepository
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState
 import io.bcs.storage.domain.model.contracts.FileDescriptor
 import io.bcs.storage.domain.model.contracts.FilePointer
 import io.bcs.storage.domain.model.contracts.upload.FileUploadListener
 import io.bcs.storage.domain.model.contracts.upload.FileUploader
-import io.bcs.storage.domain.model.errors.FileDoesNotExistException
-import io.bcs.storage.domain.model.errors.FileHasAlreadyBeenDisposedException
-import io.bcs.storage.domain.model.errors.FileHasAlreadyBeenUploadedException
 import io.bcs.storage.domain.model.errors.UnspecifiedFilesystemNameException
-import io.bcs.storage.domain.model.states.CreatedState
-import io.bcs.storage.domain.model.states.DisposedState
-import io.bcs.storage.domain.model.states.DistributionState
+import io.bcs.storage.domain.model.states.CreatedFileRevisionState
+import io.bcs.storage.domain.model.states.DisposedFileRevisionState
+import io.bcs.storage.domain.model.states.DistributionFileRevisionState
+import io.bcs.storage.domain.model.states.FileDoesNotExistException
+import io.bcs.storage.domain.model.states.FileHasAlreadyBeenDisposedException
+import io.bcs.storage.domain.model.states.FileHasAlreadyBeenUploadedException
 import spock.lang.Specification
 
 class UploadFileToResourceFeature extends Specification {
@@ -38,7 +38,7 @@ class UploadFileToResourceFeature extends Specification {
 
 	private SourcePoint source
 	private DestinationPoint destination
-	private FileRepository fileRepository
+	private FileRevisionRepository fileRepository
 	private FilesystemAccessor filesystemAccessor
 	private TransferingScheduler transferringScheduler
 	private FileUploadListener uploadListener
@@ -48,7 +48,7 @@ class UploadFileToResourceFeature extends Specification {
 		this.source = Stub(SourcePoint)
 		this.destination = Stub(DestinationPoint)
 		this.filesystemAccessor = Stub(FilesystemAccessor)
-		this.fileRepository = Mock(FileRepository)
+		this.fileRepository = Mock(FileRevisionRepository)
 		this.uploadListener = Mock(FileUploadListener)
 		this.transferringScheduler = Mock(TransferingScheduler)
 		this.fileUploader = new FileUploadService(fileRepository, filesystemAccessor, transferringScheduler)
@@ -103,13 +103,13 @@ class UploadFileToResourceFeature extends Specification {
 	}
 
 	def "Scenario: file is successfuly uploaded to the existing resource"() {
-		File storedFile;
+		FileRevision storedFile;
 		FileDescriptor fileDescriptor;
 		given: "The file pointer"
 		FilePointer filePointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
 
 		and: "The file, containing into repository, has the created state"
-		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createFile(new CreatedState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createFile(new CreatedFileRevisionState(), FILE_SIZE))
 
 		and: "There is access on write to the filesystem"
 		filesystemAccessor.getAccessOnWrite(FILESYSTEM_NAME, FILE_SIZE) >> destination
@@ -168,8 +168,8 @@ class UploadFileToResourceFeature extends Specification {
 		
 		where:
 		fileState                 | errorSeverity           | errorContext                                | errorCode
-		new DistributionState()   | ErrorSeverity.BUSINESS  | FileHasAlreadyBeenUploadedException.CONTEXT | FileHasAlreadyBeenUploadedException.ERROR_CODE
-		new DisposedState()       | ErrorSeverity.BUSINESS  | FileHasAlreadyBeenDisposedException.CONTEXT | FileHasAlreadyBeenDisposedException.ERROR_CODE
+		new DistributionFileRevisionState()   | ErrorSeverity.BUSINESS  | FileHasAlreadyBeenUploadedException.CONTEXT | FileHasAlreadyBeenUploadedException.ERROR_CODE
+		new DisposedFileRevisionState()       | ErrorSeverity.BUSINESS  | FileHasAlreadyBeenDisposedException.CONTEXT | FileHasAlreadyBeenDisposedException.ERROR_CODE
 		     
 	}
 
@@ -179,7 +179,7 @@ class UploadFileToResourceFeature extends Specification {
 		FilePointer filePointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
 
 		and: "The file, containing into repository, has the created state"
-		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createFile(new CreatedState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createFile(new CreatedFileRevisionState(), FILE_SIZE))
 
 		and: "There isn't access on write to the filesystem"
 		filesystemAccessor.getAccessOnWrite(FILESYSTEM_NAME, FILE_SIZE) >> {throw error}
@@ -197,7 +197,7 @@ class UploadFileToResourceFeature extends Specification {
 		FilePointer filePointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
 
 		and: "The file, containing into repository, has the created state"
-		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createFile(new CreatedState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createFile(new CreatedFileRevisionState(), FILE_SIZE))
 
 		and: "There is access on write to the filesystem"
 		filesystemAccessor.getAccessOnWrite(FILESYSTEM_NAME, FILE_SIZE) >> destination
@@ -240,8 +240,8 @@ class UploadFileToResourceFeature extends Specification {
 		return filePointer
 	}
 
-	private File createFile(FileState fileState, Long fileSize) {
-		return File.builder()
+	private FileRevision createFile(FileRevisionState fileState, Long fileSize) {
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)

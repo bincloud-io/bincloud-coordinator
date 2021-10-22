@@ -1,6 +1,7 @@
 package io.bcs.storage.domain.model.errors;
 
 import io.bcs.storage.domain.model.Constants;
+import io.bcs.storage.domain.model.states.FileManagementException;
 
 public class UnspecifiedFilesystemNameException extends FileManagementException {	
 	private static final long serialVersionUID = -6241501905585818399L;

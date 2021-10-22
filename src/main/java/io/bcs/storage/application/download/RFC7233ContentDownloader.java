@@ -3,9 +3,9 @@ package io.bcs.storage.application.download;
 import io.bcs.common.domain.model.io.transfer.CompletionCallback;
 import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler;
-import io.bcs.storage.domain.model.File;
-import io.bcs.storage.domain.model.FileDownloadingContext;
+import io.bcs.storage.domain.model.FileRevision;
 import io.bcs.storage.domain.model.FilesystemAccessor;
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
 import io.bcs.storage.domain.model.contracts.download.DownloadListener;
 import io.bcs.storage.domain.model.contracts.download.Fragment;
 import io.bcs.storage.domain.model.contracts.download.DownloadListener.DownloadProcessType;
@@ -13,11 +13,11 @@ import io.bcs.storage.domain.model.contracts.download.FileDownloader.DownloadReq
 import lombok.RequiredArgsConstructor;
 
 public class RFC7233ContentDownloader {
-	private final File file;
+	private final FileRevision file;
 	private final FilesystemAccessor filesystemAccessor;
 	private final TransferingScheduler contentTransferScheduler;
 
-	public RFC7233ContentDownloader(File file, FilesystemAccessor filesystemAccessor,
+	public RFC7233ContentDownloader(FileRevision file, FilesystemAccessor filesystemAccessor,
 			TransferingScheduler contentTransferScheduler) {
 		super();
 		this.file = file;

@@ -8,11 +8,10 @@ import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
-import io.bcs.storage.application.download.FileDownloadService
-import io.bcs.storage.domain.model.File
-import io.bcs.storage.domain.model.FileRepository
-import io.bcs.storage.domain.model.FileState
+import io.bcs.storage.domain.model.FileRevisionRepository
+import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
+import io.bcs.storage.domain.model.FileRevision.FileRevisionState
 import io.bcs.storage.domain.model.contracts.FileDescriptor
 import io.bcs.storage.domain.model.contracts.FilePointer
 import io.bcs.storage.domain.model.contracts.download.DownloadListener
@@ -22,8 +21,8 @@ import io.bcs.storage.domain.model.contracts.download.Range
 import io.bcs.storage.domain.model.contracts.download.DownloadListener.DownloadProcessType
 import io.bcs.storage.domain.model.contracts.download.FileDownloader.DownloadRequestDetails
 import io.bcs.storage.domain.model.contracts.download.FileDownloader.FileDownloadRequest
-import io.bcs.storage.domain.model.errors.FileDoesNotExistException
-import io.bcs.storage.domain.model.states.DistributionState
+import io.bcs.storage.domain.model.states.DistributionFileRevisionState
+import io.bcs.storage.domain.model.states.FileDoesNotExistException
 import spock.lang.Specification
 
 class DownloadFileFromResourceFeature extends Specification {
@@ -40,7 +39,7 @@ class DownloadFileFromResourceFeature extends Specification {
 
 	private SourcePoint source
 	private DestinationPoint destination
-	private FileRepository fileRepository
+	private FileRevisionRepository fileRepository
 	private FilesystemAccessor filesystemAccessor
 	private TransferingScheduler transferringScheduler
 	private FileDownloader fileDownloader
@@ -50,7 +49,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		this.source = Stub(SourcePoint)
 		this.destination = Stub(DestinationPoint)
 		this.filesystemAccessor = Stub(FilesystemAccessor)
-		this.fileRepository = Mock(FileRepository)
+		this.fileRepository = Mock(FileRevisionRepository)
 		this.transferringScheduler = Stub(TransferingScheduler)
 		this.fileDownloader = new FileDownloadService(fileRepository, filesystemAccessor, transferringScheduler);
 	}
@@ -281,7 +280,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initSuccessfulTransferring();
@@ -307,7 +306,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initSuccessfulTransferring();
@@ -335,7 +334,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 		
 		and: "The file content transferring is completed successfully"
 		initSuccessfulTransferring();
@@ -366,7 +365,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initErrorTransferring(error)
@@ -391,7 +390,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initErrorTransferring(error)
@@ -422,7 +421,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionState(), FILE_SIZE))
+		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "Suddenly, the download listener throws an exception"
 		downloadListener.onDownloadStart(_, _) >> {throw error}
@@ -479,8 +478,8 @@ class DownloadFileFromResourceFeature extends Specification {
 		return filePointer
 	}
 
-	private File createFile(FileState fileState, Long fileSize) {
-		return File.builder()
+	private FileRevision createFile(FileRevisionState fileState, Long fileSize) {
+		return FileRevision.builder()
 				.filesystemName(FILESYSTEM_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
