@@ -1,4 +1,4 @@
-package io.bcs.common.port.adapters.validation;
+package io.bce.validation;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

@@ -1,4 +1,4 @@
-package io.bcs.common.port.adapters.validation
+package io.bce.validation
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME

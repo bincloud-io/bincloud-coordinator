@@ -1,4 +1,4 @@
-package io.bcs.common.port.adapters.validation;
+package io.bce.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
