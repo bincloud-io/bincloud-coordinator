@@ -3,7 +3,7 @@ package io.bce.interaction;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.bce.interaction.promises.Deferred;
+import io.bce.promises.Deferred;
 import lombok.NonNull;
 
 public class AsyncResolverProxy<T> implements Deferred<T> {

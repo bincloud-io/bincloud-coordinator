@@ -18,8 +18,8 @@ import io.bce.interaction.interactor.TargetAddress
 import io.bce.interaction.interactor.Interactor.Factory
 import io.bce.interaction.interactor.Interactor.WrongRequestTypeException
 import io.bce.interaction.interactor.Interactor.WrongResponseTypeException
-import io.bce.interaction.promises.Promise.ErrorHandler
-import io.bce.interaction.promises.Promise.ResponseHandler
+import io.bce.promises.Promise.ErrorHandler
+import io.bce.promises.Promise.ResponseHandler
 import io.bce.timer.Timeout
 import io.bce.timer.TimeoutException
 import lombok.NonNull

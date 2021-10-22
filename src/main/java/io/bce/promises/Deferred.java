@@ -1,4 +1,4 @@
-package io.bce.interaction.promises;
+package io.bce.promises;
 
 /**
  * This interface declares the triggers for promise resolution

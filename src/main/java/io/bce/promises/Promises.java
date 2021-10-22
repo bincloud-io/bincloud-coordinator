@@ -1,4 +1,4 @@
-package io.bce.interaction.promises;
+package io.bce.promises;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -6,7 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import io.bce.interaction.promises.Deferred.DeferredFunction;
+import io.bce.promises.Deferred.DeferredFunction;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -30,11 +31,14 @@ public final class Promises {
 
 		public DeferredPromise(@NonNull DeferredFunction<T> deferredOperationExecutor) {
 			super();
-			ExecutorService singleThreadPool = Executors.newSingleThreadExecutor();
-			singleThreadPool.execute(() -> {
-				deferredOperationExecutor.execute(createDeferred());
-				singleThreadPool.shutdown();
-			});
+			executeDeferredOperation(deferredOperationExecutor);
+		}
+
+		public DeferredPromise(@NonNull DeferredFunction<T> deferredOperationExecutor,
+				Collection<ErrorHandlerDescriptorState> descriptors) {
+			super();
+			appendAllErrorHandlers(descriptors);
+			executeDeferredOperation(deferredOperationExecutor);
 		}
 
 		@Override
@@ -53,6 +57,50 @@ public final class Promises {
 		@Override
 		public Promise<T> error(@NonNull ErrorHandler<Throwable> errorHandler) {
 			return error(Throwable.class, errorHandler);
+		}
+
+		@Override
+		public <C> Promise<C> chain(ChainingDeferredFunction<T, C> chainingDeferredFunction) {
+			return new DeferredPromise<C>(createChainingDeferredFunctionExecutor(chainingDeferredFunction),
+					getDescriptorStates());
+		}
+
+		@Override
+		public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider) {
+			return new DeferredPromise<C>(createChainingDeferredFunctionExecutor((previousResult, deferred) -> {
+				chainingPromiseProvider
+				.derivePronise(previousResult)
+				.then(response -> deferred.resolve(response))
+				.error(error -> deferred.reject(error));
+			}));
+		}
+
+		private <C> DeferredFunction<C> createChainingDeferredFunctionExecutor(
+				ChainingDeferredFunction<T, C> chainingDeferredFunction) {
+			return deferred -> {
+				then(response -> {
+					chainingDeferredFunction.execute(response, deferred);
+				});
+			};
+		}
+
+		private Collection<ErrorHandlerDescriptorState> getDescriptorStates() {
+			return errorHandlers.stream()
+					.collect(Collectors.mapping(ErrorHandlerDescriptorState.class::cast, Collectors.toList()));
+		}
+
+		private void executeDeferredOperation(DeferredFunction<T> deferredOperationExecutor) {
+			ExecutorService singleThreadPool = Executors.newSingleThreadExecutor();
+			singleThreadPool.execute(() -> {
+				deferredOperationExecutor.execute(createDeferred());
+				singleThreadPool.shutdown();
+			});
+		}
+
+		private void appendAllErrorHandlers(Collection<ErrorHandlerDescriptorState> descriptors) {
+			for (ErrorHandlerDescriptorState handlerState : descriptors) {
+				this.errorHandlers.add(new ErrorHandlerDescriptor(handlerState));
+			}
 		}
 
 		private Deferred<T> createDeferred() {
@@ -80,6 +128,12 @@ public final class Promises {
 		private Collection<ErrorHandlerDescriptor> getAcceptableDescriptorsFor(Throwable error) {
 			return errorHandlers.stream().filter(handlerDescriptor -> handlerDescriptor.isAcceptableFor(error))
 					.collect(Collectors.toList());
+		}
+
+		private interface ErrorHandlerDescriptorState {
+			public Class<?> getErrorType();
+
+			public ErrorHandler<Throwable> getErrorHandler();
 		}
 
 		private abstract class State implements Deferred<T> {
@@ -173,9 +227,16 @@ public final class Promises {
 		}
 
 		@RequiredArgsConstructor
-		private class ErrorHandlerDescriptor extends HandlerDescriptor<Throwable> {
+		private class ErrorHandlerDescriptor extends HandlerDescriptor<Throwable>
+				implements ErrorHandlerDescriptorState {
+			@Getter
 			private final Class<?> errorType;
+			@Getter
 			private final ErrorHandler<Throwable> errorHandler;
+
+			public ErrorHandlerDescriptor(ErrorHandlerDescriptorState proto) {
+				this(proto.getErrorType(), proto.getErrorHandler());
+			}
 
 			public boolean isAcceptableFor(Throwable error) {
 				return errorType.isInstance(error);
