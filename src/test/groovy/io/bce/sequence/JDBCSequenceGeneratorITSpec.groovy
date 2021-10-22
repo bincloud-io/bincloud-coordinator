@@ -1,4 +1,4 @@
-package io.bcs.common.port.adapters.generators
+package io.bce.sequence
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
@@ -15,34 +15,28 @@ import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 
+import io.bce.Generator
 import io.bce.domain.errors.ApplicationException
 import io.bcs.common.domain.model.generator.SequentialGenerator
-import io.bcs.common.port.adapters.generators.JDBCSequenceGenerator
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import spock.lang.Narrative
 import spock.lang.Specification
 
-@Narrative("""
-	To have possibility generate unique sequential auto incremented numbers,
-	as a developer I am needed in a component which will generate them and 
-	give warranty that each of them is unique value 
-""")
 @RunWith(ArquillianSputnik)
 class JDBCSequenceGeneratorITSpec extends Specification {
 	@Deployment
 	public static Archive "create deployment"() {
-		return ArchiveBuilder.jar("file-repository-spec.jar")
+		return ArchiveBuilder.jar("jdbc-sequence-generator-spec.jar")
 				.resolveDependencies("pom.xml")
 				.withScopes(COMPILE, RUNTIME, TEST)
 				.resolveDependency("org.liquibase", "liquibase-core")
 				.resolveDependency("org.openclover", "clover")
 				.apply()
-				.appendPackagesRecursively(File.getPackage().getName())
 				.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
 				.appendPackagesRecursively(ApplicationException.getPackage().getName())
-				.appendClasses(SequentialGenerator, JDBCSequenceGenerator)
+				.appendClasses(Generator, JDBCSequenceGenerator)
 				.appendResource("liquibase")
 				.appendResource("liquibase-test")
 				.appendManifestResource("META-INF/beans.xml", "beans.xml")

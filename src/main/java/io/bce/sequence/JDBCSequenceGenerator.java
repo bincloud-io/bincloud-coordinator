@@ -1,4 +1,4 @@
-package io.bcs.common.port.adapters.generators;
+package io.bce.sequence;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,13 +7,13 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import io.bce.Generator;
 import io.bce.MustNeverBeHappenedError;
-import io.bcs.common.domain.model.generator.SequentialGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
-public class JDBCSequenceGenerator implements SequentialGenerator<Long> {
+public class JDBCSequenceGenerator implements Generator<Long> {
 	private static final String KEY_GENERATION_QUERY = "SELECT SEQ_NEXT(?) FROM DUAL";
 
 	private final DataSource dataSource;
@@ -21,7 +21,7 @@ public class JDBCSequenceGenerator implements SequentialGenerator<Long> {
 
 	@Override
 	@SneakyThrows
-	public Long nextValue() {
+	public Long generateNext() {
 		try (Connection connection = dataSource.getConnection()) {
 			PreparedStatement statement = connection
 					.prepareStatement(String.format(KEY_GENERATION_QUERY, sequenceName));
