@@ -4,6 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
+import io.bce.interaction.streaming.Streamer;
 import io.bcs.common.domain.model.generator.SequentialGenerator;
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler;
 import io.bcs.storage.application.download.FileDownloadService;
@@ -28,6 +29,9 @@ public class ServicesConfig {
 	@Inject
 	private TransferingScheduler transferringScheduler;
 	
+	@Inject
+	private Streamer dataStreamer;
+	
 	@Produces
 	public FileDownloader fileDownloader() {
 		return new FileDownloadService(fileRepository, filesystemAccessor, transferringScheduler);
@@ -35,6 +39,7 @@ public class ServicesConfig {
 	
 	@Produces
 	public FileUploader fileUploader() {
-		return new FileUploadService(fileRepository, filesystemAccessor, transferringScheduler);
+//		return new FileUploadService(fileRepository, filesystemAccessor, transferringScheduler, dataStreamer);
+		return new FileUploadService(fileRepository, filesystemAccessor, dataStreamer);
 	}
 }

@@ -22,6 +22,7 @@ import io.bcs.common.port.adapters.web.AsyncServletOperationExecutor;
 import io.bcs.common.port.adapters.web.HttpServletAppliactionExceptionHandler;
 import io.bcs.common.port.adapters.web.HttpServletRequestParameters;
 import io.bcs.storage.domain.model.Constants;
+import io.bcs.storage.domain.model.FileId;
 import io.bcs.storage.domain.model.contracts.FileDescriptor;
 import io.bcs.storage.domain.model.contracts.FilePointer;
 import io.bcs.storage.domain.model.contracts.upload.FileUploadListener;
@@ -50,15 +51,16 @@ public class HttpFileUploadServlet extends HttpServlet {
 			throws ServletException, IOException {
 		AsyncServletOperationExecutor asyncOperationExecutor = new AsyncServletOperationExecutor(request, response);
 		asyncOperationExecutor.execute(context -> {
-			FileUploadListener uploadingCallback = new HttpFileUploadCallback(context);
-			try {
-				SourcePoint sourcePoint = new StreamSource(context.getRequest().getInputStream(),
-						serverContext.getIOBufferSize());
-				fileUploader.uploadFileContent(getRevisionPointer(context), getContentSize(context), sourcePoint,
-						uploadingCallback);
-			} catch (IOException error) {
-				uploadingCallback.onError(error);
-			}
+
+//			FileUploadListener uploadingCallback = new HttpFileUploadCallback(context);
+//			try {
+//				SourcePoint sourcePoint = new StreamSource(context.getRequest().getInputStream(),
+//						serverContext.getIOBufferSize());
+//				fileUploader.uploadFileContent(getRevisionPointer(context), getContentSize(context), sourcePoint,
+//						uploadingCallback);
+//			} catch (IOException error) {
+//				uploadingCallback.onError(error);
+//			}
 		});
 	}
 
@@ -96,20 +98,20 @@ public class HttpFileUploadServlet extends HttpServlet {
 		}
 	}
 
-	private FilePointer getRevisionPointer(AsyncContext asyncContext) {
-		KeyValueParameters parameters = new HttpServletRequestParameters(
-				(HttpServletRequest) asyncContext.getRequest());
-		return new FilePointer() {
-			@Override
-			public Optional<String> getFilesystemName() {
-				return parameters.getStringValue(FILE_ID_PARAMETER_NAME);
-			}
-		};
-	}
-
-	private Long getContentSize(AsyncContext asyncContext) {
-		return asyncContext.getRequest().getContentLengthLong();
-	}
+//	private FilePointer getRevisionPointer(AsyncContext asyncContext) {
+//		KeyValueParameters parameters = new HttpServletRequestParameters(
+//				(HttpServletRequest) asyncContext.getRequest());
+//		return new FilePointer() {
+//			@Override
+//			public Optional<FileId> getFilesystemName() {
+//				return parameters.getStringValue(FILE_ID_PARAMETER_NAME).map(FileId::new);
+//			}
+//		};
+//	}
+//
+//	private Long getContentSize(AsyncContext asyncContext) {
+//		return asyncContext.getRequest().getContentLengthLong();
+//	}
 
 	private ErrorInterceptor<AsyncContext, Exception> createDefaultErrorHandler(BoundedContextId context) {
 		return HttpServletAppliactionExceptionHandler.defaultErrorHandler(textProcessor, context);

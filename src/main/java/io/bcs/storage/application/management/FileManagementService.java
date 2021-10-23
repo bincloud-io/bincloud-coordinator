@@ -15,27 +15,27 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class FileManagementService implements FileManager {
-	private final SequentialGenerator<String> filesystemNameGenerator;
+	private final SequentialGenerator<FileId> filesystemNameGenerator;
 	private final FileRevisionRepository fileRepository;
 	private final FilesystemAccessor filesystemAccessor;
 
 	@Override
 	public Optional<FileDescriptor> getFileDescriptor(FileId fileId) {
-		return fileRepository.findById(fileId.getFilesystemName()).map(file -> file);
+		return fileRepository.findById(fileId).map(FileRevision::getDescriptor);
 	}
 
 	@Override
 	public FileId createFileRevision(FileAttributes fileAttributes) {
-		FileRevision file = new FileRevision(filesystemNameGenerator, fileAttributes);
-		file.createFile(filesystemAccessor);
-		fileRepository.save(file);
-		return new FileId(file.getFilesystemName());
+		FileRevision fileRevision = new FileRevision(filesystemNameGenerator, fileAttributes);
+		fileRevision.createFile(filesystemAccessor);
+		fileRepository.save(fileRevision);
+		return fileRevision.getRevisionName();
 	}
 
 	@Override
 	public void disposeFile(FileId replicaGroup) {
-		FileRevision file = new ExistingFileProvider(replicaGroup, fileRepository).get();
-		file.dispose(filesystemAccessor);
-		fileRepository.save(file);
+		FileRevision fileRevision = new ExistingFileProvider(replicaGroup, fileRepository).get();
+		fileRevision.dispose(filesystemAccessor);
+		fileRepository.save(fileRevision);
 	}
 }

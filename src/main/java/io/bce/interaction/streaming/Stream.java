@@ -13,6 +13,14 @@ import io.bce.promises.Promise;
  */
 public interface Stream<T> {
 	/**
+	 * Include status observer   
+	 * 
+	 * @param statusObserver The status observer
+	 * @return
+	 */
+	public Stream<T> observeStatus(StatusObserver statusObserver);
+	
+	/**
 	 * Start data streaming between source and destination
 	 * 
 	 * @return The promise resolving by transferred data count
@@ -21,5 +29,9 @@ public interface Stream<T> {
 
 	public interface Stat {
 		public Long getSize();
+	}
+	
+	public interface StatusObserver {
+		public void onStatusChange(Stat status);
 	}
 }

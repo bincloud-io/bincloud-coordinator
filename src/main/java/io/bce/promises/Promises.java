@@ -10,18 +10,43 @@ import io.bce.promises.Deferred.DeferredFunction;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public final class Promises {
 
 	/**
-	 * Create the deferred function
+	 * Create a deferred function
 	 * 
-	 * @param <T>
-	 * @param deferredOperationExecutor
-	 * @return
+	 * @param <T>               The promise resolving type name
+	 * @param deferredOperation The deferred operation function
+	 * @return The promise for deferred operation
 	 */
-	public static final <T> Promise<T> of(DeferredFunction<T> deferredOperationExecutor) {
-		return new DeferredPromise<>(deferredOperationExecutor);
+	public static final <T> Promise<T> of(DeferredFunction<T> deferredOperation) {
+		return new DeferredPromise<>(deferredOperation);
+	}
+
+	/**
+	 * Create a promise resolved by the specified value
+	 * 
+	 * @param <T>   The promise resolving type name
+	 * @param value The promise resolving value
+	 * @return The resolved promise
+	 */
+	public static final <T> Promise<T> resolvedBy(T value) {
+		return of(deferred -> deferred.resolve(value));
+	}
+
+	/**
+	 * Create a promise rejected by the specified error
+	 * 
+	 * @param <T>The promise resolving type name
+	 * @param <E>The promise rejection error name
+	 * @param error  The promise rejection error
+	 * @return The rejected promise
+	 */
+	public static final <T, E extends Throwable> Promise<T> rejectedBy(E error) {
+		return of(deferred -> deferred.reject(error));
 	}
 
 	private static final class DeferredPromise<T> implements Promise<T> {
@@ -68,11 +93,23 @@ public final class Promises {
 		@Override
 		public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider) {
 			return new DeferredPromise<C>(createChainingDeferredFunctionExecutor((previousResult, deferred) -> {
-				chainingPromiseProvider
-				.derivePronise(previousResult)
-				.then(response -> deferred.resolve(response))
-				.error(error -> deferred.reject(error));
+				chainingPromiseProvider.derivePronise(previousResult).delegate(deferred);
 			}));
+		}
+
+		@Override
+		public Promise<T> then(Deferred<T> resolver) {
+			return then(response -> resolver.resolve(response));
+		}
+
+		@Override
+		public Promise<T> error(Deferred<T> rejector) {
+			return error(error -> rejector.reject(error));
+		}
+
+		@Override
+		public Promise<T> delegate(Deferred<T> deferred) {
+			return this.then(deferred).error(deferred);
 		}
 
 		private <C> DeferredFunction<C> createChainingDeferredFunctionExecutor(
@@ -80,7 +117,7 @@ public final class Promises {
 			return deferred -> {
 				then(response -> {
 					chainingDeferredFunction.execute(response, deferred);
-				});
+				}).error(error -> deferred.reject(error));
 			};
 		}
 
@@ -92,9 +129,18 @@ public final class Promises {
 		private void executeDeferredOperation(DeferredFunction<T> deferredOperationExecutor) {
 			ExecutorService singleThreadPool = Executors.newSingleThreadExecutor();
 			singleThreadPool.execute(() -> {
-				deferredOperationExecutor.execute(createDeferred());
+				executeDeferredOperationSafely(deferredOperationExecutor, createDeferred());
 				singleThreadPool.shutdown();
 			});
+		}
+
+		private void executeDeferredOperationSafely(DeferredFunction<T> deferredOperationExecutor,
+				Deferred<T> deferred) {
+			try {
+				deferredOperationExecutor.execute(deferred);
+			} catch (Throwable error) {
+				deferred.reject(error);
+			}
 		}
 
 		private void appendAllErrorHandlers(Collection<ErrorHandlerDescriptorState> descriptors) {

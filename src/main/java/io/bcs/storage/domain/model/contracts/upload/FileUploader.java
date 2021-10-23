@@ -1,8 +1,17 @@
 package io.bcs.storage.domain.model.contracts.upload;
 
-import io.bcs.common.domain.model.io.transfer.SourcePoint;
-import io.bcs.storage.domain.model.contracts.FilePointer;
+import java.util.Optional;
+
+import io.bce.interaction.streaming.binary.BinarySource;
+import io.bce.promises.Promise;
+import io.bcs.storage.domain.model.FileId;
+import io.bcs.storage.domain.model.contracts.FileDescriptor;
 
 public interface FileUploader {
-	public void uploadFileContent(FilePointer revisionPointer, Long contentSize, SourcePoint source, FileUploadListener callback);
+	public Promise<FileDescriptor> uploadFileContent(UploadFileCommand uploadFileCommand, BinarySource source);
+	
+	
+	public interface UploadFileCommand {
+		public Optional<FileId> getRevisionName();
+	}
 }

@@ -2,10 +2,11 @@ package io.bcs.storage.domain.model;
 
 import java.time.Instant;
 
+import io.bce.promises.Promise;
 import io.bcs.common.domain.model.generator.SequentialGenerator;
+import io.bcs.storage.domain.model.FileRevision.ContentUploader.UploadedContent;
 import io.bcs.storage.domain.model.FileRevision.FileRevisionState.RootContext;
 import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
-import io.bcs.storage.domain.model.contexts.FileUploadingContext;
 import io.bcs.storage.domain.model.contracts.FileDescriptor;
 import io.bcs.storage.domain.model.contracts.upload.FileAttributes;
 import io.bcs.storage.domain.model.states.DisposedFileRevisionState;
@@ -17,15 +18,14 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
-@Getter
 @ToString
 @SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class FileRevision implements FileDescriptor {
+public class FileRevision {
+	@Getter
 	@EqualsAndHashCode.Include
-	private String filesystemName;
-
+	private FileId revisionName;
 	private String fileName;
 	private String mediaType;
 	private String contentDisposition;
@@ -35,9 +35,9 @@ public class FileRevision implements FileDescriptor {
 	private FileRevisionState state;
 	private Long fileSize;
 
-	public FileRevision(SequentialGenerator<String> filesystemNameGenerator, FileAttributes fileAttributes) {
+	public FileRevision(SequentialGenerator<FileId> revisionNameGenerator, FileAttributes fileAttributes) {
 		super();
-		this.filesystemName = filesystemNameGenerator.nextValue();
+		this.revisionName = revisionNameGenerator.nextValue();
 		this.fileName = fileAttributes.getFileName();
 		this.mediaType = fileAttributes.getMediaType();
 		this.contentDisposition = fileAttributes.getContentDisposition();
@@ -46,18 +46,66 @@ public class FileRevision implements FileDescriptor {
 		this.lastModification = this.creationMoment;
 		this.fileSize = 0L;
 	}
-
+	
 	public String getStatus() {
-		return state.getStatus();
+		return state.getStatus(); 
 	}
-
+	
+	public FileDescriptor getDescriptor() {
+		return new FileDescriptor() {
+			@Override
+			public String getStatus() {
+				return FileRevision.this.getStatus();
+			}
+			
+			@Override
+			public String getRevisionName() {
+				return revisionName.getFilesystemName();
+			}
+			
+			@Override
+			public String getMediaType() {
+				return mediaType;
+			}
+			
+			@Override
+			public Instant getLastModification() {
+				return lastModification;
+			}
+			
+			@Override
+			public Long getFileSize() {
+				return fileSize;
+			}
+			
+			@Override
+			public String getFileName() {
+				return fileName;
+			}
+			
+			@Override
+			public Instant getCreationMoment() {
+				return creationMoment;
+			}
+			
+			@Override
+			public String getContentDisposition() {
+				return contentDisposition;
+			}
+		};
+	}
+	
+	
 	public void createFile(FilesystemAccessor fileSystem) {
 		state.createFile(createRootContext(), fileSystem);
 		updateModification();
 	}
-
-	public void uploadFileContent(FileUploadingContext uploadingContext) {
-		state.uploadFile(createRootContext(), uploadingContext);
+	
+	public Promise<FileDescriptor> uploadContent(ContentUploader contentUploader) {
+		return state.uploadContent(createRootContext(), contentUploader).chain((uploadedContent, deferred) -> {
+			updateFileSize(fileSize);
+			deferred.resolve(getDescriptor());
+		});
 	}
 
 	public void startDistribution() {
@@ -71,24 +119,28 @@ public class FileRevision implements FileDescriptor {
 
 	public void dispose(FilesystemAccessor filesystemAccessor) {
 		this.state = new DisposedFileRevisionState();
-		filesystemAccessor.removeFile(filesystemName);
+		filesystemAccessor.removeFile(revisionName.getFilesystemName());
 		updateModification();
 	}
 
 	private void updateModification() {
 		this.lastModification = Instant.now();
 	}
+	
+	private void updateFileSize(Long fileSize) {
+		this.fileSize = fileSize;
+	}
 
 	private RootContext createRootContext() {
 		return new RootContext() {
 			@Override
-			public String getFileName() {
-				return FileRevision.this.filesystemName;
+			public String getRevisionName() {
+				return FileRevision.this.revisionName.getFilesystemName();
 			}
 
 			@Override
 			public void setSize(Long size) {
-				FileRevision.this.fileSize = size;
+				updateFileSize(size);
 			}
 
 			@Override
@@ -102,20 +154,30 @@ public class FileRevision implements FileDescriptor {
 		public String getStatus();
 
 		public void createFile(RootContext context, FilesystemAccessor fileSystem);
-
-		public void uploadFile(RootContext context, FileUploadingContext uploadingContext);
-
+		
+		public Promise<UploadedContent> uploadContent(RootContext context, ContentUploader contentUploader);
+		
 		public void startDistribution(RootContext context);
 
 		public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset,
 				Long size);
 
 		public interface RootContext {
-			public String getFileName();
+			public String getRevisionName();
 
 			public void setSize(Long size);
 
 			public void setState(FileRevisionState fileState);
 		}
 	}
+	
+	
+	public interface ContentUploader {
+		public Promise<UploadedContent> upload(String revisionName);
+		
+		public interface UploadedContent {
+			public Long getSize();
+		}
+	}
+	
 }

@@ -15,7 +15,7 @@ import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DisposeExistingFileFeatureSpec extends Specification {
-	private static final String FILESYSTEM_NAME = "12345"
+	private static final FileId FILE_REVISION_NAME = new FileId("12345")
 	private static final String FILE_NAME = "file.txt"
 	private static final String FILE_MEDIA_TYPE = "application/media"
 	private static final String FILE_DISPOSITION = "inline"
@@ -36,22 +36,22 @@ class DisposeExistingFileFeatureSpec extends Specification {
 	def "Scenario: file is successfully disposed"() {
 		FileRevision storedFile;
 		given: "The file is stored in the repository"
-		fileRepository.findById(FILESYSTEM_NAME) >> Optional.of(createDistributionFile())
+		fileRepository.findById(FILE_REVISION_NAME) >> Optional.of(createDistributionFile())
 
 		when: "The file disposition is requested"
-		fileManager.disposeFile(new FileId(FILESYSTEM_NAME))
+		fileManager.disposeFile(FILE_REVISION_NAME)
 
 		then: "The file should be stored with disposed state"
 		1 * fileRepository.save(_) >> {storedFile = it[0]}
 		storedFile.getStatus() == FileRevisionStatus.DISPOSED.name()
 		
 		and: "The physical file should be removed from the filesystem"
-		1 * filesystemAccessor.removeFile(FILESYSTEM_NAME)
+		1 * filesystemAccessor.removeFile(FILE_REVISION_NAME.getFilesystemName())
 	}
 
 	def createDistributionFile() {
 		return FileRevision.builder()
-				.filesystemName(FILESYSTEM_NAME)
+				.revisionName(FILE_REVISION_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)

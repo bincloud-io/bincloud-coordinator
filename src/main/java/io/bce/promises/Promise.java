@@ -18,12 +18,19 @@ public interface Promise<T> {
 
 	public Promise<T> then(ResponseHandler<T> responseHandler);
 
+	public Promise<T> then(Deferred<T> resolver);
+	
 	public <E extends Throwable> Promise<T> error(Class<E> errorType, ErrorHandler<E> errorHandler);
 
 	public Promise<T> error(ErrorHandler<Throwable> errorHandler);
 
+	public Promise<T> error(Deferred<T> rejector);
+	
 	public <C> Promise<C> chain(ChainingDeferredFunction<T, C> chainingDeferredFunction);
+	
 	public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider);
+	
+	public Promise<T> delegate(Deferred<T> deferred);
 
 	/**
 	 * This interface declares the contract for the component which handles result

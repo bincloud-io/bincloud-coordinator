@@ -5,6 +5,8 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.transaction.TransactionManager;
 
+import io.bce.promises.Promise;
+import io.bce.promises.Promises;
 import io.bce.text.TextTemplates;
 import io.bcs.common.domain.model.logging.Level;
 import io.bcs.common.domain.model.logging.LogRecord;
@@ -20,13 +22,13 @@ public class JPAFileRepository implements FileRevisionRepository {
 //	private static final String FIND_LATEST_RESOURCE_UPLOAD_NAMED_QUERY = "FileRepository.findLatestResourceUpload";
 	private final EntityManager entityManager;
 	private final TransactionManager transactionManager;
-
+	
 	@Override
-	public Optional<FileRevision> findById(String fileId) {
+	public Optional<FileRevision> findById(FileId fileId) {
 		Loggers.applicationLogger(JPAFileRepository.class).log(new LogRecord(Level.TRACE,
 				TextTemplates.createBy("Find file with fileId={{fileId}}").withParameter("fileId", fileId)));
 
-		return Optional.ofNullable(entityManager.find(FileRevision.class, new FileId(fileId)));
+		return Optional.ofNullable(entityManager.find(FileRevision.class, fileId));
 	}
 
 //	@Override
@@ -48,5 +50,4 @@ public class JPAFileRepository implements FileRevisionRepository {
 		this.entityManager.merge(file);
 		transactionManager.commit();
 	}
-
 }

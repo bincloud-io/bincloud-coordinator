@@ -9,6 +9,7 @@ import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
 import io.bcs.storage.domain.model.FileRevisionRepository
+import io.bcs.storage.domain.model.FileId
 import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
 import io.bcs.storage.domain.model.FileRevision.FileRevisionState
@@ -26,13 +27,10 @@ import io.bcs.storage.domain.model.states.FileDoesNotExistException
 import spock.lang.Specification
 
 class DownloadFileFromResourceFeature extends Specification {
-//	private static final Long RESOURCE_ID = 1L
 	private static final String FILE_NAME = "file.txt"
 	private static final String FILE_MEDIA_TYPE = "application/media"
 	private static final String FILE_DISPOSITION = "inline"
-//	private static final Optional<Long> EXISTING_RESOURCE_ID = Optional.of(RESOURCE_ID)
-//	private static final Optional<Long> MISSING_RESOURCE_ID = Optional.empty()
-	private static final String FILESYSTEM_NAME = "12345"
+	private static final FileId FILE_REVISION_NAME = new FileId("12345")
 	private static final Instant CREATION_MOMENT = Instant.now()
 	private static final Instant LAST_MODIFICATION = CREATION_MOMENT.plus(1, ChronoUnit.MINUTES)
 	private static final Long FILE_SIZE = 100L
@@ -53,192 +51,18 @@ class DownloadFileFromResourceFeature extends Specification {
 		this.transferringScheduler = Stub(TransferingScheduler)
 		this.fileDownloader = new FileDownloadService(fileRepository, filesystemAccessor, transferringScheduler);
 	}
-
-//	def "Scenario: request file download for unspecified resource id"() {
-//		UnspecifiedResourceException error;
-//		given: "The file download request with unspecified resource id"
-//		FilePointer revisionPointer = createFilePointer(Optional.empty(), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
-//		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
-//		error.getContext() == UnspecifiedResourceException.CONTEXT
-//		error.getErrorCode() == UnspecifiedResourceException.ERROR_CODE
-//	}
-
-//	def "Scenario: request file range download for unspecified resource id"() {
-//		UnspecifiedResourceException error;
-//		given: "The file download request with unspecified resource id"
-//		FilePointer revisionPointer = createFilePointer(Optional.empty(), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L), createRange(1L, 1L)])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
-//		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
-//		error.getContext() == UnspecifiedResourceException.CONTEXT
-//		error.getErrorCode() == UnspecifiedResourceException.ERROR_CODE
-//	}
-	
-//	def "Scenario: request file download for unknown resource"() {
-//		FileDoesNotExistException error;
-//		given: "The file download request"
-//		FilePointer revisionPointer = createFilePointer(Optional.of(RESOURCE_ID), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-////		and: "There are uploads for specified resource"
-//		fileRepository.findLatestResourceUpload(RESOURCE_ID) >> Optional.empty()
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
-//		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
-//		error.getContext() == FileDoesNotExistException.CONTEXT
-//		error.getErrorCode() == FileDoesNotExistException.ERROR_CODE
-//	}
-	
-	
-//	def "Scenario: request file ranges download for unknown resource"() {
-//		FileDoesNotExistException error;
-//		given: "The file download request"
-//		FilePointer revisionPointer = createFilePointer(Optional.of(RESOURCE_ID), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L)])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-//		and: "There are uploads for specified resource"
-//		fileRepository.findLatestResourceUpload(RESOURCE_ID) >> Optional.empty()
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The unspecified resource exception should be passed to the onRequestError of download the file download listener"
-//		1 * downloadListener.onRequestError(downloadRequest, _) >> {error = it[1]}
-//		error.getContext() == FileDoesNotExistException.CONTEXT
-//		error.getErrorCode() == FileDoesNotExistException.ERROR_CODE
-//	}
-//	
-
-//	def "Scenario: request file download with unspecified filesystem name"() {
-//		given: "The file download request"
-//		FilePointer revisionPointer = createFilePointer(Optional.of(RESOURCE_ID), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-//		and: "The specified file doesn't exist in the repository"
-//		fileRepository.findById(FILESYSTEM_NAME) >> Optional.empty()
-//
-//		and: "There are uploads for specified resource"
-//		fileRepository.findLatestResourceUpload(RESOURCE_ID) >> Optional.of(createFile(new DistributionState(), FILE_SIZE))
-//
-//		and: "The file content transferring is completed successfully"
-//		initSuccessfulTransferring();
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The download process should be started"
-//		1 * downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, _)
-//		
-//		and: "The download process should be completed"
-//		1 * downloadListener.onDownloadComplete(_, FILE_SIZE)
-//	}
-
-//	def "Scenario: request single file range download with unspecified filesystem name"() {
-//		FileDescriptor fileDescriptor;
-//		Fragment fragment;
-//		given: "The file download request"
-//		FilePointer revisionPointer = createFilePointer(Optional.of(RESOURCE_ID), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L)])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-//		and: "The specified file doesn't exist in the repository"
-//		fileRepository.findById(FILESYSTEM_NAME) >> Optional.empty()
-//
-//		and: "There are uploads for specified resource"
-//		fileRepository.findLatestResourceUpload(RESOURCE_ID) >> Optional.of(createFile(new DistributionState(), FILE_SIZE))
-//
-//		and: "The file content transferring is completed successfully"
-//		initSuccessfulTransferring();
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The download process should be started"
-//		1 * downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, _)
-//
-//		and: "The download process should be completed"
-//		1 * downloadListener.onDownloadComplete(_, 2L) >> {fileDescriptor = it[0]}
-//	}
-	
-//	def "Scenario: request multiple ranges download with unspecified filesystem name"() {
-//		Fragment firstFragment;
-//		Fragment secondFragment;
-//		FileDescriptor fileDescriptor;
-//		
-//		given: "The file download request"
-//		FilePointer revisionPointer = createFilePointer(Optional.of(RESOURCE_ID), Optional.empty())
-//		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L), createRange(1L, 1L)])
-//
-//		and: "The file download listener"
-//		DownloadListener downloadListener = Mock(DownloadListener)
-//
-//		and: "The specified file doesn't exist in the repository"
-//		fileRepository.findById(FILESYSTEM_NAME) >> Optional.empty()
-//
-//		and: "There are uploads for specified resource"
-//		fileRepository.findLatestResourceUpload(RESOURCE_ID) >> Optional.of(createFile(new DistributionState(), FILE_SIZE))
-//
-//		and: "The file content transferring is completed successfully"
-//		initSuccessfulTransferring();
-//
-//		when: "The file download is requested"
-//		fileDownloader.downloadFile(downloadRequest, downloadListener)
-//
-//		then: "The download process should be started"
-//		1 * downloadListener.onDownloadStart(DownloadProcessType.PARTIAL, _) >> {fileDescriptor = it[1]}
-//		
-//		and: "The fragments download should be started and completed for both fragments"
-//		2 * downloadListener.onFragmentDownloadStart( _, _) >> {firstFragment = it[1]} >> {secondFragment = it[1]} 
-//		2 * downloadListener.onFragmentDownloadComplete( _, _)
-//		firstFragment.getSize() == 2L
-//		secondFragment.getSize() == 1L
-//		
-//		and: "The download process should be completed"
-//		1 * downloadListener.onDownloadComplete(_, 3L)
-//	}
-//	
 	
 	def "Scenario: request file download for unknown file"() {
 		FileDoesNotExistException error;
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME) >> Optional.empty()
+		fileRepository.findById(FILE_REVISION_NAME) >> Optional.empty()
 
 		when: "The file download is requested"
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
@@ -253,14 +77,14 @@ class DownloadFileFromResourceFeature extends Specification {
 	def "Scenario: request file ranges download for unknown file"() {
 		FileDoesNotExistException error;
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L)])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME) >> Optional.empty()
+		fileRepository.findById(FILE_REVISION_NAME) >> Optional.empty()
 
 		when: "The file download is requested"
 		fileDownloader.downloadFile(downloadRequest, downloadListener)
@@ -273,14 +97,14 @@ class DownloadFileFromResourceFeature extends Specification {
 	
 	def "Scenario: request file download for specified file"() {
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
+		fileRepository.findById(FILE_REVISION_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initSuccessfulTransferring();
@@ -299,14 +123,14 @@ class DownloadFileFromResourceFeature extends Specification {
 		FileDescriptor fileDescriptor;
 		Fragment fragment;
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L)])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
+		fileRepository.findById(FILE_REVISION_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initSuccessfulTransferring();
@@ -327,14 +151,14 @@ class DownloadFileFromResourceFeature extends Specification {
 		FileDescriptor fileDescriptor;
 		
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L), createRange(1L, 1L)])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
+		fileRepository.findById(FILE_REVISION_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 		
 		and: "The file content transferring is completed successfully"
 		initSuccessfulTransferring();
@@ -358,14 +182,14 @@ class DownloadFileFromResourceFeature extends Specification {
 	def "Scenario: error during file download process"() {
 		Exception error
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
+		fileRepository.findById(FILE_REVISION_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initErrorTransferring(error)
@@ -383,14 +207,14 @@ class DownloadFileFromResourceFeature extends Specification {
 	def "Scenario: error during file ranges download process"() {
 		Exception error
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L), createRange(1L, 1L)])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
+		fileRepository.findById(FILE_REVISION_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "The file content transferring is completed successfully"
 		initErrorTransferring(error)
@@ -414,14 +238,14 @@ class DownloadFileFromResourceFeature extends Specification {
 	def "Scenario: something went wrong during download process"() {
 		RuntimeException error = new RuntimeException()
 		given: "The file download request"
-		FilePointer revisionPointer = createFilePointer(Optional.of(FILESYSTEM_NAME))
+		FilePointer revisionPointer = createFilePointer(Optional.of(FILE_REVISION_NAME))
 		FileDownloadRequest downloadRequest = createDownloadRequest(revisionPointer, [createRange(0L, 1L), createRange(1L, 1L)])
 
 		and: "The file download listener"
 		DownloadListener downloadListener = Mock(DownloadListener)
 
 		and: "The specified file doesn't exist in the repository"
-		fileRepository.findById(FILESYSTEM_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
+		fileRepository.findById(FILE_REVISION_NAME)>> Optional.of(createFile(new DistributionFileRevisionState(), FILE_SIZE))
 
 		and: "Suddenly, the download listener throws an exception"
 		downloadListener.onDownloadStart(_, _) >> {throw error}
@@ -472,7 +296,7 @@ class DownloadFileFromResourceFeature extends Specification {
 		}
 	}
 
-	private FilePointer createFilePointer(Optional<String> filesystemName) {
+	private FilePointer createFilePointer(Optional<FileId> filesystemName) {
 		FilePointer filePointer = Stub(FilePointer)
 		filePointer.getFilesystemName() >> filesystemName
 		return filePointer
@@ -480,7 +304,7 @@ class DownloadFileFromResourceFeature extends Specification {
 
 	private FileRevision createFile(FileRevisionState fileState, Long fileSize) {
 		return FileRevision.builder()
-				.filesystemName(FILESYSTEM_NAME)
+				.revisionName(FILE_REVISION_NAME)
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)

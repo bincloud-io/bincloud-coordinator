@@ -2,9 +2,12 @@ package io.bcs.storage.domain.model
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.CountDownLatch
 
 import io.bce.domain.errors.ApplicationException
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
+import io.bce.promises.Promise
+import io.bce.promises.Promises
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
@@ -12,8 +15,11 @@ import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
 import io.bcs.storage.domain.model.FileRevision
 import io.bcs.storage.domain.model.FilesystemAccessor
+import io.bcs.storage.domain.model.FileRevision.ContentUploader
+import io.bcs.storage.domain.model.FileRevision.ContentUploader.UploadedContent
 import io.bcs.storage.domain.model.contexts.FileDownloadingContext
 import io.bcs.storage.domain.model.contexts.FileUploadingContext
+import io.bcs.storage.domain.model.contracts.FileDescriptor
 import io.bcs.storage.domain.model.states.CreatedFileRevisionState
 import io.bcs.storage.domain.model.states.FileAlreadyExistsException
 import io.bcs.storage.domain.model.states.FileHasNotBeenUploadedException
@@ -21,7 +27,7 @@ import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class CreatedFileSpec extends Specification {
-	private static final String FILESYSTEM_NAME = "12345"
+	private static final String FILE_REVISION_NAME = "12345"
 	private static final String FILE_NAME = "file.txt"
 	private static final String FILE_MEDIA_TYPE = "application/media"
 	private static final String FILE_DISPOSITION = "inline"
@@ -44,46 +50,52 @@ class CreatedFileSpec extends Specification {
 	}
 
 	def "Scenario: file successfully uploaded"() {
+		FileDescriptor fileDescriptor
+		CountDownLatch latch = new CountDownLatch(1)
+		
 		given: "The file in created state"
 		FileRevision file = createFileInCreatedState(0L)
 
-		and: "There is access on write to the file on a filesystem"
-		filesystem.getAccessOnWrite(file.getFilesystemName(), UPLOADED_FILE_SIZE) >> destinationPoint
-
-		and: "The file transfering can be scheduled"
-		scheduler.schedule(sourcePoint, destinationPoint, _) >> {
-			CompletionCallback callback = it[2]
-			return Stub(Transmitter) {
-				start() >> {
-					callback.onSuccess()
-				}
+		and: "The content uploader, transferring ${UPLOADED_FILE_SIZE} bytes"
+		ContentUploader contentUploader = Mock(ContentUploader) {
+			upload(file.getRevisionName().getFilesystemName()) >> {
+				return Promises.of({ deferred ->  
+					deferred.resolve(new UploadedContent() {
+						@Override
+						public Long getSize() {
+							return UPLOADED_FILE_SIZE;
+						}
+					})
+				})
 			}
 		}
 
 		when: "The file uploading is requested"
-		FileUploadingContext uploadingContext = createUploadingContext(UPLOADED_FILE_SIZE)
-		file.uploadFileContent(uploadingContext)
-
-		then: "The transmission should be started"
-		1 * completionCallback.onSuccess()
+		file.uploadContent(contentUploader).then({ response -> 
+			fileDescriptor = response 
+			latch.countDown()
+		})
 		
+		latch.await()
+
+		then: "The data streaming should be completed successfully "				
 		and: "The modification time should be changed"
-		file.lastModification == TIMESTAMP_NEXT_POINT
+		fileDescriptor.getLastModification() == TIMESTAMP_NEXT_POINT
 
 		and: "The status should not be changed"
-		file.status == FileRevisionStatus.CREATED.name()
+		fileDescriptor.getStatus() == FileRevisionStatus.CREATED.name()
 		
 		and: "The filesystem name should be generated"
-		file.getFilesystemName() == FILESYSTEM_NAME
+		fileDescriptor.getRevisionName() == FILE_REVISION_NAME
 		
 		and: "The file name should be got from file attributes"
-		file.getFileName() == FILE_NAME
+		fileDescriptor.getFileName() == FILE_NAME
 		
 		and: "The media type should be got from file attributes"
-		file.getMediaType() == FILE_MEDIA_TYPE
+		fileDescriptor.getMediaType() == FILE_MEDIA_TYPE
 		
 		and: "The content disposition should be got from file attributes"
-		file.getContentDisposition() == FILE_DISPOSITION
+		fileDescriptor.getContentDisposition() == FILE_DISPOSITION
 	}
 
 	def "Scenario: file distribution successfully started"() {
@@ -93,24 +105,25 @@ class CreatedFileSpec extends Specification {
 		when: "The file distribion start was requested"
 		Thread.sleep(10)
 		file.startDistribution()
+		FileDescriptor fileDescriptor = file.getDescriptor();
 
 		then: "The file size should be changed to distribution"
-		file.status == FileRevisionStatus.DISTRIBUTION.name()
+		fileDescriptor.getStatus() == FileRevisionStatus.DISTRIBUTION.name()
 		
 		and: "The modification time should be changed"
-		file.lastModification != TIMESTAMP_NEXT_POINT
+		fileDescriptor.getLastModification() != TIMESTAMP_NEXT_POINT
 		
 		and: "The filesystem name should be generated"
-		file.getFilesystemName() == FILESYSTEM_NAME
+		fileDescriptor.getRevisionName() == FILE_REVISION_NAME
 		
 		and: "The file name should be got from file attributes"
-		file.getFileName() == FILE_NAME
+		fileDescriptor.getFileName() == FILE_NAME
 		
 		and: "The media type should be got from file attributes"
-		file.getMediaType() == FILE_MEDIA_TYPE
+		fileDescriptor.getMediaType() == FILE_MEDIA_TYPE
 		
 		and: "The content disposition should be got from file attributes"
-		file.getContentDisposition() == FILE_DISPOSITION
+		fileDescriptor.getContentDisposition() == FILE_DISPOSITION
 	}
 
 	def "Scenario: file can not be created on a filesysten in the created state"() {
@@ -143,17 +156,13 @@ class CreatedFileSpec extends Specification {
 		error.getErrorSeverity() == ErrorSeverity.BUSINESS
 	}
 
-	private def createUploadingContext(Long contentLength) {
-		return new FileUploadingContext(contentLength, sourcePoint, scheduler, filesystem, completionCallback)
-	}
-	
 	private def createDownloadingContext() {
 		return new FileDownloadingContext(destinationPoint, scheduler, filesystem, completionCallback)
 	}
 
 	def createFileInCreatedState(Long fileSize) {
 		return FileRevision.builder()
-				.filesystemName(FILESYSTEM_NAME)
+				.revisionName(new FileId(FILE_REVISION_NAME))
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)

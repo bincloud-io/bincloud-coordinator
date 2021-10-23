@@ -12,12 +12,12 @@ import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class CreateNewFileFeatureSpec extends Specification {
-	private static final String FILESYSTEM_NAME = "12345"
+	private static final FileId FILE_REVISION_NAME = new FileId("12345")
 	private static final String FILE_NAME = "file.txt"
 	private static final String FILE_MEDIA_TYPE = "application/media"
 	private static final String FILE_DISPOSITION = "inline"
 	
-	private SequentialGenerator<String> filesystemNameGenerator
+	private SequentialGenerator<FileId> filesystemNameGenerator
 	private FileRevisionRepository fileRepository
 	private FilesystemAccessor filesystemAccessor
 	private FileManager fileManager
@@ -34,7 +34,7 @@ class CreateNewFileFeatureSpec extends Specification {
 	def "Scenario: create a new file"() {
 		FileRevision file;
 		given: "The filesystem name generator generates unique name"
-		filesystemNameGenerator.nextValue() >> FILESYSTEM_NAME
+		filesystemNameGenerator.nextValue() >> FILE_REVISION_NAME
 		
 		and: "The file attributes"
 		fileAttributes.getFileName() >> FILE_NAME
@@ -49,9 +49,9 @@ class CreateNewFileFeatureSpec extends Specification {
 		file.getStatus() == FileRevisionStatus.CREATED.name()
 		
 		and: "The file should be created on a filesystem"
-		1 * this.filesystemAccessor.createFile(FILESYSTEM_NAME)
+		1 * this.filesystemAccessor.createFile(FILE_REVISION_NAME.getFilesystemName())
 		
 		and: "The file id should contain correct values"
-		fileId.getFilesystemName() == file.getFilesystemName()
+		fileId.getFilesystemName() == file.getDescriptor().getRevisionName()
 	}
 }
