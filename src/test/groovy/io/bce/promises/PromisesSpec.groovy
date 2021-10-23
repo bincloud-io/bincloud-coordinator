@@ -10,7 +10,7 @@ import io.bce.promises.Promises.PromiseHasAlreadyBeenRejectedException
 import io.bce.promises.Promises.PromiseHasAlreadyBeenResolvedException
 import spock.lang.Specification
 
-class PromiseSpec extends Specification {
+class PromisesSpec extends Specification {
 	private static final String RESPONSE = "HELLO WORLD!"
 	private static final RuntimeException TYPED_EXCEPTION = new RuntimeException("THE TYPED ERROR!")
 	private static final Exception UNTYPED_EXCEPTION = new Exception("THE UNTYPED ERROR!")
@@ -26,7 +26,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<RuntimeException> firstErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created"
+		when: "The deferred operation is executed"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			System.sleep(1000)
 			resolver.resolve(RESPONSE)
@@ -60,7 +60,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created"
+		when: "The deferred operation is executed"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			System.sleep(1000)
 			resolver.reject(TYPED_EXCEPTION)
@@ -84,7 +84,7 @@ class PromiseSpec extends Specification {
 		1 * thirdErrorHandler.onError(TYPED_EXCEPTION)
 	}
 
-	def "Scenario: resolve promise with untyped error handlers"() {
+	def "Scenario: reject promise with untyped error handlers"() {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		given: "The response handlers"
@@ -96,7 +96,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created"
+		when: "The deferred operation is executed"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			System.sleep(1000)
 			resolver.reject(UNTYPED_EXCEPTION)
@@ -118,10 +118,31 @@ class PromiseSpec extends Specification {
 		0 * thirdErrorHandler.onError(UNTYPED_EXCEPTION)
 	}
 
+	def "Scenario: reject promise on thrown exception"() {
+		CountDownLatch latch = new CountDownLatch(1);
+		RuntimeException error = new RuntimeException()
+
+		given: "The error handlers"
+		ErrorHandler<RuntimeException> errorHandler = Mock(ErrorHandler)
+
+		when: "The deferred operation is executed and exception is thrown"
+		Promises.of({deferred ->
+			throw error;
+		}).error({e ->
+			errorHandler.onError(e)
+			latch.countDown();
+		})
+
+		latch.await()
+
+		then: "The promise should be resolved as ususal as on rejected method call"
+		1 * errorHandler.onError(error)
+	}
+
 	def "Scenario: resolve twice"() {
 		CountDownLatch latch = new CountDownLatch(1);
 		PromiseHasAlreadyBeenResolvedException thrownError;
-		
+
 		given: "The response handlers"
 		ResponseHandler firstResponseHandler = Mock(ResponseHandler)
 		ResponseHandler secondResponseHandler = Mock(ResponseHandler)
@@ -131,7 +152,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created and it is resolved twice"
+		when: "The deferred operation is executed and it is resolved twice"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.resolve(RESPONSE)
@@ -152,7 +173,7 @@ class PromiseSpec extends Specification {
 	def "Scenario: reject twice"() {
 		CountDownLatch latch = new CountDownLatch(1);
 		PromiseHasAlreadyBeenRejectedException thrownError;
-		
+
 		given: "The response handlers"
 		ResponseHandler firstResponseHandler = Mock(ResponseHandler)
 		ResponseHandler secondResponseHandler = Mock(ResponseHandler)
@@ -162,7 +183,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created and it is rejected twice"
+		when: "The deferred operation is executed and it is rejected twice"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.reject(UNTYPED_EXCEPTION)
@@ -183,7 +204,7 @@ class PromiseSpec extends Specification {
 	def "Scenario: reject after resolve"() {
 		CountDownLatch latch = new CountDownLatch(1);
 		PromiseHasAlreadyBeenResolvedException thrownError;
-		
+
 		given: "The response handlers"
 		ResponseHandler firstResponseHandler = Mock(ResponseHandler)
 		ResponseHandler secondResponseHandler = Mock(ResponseHandler)
@@ -193,7 +214,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created and it is rejected after resolving"
+		when: "The deferred operation is executed and it is rejected after resolving"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.resolve(RESPONSE)
@@ -214,7 +235,7 @@ class PromiseSpec extends Specification {
 	def "Scenario: resolve after reject"() {
 		CountDownLatch latch = new CountDownLatch(1);
 		PromiseHasAlreadyBeenRejectedException thrownError;
-		
+
 		given: "The response handlers"
 		ResponseHandler firstResponseHandler = Mock(ResponseHandler)
 		ResponseHandler secondResponseHandler = Mock(ResponseHandler)
@@ -224,7 +245,7 @@ class PromiseSpec extends Specification {
 		ErrorHandler<Throwable> secondErrorHandler = Mock(ErrorHandler)
 		ErrorHandler<RuntimeException> thirdErrorHandler = Mock(ErrorHandler)
 
-		when: "The promise is created and it is resolved after rejection"
+		when: "The deferred operation is executed and it is resolved after rejection"
 		Promise<String> promise = Promises.of({Deferred<String> resolver ->
 			try {
 				resolver.reject(UNTYPED_EXCEPTION)
@@ -263,15 +284,15 @@ class PromiseSpec extends Specification {
 
 		then: "The first handler should be resolved by long value"
 		1 * firstResponseHandler.onResponse(100L)
-		
+
 		and: "The second handler should be resolved by stringified value"
-		1 * secondResponseHandler.onResponse("100") 
+		1 * secondResponseHandler.onResponse("100")
 	}
 
-	def "Scnario: reject chained promise using chaining deferred function"() {
+	def "Scnario: reject chained promise using chaining deferred function if it is rejected"() {
 		RuntimeException error = new RuntimeException()
 		CountDownLatch latch = new CountDownLatch(2);
-		
+
 		given: "The response handlers"
 		ResponseHandler firstResponseHandler = Mock(ResponseHandler)
 		ResponseHandler secondResponseHandler = Mock(ResponseHandler)
@@ -295,19 +316,48 @@ class PromiseSpec extends Specification {
 		.error(thirdErrorHandler)
 
 		latch.await()
-		
+
 		then: "The first response handler should be  resolved by long value"
 		1 * firstResponseHandler.onResponse(100L)
-		
+
 		and: "The second response handler shouldn't be resolved"
 		0 * secondResponseHandler.onResponse(_)
-		
+
 		and: "All error handlers should be called"
 		1 * firstErrorHandler.onError(error)
 		1 * secondErrorHandler.onError(error)
 		1 * thirdErrorHandler.onError(error)
 	}
 	
+	def "Scnario: reject chained promise using chaining deferred function if an error is thrown"() {
+		RuntimeException error = new RuntimeException()
+		CountDownLatch latch = new CountDownLatch(1);
+
+		given: "The response handler"
+		ResponseHandler responseHandler = Mock(ResponseHandler)
+
+		and: "The error handler"
+		ErrorHandler<RuntimeException> errorHandler = Mock(ErrorHandler)
+
+		when: "The promises chain is created and first promise is resolved, but second is thrown an error"
+		Promises.of({Deferred<Long> deferred ->
+			deferred.resolve(100L)
+		}).then(responseHandler)
+		.chain((ChainingDeferredFunction) {previous, deferred -> throw error})
+		.error({ RuntimeException err -> 
+			errorHandler.onError(err)
+			latch.countDown()
+		})
+		
+		latch.await()
+
+		then: "The response handler should be  resolved by long value"
+		1 * responseHandler.onResponse(100L)
+
+		and: "The error handler should be called"
+		1 * errorHandler.onError(error)
+	}
+
 	def "Scenario: resolve chained promises using chaining promise handler"() {
 		CountDownLatch latch = new CountDownLatch(2);
 
@@ -321,10 +371,10 @@ class PromiseSpec extends Specification {
 			latch.countDown()
 		}).then(firstResponseHandler)
 		.chain((ChainingPromiseHandler) {previous ->
-			return Promises.of({ deferred -> 
+			return Promises.of({ deferred ->
 				deferred.resolve("${previous}")
 			})
-		}).then({response -> 
+		}).then({response ->
 			secondResponseHandler.onResponse(response)
 			latch.countDown()
 		})
@@ -333,7 +383,7 @@ class PromiseSpec extends Specification {
 
 		then: "The first handler should be resolved by long value"
 		1 * firstResponseHandler.onResponse(100L)
-		
+
 		and: "The second handler should be resolved by stringified value"
 		1 * secondResponseHandler.onResponse("100")
 	}
@@ -341,7 +391,7 @@ class PromiseSpec extends Specification {
 	def "Scnario: reject chained promise using chaining promise handler"() {
 		RuntimeException error = new RuntimeException()
 		CountDownLatch latch = new CountDownLatch(2);
-		
+
 		given: "The response handlers"
 		ResponseHandler firstResponseHandler = Mock(ResponseHandler)
 		ResponseHandler secondResponseHandler = Mock(ResponseHandler)
@@ -358,25 +408,61 @@ class PromiseSpec extends Specification {
 		}).then(firstResponseHandler)
 		.error(RuntimeException, firstErrorHandler)
 		.chain((ChainingPromiseHandler) {previous ->
-			return Promises.of({ deferred -> 
+			return Promises.of({ deferred ->
 				deferred.reject(error)
 				latch.countDown()
 			})
 		}).then(secondResponseHandler)
 		.error(RuntimeException, secondErrorHandler)
 		.error(thirdErrorHandler)
-
-		latch.await()
 		
+		latch.await()
+
 		then: "The first response handler should be  resolved by long value"
 		1 * firstResponseHandler.onResponse(100L)
-		
+
 		and: "The second response handler shouldn't be resolved"
 		0 * secondResponseHandler.onResponse(_)
-		
+
 		and: "All error handlers should be called on the failed promise only"
 		0 * firstErrorHandler.onError(error)
 		1 * secondErrorHandler.onError(error)
 		1 * thirdErrorHandler.onError(error)
+	}
+	
+	def "Scenario: create the resolved promise by a value"() {
+		CountDownLatch latch = new CountDownLatch(1)
+		given: "The response handler"
+		ResponseHandler responseHandler = Mock(ResponseHandler)
+		
+		when: "The resolved promise is created"
+		Promises.resolvedBy(100L).then({Long value -> 
+			responseHandler.onResponse(value)
+			latch.countDown()
+		})
+		
+		latch.await()
+		
+		then: "The response handler should catch the value"
+		1 * responseHandler.onResponse(100L)	
+	}
+	
+	def "Scenario: create the rejected promise by an error"() {
+		CountDownLatch latch = new CountDownLatch(1)
+		RuntimeException error = new RuntimeException("ERROR")
+		
+		given: "The error handler"
+		ErrorHandler errorHandler = Mock(ErrorHandler)
+		
+		when: "The rejected promise is created"
+		Promises.rejectedBy(error).error({RuntimeException err ->
+			errorHandler.onError(err)
+			latch.countDown()
+		})
+		
+		latch.await()
+		
+		then: "The error handler should catch the error"
+		1 * errorHandler.onError(error)
 	}
 }

@@ -78,30 +78,30 @@ public class RFC7233ContentDownloader {
 
 	private void startDownloadProcess(DownloadRequestDetails requestDetails, DownloadListener downloadListener) {
 		if (createFileFragments(requestDetails).isRequestedMultipleFragments()) {
-			downloadListener.onDownloadStart(DownloadProcessType.PARTIAL, file);
+			downloadListener.onDownloadStart(DownloadProcessType.PARTIAL, file.getDescriptor());
 		} else {
-			downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, file);
+			downloadListener.onDownloadStart(DownloadProcessType.FULL_SIZE, file.getDescriptor());
 		}
 	}
 
 	private FileFragments createFileFragments(DownloadRequestDetails requestDetails) {
-		return new FileFragments(requestDetails.getRanges(), file.getFileSize());
+		return new FileFragments(requestDetails.getRanges(), file.getDescriptor().getFileSize());
 	}
 
 	private void completeDownloadProcess(DownloadListener downloadListener, Long totalSize) {
-		downloadListener.onDownloadComplete(file, totalSize);
+		downloadListener.onDownloadComplete(file.getDescriptor(), totalSize);
 	}
 
 	private void failDownloadProcess(DownloadListener downloadListener, Exception error) {
-		downloadListener.onDownloadError(file, error);
+		downloadListener.onDownloadError(file.getDescriptor(), error);
 	}
 
 	private void startFragmentDownloadProcess(DownloadListener downloadListener, Fragment fragment) {
-		downloadListener.onFragmentDownloadStart(file, fragment);
+		downloadListener.onFragmentDownloadStart(file.getDescriptor(), fragment);
 	}
 
 	private void completeFragmentDownloadProcess(DownloadListener downloadListener, Fragment fragment) {
-		downloadListener.onFragmentDownloadComplete(file, fragment);
+		downloadListener.onFragmentDownloadComplete(file.getDescriptor(), fragment);
 	}
 
 	@RequiredArgsConstructor

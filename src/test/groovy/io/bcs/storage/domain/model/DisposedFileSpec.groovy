@@ -2,15 +2,16 @@ package io.bcs.storage.domain.model
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.CountDownLatch
 
 import io.bce.domain.errors.ApplicationException
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
+import io.bce.promises.Promise.ErrorHandler
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
-import io.bcs.storage.domain.model.FileRevision
-import io.bcs.storage.domain.model.FilesystemAccessor
+import io.bcs.storage.domain.model.FileRevision.ContentUploader
 import io.bcs.storage.domain.model.contexts.FileDownloadingContext
 import io.bcs.storage.domain.model.contexts.FileUploadingContext
 import io.bcs.storage.domain.model.states.DisposedFileRevisionState
@@ -19,7 +20,7 @@ import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DisposedFileSpec extends Specification {
-	private static final String FILESYSTEM_NAME = "12345"
+	private static final String FILE_REVISION_NAME = "12345"
 	private static final String FILE_NAME = "file.txt"
 	private static final String FILE_MEDIA_TYPE = "application/media"
 	private static final String FILE_DISPOSITION = "inline"
@@ -49,17 +50,29 @@ class DisposedFileSpec extends Specification {
 	}
 
 	def "Scenario: file can not be uploaded in the disposed state"() {
+		ApplicationException thrownError
+		CountDownLatch latch = new CountDownLatch(1)
+				
 		given: "The file in disposed state"
 		FileRevision file =  createDisposedFile()
 
+		and: "The content uploader"
+		ContentUploader contentUploader = Mock(ContentUploader)
+
+		and: "The error handler"
+		ErrorHandler errorHandler = {error ->
+			thrownError = error
+			latch.countDown()
+		}
+
 		when: "The file uploading is requested"
-		file.uploadFileContent(createUploadingContext())
+		file.uploadContent(contentUploader).error(FileHasAlreadyBeenDisposedException, errorHandler)
+		latch.await()
 
 		then: "The file has been disposed should be thrown"
-		ApplicationException error = thrown(FileHasAlreadyBeenDisposedException)
-		error.getContextId() == FileHasAlreadyBeenDisposedException.CONTEXT
-		error.getErrorCode() == FileHasAlreadyBeenDisposedException.ERROR_CODE
-		error.getErrorSeverity() == ErrorSeverity.BUSINESS
+		thrownError.getContextId() == FileHasAlreadyBeenDisposedException.CONTEXT
+		thrownError.getErrorCode() == FileHasAlreadyBeenDisposedException.ERROR_CODE
+		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileRevisionStatus.DISPOSED.name()
@@ -109,7 +122,7 @@ class DisposedFileSpec extends Specification {
 
 	def createDisposedFile() {
 		return FileRevision.builder()
-				.filesystemName(FILESYSTEM_NAME)
+				.revisionName(new FileId(FILE_REVISION_NAME))
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)

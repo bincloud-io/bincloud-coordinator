@@ -1,9 +1,12 @@
 package io.bcs.storage.domain.model.states;
 
+import io.bce.promises.Promise;
+import io.bce.promises.Promises;
+import io.bcs.storage.domain.model.FileRevision.ContentUploader;
 import io.bcs.storage.domain.model.FileRevision.FileRevisionState;
-import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
-import io.bcs.storage.domain.model.contexts.FileUploadingContext;
+import io.bcs.storage.domain.model.FileRevision.ContentUploader.UploadedContent;
 import io.bcs.storage.domain.model.FilesystemAccessor;
+import io.bcs.storage.domain.model.contexts.FileDownloadingContext;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -23,9 +26,9 @@ public class DisposedFileRevisionState implements FileRevisionState {
 	}
 
 	@Override
-	public void uploadFile(RootContext context, FileUploadingContext uploadingContext) {
-		throw new FileHasAlreadyBeenDisposedException();
-	}
+	public Promise<UploadedContent> uploadContent(RootContext context, ContentUploader contentUploader) {
+		return Promises.rejectedBy(new FileHasAlreadyBeenDisposedException());
+	}	
 
 	@Override
 	public void downloadFile(RootContext context, FileDownloadingContext downloadingContext, Long offset, Long size) {

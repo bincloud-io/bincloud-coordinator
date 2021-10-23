@@ -22,6 +22,4 @@ public class FileId implements Validatable, Serializable {
 	public DefaultValidationContext validate(ValidationContext context) {
 		return null;
 	}
-	
-	
 }

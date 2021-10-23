@@ -2,19 +2,20 @@ package io.bcs.storage.domain.model
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.CountDownLatch
 
 import io.bce.domain.errors.ApplicationException
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
+import io.bce.promises.Promise.ErrorHandler
 import io.bcs.common.domain.model.io.transfer.CompletionCallback
 import io.bcs.common.domain.model.io.transfer.DestinationPoint
 import io.bcs.common.domain.model.io.transfer.SourcePoint
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler
 import io.bcs.common.domain.model.io.transfer.Transmitter
-import io.bcs.storage.domain.model.FileRevision
-import io.bcs.storage.domain.model.FilesystemAccessor
+import io.bcs.storage.domain.model.FileRevision.ContentUploader
 import io.bcs.storage.domain.model.contexts.FileDownloadingContext
 import io.bcs.storage.domain.model.contexts.FileUploadingContext
-import io.bcs.storage.domain.model.states.CreatedFileRevisionState
+import io.bcs.storage.domain.model.contracts.FileDescriptor
 import io.bcs.storage.domain.model.states.DistributionFileRevisionState
 import io.bcs.storage.domain.model.states.FileAlreadyExistsException
 import io.bcs.storage.domain.model.states.FileHasAlreadyBeenUploadedException
@@ -22,7 +23,7 @@ import io.bcs.storage.domain.model.states.FileRevisionStatus
 import spock.lang.Specification
 
 class DistributionFileSpec extends Specification {
-	private static final String FILESYSTEM_NAME = "12345"
+	private static final String FILE_REVISION_NAME = "12345"
 	private static final String FILE_NAME = "file.txt"
 	private static final String FILE_MEDIA_TYPE = "application/media"
 	private static final String FILE_DISPOSITION = "inline"
@@ -62,17 +63,31 @@ class DistributionFileSpec extends Specification {
 	}
 
 	def "Scenario: file can not be uploaded in the distribution state"() {
+		ApplicationException thrownError
+		CountDownLatch latch = new CountDownLatch(1)
+		
 		given: "The file in distribution state"
 		FileRevision file =  createDistributionFile()
 
+		and: "The content uploader"
+		ContentUploader contentUploader = Mock(ContentUploader)
+		
+		and: "The error handler"
+		ErrorHandler errorHandler = {error ->
+			thrownError = error
+			latch.countDown()
+		}
+		
 		when: "The file uploading is requested"
-		file.uploadFileContent(createUploadingContext())
+		file
+			.uploadContent(contentUploader)
+			.error(ApplicationException, errorHandler)
+		latch.await()
 
 		then: "The file has been disposed should be thrown"
-		ApplicationException error = thrown(FileHasAlreadyBeenUploadedException)
-		error.getContextId() == FileHasAlreadyBeenUploadedException.CONTEXT
-		error.getErrorCode() == FileHasAlreadyBeenUploadedException.ERROR_CODE
-		error.getErrorSeverity() == ErrorSeverity.BUSINESS
+		thrownError.getContextId() == FileHasAlreadyBeenUploadedException.CONTEXT
+		thrownError.getErrorCode() == FileHasAlreadyBeenUploadedException.ERROR_CODE
+		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
 
 		and: "The file status should not be changed"
 		file.status == FileRevisionStatus.DISTRIBUTION.name()
@@ -83,7 +98,7 @@ class DistributionFileSpec extends Specification {
 		FileRevision file =  createDistributionFile()
 
 		and: "There is access on read to the file on a file system for range 10..20"
-		1 * filesystem.getAccessOnRead(file.getFilesystemName(), 10, 20) >> sourcePoint
+		1 * filesystem.getAccessOnRead(file.getRevisionName().getFilesystemName(), 10, 20) >> sourcePoint
 
 		and: "The file transfering can be scheduled"
 		scheduler.schedule(sourcePoint, destinationPoint, _) >> {
@@ -98,27 +113,28 @@ class DistributionFileSpec extends Specification {
 		when: "The file content 10..20 downloading is requested"
 		FileDownloadingContext downloadingContext = createDownloadingContext()
 		file.downloadFileContent(downloadingContext, 10, 20)
+		FileDescriptor fileDescriptor = file.getDescriptor()
 
 		then: "The transmission should be completed"
 		1 * completionCallback.onSuccess()
 		
 		and: "The modification time should be changed"
-		file.lastModification == TIMESTAMP_NEXT_POINT
+		fileDescriptor.lastModification == TIMESTAMP_NEXT_POINT
 
 		and: "The status should not be changed"
-		file.status == FileRevisionStatus.DISTRIBUTION.name()
+		fileDescriptor.status == FileRevisionStatus.DISTRIBUTION.name()
 		
 		and: "The filesystem name should be generated"
-		file.getFilesystemName() == FILESYSTEM_NAME
+		fileDescriptor.getRevisionName() == FILE_REVISION_NAME
 		
 		and: "The file name should be got from file attributes"
-		file.getFileName() == FILE_NAME
+		fileDescriptor.getFileName() == FILE_NAME
 		
 		and: "The media type should be got from file attributes"
-		file.getMediaType() == FILE_MEDIA_TYPE
+		fileDescriptor.getMediaType() == FILE_MEDIA_TYPE
 		
 		and: "The content disposition should be got from file attributes"
-		file.getContentDisposition() == FILE_DISPOSITION
+		fileDescriptor.getContentDisposition() == FILE_DISPOSITION
 	}
 
 	def "Scenario: file distribution can not be started in the distribution state"() {
@@ -137,18 +153,14 @@ class DistributionFileSpec extends Specification {
 		and: "The file status should not be changed"
 		file.status == FileRevisionStatus.DISTRIBUTION.name()
 	}
-
-	private def createUploadingContext() {
-		return new FileUploadingContext(1000L, sourcePoint, scheduler, filesystem, completionCallback)
-	}
-
+	
 	private def createDownloadingContext() {
 		return new FileDownloadingContext(destinationPoint, scheduler, filesystem, completionCallback)
 	}
 
 	def createDistributionFile() {
 		return FileRevision.builder()
-				.filesystemName(FILESYSTEM_NAME)
+				.revisionName(new FileId(FILE_REVISION_NAME))
 				.fileName(FILE_NAME)
 				.mediaType(FILE_MEDIA_TYPE)
 				.contentDisposition(FILE_DISPOSITION)
