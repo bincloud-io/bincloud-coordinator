@@ -5,7 +5,7 @@ import java.util.Collection;
 import io.bce.text.TextTemplate;
 
 public interface ValidationContext {
-	
+
 	/**
 	 * Get the result validation state
 	 * 
@@ -53,11 +53,21 @@ public interface ValidationContext {
 	public ValidationContext validate(String groupName, Validatable validatable, DerivationPolicy derivationPolicy);
 
 	/**
+	 * Validate all objects inside a collection, implementing the
+	 * {@link Validatable} interface, grouped by a specified group
+	 * 
+	 * @param groupName        The validation group
+	 * @param collection       The validatable collection
+	 * @return The derived context
+	 */
+	public <T> ValidationContext validate(String groupName, Collection<T> collection);
+
+	/**
 	 * Append ungrouped rule checking for the value, obtained by the provider
 	 * 
-	 * @param <T> The value type name
+	 * @param <T>           The value type name
 	 * @param valueProvider The under validation value provider
-	 * @param rule The rule under validation
+	 * @param rule          The rule under validation
 	 * @return The validation context
 	 */
 	<T> ValidationContext withRule(ValueProvider<T> valueProvider, Rule<T> rule);
@@ -65,18 +75,18 @@ public interface ValidationContext {
 	/**
 	 * Append grouped rule checking for the value, obtained by the provider
 	 * 
-	 * @param <T> The value type name
-	 * @param groupName The validation group name
+	 * @param <T>           The value type name
+	 * @param groupName     The validation group name
 	 * @param valueProvider The under validation value provider
-	 * @param rule The rule under validation
+	 * @param rule          The rule under validation
 	 * @return The validation context
 	 */
 	<T> ValidationContext withRule(String groupName, ValueProvider<T> valueProvider, Rule<T> rule);
 
 	/**
-	 * Append the ungrouped errors 
+	 * Append the ungrouped errors
 	 * 
-	 * @param <T> 
+	 * @param <T>
 	 * @param errors
 	 * @return
 	 */
@@ -150,7 +160,7 @@ public interface ValidationContext {
 		public boolean isAcceptableFor(T value);
 
 		public Collection<TextTemplate> check(T value);
-		
+
 		public Rule<T> invert();
 	}
 }

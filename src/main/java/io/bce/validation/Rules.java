@@ -1,21 +1,16 @@
 package io.bce.validation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import javax.jms.TextMessage;
-
+import io.bce.Range;
 import io.bce.text.TextTemplate;
 import io.bce.text.TextTemplates;
 import io.bce.text.TextTemplates.DefaultTextTemplate;
 import io.bce.validation.ValidationContext.Rule;
 import lombok.NonNull;
-import lombok.val;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -35,11 +30,11 @@ public class Rules {
 	 * @param errorMessage  The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public final <T> Rule<T> equalTo(T expectedValue, TextTemplate errorMessage) {
+	@SuppressWarnings({ "unchecked" })
+	public final <T> Rule<T> equalTo(@NonNull T expectedValue, @NonNull TextTemplate errorMessage) {
 		ErrorMessageBuilder errorMessageBuilder = ErrorMessageBuilder.of(errorMessage)
 				.withParameter(EXPECTED_VALUE_PARAMETER, expectedValue);
-		return new AssertRule(Object.class, errorMessageBuilder, value -> value.equals(errorMessage));
+		return (Rule<T>) new AssertRule<>(Object.class, errorMessageBuilder, value -> value.equals(expectedValue));
 	}
 
 	/**
@@ -51,7 +46,7 @@ public class Rules {
 	 * @param errorMessage  The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T> Rule<T> notEqualTo(T expectedValue, TextTemplate errorMessage) {
+	public final <T> Rule<T> notEqualTo(@NonNull T expectedValue, @NonNull TextTemplate errorMessage) {
 		return equalTo(expectedValue, errorMessage).invert();
 	}
 
@@ -61,7 +56,7 @@ public class Rules {
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final Rule<Boolean> assertTrue(TextTemplate errorMessage) {
+	public final Rule<Boolean> assertTrue(@NonNull TextTemplate errorMessage) {
 		return equalTo(true, errorMessage);
 	}
 
@@ -71,7 +66,7 @@ public class Rules {
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final Rule<Boolean> assertFalse(TextTemplate errorMessage) {
+	public final Rule<Boolean> assertFalse(@NonNull TextTemplate errorMessage) {
 		return equalTo(false, errorMessage);
 	}
 
@@ -80,15 +75,16 @@ public class Rules {
 	 * passed minimal value
 	 * 
 	 * @param <T>          The under validation value type
+	 * @param valueType    The under validation value class
 	 * @param minValue     The minimal value
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T extends Comparable<T>> Rule<T> greaterThan(Class<T> comparableType, T minValue,
-			TextTemplate errorMessage) {
+	public final <T extends Comparable<T>> Rule<T> greaterThan(@NonNull Class<T> valueType, @NonNull T minValue,
+			@NonNull TextTemplate errorMessage) {
 		ErrorMessageBuilder errorMessageBuilder = ErrorMessageBuilder.of(errorMessage)
 				.withParameter(MIN_PARAMETER_VALUE, minValue);
-		return new AssertRule<>(comparableType, errorMessageBuilder, value -> value.compareTo(minValue) > 0);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.compareTo(minValue) > 0);
 	}
 
 	/**
@@ -96,15 +92,16 @@ public class Rules {
 	 * maximal value
 	 * 
 	 * @param <T>          The under validation value type
+	 * @param valueType    The under validation value class
 	 * @param maxValue     The maximal value
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T extends Comparable<T>> Rule<T> lessThan(Class<T> comparableType, T maxValue,
-			TextTemplate errorMessage) {
+	public final <T extends Comparable<T>> Rule<T> lessThan(@NonNull Class<T> valueType, @NonNull T maxValue,
+			@NonNull TextTemplate errorMessage) {
 		ErrorMessageBuilder errorMessageBuilder = ErrorMessageBuilder.of(errorMessage)
 				.withParameter(MAX_PARAMETER_VALUE, maxValue);
-		return new AssertRule<>(comparableType, errorMessageBuilder, value -> value.compareTo(maxValue) < 0);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.compareTo(maxValue) < 0);
 	}
 
 	/**
@@ -112,13 +109,14 @@ public class Rules {
 	 * passed minimal value or equal to this one
 	 * 
 	 * @param <T>          The under validation value type
+	 * @param valueType    The under validation value class
 	 * @param minValue     The minimal value
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T extends Comparable<T>> Rule<T> greaterThanOrEqual(Class<T> comparableType, T minValue,
-			TextTemplate errorMessage) {
-		return lessThan(comparableType, minValue, errorMessage).invert();
+	public final <T extends Comparable<T>> Rule<T> greaterThanOrEqual(@NonNull Class<T> valueType, @NonNull T minValue,
+			@NonNull TextTemplate errorMessage) {
+		return lessThan(valueType, minValue, errorMessage).invert();
 	}
 
 	/**
@@ -126,65 +124,108 @@ public class Rules {
 	 * maximal value or equal to this one
 	 * 
 	 * @param <T>          The under validation value type
+	 * @param valueType    The under validation value class
 	 * @param maxValue     The maximal value
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T extends Comparable<T>> Rule<T> lessThanOrEqual(Class<T> comparableType, T maxValue,
-			TextTemplate errorMessage) {
-		return greaterThan(comparableType, maxValue, errorMessage).invert();
+	public final <T extends Comparable<T>> Rule<T> lessThanOrEqual(@NonNull Class<T> valueType, @NonNull T maxValue,
+			@NonNull TextTemplate errorMessage) {
+		return greaterThan(valueType, maxValue, errorMessage).invert();
 	}
 
-	public final <T extends Comparable<T>> Rule<T> between(Class<T> comparableType, T minValue, T maxValue,
-			TextTemplate errorMessage) {
+	/**
+	 * Create rule checking that the value under validation is inside the specified
+	 * range
+	 * 
+	 * @param <T>          The under validation value type
+	 * @param valueType    The under validation value class
+	 * @param min          The minimal range value (lower threshold)
+	 * @param max          The maximal range value (upper threshold)
+	 * @param errorMessage The error message
+	 * @return The rule
+	 */
+	public final <T extends Comparable<T>> Rule<T> between(@NonNull Class<T> valueType, @NonNull T min, @NonNull T max,
+			@NonNull TextTemplate errorMessage) {
+		Range<T> range = Range.createFor(min, max);
 		ErrorMessageBuilder errorMessageBuilder = ErrorMessageBuilder.of(errorMessage)
-				.withParameter(MIN_PARAMETER_VALUE, minValue).withParameter(MAX_PARAMETER_VALUE, maxValue);
-		return new AssertRule<>(comparableType, errorMessageBuilder, value -> {
-			return (value.compareTo(minValue)) >= 0 && (value.compareTo(maxValue) <= 0);
-		});
+				.withParameter(MIN_PARAMETER_VALUE, range.getMin()).withParameter(MAX_PARAMETER_VALUE, range.getMax());
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> range.contains(value));
 	}
 
-	public final <T extends Comparable<T>> Rule<T> outOf(Class<T> comparableType, T minValue, T maxValue, TextTemplate errorMessage) {
-		return between(comparableType, minValue, maxValue, errorMessage);
+	/**
+	 * Create rule checking that the value under validation is outside the specified
+	 * range
+	 * 
+	 * @param <T>          The under validation value type
+	 * @param valueType    The under validation value class
+	 * @param min          The minimal range value (lower threshold)
+	 * @param max          The maximal range value (upper threshold)
+	 * @param errorMessage The error message
+	 * @return The rule
+	 */
+	public final <T extends Comparable<T>> Rule<T> outside(@NonNull Class<T> comparableType, @NonNull T min,
+			@NonNull T max, @NonNull TextTemplate errorMessage) {
+		return between(comparableType, min, max, errorMessage).invert();
 	}
 
 	/**
 	 * Create rule checking that the character sequence value under validation is
 	 * empty sequence
 	 * 
-	 * @param <T>              The under validation value type
-	 * @param charSequenceType The character sequence concrete type name
-	 * @param errorMessage     The error message if the rule isn't passed
+	 * @param <T>          The under validation value type
+	 * @param valueType    The character sequence concrete type name
+	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T extends CharSequence> Rule<T> empty(Class<T> charSequenceType, TextTemplate errorMessage) {
+	public final <T extends CharSequence> Rule<T> empty(@NonNull Class<T> valueType,
+			@NonNull TextTemplate errorMessage) {
 		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage);
-		return new AssertRule<>(charSequenceType, errorMessageBuilder, value -> value.length() == 0);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.length() == 0);
 	}
 
 	/**
 	 * Create rule checking that the character sequence value under validation is
 	 * not empty sequence
 	 * 
-	 * @param <T>              The under validation value type
-	 * @param charSequenceType The character sequence concrete type name
-	 * @param errorMessage     The error message if the rule isn't passed
+	 * @param <T>          The under validation value type
+	 * @param valueType    The character sequence concrete type name
+	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <T extends CharSequence> Rule<T> notEmpty(Class<T> charSequenceType, TextTemplate errorMessage) {
-		return empty(charSequenceType, errorMessage).invert();
+	public final <T extends CharSequence> Rule<T> notEmpty(@NonNull Class<T> valueType,
+			@NonNull TextTemplate errorMessage) {
+		return empty(valueType, errorMessage).invert();
+	}
+
+	public final <T extends CharSequence> Rule<T> minLength(@NonNull Class<T> valueType, @NonNull Long minLength,
+			@NonNull TextTemplate errorMessage) {
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(MIN_PARAMETER_VALUE, minLength);
+		return new AssertRule<>(valueType, errorMessageBuilder,
+				value -> value.length() <= minLength.longValue());
+	}
+
+	public final <T extends CharSequence> Rule<T> maxLength(@NonNull Class<T> valueType, @NonNull Long minLength,
+			@NonNull TextTemplate errorMessage) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static final class SizeMustNotBeNegativeValue extends RuntimeException {
+		private static final long serialVersionUID = -7584943704277538153L;
+
 	}
 
 	/**
 	 * Create rule checking that the collection under validation is empty collection
 	 * 
 	 * @param <T>            The under validation value type
-	 * @param collectionType The collection concrete type name
+	 * @param collectionType The under validation collection type
 	 * @param errorMessage   The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <E, T extends Collection<E>> Rule<T> isEmptyCollection(Class<T> collectionType,
-			TextTemplate errorMessage) {
+	public final <E, T extends Collection<E>> Rule<T> isEmptyCollection(@NonNull Class<T> collectionType,
+			@NonNull TextTemplate errorMessage) {
 		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage);
 		return new AssertRule<>(collectionType, errorMessageBuilder, value -> value.size() == 0);
 	}
@@ -197,8 +238,8 @@ public class Rules {
 	 * @param errorMessage   The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <E, T extends Collection<E>> Rule<T> isNotEmptyCollection(Class<T> collectionType,
-			TextTemplate errorMessage) {
+	public final <E, T extends Collection<E>> Rule<T> isNotEmptyCollection(@NonNull Class<T> collectionType,
+			@NonNull TextTemplate errorMessage) {
 		return isEmptyCollection(collectionType, errorMessage).invert();
 	}
 
