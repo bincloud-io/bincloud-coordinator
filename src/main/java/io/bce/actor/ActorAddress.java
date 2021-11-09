@@ -3,6 +3,7 @@ package io.bce.actor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.bce.FormatChecker;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -12,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ActorAddress {
 	public static final ActorAddress UNKNOWN_ADDRESS = new ActorAddress("urn:actor:SYSTEM.DEAD_LETTER");
-	private static final Pattern URN_PATTERN = Pattern.compile("urn:actor:(.+)");
+	private static final String ACTOR_URN_PATTERN = "urn:actor:(.+)";
+	private static final FormatChecker ACTOR_URN_FORMAT_CHECKER = FormatChecker.createFor(ACTOR_URN_PATTERN, WrongActorAddressFormatException::new);
 
 	private final String addressURN;
 
@@ -26,31 +28,26 @@ public class ActorAddress {
 	}
 
 	private Matcher getURNMatcher() {
-		Matcher urnMatcher = URN_PATTERN.matcher(addressURN);
+		Pattern urnPattern = Pattern.compile(ACTOR_URN_PATTERN);
+		Matcher urnMatcher = urnPattern.matcher(addressURN);
 		urnMatcher.find();
 		return urnMatcher;
 	}
 	
 	public static final ActorAddress ofURN(@NonNull String urn) {
-		checkThatURNFormatIsCorrect(urn);
+		ACTOR_URN_FORMAT_CHECKER.checkThatValueIsWellFormatted(urn);
 		return new ActorAddress(urn);
 	}
 
 	static final ActorAddress ofName(@NonNull ActorName actorName) {
 		return ofURN(String.format("urn:actor:%s", actorName));
 	}
-
-	private static final void checkThatURNFormatIsCorrect(String urn) {
-		if (!URN_PATTERN.matcher(urn).matches()) {
-			throw new WrongActorAddressFormatException(urn);
-		}
-	}
-
+	
 	public static class WrongActorAddressFormatException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 
 		public WrongActorAddressFormatException(String urn) {
-			super(String.format("The actor URN \"%s\" isn't matched to the \"%s\" pattern", urn, URN_PATTERN));
+			super(String.format("The actor URN \"%s\" isn't matched to the \"%s\" pattern", urn, ACTOR_URN_PATTERN));
 		}
 	}
 }

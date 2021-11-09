@@ -57,10 +57,23 @@ public class TextTemplates {
 	 * 
 	 * @param template   The template text
 	 * @param parameters The parameters for template processing
-	 * @return The text template2
+	 * @return The text template
 	 */
 	public static final DefaultTextTemplate createBy(String template, Map<String, Object> parameters) {
 		return new DefaultTextTemplate(Optional.ofNullable(template), parameters);
+	}
+
+	/**
+	 * Create the text message duplicate from the existing text template. Derived
+	 * text template isnull-safe, because if null values receives, the null pattern
+	 * will returned by {@link TextTemplate#getTemplateText()} in the derived object
+	 * and empty map will returned by {@link TextTemplate#getParameters()}
+	 * 
+	 * @param textTemplate The existing template
+	 * @return The text template
+	 */
+	public static final DefaultTextTemplate createBy(TextTemplate textTemplate) {
+		return createBy(textTemplate.getTemplateText(), textTemplate.getParameters());
 	}
 
 	/**

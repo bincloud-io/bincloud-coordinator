@@ -52,13 +52,37 @@ public interface ValidationContext {
 	 */
 	public ValidationContext validate(String groupName, Validatable validatable, DerivationPolicy derivationPolicy);
 
+	/**
+	 * Append ungrouped rule checking for the value, obtained by the provider
+	 * 
+	 * @param <T> The value type name
+	 * @param valueProvider The under validation value provider
+	 * @param rule The rule under validation
+	 * @return The validation context
+	 */
 	<T> ValidationContext withRule(ValueProvider<T> valueProvider, Rule<T> rule);
 
+	/**
+	 * Append grouped rule checking for the value, obtained by the provider
+	 * 
+	 * @param <T> The value type name
+	 * @param groupName The validation group name
+	 * @param valueProvider The under validation value provider
+	 * @param rule The rule under validation
+	 * @return The validation context
+	 */
 	<T> ValidationContext withRule(String groupName, ValueProvider<T> valueProvider, Rule<T> rule);
 
-	<T> ValidationContext withErrors(TextTemplate... errors);
+	/**
+	 * Append the ungrouped errors 
+	 * 
+	 * @param <T> 
+	 * @param errors
+	 * @return
+	 */
+	ValidationContext withErrors(TextTemplate... errors);
 
-	<T> ValidationContext withErrors(String groupName, TextTemplate... errors);
+	ValidationContext withErrors(String groupName, TextTemplate... errors);
 
 	/**
 	 * This interface declares the contract for object validation.
@@ -126,5 +150,7 @@ public interface ValidationContext {
 		public boolean isAcceptableFor(T value);
 
 		public Collection<TextTemplate> check(T value);
+		
+		public Rule<T> invert();
 	}
 }

@@ -111,4 +111,22 @@ public class ActorSystemPubSub<T> implements PubSub<T> {
 			tell(Message.createFor(coordinatorAddress, new Subscribe(topic, self())));
 		}
 	}
+	
+	/**
+	 * This interface declares the contract of creating pub-sub channel, bound to
+	 * the concrete topic with specified message type
+	 * 
+	 * @author Dmitry Mikaylenko
+	 *
+	 */
+	public interface Factory {
+		/**
+		 * Create the pub-sub channel
+		 * 
+		 * @param <T>             The message type name
+		 * @param coordinatorName The coordinator actor name
+		 * @return The pub-sub channel
+		 */
+		public <T> PubSub<T> createPubSub(ActorName coordinatorName);
+	}
 }

@@ -1,7 +1,5 @@
 package io.bce.interaction.pubsub;
 
-import io.bce.actor.ActorName;
-
 /**
  * This interface declares the contract of the pub-sub pattern implementation.
  * This pattern works by the fire and forget communication mechanism. This
@@ -85,23 +83,5 @@ public interface PubSub<T> {
 		 * Unsubscribe from the subscription
 		 */
 		public void unsubscribe();
-	}
-
-	/**
-	 * This interface declares the contract of creating pub-sub channel, bound to
-	 * the concrete topic with specified message type
-	 * 
-	 * @author Dmitry Mikaylenko
-	 *
-	 */
-	public interface Factory {
-		/**
-		 * Create the pub-sub channel
-		 * 
-		 * @param <T>             The message type name
-		 * @param coordinatorName The coordinator actor name
-		 * @return The pub-sub channel
-		 */
-		public <T> PubSub<T> createPubSub(ActorName coordinatorName);
 	}
 }

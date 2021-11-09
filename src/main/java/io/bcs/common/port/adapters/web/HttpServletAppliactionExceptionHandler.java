@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.bce.domain.BoundedContextId;
 import io.bce.domain.ErrorDescriptorTemplate;
-import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor;
 import io.bce.domain.errors.ApplicationException;
 import io.bce.domain.errors.UnexpectedErrorException;
 import io.bce.text.TextProcessor;
+import io.bcs.storage.port.adapter.file.web.AsyncErrorsHandler.ErrorInterceptor;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 

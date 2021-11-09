@@ -5,13 +5,13 @@ import javax.servlet.AsyncContext
 import javax.servlet.http.HttpServletResponse
 
 import io.bce.domain.BoundedContextId
-import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor
 import io.bce.domain.errors.ApplicationException
 import io.bce.domain.errors.UnexpectedErrorException
 import io.bce.domain.errors.ErrorDescriptor.ErrorCode
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bce.text.TextProcessor
 import io.bce.text.TextTemplates
+import io.bcs.storage.port.adapter.file.web.AsyncErrorsHandler.ErrorInterceptor
 import spock.lang.Specification
 
 class HttpServletApplicatonExceptionHandlerSpec extends Specification {

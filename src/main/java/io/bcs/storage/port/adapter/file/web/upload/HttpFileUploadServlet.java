@@ -10,9 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.bce.domain.AsyncErrorsHandler;
 import io.bce.domain.BoundedContextId;
-import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor;
 import io.bce.domain.errors.ApplicationException;
 import io.bce.text.TextProcessor;
 import io.bcs.common.domain.model.io.transfer.SourcePoint;
@@ -28,6 +26,8 @@ import io.bcs.storage.domain.model.contracts.FilePointer;
 import io.bcs.storage.domain.model.contracts.upload.FileUploadListener;
 import io.bcs.storage.domain.model.contracts.upload.FileUploader;
 import io.bcs.storage.port.adapter.ServerContextProvider;
+import io.bcs.storage.port.adapter.file.web.AsyncErrorsHandler;
+import io.bcs.storage.port.adapter.file.web.AsyncErrorsHandler.ErrorInterceptor;
 
 public class HttpFileUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -8092602564530445635L;

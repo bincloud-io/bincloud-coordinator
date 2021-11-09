@@ -91,12 +91,12 @@ public final class DefaultValidationContext implements ValidationContext {
 	}
 
 	@Override
-	public <T> ValidationContext withErrors(TextTemplate... errors) {
+	public ValidationContext withErrors(TextTemplate... errors) {
 		return withErrors(errors, (state, error) -> state.withUngrouped(error));
 	}
 
 	@Override
-	public <T> ValidationContext withErrors(String groupName, TextTemplate... errors) {
+	public ValidationContext withErrors(String groupName, TextTemplate... errors) {
 		ValidationGroup group = ValidationGroup.createFor(groupName);
 		return withErrors(errors, (state, error) -> state.withGrouped(group, error));
 	}

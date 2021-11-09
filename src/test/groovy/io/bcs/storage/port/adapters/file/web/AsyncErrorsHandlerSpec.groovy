@@ -1,7 +1,8 @@
-package io.bce.domain
+package io.bcs.storage.port.adapters.file.web
 
-import io.bce.domain.AsyncErrorsHandler.ErrorInterceptor
 import io.bce.domain.errors.UnexpectedErrorException
+import io.bcs.storage.port.adapter.file.web.AsyncErrorsHandler
+import io.bcs.storage.port.adapter.file.web.AsyncErrorsHandler.ErrorInterceptor
 import spock.lang.Specification
 
 class AsyncErrorsHandlerSpec extends Specification {

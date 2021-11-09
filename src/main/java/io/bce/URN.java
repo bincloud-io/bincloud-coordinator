@@ -1,7 +1,5 @@
 package io.bce;
 
-import java.util.regex.Pattern;
-
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -10,15 +8,15 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public final class URN {
-	private static final Pattern URN_PATTERN = Pattern
-			.compile("\\burn:[a-zA-Z0-9][a-zA-Z0-9-]{0,31}:[a-zA-Z0-9()+,\\-.:=@;$_!*'%/?#]+");
+	private static final String URN_PATTERN = "\\burn:[a-zA-Z0-9][a-zA-Z0-9-]{0,31}:[a-zA-Z0-9()+,\\-.:=@;$_!*'%/?#]+";
+	private static final FormatChecker URN_FORMAT_CHECKER = FormatChecker.createFor(URN_PATTERN, WrongUrnAddressFormatException::new);
 	private final String addressString;
-	
+
 	@Override
 	public String toString() {
 		return addressString;
 	}
-	
+
 	/**
 	 * Create the target address of an URN-address string value
 	 * 
@@ -26,14 +24,8 @@ public final class URN {
 	 * @return The target address
 	 */
 	public static final URN ofURN(@NonNull String urnAddress) {
-		checkThatAddressIsMatchedToPattern(urnAddress);
+		URN_FORMAT_CHECKER.checkThatValueIsWellFormatted(urnAddress);
 		return new URN(urnAddress);
-	}
-
-	private static void checkThatAddressIsMatchedToPattern(String urnAddress) {
-		if (!URN_PATTERN.matcher(urnAddress).matches()) {
-			throw new WrongUrnAddressFormatException(urnAddress);
-		}
 	}
 
 	public static class WrongUrnAddressFormatException extends RuntimeException {

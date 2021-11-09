@@ -1,4 +1,4 @@
-package io.bce.domain;
+package io.bcs.storage.port.adapter.file.web;
 
 import java.util.HashMap;
 import java.util.Map;

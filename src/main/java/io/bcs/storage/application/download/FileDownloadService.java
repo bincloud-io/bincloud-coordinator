@@ -1,5 +1,7 @@
 package io.bcs.storage.application.download;
 
+import io.bce.interaction.pubsub.PubSub;
+import io.bce.interaction.streaming.binary.BinaryDestination;
 import io.bcs.common.domain.model.io.transfer.DestinationPoint;
 import io.bcs.common.domain.model.io.transfer.TransferingScheduler;
 import io.bcs.storage.domain.model.FileRevision;
@@ -26,5 +28,11 @@ public class FileDownloadService implements FileDownloader {
 		} catch (Exception error) {
 			downloadListener.onRequestError(fileDownloadRequest, error);
 		}
+	}
+
+	@Override
+	public PubSub<DownloadStage> downloadContent(DownloadFileContent command, BinaryDestination destination) {
+		// TODO Auto-generated method stub
+		return null;
 	}	
 }

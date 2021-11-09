@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class TypeSafeRule<T> implements Rule<T> {
-	private final Class<T> type;
+	protected final Class<T> type;
 	
 	@Override
 	public boolean isAcceptableFor(T value) {
