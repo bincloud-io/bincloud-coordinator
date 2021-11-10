@@ -26,7 +26,13 @@ public class FormatChecker {
 	public static final FormatChecker createFor(String expressionPattern, ErrorFactory errorFactory) {
 		return new FormatChecker(Pattern.compile(expressionPattern), errorFactory);
 	}
-
+	
+	/**
+	 * This exception is happened if a checked value is badly formatted
+	 * 
+	 * @author Dmitry Mikhaylenko
+	 *
+	 */
 	public static class WrongValueFormatException extends RuntimeException {
 		private static final long serialVersionUID = -1953906038603832486L;
 

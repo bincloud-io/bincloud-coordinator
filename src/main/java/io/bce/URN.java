@@ -28,6 +28,12 @@ public final class URN {
 		return new URN(urnAddress);
 	}
 
+	/**
+	 * This exception is happened if an URN address is badly formatted
+	 * 
+	 * @author Dmitry Mikhaylenko
+	 *
+	 */
 	public static class WrongUrnAddressFormatException extends RuntimeException {
 		private static final long serialVersionUID = -2834624762838052971L;
 

@@ -14,14 +14,15 @@ import lombok.RequiredArgsConstructor;
 public class ActorAddress {
 	public static final ActorAddress UNKNOWN_ADDRESS = new ActorAddress("urn:actor:SYSTEM.DEAD_LETTER");
 	private static final String ACTOR_URN_PATTERN = "urn:actor:(.+)";
-	private static final FormatChecker ACTOR_URN_FORMAT_CHECKER = FormatChecker.createFor(ACTOR_URN_PATTERN, WrongActorAddressFormatException::new);
+	private static final FormatChecker ACTOR_URN_FORMAT_CHECKER = FormatChecker.createFor(ACTOR_URN_PATTERN,
+			WrongActorAddressFormatException::new);
 
 	private final String addressURN;
 
 	public ActorName getActorName() {
 		return ActorName.wrap(getURNMatcher().group(1));
 	}
-	
+
 	@Override
 	public String toString() {
 		return addressURN;
@@ -33,7 +34,7 @@ public class ActorAddress {
 		urnMatcher.find();
 		return urnMatcher;
 	}
-	
+
 	public static final ActorAddress ofURN(@NonNull String urn) {
 		ACTOR_URN_FORMAT_CHECKER.checkThatValueIsWellFormatted(urn);
 		return new ActorAddress(urn);
@@ -42,7 +43,13 @@ public class ActorAddress {
 	static final ActorAddress ofName(@NonNull ActorName actorName) {
 		return ofURN(String.format("urn:actor:%s", actorName));
 	}
-	
+
+	/**
+	 * This exception is happened if an actor URN address is badly formatted
+	 * 
+	 * @author Dmitry Mikhaylenko
+	 *
+	 */
 	public static class WrongActorAddressFormatException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 

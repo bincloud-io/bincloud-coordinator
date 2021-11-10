@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import io.bce.Range;
 import io.bce.text.TextTemplate;
@@ -28,6 +29,8 @@ public class Rules {
 	public static final String EXPECTED_SIZE_PARAMETER_VALUE = "$$size";
 	public static final String MIN_SIZE_PARAMETER_VALUE = "$$minSize";
 	public static final String MAX_SIZE_PARAMETER_VALUE = "$$maxSize";
+
+	public static final String REGEXP_PARAMETER_VALUE = "$$pattern";
 
 	/**
 	 * Create rule checking that the value under validation is equal to the passed
@@ -297,6 +300,24 @@ public class Rules {
 	}
 
 	/**
+	 * Create rule checking that the under validation character sequence length is
+	 * matched to the specified regular expression
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param regexp       The regular expression
+	 * @param maxLength    The character sequence maximal length
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <T extends CharSequence> Rule<T> pattern(@NonNull Class<T> valueType, @NonNull Pattern regexp,
+			@NonNull TextTemplate errorMessage) {
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(REGEXP_PARAMETER_VALUE, regexp);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> regexp.matcher(value).matches());
+	}
+
+	/**
 	 * Create rule checking that the under validation collection size is equal to
 	 * the specified value
 	 * 
@@ -394,6 +415,21 @@ public class Rules {
 		if (value.compareTo(0L) < 0) {
 			throw new SizeMustNotBeNegativeValue();
 		}
+	}
+
+	/**
+	 * Create the rule, which matches the random value using predicate.
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @param predicate    The rule checking predicate, which will make decision if
+	 *                     the value is valid or not
+	 * @return The rule
+	 */
+	public <T> Rule<T> match(@NonNull Class<T> valueType, @NonNull TextTemplate errorMessage,
+			RulePredicate<T> predicate) {
+		return new AssertRule<>(valueType, new ErrorMessageBuilder(errorMessage), predicate);
 	}
 
 	public interface RulePredicate<T> {
