@@ -15,11 +15,19 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Rules {
-	public static final String VALUE_PARAMETER_NAME = "$$value";
-	public static final String EXPECTED_VALUE_PARAMETER = "$$expectedValue";
+	public static final String VALIDATED_ELEMENT_PARAMETER_NAME = "$$element";
+	public static final String EXPECTED_VALUE_PARAMETER = "$$value";
 
-	public static final String MIN_PARAMETER_VALUE = "$$min";
-	public static final String MAX_PARAMETER_VALUE = "$$max";
+	public static final String MIN_PARAMETER_VALUE = "$$minValue";
+	public static final String MAX_PARAMETER_VALUE = "$$maxValue";
+
+	public static final String EXPECTED_LENGTH_PARAMETER_VALUE = "$$length";
+	public static final String MIN_LENGTH_PARAMETER_VALUE = "$$minLength";
+	public static final String MAX_LENGTH_PARAMETER_VALUE = "$$maxLength";
+
+	public static final String EXPECTED_SIZE_PARAMETER_VALUE = "$$size";
+	public static final String MIN_SIZE_PARAMETER_VALUE = "$$minSize";
+	public static final String MAX_SIZE_PARAMETER_VALUE = "$$maxSize";
 
 	/**
 	 * Create rule checking that the value under validation is equal to the passed
@@ -157,7 +165,7 @@ public class Rules {
 	 * Create rule checking that the value under validation is outside the specified
 	 * range
 	 * 
-	 * @param <T>          The under validation value type
+	 * @param <T>          The under validation value type name
 	 * @param valueType    The under validation value class
 	 * @param min          The minimal range value (lower threshold)
 	 * @param max          The maximal range value (upper threshold)
@@ -170,26 +178,58 @@ public class Rules {
 	}
 
 	/**
+	 * Create rule checking that the under validation character sequence value
+	 * length is equal to the specified value
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param length       The expected collection length
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <T extends CharSequence> Rule<T> hasLength(@NonNull Class<T> valueType, @NonNull Long length,
+			@NonNull TextTemplate errorMessage) {
+		checkThatTheSizeValueIsNotNegative(length);
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(EXPECTED_LENGTH_PARAMETER_VALUE, length);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.length() == length);
+	}
+
+	/**
+	 * Create rule checking that the under validation character sequence value
+	 * length is equal to the specified value
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param length       The expected collection length
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <T extends CharSequence> Rule<T> doesNotHaveLength(@NonNull Class<T> valueType, @NonNull Long length,
+			@NonNull TextTemplate errorMessage) {
+		return hasLength(valueType, length, errorMessage).invert();
+	}
+
+	/**
 	 * Create rule checking that the character sequence value under validation is
 	 * empty sequence
 	 * 
-	 * @param <T>          The under validation value type
-	 * @param valueType    The character sequence concrete type name
+	 * @param valueType    The under validation value class
+	 * @param valueType    The character sequence concrete type
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
 	public final <T extends CharSequence> Rule<T> empty(@NonNull Class<T> valueType,
 			@NonNull TextTemplate errorMessage) {
-		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage);
-		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.length() == 0);
+		return hasLength(valueType, 0L, errorMessage);
 	}
 
 	/**
 	 * Create rule checking that the character sequence value under validation is
 	 * not empty sequence
 	 * 
-	 * @param <T>          The under validation value type
-	 * @param valueType    The character sequence concrete type name
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
 	 * @param errorMessage The error message if the rule isn't passed
 	 * @return The rule
 	 */
@@ -198,49 +238,166 @@ public class Rules {
 		return empty(valueType, errorMessage).invert();
 	}
 
+	/**
+	 * Create rule checking that the character under validation sequence length is
+	 * not less then minimal value
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param minLength    The character sequence minimal length
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
 	public final <T extends CharSequence> Rule<T> minLength(@NonNull Class<T> valueType, @NonNull Long minLength,
 			@NonNull TextTemplate errorMessage) {
+		checkThatTheSizeValueIsNotNegative(minLength);
 		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
-				.withParameter(MIN_PARAMETER_VALUE, minLength);
-		return new AssertRule<>(valueType, errorMessageBuilder,
-				value -> value.length() <= minLength.longValue());
+				.withParameter(MIN_LENGTH_PARAMETER_VALUE, minLength);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.length() <= minLength.longValue());
 	}
 
-	public final <T extends CharSequence> Rule<T> maxLength(@NonNull Class<T> valueType, @NonNull Long minLength,
+	/**
+	 * Create rule checking that the character under validation sequence length is
+	 * not greater then maximal value
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param maxLength    The character sequence maximal length
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <T extends CharSequence> Rule<T> maxLength(@NonNull Class<T> valueType, @NonNull Long maxLength,
 			@NonNull TextTemplate errorMessage) {
-		throw new UnsupportedOperationException();
+		checkThatTheSizeValueIsNotNegative(maxLength);
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(MAX_LENGTH_PARAMETER_VALUE, maxLength);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> value.length() >= maxLength.longValue());
 	}
 
-	public static final class SizeMustNotBeNegativeValue extends RuntimeException {
-		private static final long serialVersionUID = -7584943704277538153L;
+	/**
+	 * Create rule checking that the character under validation sequence length is
+	 * limited by the minimal and maximal values and doesn't violate them
+	 * 
+	 * @param <T>          The under validation value type name
+	 * @param valueType    The under validation value class
+	 * @param minLength    The character sequence minimal length
+	 * @param maxLength    The character sequence maximal length
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <T extends CharSequence> Rule<T> limitedLength(@NonNull Class<T> valueType, @NonNull Long minLength,
+			@NonNull Long maxLength, @NonNull TextTemplate errorMessage) {
+		checkThatTheSizeValueIsNotNegative(minLength);
+		checkThatTheSizeValueIsNotNegative(maxLength);
+		Range<Long> lengthRange = Range.createFor(minLength, maxLength);
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(MIN_LENGTH_PARAMETER_VALUE, minLength)
+				.withParameter(MAX_LENGTH_PARAMETER_VALUE, maxLength);
+		return new AssertRule<>(valueType, errorMessageBuilder, value -> lengthRange.contains((long) value.length()));
+	}
 
+	/**
+	 * Create rule checking that the under validation collection size is equal to
+	 * the specified value
+	 * 
+	 * @param <T>            The under validation value type name
+	 * @param collectionType The under validation value class
+	 * @param size           The expected collection size
+	 * @param errorMessage   The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <E, T extends Collection<E>> Rule<T> collectionHasSize(@NonNull Class<T> collectionType,
+			@NonNull Long size, @NonNull TextTemplate errorMessage) {
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(EXPECTED_SIZE_PARAMETER_VALUE, size);
+		return new AssertRule<>(collectionType, errorMessageBuilder, value -> value.size() == size.longValue());
+	}
+
+	/**
+	 * Create rule checking that the under validation collection size is not equal
+	 * to the specified value
+	 * 
+	 * @param <T>            The under validation value type name
+	 * @param collectionType The under validation value class
+	 * @param size           The wrong collection size
+	 * @param errorMessage   The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <E, T extends Collection<E>> Rule<T> collectionDoesNotHasSize(@NonNull Class<T> collectionType,
+			@NonNull Long size, @NonNull TextTemplate errorMessage) {
+		return collectionHasSize(collectionType, size, errorMessage).invert();
 	}
 
 	/**
 	 * Create rule checking that the collection under validation is empty collection
 	 * 
-	 * @param <T>            The under validation value type
-	 * @param collectionType The under validation collection type
+	 * @param <T>            The under validation value type name
+	 * @param collectionType The under validation value class
 	 * @param errorMessage   The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <E, T extends Collection<E>> Rule<T> isEmptyCollection(@NonNull Class<T> collectionType,
+	public final <E, T extends Collection<E>> Rule<T> emptyCollection(@NonNull Class<T> collectionType,
 			@NonNull TextTemplate errorMessage) {
-		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage);
-		return new AssertRule<>(collectionType, errorMessageBuilder, value -> value.size() == 0);
+		return collectionHasSize(collectionType, 0L, errorMessage);
 	}
 
 	/**
 	 * Create rule checking that the collection under validation is empty collection
 	 * 
-	 * @param <T>            The under validation value type
-	 * @param collectionType The character sequence concrete type name
+	 * @param <T>            The under validation value type name
+	 * @param collectionType The under validation value class
 	 * @param errorMessage   The error message if the rule isn't passed
 	 * @return The rule
 	 */
-	public final <E, T extends Collection<E>> Rule<T> isNotEmptyCollection(@NonNull Class<T> collectionType,
+	public final <E, T extends Collection<E>> Rule<T> notEmptyCollection(@NonNull Class<T> collectionType,
 			@NonNull TextTemplate errorMessage) {
-		return isEmptyCollection(collectionType, errorMessage).invert();
+		return emptyCollection(collectionType, errorMessage).invert();
+	}
+
+	/**
+	 * Create rule checking that the character under validation collection size is
+	 * not less then minimal value
+	 * 
+	 * @param <T>            The under validation value type name
+	 * @param collectionType The under validation value class
+	 * @param minSize        The character sequence minimal length
+	 * @param errorMessage   The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <E, T extends Collection<E>> Rule<T> minCollectionSize(@NonNull Class<T> collectionType,
+			@NonNull Long minSize, @NonNull TextTemplate errorMessage) {
+		checkThatTheSizeValueIsNotNegative(minSize);
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(MIN_SIZE_PARAMETER_VALUE, minSize);
+		return new AssertRule<>(collectionType, errorMessageBuilder, value -> value.size() >= minSize.longValue());
+	}
+
+	/**
+	 * Create rule checking that the character under validation collection size is
+	 * not greater then maximal value
+	 * 
+	 * @param <T>            The under validation value type name
+	 * @param collectionType The under validation value class
+	 * @param maxSize        The collection maximal size
+	 * @param errorMessage   The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public final <E, T extends Collection<E>> Rule<T> maxCollectionSize(@NonNull Class<T> collectionType,
+			@NonNull Long minSize, @NonNull TextTemplate errorMessage) {
+		checkThatTheSizeValueIsNotNegative(minSize);
+		ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(errorMessage)
+				.withParameter(MIN_SIZE_PARAMETER_VALUE, minSize);
+		return new AssertRule<>(collectionType, errorMessageBuilder, value -> value.size() <= minSize.longValue());
+	}
+
+	private final void checkThatTheSizeValueIsNotNegative(Long value) {
+		if (value.compareTo(0L) < 0) {
+			throw new SizeMustNotBeNegativeValue();
+		}
+	}
+
+	public interface RulePredicate<T> {
+		public boolean checkRuleFor(T value);
 	}
 
 	private static class ErrorMessageBuilder {
@@ -261,7 +418,7 @@ public class Rules {
 		}
 
 		public <T> TextTemplate build(T value) {
-			return textTemplate.withParameter(VALUE_PARAMETER_NAME, value);
+			return textTemplate.withParameter(VALIDATED_ELEMENT_PARAMETER_NAME, value);
 		}
 	}
 
@@ -294,7 +451,18 @@ public class Rules {
 
 	}
 
-	public interface RulePredicate<T> {
-		public boolean checkRuleFor(T value);
+	/**
+	 * This exception notifies that the size or length amount has negative value,
+	 * but must not be
+	 * 
+	 * @author Dmitry Mikhaylenko
+	 *
+	 */
+	public static final class SizeMustNotBeNegativeValue extends RuntimeException {
+		private static final long serialVersionUID = -7584943704277538153L;
+
+		public SizeMustNotBeNegativeValue() {
+			super("Values, representing size or length values must not be negative.");
+		}
 	}
 }
