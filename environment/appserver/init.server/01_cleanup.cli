@@ -1,3 +1,0 @@
-/subsystem=ee/service=default-bindings:write-attribute(name=datasource, value=undefined)
-/subsystem=datasources/data-source=ExampleDS:remove()
-/subsystem=datasources/jdbc-driver=h2:remove()

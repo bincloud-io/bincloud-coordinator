@@ -1,2 +1,0 @@
-[mysqld]
-datadir = /srv/bincloud/mariadb/schema
