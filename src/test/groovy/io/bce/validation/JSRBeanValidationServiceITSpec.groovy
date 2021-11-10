@@ -1,59 +1,32 @@
 package io.bce.validation
 
-import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
-import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
-import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
+import java.util.stream.Collectors
 
-import javax.inject.Inject
+import javax.validation.Validation
 import javax.validation.Validator
+import javax.validation.ValidatorFactory
 
-import org.jboss.arquillian.container.test.api.Deployment
-import org.jboss.arquillian.spock.ArquillianSputnik
-import org.jboss.shrinkwrap.api.Archive
-import org.junit.runner.RunWith
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 
-import io.bce.domain.errors.ApplicationException
 import io.bce.text.TextProcessor
 import io.bce.text.TextTemplate
 import io.bce.text.TextTemplates
 import io.bce.text.transformers.TemplateCompilingTransformer
 import io.bce.text.transformers.compilers.HandlebarsTemplateCompiler
-import io.bce.validation.JSRBeanValidationService
-import io.bce.validation.ValidationService
-import io.bce.validation.ValidationState
-import io.bcs.common.domain.model.logging.Loggers
-import io.bcs.testing.archive.ArchiveBuilder
-import spock.lang.Narrative
+import io.bce.validation.ValidationState.ErrorState
 import spock.lang.Specification
 
-@Narrative("""
-	To make validation service compatible to JSR bean validation specification,
-	as a developer I am needed in the corresponding component which will adapt 
-	JSR validation API to the internal contract.
-""")
-@RunWith(ArquillianSputnik)
 class JSRBeanValidationServiceITSpec extends Specification {
+	private TextProcessor messageProcessor
+	private Validator validator
 
-	@Deployment
-	public static final Archive "create deployment"() {
-		return ArchiveBuilder.jar("jsr-bean-validation-spec.jar")
-				.resolveDependencies("pom.xml")
-				.withScopes(COMPILE, RUNTIME, TEST)
-				.resolveDependency("com.github.jknack", "handlebars")
-				.apply()
-				.appendPackagesRecursively(ApplicationException.getPackage().getName())
-				.appendPackagesRecursively(Loggers.getPackage().getName())
-				.appendPackagesRecursively(TextTemplate.getPackage().getName())
-				.appendPackagesRecursively(ValidationService.getPackage().getName())
-				.appendClasses(AlwaysFailed, AlwaysFailedValidator, JSRBeanValidationService, HandlebarsTemplateCompiler)
-				.appendManifestResource("META-INF/beans.xml", "beans.xml")
-				.build()
+	def setup() {
+		this.messageProcessor = TextProcessor.create().withTransformer(new TemplateCompilingTransformer(new HandlebarsTemplateCompiler()))
+		ValidatorFactory validatorFactory = Validation.byDefaultProvider().configure()
+				.messageInterpolator(new ParameterMessageInterpolator())
+				.buildValidatorFactory()
+		validator = validatorFactory.getValidator()
 	}
-
-	private final TextProcessor messageProcessor = TextProcessor.create().withTransformer(new TemplateCompilingTransformer(new HandlebarsTemplateCompiler()))
-
-	@Inject
-	private Validator validator;
 
 	def "Scenario: validate object with validation framework"() {
 		given: "The wrong bean"
@@ -63,16 +36,24 @@ class JSRBeanValidationServiceITSpec extends Specification {
 		ValidationService validationService = new JSRBeanValidationService(validator, messageProcessor)
 
 		when: "The validation has been requested"
-		ValidationState validationState = validationService.validate(wrongBean)
+		ErrorState errorState = validationService.validate(wrongBean).getErrorState()
 
-		then: "The result validation state will contain all expected constraints"
-		validationState == createExpectedValidationState()
+
+		then: "The error state should contain ungrouped error with processed text"
+		Collection<String> ungroupedErrors = stringifyTextTemplatesCollection(errorState.getUngroupedErrors())
+		ungroupedErrors.containsAll([
+			"Violation constraint: Ungrouped property"
+		])
+
+		and: "The error state should"
+		Collection<String> groupedErrors = stringifyTextTemplatesCollection(GroupedErrors.errorsOf("stringValue", errorState))
+		groupedErrors.containsAll([
+			"Violation constraint: Grouped property"
+		])
 	}
 
-	private ValidationState createExpectedValidationState() {
-		return new ValidationState()
-				.withUngrouped("Violation constraint: Ungrouped property")
-				.withGrouped("stringValue", "Violation constraint: Grouped property")
+	private Collection<String> stringifyTextTemplatesCollection(Collection<TextTemplate> templatesCollection) {
+		return templatesCollection.stream().map({template -> template.toString()}).collect(Collectors.toList());
 	}
 
 	@AlwaysFailed(passedProperty="Ungrouped property", message="Violation constraint: {{passedProperty}}")
