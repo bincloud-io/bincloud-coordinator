@@ -3,20 +3,22 @@ package io.bce.validation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import io.bce.text.TextTemplate;
 import io.bce.validation.ValidationContext.Rule;
-import io.bce.validation.ValidationContext.Validatable;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public class RuleExecutor<V extends Validatable> {
-	private V validatable;
-	private Rule<V> validationRule;
+@RequiredArgsConstructor
+public class RuleExecutor<V> {
+	private final V validatable;
+	private final Supplier<Rule<V>> validationRule;
 
-	public RuleExecutionReport probe() {
+	public RuleExecutionReport execute() {
 		try {
-			return new RuleExecutionReport(validationRule.check(validatable));
+			return new RuleExecutionReport(validationRule.get().check(validatable));
 		} catch (Throwable error) {
 			return new RuleExecutionReport(error);
 		}
@@ -52,11 +54,11 @@ public class RuleExecutor<V extends Validatable> {
 		}
 
 		public boolean ruleIsPassed() {
-			return ruleResult.isEmpty();
+			return completedWithoutError() && ruleResult.isEmpty();
 		}
 
 		public boolean ruleIsFailed() {
-			return !ruleIsPassed();
+			return completedWithoutError() && !ruleResult.isEmpty();
 		}
 
 		public Collection<String> getErrorTexts() {
