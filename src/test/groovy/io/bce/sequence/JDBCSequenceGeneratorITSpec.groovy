@@ -21,7 +21,6 @@ import io.bcs.common.domain.model.generator.SequentialGenerator
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
-import spock.lang.Narrative
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
