@@ -10,7 +10,6 @@ import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 
 import io.bce.text.TextProcessor
 import io.bce.text.TextTemplate
-import io.bce.text.TextTemplates
 import io.bce.text.transformers.TemplateCompilingTransformer
 import io.bce.text.transformers.compilers.HandlebarsTemplateCompiler
 import io.bce.validation.ValidationState.ErrorState
