@@ -1,5 +1,7 @@
 package io.bcs.storage.application.upload
 
+import static java.util.concurrent.TimeUnit.SECONDS
+
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CountDownLatch
@@ -73,9 +75,9 @@ class UploadFileToResourceFeature extends Specification {
 			thrownError = error
 			latch.countDown()
 		})
-		latch.await()
-
-
+		
+		await(latch)
+		
 		then: "The wrong file pointer format error should be passed to the upload listener"
 		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
 		thrownError.getContextId() == UnspecifiedRevisionNameException.CONTEXT
@@ -98,7 +100,7 @@ class UploadFileToResourceFeature extends Specification {
 			latch.countDown()
 		})
 
-		latch.await()
+		await(latch)
 
 		then: "The wrong file pointer format error should be passed to the upload listener"
 		thrownError.getErrorSeverity() == ErrorSeverity.BUSINESS
@@ -128,7 +130,8 @@ class UploadFileToResourceFeature extends Specification {
 			fileDescriptor = response
 			latch.countDown()
 		})
-		latch.await()
+		
+		await(latch)
 
 		then: "Upload listener should be successfully completed with received file descriptor"
 		and: "File should be stored to the repository"
@@ -174,7 +177,7 @@ class UploadFileToResourceFeature extends Specification {
 			latch.countDown()
 		})
 
-		latch.await()
+		await(latch)
 
 		then: "Upload listener should be completed with error"
 		thrownError.getErrorSeverity() == errorSeverity
@@ -212,7 +215,7 @@ class UploadFileToResourceFeature extends Specification {
 			latch.countDown()
 		})
 		
-		latch.await()
+		await(latch)
 
 		then: "Upload listener should be completed with error"
 		thrownError.is(error)
@@ -241,10 +244,16 @@ class UploadFileToResourceFeature extends Specification {
 			latch.countDown()
 		})
 		
-		latch.await()
+		await(latch)
 
 		then: "Upload listener should be completed with error"
 		thrownError.is(error)
+	}
+	
+	private void await(CountDownLatch latch) {
+		if (!latch.await(30, SECONDS)) {
+			throw new RuntimeException("Waiting time is out.")
+		}
 	}
 
 	private UploadFileCommand createValidUploadCommand() {
