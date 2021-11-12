@@ -29,6 +29,28 @@ public class Rules {
 	public static final String MAX_SIZE_PARAMETER_VALUE = "$$maxSize";
 
 	public static final String REGEXP_PARAMETER_VALUE = "$$pattern";
+	
+	/**
+	 * Create rule checking that the value under validation is not null
+	 * 
+	 * @param errorMessage  The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	public static final Rule<Object> notNull(TextTemplate errorMessage) {
+		return wrapIsPresentMatcherRule(match(Optional.class, errorMessage, Optional::isPresent));
+		
+	}
+	
+
+	/**
+	 * Create rule checking that the value under validation is null
+	 * 
+	 * @param errorMessage  The error message if the rule isn't passed
+	 * @return The rule
+	 */	
+	public static final Rule<Object> isNull(TextTemplate errorMessage) {
+		return notNull(errorMessage).invert();
+	}
 
 	/**
 	 * Create rule checking that the value under validation is equal to the passed
@@ -437,6 +459,26 @@ public class Rules {
 		return new AssertRule<>(collectionType, errorMessageBuilder, value -> range.contains((long) value.size()));
 	}
 
+	@SuppressWarnings("rawtypes")
+	private static final Rule<Object> wrapIsPresentMatcherRule(Rule<Optional> rule) {
+		return new Rule<Object>() {
+			@Override
+			public boolean isAcceptableFor(Object value) {
+				return true;
+			}
+
+			@Override
+			public Collection<TextTemplate> check(Object value) {
+				return rule.check(Optional.ofNullable(value));
+			}
+
+			@Override
+			public Rule<Object> invert() {
+				return wrapIsPresentMatcherRule(rule.invert());
+			}
+		};
+	}
+	
 	private static final void checkThatTheSizeValueIsNotNegative(Long value) {
 		if (value.compareTo(0L) < 0) {
 			throw new SizeMustNotBeNegativeValue();

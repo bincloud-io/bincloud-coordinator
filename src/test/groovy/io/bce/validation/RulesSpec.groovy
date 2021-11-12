@@ -28,6 +28,8 @@ class RulesSpec extends Specification {
 
 		where:
 		ruleExecutor                                                                                          | _
+		new RuleExecutor(new Object(), {Rules.notNull(FAIL_MESSAGE_TEMPLATE)})                                | _
+		new RuleExecutor(null, {Rules.isNull(FAIL_MESSAGE_TEMPLATE)})                                         | _
 		new RuleExecutor(null, {Rules.match(Object.class, FAIL_MESSAGE_TEMPLATE, FAILED_PREDICATE)})          | _
 		new RuleExecutor(10, {Rules.equalTo(10, FAIL_MESSAGE_TEMPLATE)})                                      | _
 		new RuleExecutor(10, {Rules.notEqualTo(100, FAIL_MESSAGE_TEMPLATE)})                                  | _
@@ -82,6 +84,8 @@ class RulesSpec extends Specification {
 		
 		where:
 		ruleExecutor                                                                                              | errorTemplates
+		new RuleExecutor(SIMPLE_OBJECT, {Rules.isNull(FAIL_MESSAGE_TEMPLATE)})                                    | [FAIL_MESSAGE_TEMPLATE.withParameter(VALIDATED_ELEMENT_PARAMETER_NAME, Optional.of(SIMPLE_OBJECT))]
+		new RuleExecutor(null, {Rules.notNull(FAIL_MESSAGE_TEMPLATE)})                                            | [FAIL_MESSAGE_TEMPLATE.withParameter(VALIDATED_ELEMENT_PARAMETER_NAME, Optional.empty())]
 		new RuleExecutor(11, {Rules.equalTo(10, FAIL_MESSAGE_TEMPLATE)})                                          | [FAIL_MESSAGE_TEMPLATE.withParameter(EXPECTED_VALUE_PARAMETER, 10).withParameter(VALIDATED_ELEMENT_PARAMETER_NAME, 11)]
 		new RuleExecutor(10, {Rules.notEqualTo(10, FAIL_MESSAGE_TEMPLATE)})                                       | [FAIL_MESSAGE_TEMPLATE.withParameter(EXPECTED_VALUE_PARAMETER, 10).withParameter(VALIDATED_ELEMENT_PARAMETER_NAME, 10)]
 		new RuleExecutor(false, {Rules.assertTrue(FAIL_MESSAGE_TEMPLATE)})                                        | [FAIL_MESSAGE_TEMPLATE.withParameter(EXPECTED_VALUE_PARAMETER, true).withParameter(VALIDATED_ELEMENT_PARAMETER_NAME, false)]
