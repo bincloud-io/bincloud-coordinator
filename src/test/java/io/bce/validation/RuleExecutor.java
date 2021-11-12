@@ -18,6 +18,9 @@ public class RuleExecutor<V> {
 
 	public RuleExecutionReport execute() {
 		try {
+			if (!validationRule.get().isAcceptableFor(validatable)) {
+				throw new IllegalArgumentException("Value type is not acceptable for the rule!!!");
+			}
 			return new RuleExecutionReport(validationRule.get().check(validatable));
 		} catch (Throwable error) {
 			return new RuleExecutionReport(error);

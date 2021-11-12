@@ -1,5 +1,7 @@
 package io.bce.validation;
 
+import java.util.Optional;
+
 import io.bce.validation.ValidationContext.Rule;
 import lombok.RequiredArgsConstructor;
 
@@ -9,6 +11,6 @@ public abstract class TypeSafeRule<T> implements Rule<T> {
 	
 	@Override
 	public boolean isAcceptableFor(T value) {
-		return type.isInstance(value);
+		return Optional.ofNullable(value).map(v -> type.isInstance(v)).orElse(true);
 	}
 }
