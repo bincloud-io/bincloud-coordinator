@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import io.bce.text.TextTemplate;
 import io.bce.validation.ValidationContext.Rule;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +30,9 @@ public class RuleExecutor<V> {
 		@Getter
 		private Optional<Throwable> thrownError;
 		@Getter
-		private Collection<TextTemplate> ruleResult = new ArrayList<>();
+		private Collection<ErrorMessage> ruleResult = new ArrayList<>();
 
-		private RuleExecutionReport(Collection<TextTemplate> errorMessages) {
+		private RuleExecutionReport(Collection<ErrorMessage> errorMessages) {
 			super();
 			this.ruleResult.addAll(errorMessages);
 			this.thrownError = Optional.empty();
@@ -65,14 +64,14 @@ public class RuleExecutor<V> {
 		}
 
 		public Collection<String> getErrorTexts() {
-			return this.ruleResult.stream().map(TextTemplate::toString).collect(Collectors.toList());
+			return this.ruleResult.stream().map(ErrorMessage::toString).collect(Collectors.toList());
 		}
 
-		public boolean contains(TextTemplate textMessage) {
+		public boolean contains(ErrorMessage textMessage) {
 			return ruleResult.contains(textMessage);
 		}
 
-		public boolean contains(Collection<TextTemplate> textMessage) {
+		public boolean contains(Collection<ErrorMessage> textMessage) {
 			return this.ruleResult.containsAll(textMessage);
 		}
 	}

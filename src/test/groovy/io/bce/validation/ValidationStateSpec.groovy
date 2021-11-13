@@ -1,7 +1,5 @@
 package io.bce.validation
 
-import io.bce.text.TextTemplate
-import io.bce.text.TextTemplates
 import io.bce.validation.ValidationState.ErrorState
 import spock.lang.Specification
 
@@ -22,12 +20,12 @@ class ValidationStateSpec extends Specification {
 	private static final String DERIVED_BASE_GROUP_NAME = "base.group"
 	private static final ValidationGroup DERIVED_BASE_GROUP = ValidationGroup.createFor(DERIVED_BASE_GROUP_NAME)
 	
-	private static final TextTemplate SIMPLE_MESSAGE = TextTemplates.createBy("simple-message")
-	private static final TextTemplate GROUPED_MESSAGE = TextTemplates.createBy("grouped_message")
-	private static final TextTemplate UNGROUPED_MESSAGE_1 = TextTemplates.createBy("ungrouped_message_1")
-	private static final TextTemplate UNGROUPED_MESSAGE_2 = TextTemplates.createBy("ungrouped_message_2")
-	private static final TextTemplate MESSAGE_1 = TextTemplates.createBy("message_1")
-	private static final TextTemplate MESSAGE_2 = TextTemplates.createBy("message_2")
+	private static final ErrorMessage SIMPLE_MESSAGE = ErrorMessage.createFor("simple-message")
+	private static final ErrorMessage GROUPED_MESSAGE = ErrorMessage.createFor("grouped_message")
+	private static final ErrorMessage UNGROUPED_MESSAGE_1 = ErrorMessage.createFor("ungrouped_message_1")
+	private static final ErrorMessage UNGROUPED_MESSAGE_2 = ErrorMessage.createFor("ungrouped_message_2")
+	private static final ErrorMessage MESSAGE_1 = ErrorMessage.createFor("message_1")
+	private static final ErrorMessage MESSAGE_2 = ErrorMessage.createFor("message_2")
 		
 	def "Scenario: create empty validation state"() {
 		given: "The empty validation state"

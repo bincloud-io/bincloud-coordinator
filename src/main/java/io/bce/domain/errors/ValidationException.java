@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.bce.domain.BoundedContextId;
-import io.bce.text.TextTemplate;
+import io.bce.validation.ErrorMessage;
 import io.bce.validation.ValidationState;
 import io.bce.validation.ValidationState.ErrorState;
 import io.bce.validation.ValidationState.GroupedError;
@@ -31,7 +31,7 @@ public class ValidationException extends ApplicationException {
 	@Override
 	public Map<String, Object> getErrorDetails() {
 		Map<String, Object> details = new HashMap<String, Object>(super.getErrorDetails());
-		Map<String, Collection<TextTemplate>> groupedErrors = groupedErrorsMap();
+		Map<String, Collection<ErrorMessage>> groupedErrors = groupedErrorsMap();
 		details.put(ERROR_STATE_PROPERTY, errorState);
 		details.put(GROUPED_ERRORS_PROPERTY, groupedErrors);
 		details.put(WRONG_PARAMETERS_PROPERTY, groupedErrors.keySet());
@@ -39,7 +39,7 @@ public class ValidationException extends ApplicationException {
 		return details;
 	}
 
-	private Map<String, Collection<TextTemplate>> groupedErrorsMap() {
+	private Map<String, Collection<ErrorMessage>> groupedErrorsMap() {
 		return errorState.getGroupedErrors().stream()
 				.collect(Collectors.toMap(GroupedError::getGroupName, GroupedError::getMessages));
 	}

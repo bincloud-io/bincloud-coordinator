@@ -2,8 +2,6 @@ package io.bce.validation;
 
 import java.util.Collection;
 
-import io.bce.text.TextTemplate;
-
 public interface ValidationContext {
 
 	/**
@@ -56,8 +54,8 @@ public interface ValidationContext {
 	 * Validate all objects inside a collection, implementing the
 	 * {@link Validatable} interface, grouped by a specified group
 	 * 
-	 * @param groupName        The validation group
-	 * @param collection       The validatable collection
+	 * @param groupName  The validation group
+	 * @param collection The validatable collection
 	 * @return The derived context
 	 */
 	public <T> ValidationContext validate(String groupName, Collection<T> collection);
@@ -84,15 +82,21 @@ public interface ValidationContext {
 	<T> ValidationContext withRule(String groupName, ValueProvider<T> valueProvider, Rule<T> rule);
 
 	/**
-	 * Append the ungrouped errors
+	 * Append the ungrouped error to the validation state
 	 * 
-	 * @param <T>
-	 * @param errors
-	 * @return
+	 * @param errors The error messages
+	 * @return The validation context
 	 */
-	ValidationContext withErrors(TextTemplate... errors);
+	ValidationContext withErrors(ErrorMessage... errors);
 
-	ValidationContext withErrors(String groupName, TextTemplate... errors);
+	/**
+	 * Append the grouped error to the validation state
+	 * 
+	 * @param groupName The group name
+	 * @param errors     The error messages
+	 * @return The validation context
+	 */
+	ValidationContext withErrors(String groupName, ErrorMessage... errors);
 
 	/**
 	 * This interface declares the contract for object validation.
@@ -159,7 +163,7 @@ public interface ValidationContext {
 	public interface Rule<T> {
 		public boolean isAcceptableFor(T value);
 
-		public Collection<TextTemplate> check(T value);
+		public Collection<ErrorMessage> check(T value);
 
 		public Rule<T> invert();
 	}

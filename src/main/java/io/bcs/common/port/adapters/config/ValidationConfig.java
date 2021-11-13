@@ -5,7 +5,6 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.validation.Validator;
 
-import io.bce.text.TextProcessor;
 import io.bce.validation.JSRBeanValidationService;
 import io.bce.validation.ValidationService;
 
@@ -13,11 +12,11 @@ import io.bce.validation.ValidationService;
 public class ValidationConfig {
 	@Inject
 	private Validator validator;
-	@Inject
-	private TextProcessor textProcessor;
+//	@Inject
+//	private TextProcessor textProcessor;
 	
 	@Produces
 	public ValidationService validationService() {
-		return new JSRBeanValidationService(validator, textProcessor);
+		return new JSRBeanValidationService(validator);
 	}
 }
