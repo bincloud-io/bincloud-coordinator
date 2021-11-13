@@ -2,7 +2,6 @@ package io.bce.validation;
 
 import java.util.Collection;
 
-import io.bce.text.TextTemplate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -68,12 +67,12 @@ public final class DefaultValidationContext implements ValidationContext {
 	}
 
 	@Override
-	public ValidationContext withErrors(TextTemplate... errors) {
+	public ValidationContext withErrors(ErrorMessage... errors) {
 		return withErrors(errors, (state, error) -> state.withUngrouped(error));
 	}
 
 	@Override
-	public ValidationContext withErrors(String groupName, TextTemplate... errors) {
+	public ValidationContext withErrors(String groupName, ErrorMessage... errors) {
 		ValidationGroup group = ValidationGroup.createFor(groupName);
 		return withErrors(errors, (state, error) -> state.withGrouped(group, error));
 	}
@@ -82,17 +81,17 @@ public final class DefaultValidationContext implements ValidationContext {
 			ContextErrorAppender errorAppender) {
 		T value = valueProvider.getValue();
 		if (rule.isAcceptableFor(value)) {
-			Collection<TextTemplate> errors = rule.check(value);
+			Collection<ErrorMessage> errors = rule.check(value);
 			if (!errors.isEmpty()) {
-				return errorAppender.withError(this, errors.toArray(new TextTemplate[errors.size()]));
+				return errorAppender.withError(this, errors.toArray(new ErrorMessage[errors.size()]));
 			}
 		}
 		return this;
 	}
 
-	private ValidationContext withErrors(TextTemplate[] errors, StateErrorAppender errorAppender) {
+	private ValidationContext withErrors(ErrorMessage[] errors, StateErrorAppender errorAppender) {
 		ValidationState resultState = this.validationState;
-		for (TextTemplate error : errors) {
+		for (ErrorMessage error : errors) {
 			resultState = errorAppender.withError(resultState, error);
 		}
 		return new DefaultValidationContext(this.group, this.derivation, resultState);
@@ -120,11 +119,11 @@ public final class DefaultValidationContext implements ValidationContext {
 	}
 
 	private interface ContextErrorAppender {
-		public ValidationContext withError(ValidationContext currentState, TextTemplate... errors);
+		public ValidationContext withError(ValidationContext currentState, ErrorMessage... errors);
 	}
 
 	private interface StateErrorAppender {
-		public ValidationState withError(ValidationState currentState, TextTemplate error);
+		public ValidationState withError(ValidationState currentState, ErrorMessage error);
 	}
 
 	public static final ValidationService createValidationService() {

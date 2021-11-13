@@ -3,7 +3,6 @@ package io.bce.validation;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import io.bce.text.TextTemplate;
 import io.bce.validation.ValidationContext.Validatable;
 import io.bce.validation.ValidationState.ErrorState;
 import lombok.RequiredArgsConstructor;
@@ -57,17 +56,17 @@ public class ValidationExecutor {
 			return validationState.getErrorState();
 		}
 
-		private Collection<TextTemplate> getUngroupedMessages() {
+		private Collection<ErrorMessage> getUngroupedMessages() {
 			return getErrorState().getUngroupedErrors();
 		}
 
-		private Collection<TextTemplate> getGroupedMessages(String group) {
+		private Collection<ErrorMessage> getGroupedMessages(String group) {
 			return getErrorState().getGroupedErrors().stream().filter(error -> error.getGroupName().equals(group))
 					.flatMap(error -> error.getMessages().stream()).collect(Collectors.toList());
 		}
 
-		private Collection<String> stringifyErrorMessages(Collection<TextTemplate> errorMessages) {
-			return errorMessages.stream().collect(Collectors.mapping(TextTemplate::toString, Collectors.toList()));
+		private Collection<String> stringifyErrorMessages(Collection<ErrorMessage> errorMessages) {
+			return errorMessages.stream().collect(Collectors.mapping(ErrorMessage::toString, Collectors.toList()));
 		}
 	}
 }

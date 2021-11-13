@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import io.bce.text.TextTemplate;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode
 public final class ValidationState {
-	private final Map<ValidationGroup, Collection<TextTemplate>> errorMessages = new HashMap<>();
+	private final Map<ValidationGroup, Collection<ErrorMessage>> errorMessages = new HashMap<>();
 
 	private ValidationState(ValidationState prototype) {
 		this.errorMessages.putAll(prototype.errorMessages);
@@ -45,7 +44,7 @@ public final class ValidationState {
 	 * @param errorMessage The violation descriptor
 	 * @return The derived validation state
 	 */
-	public ValidationState withUngrouped(TextTemplate errorMessage) {
+	public ValidationState withUngrouped(ErrorMessage errorMessage) {
 		return withGrouped(ValidationGroup.UNGROUPED, errorMessage);
 	}
 
@@ -56,7 +55,7 @@ public final class ValidationState {
 	 * @param errorMessage The violation descriptor
 	 * @return The derived validation state
 	 */
-	public ValidationState withGrouped(ValidationGroup group, TextTemplate errorMessage) {
+	public ValidationState withGrouped(ValidationGroup group, ErrorMessage errorMessage) {
 		ValidationState result = new ValidationState(this);
 		result.addGroupedError(group, errorMessage);
 		return result;
@@ -101,48 +100,47 @@ public final class ValidationState {
 		return derived;
 	}
 
-	private Map<ValidationGroup, Collection<TextTemplate>> createDerivedGroups(ValidationGroup baseGroup,
-			Map<ValidationGroup, Collection<TextTemplate>> errorMessages) {
-		
-		
+	private Map<ValidationGroup, Collection<ErrorMessage>> createDerivedGroups(ValidationGroup baseGroup,
+			Map<ValidationGroup, Collection<ErrorMessage>> errorMessages) {
+
 		return errorMessages.entrySet().stream()
 				.collect(Collectors.toMap(entry -> baseGroup.deriveWith(entry.getKey()), Entry::getValue));
 	}
-	
-	private Collection<TextTemplate> getUngroupedErrors() {
+
+	private Collection<ErrorMessage> getUngroupedErrors() {
 		if (errorMessages.containsKey(ValidationGroup.UNGROUPED)) {
 			return errorMessages.get(ValidationGroup.UNGROUPED);
 		}
 		return Collections.emptyList();
 	}
 
-	private Map<ValidationGroup, Collection<TextTemplate>> getGroupedErrors() {
+	private Map<ValidationGroup, Collection<ErrorMessage>> getGroupedErrors() {
 		return errorMessages.entrySet().stream().filter(entry -> !ValidationGroup.UNGROUPED.equals(entry.getKey()))
 				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 	}
 
-	private Map<String, Collection<TextTemplate>> getUnmodifiableGroupedMessages(
-			Map<ValidationGroup, Collection<TextTemplate>> messages) {
+	private Map<String, Collection<ErrorMessage>> getUnmodifiableGroupedMessages(
+			Map<ValidationGroup, Collection<ErrorMessage>> messages) {
 		return messages.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().toString(),
 				entry -> getUnmodifiableMessagesCollection(entry.getValue())));
 	}
 
-	private Collection<TextTemplate> getUnmodifiableMessagesCollection(Collection<TextTemplate> messages) {
+	private Collection<ErrorMessage> getUnmodifiableMessagesCollection(Collection<ErrorMessage> messages) {
 		return Collections.unmodifiableList(new ArrayList<>(messages));
 	}
 
-	private void addErrors(Map<ValidationGroup, Collection<TextTemplate>> errors) {
+	private void addErrors(Map<ValidationGroup, Collection<ErrorMessage>> errors) {
 		errors.entrySet().stream().forEach(entry -> {
 			ValidationGroup group = entry.getKey();
 			entry.getValue().stream().forEach(message -> addGroupedError(group, message));
 		});
 	}
 
-	private void addUngroupedErrors(Collection<TextTemplate> ungroupedMessages) {
+	private void addUngroupedErrors(Collection<ErrorMessage> ungroupedMessages) {
 		this.errorMessages.put(ValidationGroup.UNGROUPED, ungroupedMessages);
 	}
 
-	private void addGroupedError(ValidationGroup group, TextTemplate message) {
+	private void addGroupedError(ValidationGroup group, ErrorMessage message) {
 		if (!errorMessages.containsKey(group)) {
 			this.errorMessages.put(group, new LinkedHashSet<>());
 		}
@@ -153,18 +151,18 @@ public final class ValidationState {
 	@EqualsAndHashCode
 	@AllArgsConstructor
 	private static class DefaultErrorState implements ErrorState {
-		private Collection<TextTemplate> ungroupedErrors;
-		private Map<String, Collection<TextTemplate>> groupedErrors;
-		
+		private Collection<ErrorMessage> ungroupedErrors;
+		private Map<String, Collection<ErrorMessage>> groupedErrors;
+
 		@Override
-		public Collection<TextTemplate> getUngroupedErrors() {
+		public Collection<ErrorMessage> getUngroupedErrors() {
 			return Collections.unmodifiableCollection(ungroupedErrors);
 		}
+
 		@Override
 		public Collection<GroupedError> getGroupedErrors() {
-			return Collections.unmodifiableCollection(groupedErrors.entrySet().stream()
-					.map(DefaultGroupedError::new)
-					.collect(Collectors.toSet()));
+			return Collections.unmodifiableCollection(
+					groupedErrors.entrySet().stream().map(DefaultGroupedError::new).collect(Collectors.toSet()));
 		}
 	}
 
@@ -172,7 +170,7 @@ public final class ValidationState {
 	@AllArgsConstructor
 	@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 	private static final class DefaultGroupedError implements GroupedError {
-		private Entry<String, Collection<TextTemplate>> entry;
+		private Entry<String, Collection<ErrorMessage>> entry;
 
 		@Override
 		@EqualsAndHashCode.Include
@@ -182,7 +180,7 @@ public final class ValidationState {
 
 		@Override
 		@EqualsAndHashCode.Include
-		public Collection<TextTemplate> getMessages() {
+		public Collection<ErrorMessage> getMessages() {
 			return Collections.unmodifiableList(new ArrayList<>(entry.getValue()));
 		}
 	}
@@ -193,7 +191,7 @@ public final class ValidationState {
 		 * 
 		 * @return The ungrouped errors
 		 */
-		public Collection<TextTemplate> getUngroupedErrors();
+		public Collection<ErrorMessage> getUngroupedErrors();
 
 		/**
 		 * Get the grouped errors
@@ -214,8 +212,8 @@ public final class ValidationState {
 		/**
 		 * Get grouped error messages
 		 * 
-		 * @return The grouped errors messages collection 
+		 * @return The grouped errors messages collection
 		 */
-		public Collection<TextTemplate> getMessages();
+		public Collection<ErrorMessage> getMessages();
 	}
 }

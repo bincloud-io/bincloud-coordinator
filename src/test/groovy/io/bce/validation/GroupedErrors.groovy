@@ -2,7 +2,6 @@ package io.bce.validation
 
 import java.util.stream.Collectors
 
-import io.bce.text.TextTemplate
 import io.bce.validation.ValidationState.ErrorState
 import io.bce.validation.ValidationState.GroupedError
 
@@ -17,14 +16,14 @@ class GroupedErrors {
 		this.errorState = errorState;
 	}
 	
-	public Collection<TextTemplate> getErrors() {
+	public Collection<ErrorMessage> getErrors() {
 		return errorState.getGroupedErrors().stream()
 			.filter({error -> error.getGroupName().equals(groupName)})
 			.flatMap({error -> error.getMessages().stream()})
 			.collect(Collectors.toSet())
 	}
 	
-	public static Collection<TextTemplate> errorsOf(String groupName, ErrorState errorState) {
+	public static Collection<ErrorMessage> errorsOf(String groupName, ErrorState errorState) {
 		return new GroupedErrors(groupName, errorState).getErrors();
 	}
 }

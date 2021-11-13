@@ -2,8 +2,6 @@ package io.bce.validation
 
 import static io.bce.validation.ValidationContext.DerivationPolicy.DERIVE_GROUPES
 
-import io.bce.text.TextTemplate
-import io.bce.text.TextTemplates
 import io.bce.validation.ValidationContext.Rule
 import io.bce.validation.ValidationContext.Validatable
 import io.bce.validation.ValidationContext.ValueProvider
@@ -33,16 +31,16 @@ class DefaultValidationContextSpec extends Specification {
 	private static final String MESSAGE_TEXT_9  = "Message text 9";
 	private static final String MESSAGE_TEXT_10 = "Message text 10";
 
-	private static final TextTemplate MESSAGE_TEMPLATE_1  = TextTemplates.createBy(MESSAGE_TEXT_1);
-	private static final TextTemplate MESSAGE_TEMPLATE_2  = TextTemplates.createBy(MESSAGE_TEXT_2);
-	private static final TextTemplate MESSAGE_TEMPLATE_3  = TextTemplates.createBy(MESSAGE_TEXT_3);
-	private static final TextTemplate MESSAGE_TEMPLATE_4  = TextTemplates.createBy(MESSAGE_TEXT_4);
-	private static final TextTemplate MESSAGE_TEMPLATE_5  = TextTemplates.createBy(MESSAGE_TEXT_5);
-	private static final TextTemplate MESSAGE_TEMPLATE_6  = TextTemplates.createBy(MESSAGE_TEXT_6);
-	private static final TextTemplate MESSAGE_TEMPLATE_7  = TextTemplates.createBy(MESSAGE_TEXT_7);
-	private static final TextTemplate MESSAGE_TEMPLATE_8  = TextTemplates.createBy(MESSAGE_TEXT_8);
-	private static final TextTemplate MESSAGE_TEMPLATE_9  = TextTemplates.createBy(MESSAGE_TEXT_9);
-	private static final TextTemplate MESSAGE_TEMPLATE_10 = TextTemplates.createBy(MESSAGE_TEXT_10);
+	private static final ErrorMessage MESSAGE_TEMPLATE_1  = ErrorMessage.createFor(MESSAGE_TEXT_1);
+	private static final ErrorMessage MESSAGE_TEMPLATE_2  = ErrorMessage.createFor(MESSAGE_TEXT_2);
+	private static final ErrorMessage MESSAGE_TEMPLATE_3  = ErrorMessage.createFor(MESSAGE_TEXT_3);
+	private static final ErrorMessage MESSAGE_TEMPLATE_4  = ErrorMessage.createFor(MESSAGE_TEXT_4);
+	private static final ErrorMessage MESSAGE_TEMPLATE_5  = ErrorMessage.createFor(MESSAGE_TEXT_5);
+	private static final ErrorMessage MESSAGE_TEMPLATE_6  = ErrorMessage.createFor(MESSAGE_TEXT_6);
+	private static final ErrorMessage MESSAGE_TEMPLATE_7  = ErrorMessage.createFor(MESSAGE_TEXT_7);
+	private static final ErrorMessage MESSAGE_TEMPLATE_8  = ErrorMessage.createFor(MESSAGE_TEXT_8);
+	private static final ErrorMessage MESSAGE_TEMPLATE_9  = ErrorMessage.createFor(MESSAGE_TEXT_9);
+	private static final ErrorMessage MESSAGE_TEMPLATE_10 = ErrorMessage.createFor(MESSAGE_TEXT_10);
 
 	private static final Object VALIDATABLE_VALUE = new Object()
 
@@ -52,14 +50,14 @@ class DefaultValidationContextSpec extends Specification {
 		DefaultValidationContext context = new DefaultValidationContext()
 
 		and: "The ungrouped error messages text templates"
-		TextTemplate[] ungroupedErrorTextTemplates = (TextTemplate[])[
+		ErrorMessage[] ungroupedErrorTextTemplates = (ErrorMessage[])[
 			MESSAGE_TEMPLATE_1,
 			MESSAGE_TEMPLATE_2,
 			MESSAGE_TEMPLATE_3
 		]
 
 		and: "The grouped error messages text templates"
-		TextTemplate[] groupedErrorTextTemplates = (TextTemplate[])[
+		ErrorMessage[] groupedErrorTextTemplates = (ErrorMessage[])[
 			MESSAGE_TEMPLATE_1,
 			MESSAGE_TEMPLATE_2
 		]
