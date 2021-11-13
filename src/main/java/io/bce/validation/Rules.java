@@ -453,17 +453,6 @@ public class Rules {
 		return new AssertRule<>(valueType, errorMessage, predicate);
 	}
 
-	/**
-	 * Get rule regietered by specified alias earlier
-	 * 
-	 * @param <T>           The under validation value type name
-	 * @param registryAlias The registered rule alias name into the registry
-	 * @return The rule
-	 */
-	public static final <T> Rule<T> external(String registryAlias) {
-		return RulesRegistry.getRule(registryAlias);
-	}
-
 	@SuppressWarnings("rawtypes")
 	private static final Rule<Object> wrapIsPresentMatcherRule(Rule<Optional> rule) {
 		return new Rule<Object>() {

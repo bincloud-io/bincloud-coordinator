@@ -2,6 +2,7 @@ package io.bce.validation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -17,10 +18,13 @@ public class RuleExecutor<V> {
 
 	public RuleExecutionReport execute() {
 		try {
-			if (!validationRule.get().isAcceptableFor(validatable)) {
-				throw new IllegalArgumentException("Value type is not acceptable for the rule!!!");
+			if (validationRule.get().isAcceptableFor(validatable)) {
+				return new RuleExecutionReport(true,
+						validationRule.get().check(validatable));	
+			} else {
+				return new RuleExecutionReport(false, Collections.emptyList());
 			}
-			return new RuleExecutionReport(validationRule.get().check(validatable));
+			
 		} catch (Throwable error) {
 			return new RuleExecutionReport(error);
 		}
@@ -28,12 +32,15 @@ public class RuleExecutor<V> {
 
 	public static final class RuleExecutionReport {
 		@Getter
+		private boolean acceptable;
+		@Getter
 		private Optional<Throwable> thrownError;
 		@Getter
 		private Collection<ErrorMessage> ruleResult = new ArrayList<>();
 
-		private RuleExecutionReport(Collection<ErrorMessage> errorMessages) {
+		private RuleExecutionReport(boolean acceptable, Collection<ErrorMessage> errorMessages) {
 			super();
+			this.acceptable = acceptable;
 			this.ruleResult.addAll(errorMessages);
 			this.thrownError = Optional.empty();
 		}
