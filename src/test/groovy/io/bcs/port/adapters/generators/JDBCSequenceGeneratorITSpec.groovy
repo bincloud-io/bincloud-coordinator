@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.sequence
+package io.bcs.port.adapters.generators
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 import io.bce.Generator
 import io.bce.MustNeverBeHappenedError
 import io.bce.domain.errors.ApplicationException
-import io.bcs.port.adapters.sequence.JDBCSequenceGenerator
+import io.bcs.port.adapters.generators.JDBCSequenceGenerator
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase

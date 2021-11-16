@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.sequence;
+package io.bcs.port.adapters.generators;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
