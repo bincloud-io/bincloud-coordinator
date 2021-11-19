@@ -14,7 +14,7 @@ public abstract class ValidationCase {
 	@Getter
 	@Include
 	private final Validatable validatableObject;
-	protected final ValidationReport report;
+	private final ValidationExecutor validationExecutor;
 	@Getter
 	@Include
 	private final ExpectedResult expectedRuleResult;
@@ -26,21 +26,38 @@ public abstract class ValidationCase {
 		super();
 		ValidationService validationService = DefaultValidationContext.createValidationService();
 		this.validatableObject = validatable;
-		this.report = new ValidationExecutor(validatable, validationService).execute();
+		this.validationExecutor = new ValidationExecutor(validatable, validationService);
 		this.expectedErrorMessages = expectedMessages;
 		this.expectedRuleResult = expectedResult;
 	}
 	
-	public boolean isPassed() {
-		return report.isPassed() == shouldBePassed();
+	public ValidationCaseReport execute() {
+		ValidationReport report = validationExecutor.execute();
+		return new ValidationCaseReport() {
+			@Override
+			public boolean isPassed() {
+				return report.isPassed() == shouldBePassed();
+			}
+
+			@Override
+			public boolean containsExpectedErrorMessages() {
+				return ValidationCase.this.containsExpectedErrorMessages(report);
+			}
+		};
 	}
+	
 	
 	private boolean shouldBePassed() {
 		return expectedRuleResult.shouldBeValid;
 	}
 	
-	public abstract boolean containsExpectedErrorMessages();
+	protected abstract boolean containsExpectedErrorMessages(ValidationReport validationReport);
 
+	public interface ValidationCaseReport {
+		public boolean isPassed();
+		public boolean containsExpectedErrorMessages();
+	}
+	
 	@AllArgsConstructor
 	public enum ExpectedResult {
 		PASSED(true), FAILED(false);
