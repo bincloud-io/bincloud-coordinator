@@ -14,27 +14,27 @@ import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
 public class JDBCSequenceGenerator implements Generator<Long> {
-	private static final String KEY_GENERATION_QUERY = "SELECT SEQ_NEXT(?) FROM DUAL";
+    private static final String KEY_GENERATION_QUERY = "SELECT SEQ_NEXT(?) FROM DUAL";
 
-	private final DataSource dataSource;
-	private final String sequenceName;
+    private final DataSource dataSource;
+    private final String sequenceName;
 
-	@Override
-	@SneakyThrows
-	public Long generateNext() {
-		try (Connection connection = dataSource.getConnection()) {
-			PreparedStatement statement = connection
-					.prepareStatement(String.format(KEY_GENERATION_QUERY, sequenceName));
-			statement.setString(1, sequenceName);
-			ResultSet resultSet = statement.executeQuery();
-			checkResultExistence(resultSet);
-			return resultSet.getLong(1);
-		}
-	}
+    @Override
+    @SneakyThrows
+    public Long generateNext() {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection
+                    .prepareStatement(String.format(KEY_GENERATION_QUERY, sequenceName));
+            statement.setString(1, sequenceName);
+            ResultSet resultSet = statement.executeQuery();
+            checkResultExistence(resultSet);
+            return resultSet.getLong(1);
+        }
+    }
 
-	private void checkResultExistence(ResultSet resultSet) throws SQLException, MustNeverBeHappenedError {
-		if (!resultSet.next()) {
-			throw new MustNeverBeHappenedError("This query call sequence generator and it must always return value");
-		}
-	}
+    private void checkResultExistence(ResultSet resultSet) throws SQLException, MustNeverBeHappenedError {
+        if (!resultSet.next()) {
+            throw new MustNeverBeHappenedError("This query call sequence generator and it must always return value");
+        }
+    }
 }

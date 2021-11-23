@@ -52,6 +52,7 @@ public final class Promises {
 	private static final class DeferredPromise<T> implements Promise<T> {
 		private final Collection<ResponseHandlerDescriptor> responseHandlers = new LinkedList<>();
 		private final Collection<ErrorHandlerDescriptor> errorHandlers = new LinkedList<>();
+		private final Collection<FinalizingHandlerDescriptor> finalizerHandlers = new LinkedList<>();
 		private State state = new PendingState();
 
 		public DeferredPromise(@NonNull DeferredFunction<T> deferredOperationExecutor) {
@@ -78,6 +79,12 @@ public final class Promises {
 			state.addErrorHandler(errorType, errorHandler);
 			return this;
 		}
+		
+		@Override
+        public Promise<T> finalize(FinalizingHandler finalizer) {
+		    state.addFinalizer(finalizer);
+            return this;
+        }
 
 		@Override
 		public Promise<T> error(@NonNull ErrorHandler<Throwable> errorHandler) {
@@ -93,7 +100,7 @@ public final class Promises {
 		@Override
 		public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider) {
 			return new DeferredPromise<C>(createChainingDeferredFunctionExecutor((previousResult, deferred) -> {
-				chainingPromiseProvider.derivePronise(previousResult).delegate(deferred);
+				chainingPromiseProvider.derivePromise(previousResult).delegate(deferred);
 			}));
 		}
 
@@ -112,7 +119,7 @@ public final class Promises {
 			return this.then(deferred).error(deferred);
 		}
 
-		private <C> DeferredFunction<C> createChainingDeferredFunctionExecutor(
+        private <C> DeferredFunction<C> createChainingDeferredFunctionExecutor(
 				ChainingDeferredFunction<T, C> chainingDeferredFunction) {
 			return deferred -> {
 				then(response -> {
@@ -165,10 +172,16 @@ public final class Promises {
 
 		private synchronized void handleResponse(T response) {
 			responseHandlers.forEach(descriptor -> descriptor.apply(response));
+			finalizePromise();
 		}
 
 		private synchronized void handleError(Throwable error) {
 			getAcceptableDescriptorsFor(error).forEach(descriptor -> descriptor.apply(error));
+			finalizePromise();
+		}
+		
+		private synchronized void finalizePromise() {
+		    finalizerHandlers.forEach(descriptor -> descriptor.apply(null));
 		}
 
 		private Collection<ErrorHandlerDescriptor> getAcceptableDescriptorsFor(Throwable error) {
@@ -190,6 +203,10 @@ public final class Promises {
 			@SuppressWarnings("unchecked")
 			public <E extends Throwable> void addErrorHandler(Class<E> errorType, ErrorHandler<E> errorHandler) {
 				errorHandlers.add(new ErrorHandlerDescriptor(errorType, (ErrorHandler<Throwable>) errorHandler));
+			}
+			
+			public void addFinalizer(FinalizingHandler finalizer) {
+			    finalizerHandlers.add(new FinalizingHandlerDescriptor(finalizer));
 			}
 		}
 
@@ -226,6 +243,12 @@ public final class Promises {
 				super.addResponseHandler(responseHandler);
 				handleResponse(response);
 			}
+			
+			@Override
+            public void addFinalizer(FinalizingHandler finalizer) {
+                super.addFinalizer(finalizer);
+                finalizePromise();
+            }			
 		}
 
 		@RequiredArgsConstructor
@@ -247,6 +270,12 @@ public final class Promises {
 				super.addErrorHandler(errorType, errorHandler);
 				handleError(error);
 			}
+
+            @Override
+            public void addFinalizer(FinalizingHandler finalizer) {
+                super.addFinalizer(finalizer);
+                finalizePromise();
+            }
 		}
 
 		private abstract class HandlerDescriptor<S> {
@@ -262,6 +291,16 @@ public final class Promises {
 			protected abstract void doAccept(S response);
 		}
 
+		@RequiredArgsConstructor
+		private class FinalizingHandlerDescriptor extends HandlerDescriptor<Void> {
+		    private final FinalizingHandler finalizer;
+		    
+            @Override
+            protected void doAccept(Void response) {
+                finalizer.onComplete();
+            }		    
+		}
+		
 		@RequiredArgsConstructor
 		private class ResponseHandlerDescriptor extends HandlerDescriptor<T> {
 			private final ResponseHandler<T> responseHandler;
@@ -311,3 +350,4 @@ public final class Promises {
 		}
 	}
 }
+

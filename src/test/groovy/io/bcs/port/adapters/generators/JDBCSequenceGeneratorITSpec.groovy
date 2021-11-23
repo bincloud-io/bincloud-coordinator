@@ -26,53 +26,53 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JDBCSequenceGeneratorITSpec extends Specification {
-	private static final String MIGRATION_SCRIPT ="db-init/sequence/sequence.changelog.xml"
-	private static final String IN_MEM_DATABASE_URL = "jdbc:h2:mem:sequences"
-	private static final String DATABASE_USERNAME = "sa"
-	private static final String DATABASE_PASSWORD = ""
-	
-	@Deployment
-	public static Archive "create deployment"() {
-		return ArchiveBuilder.jar("jdbc-sequence-generator-spec.jar")
-				.resolveDependencies("pom.xml")
-				.withScopes(COMPILE, RUNTIME, TEST)
-				.resolveDependency("org.liquibase", "liquibase-core")
-				.resolveDependency("org.openclover", "clover")
-				.apply()
-				.appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
-				.appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
-				.appendClasses(JDBCSequenceGenerator)
-				.appendResource("liquibase")
-				.appendResource("db-init")
-				.appendManifestResource("META-INF/beans.xml", "beans.xml")
-				.build()
-	}
-	
-	@Inject
-	@JdbcLiquibase
-	private DatabaseConfigurer databaseConfigurer;
-	
-	@Resource(lookup="java:/jdbc/BC_CENTRAL")
-	private DataSource dataSource;
-	
-	def setup() {
-		databaseConfigurer.setup("liquibase/master.changelog.xml")
-	}
+    private static final String MIGRATION_SCRIPT ="db-init/sequence/sequence.changelog.xml"
+    private static final String IN_MEM_DATABASE_URL = "jdbc:h2:mem:sequences"
+    private static final String DATABASE_USERNAME = "sa"
+    private static final String DATABASE_PASSWORD = ""
 
-	def "Scenario: generate sequence of numbers"() {
-		given: "The prepared database with registered sequence"
-		databaseConfigurer.setup(MIGRATION_SCRIPT)
+    @Deployment
+    public static Archive "create deployment"() {
+        return ArchiveBuilder.jar("jdbc-sequence-generator-spec.jar")
+                .resolveDependencies("pom.xml")
+                .withScopes(COMPILE, RUNTIME, TEST)
+                .resolveDependency("org.liquibase", "liquibase-core")
+                .resolveDependency("org.openclover", "clover")
+                .apply()
+                .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
+                .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
+                .appendClasses(JDBCSequenceGenerator)
+                .appendResource("liquibase")
+                .appendResource("db-init")
+                .appendManifestResource("META-INF/beans.xml", "beans.xml")
+                .build()
+    }
 
-		and: "The sequence generator connected to its one"
-		Generator<Long> generator = new JDBCSequenceGenerator(dataSource, "SEQUENCE")
+    @Inject
+    @JdbcLiquibase
+    private DatabaseConfigurer databaseConfigurer;
 
-		expect: "The auto incremented integer numbers will be generated"
-		IntStream.range(1, 10).forEach({
-			generator.generateNext() == it
-		})
-	}
+    @Resource(lookup="java:/jdbc/BC_CENTRAL")
+    private DataSource dataSource;
 
-	def cleanup() {
-		databaseConfigurer.tearDown();
-	}
+    def setup() {
+        databaseConfigurer.setup("liquibase/master.changelog.xml")
+    }
+
+    def "Scenario: generate sequence of numbers"() {
+        given: "The prepared database with registered sequence"
+        databaseConfigurer.setup(MIGRATION_SCRIPT)
+
+        and: "The sequence generator connected to its one"
+        Generator<Long> generator = new JDBCSequenceGenerator(dataSource, "SEQUENCE")
+
+        expect: "The auto incremented integer numbers will be generated"
+        IntStream.range(1, 10).forEach({
+            generator.generateNext() == it
+        })
+    }
+
+    def cleanup() {
+        databaseConfigurer.tearDown();
+    }
 }
