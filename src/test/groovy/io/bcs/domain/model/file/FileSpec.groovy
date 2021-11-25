@@ -23,8 +23,9 @@ import io.bcs.domain.model.FileStorage
 import io.bcs.domain.model.FileStorageException
 import io.bcs.domain.model.file.File.CreateFile
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
-import io.bcs.domain.model.file.states.FileHasBeenDisposedException
-import io.bcs.domain.model.file.states.FileHasBeenUploadedException
+import io.bcs.domain.model.file.states.FileDisposedException
+import io.bcs.domain.model.file.states.ContentNotUploadedException
+import io.bcs.domain.model.file.states.ContentUploadedException
 import spock.lang.Specification
 
 class FileSpec extends Specification {
@@ -36,9 +37,11 @@ class FileSpec extends Specification {
     public static final Long DISTRIBUTIONING_CONTENT_LENGTH = 100L
 
     private FileStorage fileStorage;
+    private ContentDownloader contentDownloader;
 
     def setup() {
         this.fileStorage = Stub(FileStorage)
+        this.contentDownloader = Mock(ContentDownloader)
     }
 
     def "Scenario: create file by default constructor"() {
@@ -121,7 +124,7 @@ class FileSpec extends Specification {
         then: "The file storage error should be happened"
         1 * errorHandler.onError(_) >> {fileStorageException = it[0]}
         fileStorageException.getContextId() == Constants.CONTEXT
-        fileStorageException.getErrorCode() == Constants.FILE_STORAGE_ERROR
+        fileStorageException.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
     }
 
     def "Scenario: dispose draft file"() {
@@ -168,7 +171,7 @@ class FileSpec extends Specification {
     }
 
     def "Scenario: dispose disposed file"() {
-        FileHasBeenDisposedException error
+        FileDisposedException error
         given: "The file in disposed state"
         File file = createDisposedFile()
 
@@ -245,14 +248,14 @@ class FileSpec extends Specification {
         then: "The file storage error should be happened"
         1 * errorHandler.onError(_) >> {fileStorageException = it[0]}
         fileStorageException.getContextId() == Constants.CONTEXT
-        fileStorageException.getErrorCode() == Constants.FILE_STORAGE_ERROR
+        fileStorageException.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
         
         and: "The content length should not be updated"
         fileMetadata.getTotalLength() == DEFAULT_CONTENT_LENGTH
     }
 
     def "Scenario: upload file content to file in the distributioning state"() {
-        FileHasBeenUploadedException error
+        ContentUploadedException error
         given: "The file in distribution state"
         File file = createDistributionFile()
 
@@ -271,11 +274,11 @@ class FileSpec extends Specification {
         then: "The file has already been exception should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
         error.getContextId() == Constants.CONTEXT
-        error.getErrorCode() == Constants.FILE_HAS_BEEN_UPLOADED_ERROR
+        error.getErrorCode() == Constants.CONTENT_IS_UPLOADED_ERROR
     }
 
     def "Scenario: upload file content to file in the disposed state"() {
-        FileHasBeenDisposedException error
+        FileDisposedException error
         given: "The file in disposed state"
         File file = createDisposedFile()
 
@@ -291,6 +294,40 @@ class FileSpec extends Specification {
         when: "The file is uploaded"
         WaitingPromise.of(uploadFile(file, streamer, source)).error(errorHandler).await()
 
+        then: "The file has already been exception should be happened"
+        1 * errorHandler.onError(_) >> {error = it[0]}
+        error.getContextId() == Constants.CONTEXT
+        error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
+    }
+    
+    def "Scenario: download file content from file in the draft state"() {
+        ContentNotUploadedException error
+        given: "The file in disposed state"
+        File file = createDraftFile()
+        
+        and: "The promise reject error handler"
+        ErrorHandler errorHandler = Mock(ErrorHandler)
+
+        when: "The file is uploaded"
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, Collections.emptyList())).error(errorHandler).await()
+        
+        then: "The file has already been exception should be happened"
+        1 * errorHandler.onError(_) >> {error = it[0]}
+        error.getContextId() == Constants.CONTEXT
+        error.getErrorCode() == Constants.CONTENT_IS_NOT_UPLOADED_ERROR
+    }
+    
+    def "Scenario: download file content from file in the disposed state"() {
+        FileDisposedException error
+        given: "The file in disposed state"
+        File file = createDisposedFile()
+        
+        and: "The promise reject error handler"
+        ErrorHandler errorHandler = Mock(ErrorHandler)
+
+        when: "The file is uploaded"
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, Collections.emptyList())).error(errorHandler).await()
+        
         then: "The file has already been exception should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
         error.getContextId() == Constants.CONTEXT

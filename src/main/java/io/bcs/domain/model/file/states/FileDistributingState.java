@@ -35,7 +35,7 @@ public class FileDistributingState extends FileState {
 
             @Override
             public LifecycleMethod<FileUploadStatistic> upload(Streamer streamer, Source<BinaryChunk> contentSource) {
-                return new InacceptableLifecycleMethod<>(FileHasBeenUploadedException::new);
+                return new InacceptableLifecycleMethod<>(ContentUploadedException::new);
             }
         };
     }

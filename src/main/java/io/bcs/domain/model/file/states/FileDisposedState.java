@@ -21,7 +21,7 @@ public class FileDisposedState extends FileState {
     @Override
     public Promise<FileContent> getContentAccess(FileStorage fileStorage,
             Collection<ContentFragment> contentFragments) {
-        throw new UnsupportedOperationException();
+        throw new FileDisposedException();
     }
 
     @Override
@@ -29,12 +29,12 @@ public class FileDisposedState extends FileState {
         return new Lifecycle() {
             @Override
             public LifecycleMethod<Void> dispose() {
-                return new InacceptableLifecycleMethod<>(FileHasBeenDisposedException::new);
+                return new InacceptableLifecycleMethod<>(FileDisposedException::new);
             }
 
             @Override
             public LifecycleMethod<FileUploadStatistic> upload(Streamer streamer, Source<BinaryChunk> contentSource) {
-                return new InacceptableLifecycleMethod<>(FileHasBeenDisposedException::new);
+                return new InacceptableLifecycleMethod<>(FileDisposedException::new);
             }
         };
     }

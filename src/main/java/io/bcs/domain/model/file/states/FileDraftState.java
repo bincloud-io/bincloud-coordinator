@@ -22,7 +22,7 @@ public class FileDraftState extends FileState {
     @Override
     public Promise<FileContent> getContentAccess(FileStorage fileStorage,
             Collection<ContentFragment> contentFragments) {
-        throw new UnsupportedOperationException();
+        throw new ContentNotUploadedException();
     }
 
     @Override
