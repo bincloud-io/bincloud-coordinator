@@ -8,6 +8,8 @@ import io.bcs.domain.model.ContentFragment;
 import io.bcs.domain.model.ContentLocator;
 
 public interface FileContent {
+    public ContentType getType();
+
     public ContentLocator getLocator();
 
     public FileMetadata getFileMetadata();
@@ -18,5 +20,9 @@ public interface FileContent {
         public ContentFragment getContentFragment();
 
         public Source<BinaryChunk> getContentSource();
+    }
+
+    public enum ContentType {
+        FULL, RANGE, MULTIRANGE;
     }
 }

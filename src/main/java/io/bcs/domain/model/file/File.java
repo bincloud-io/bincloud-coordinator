@@ -1,12 +1,15 @@
 package io.bcs.domain.model.file;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
+import io.bcs.domain.model.ContentFragment;
 import io.bcs.domain.model.ContentLocator;
 import io.bcs.domain.model.FileStorage;
+import io.bcs.domain.model.file.FileContent.ContentType;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;
 import io.bcs.domain.model.file.FileState.FileStateFactory;
 import io.bcs.domain.model.file.states.FileDisposedState;
@@ -32,8 +35,8 @@ public class File {
     private static FileStateCreator STATE_CREATOR = new FileStateCreator()
             .registerStateFactory(FileStatus.DRAFT, FileDraftState::new)
             .registerStateFactory(FileStatus.DISTRIBUTING, FileDistributingState::new)
-            .registerStateFactory(FileStatus.DISPOSED, FileDisposedState::new);     
-    
+            .registerStateFactory(FileStatus.DISPOSED, FileDisposedState::new);
+
     @Include
     @Default
     private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
@@ -60,7 +63,7 @@ public class File {
 
     public static final Promise<File> create(FileStorage fileStorage, CreateFile command) {
         return Promises.of(deferred -> {
-           deferred.resolve(new File(fileStorage.create(command.getMediaType()), command)); 
+            deferred.resolve(new File(fileStorage.create(command.getMediaType()), command));
         });
     }
 
@@ -101,7 +104,24 @@ public class File {
             }
         };
     }
-    
+
+    public Promise<Void> downloadContent(FileStorage fileStorage, ContentDownloader contentDownloader,
+            Collection<ContentFragment> fragments) {
+        return Promises.of(deferred -> {
+            getFileState().getContentAccess(fileStorage, fragments).chain(fileContent -> {
+                if (fileContent.getType() == ContentType.RANGE) {
+                    return contentDownloader.downloadContentRange(fileContent);
+                }
+
+                if (fileContent.getType() == ContentType.MULTIRANGE) {
+                    return contentDownloader.downloadContentRanges(fileContent);
+                }
+
+                return contentDownloader.downloadFullContent(fileContent);
+            }).delegate(deferred);
+        });
+    }
+
     public Lifecycle getLifecycle(FileStorage storage) {
         return getFileState().getLifecycle(storage);
     }
@@ -118,13 +138,13 @@ public class File {
             }
 
             @Override
-            public void dispose() {
-                File.this.dispose();
+            public FileMetadata getFileMetadata() {
+                return File.this.getFileMetadata();
             }
 
             @Override
-            public Long getContentLength() {
-                return File.this.contentLength;
+            public void dispose() {
+                File.this.dispose();
             }
 
             @Override
@@ -133,7 +153,7 @@ public class File {
             }
         };
     }
-    
+
     private void updateContentLength(Long contentLength) {
         this.contentLength = contentLength;
     }
@@ -148,14 +168,14 @@ public class File {
 
         public String getFileName();
     }
-    
+
     private static class FileStateCreator {
         private Map<FileStatus, FileStateFactory> STATE_FACTORIES = new HashMap<>();
-        
+
         public FileState createStateFor(FileStatus status, FileEntityAccessor accessor) {
             return STATE_FACTORIES.get(status).create(accessor);
         }
-        
+
         public FileStateCreator registerStateFactory(FileStatus status, FileStateFactory stateFactory) {
             STATE_FACTORIES.put(status, stateFactory);
             return this;

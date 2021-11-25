@@ -1,9 +1,11 @@
 package io.bcs.domain.model.file;
 
+import io.bce.promises.Promise;
+
 public interface ContentDownloader {
-    public void downloadFullContent(FileContent content);
+    public Promise<Void> downloadFullContent(FileContent content);
     
-    public void downloadContentRange(FileContent content);
+    public Promise<Void> downloadContentRange(FileContent content);
     
-    public void downloadContentRanges(FileContent content);
+    public Promise<Void> downloadContentRanges(FileContent content);
 }
