@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public abstract class FileState {
     @Getter(value = AccessLevel.PROTECTED)
     private final FileEntityAccessor fileEntityAccessor;
-
+    
     public abstract Lifecycle getLifecycle(FileStorage storage);
 
     public interface FileEntityAccessor {

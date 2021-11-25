@@ -7,5 +7,5 @@ public interface FileMetadata {
 
     public String getFileName();
 
-    public Long getContentLength();
+    public Long getTotalLength();
 }

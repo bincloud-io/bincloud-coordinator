@@ -23,6 +23,8 @@ import io.bcs.domain.model.FileStorage
 import io.bcs.domain.model.FileStorageException
 import io.bcs.domain.model.file.File.CreateFile
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
+import io.bcs.domain.model.file.states.FileHasBeenDisposedException
+import io.bcs.domain.model.file.states.FileHasBeenUploadedException
 import spock.lang.Specification
 
 class FileSpec extends Specification {
@@ -61,7 +63,7 @@ class FileSpec extends Specification {
         fileMetadata.getStatus() == FileStatus.DRAFT
 
         and: "The file content length should be 0 bytes"
-        fileMetadata.getContentLength() == 0L
+        fileMetadata.getTotalLength() == 0L
     }
 
     def "Scenario: successfully create new file"() {
@@ -99,7 +101,7 @@ class FileSpec extends Specification {
         fileMetadata.getStatus() == FileStatus.DRAFT
 
         and: "The file content length should be 0 bytes"
-        fileMetadata.getContentLength() == 0L
+        fileMetadata.getTotalLength() == 0L
     }
     
     def "Scenario: create new file with file storage error"() {
@@ -140,7 +142,7 @@ class FileSpec extends Specification {
         fileMetadata.getStatus() == FileStatus.DISPOSED
 
         and: "The content length should be set to zero"
-        fileMetadata.getContentLength() == 0L
+        fileMetadata.getTotalLength() == 0L
     }
 
 
@@ -162,7 +164,7 @@ class FileSpec extends Specification {
         fileMetadata.getStatus() == FileStatus.DISPOSED
 
         and: "The content length should be set to zero"
-        fileMetadata.getContentLength() == 0L
+        fileMetadata.getTotalLength() == 0L
     }
 
     def "Scenario: dispose disposed file"() {
@@ -215,7 +217,7 @@ class FileSpec extends Specification {
         uploadStatistic.getContentLength() == DISTRIBUTIONING_CONTENT_LENGTH
         
         and: "The content length should be updated"
-        fileMetadata.getContentLength() == DISTRIBUTIONING_CONTENT_LENGTH
+        fileMetadata.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
     }
 
     def "Scenario: upload file content with error to file in the draft state"() {
@@ -246,7 +248,7 @@ class FileSpec extends Specification {
         fileStorageException.getErrorCode() == Constants.FILE_STORAGE_ERROR
         
         and: "The content length should not be updated"
-        fileMetadata.getContentLength() == DEFAULT_CONTENT_LENGTH
+        fileMetadata.getTotalLength() == DEFAULT_CONTENT_LENGTH
     }
 
     def "Scenario: upload file content to file in the distributioning state"() {

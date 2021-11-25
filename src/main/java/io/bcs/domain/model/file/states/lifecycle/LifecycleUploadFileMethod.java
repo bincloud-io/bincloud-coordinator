@@ -1,11 +1,11 @@
-package io.bcs.domain.model.file;
+package io.bcs.domain.model.file.states.lifecycle;
 
 
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.Stream;
-import io.bce.interaction.streaming.Streamer;
 import io.bce.interaction.streaming.Stream.Stat;
+import io.bce.interaction.streaming.Streamer;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;

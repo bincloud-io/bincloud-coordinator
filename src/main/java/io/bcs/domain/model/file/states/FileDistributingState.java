@@ -1,12 +1,16 @@
-package io.bcs.domain.model.file;
+package io.bcs.domain.model.file.states;
 
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.Streamer;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bcs.domain.model.FileStorage;
+import io.bcs.domain.model.file.FileState;
+import io.bcs.domain.model.file.Lifecycle;
+import io.bcs.domain.model.file.states.lifecycle.InacceptableLifecycleMethod;
+import io.bcs.domain.model.file.states.lifecycle.LifecycleDisposeFileMethod;
 
-public class FileDisposedState extends FileState {
-    FileDisposedState(FileEntityAccessor fileEntityAccessor) {
+public class FileDistributingState extends FileState {
+    public FileDistributingState(FileEntityAccessor fileEntityAccessor) {
         super(fileEntityAccessor);
     }
 
@@ -15,13 +19,14 @@ public class FileDisposedState extends FileState {
         return new Lifecycle() {
             @Override
             public LifecycleMethod<Void> dispose() {
-                return new InacceptableLifecycleMethod<>(FileHasBeenDisposedException::new);
+                return new LifecycleDisposeFileMethod(getFileEntityAccessor(), storage);
             }
 
             @Override
             public LifecycleMethod<FileUploadStatistic> upload(Streamer streamer, Source<BinaryChunk> contentSource) {
-                return new InacceptableLifecycleMethod<>(FileHasBeenDisposedException::new);
+                return new InacceptableLifecycleMethod<>(FileHasBeenUploadedException::new);
             }
         };
     }
+
 }

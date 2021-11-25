@@ -8,13 +8,13 @@ import io.bcs.domain.model.ContentLocator;
 
 public interface Lifecycle {
     public LifecycleMethod<FileUploadStatistic> upload(Streamer streamer, Source<BinaryChunk> contentSource);
-
+    
     public LifecycleMethod<Void> dispose();
 
     public interface LifecycleMethod<R> {
         public Promise<R> execute();
     }
-
+    
     public interface FileUploadStatistic {
         public ContentLocator getLocator();
 

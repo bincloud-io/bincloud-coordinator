@@ -1,10 +1,17 @@
 package io.bcs.domain.model.file;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.domain.model.ContentLocator;
 import io.bcs.domain.model.FileStorage;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;
+import io.bcs.domain.model.file.FileState.FileStateFactory;
+import io.bcs.domain.model.file.states.FileDisposedState;
+import io.bcs.domain.model.file.states.FileDistributingState;
+import io.bcs.domain.model.file.states.FileDraftState;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
@@ -22,6 +29,11 @@ public class File {
     static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
     static final String DEFAULT_FILE_NAME = "unknown";
 
+    private static FileStateCreator STATE_CREATOR = new FileStateCreator()
+            .registerStateFactory(FileStatus.DRAFT, FileDraftState::new)
+            .registerStateFactory(FileStatus.DISTRIBUTING, FileDistributingState::new)
+            .registerStateFactory(FileStatus.DISPOSED, FileDisposedState::new);     
+    
     @Include
     @Default
     private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
@@ -84,18 +96,18 @@ public class File {
             }
 
             @Override
-            public Long getContentLength() {
+            public Long getTotalLength() {
                 return contentLength;
             }
         };
     }
-
+    
     public Lifecycle getLifecycle(FileStorage storage) {
         return getFileState().getLifecycle(storage);
     }
 
     private FileState getFileState() {
-        return status.createState(createEntityAccessor());
+        return STATE_CREATOR.createStateFor(status, createEntityAccessor());
     }
 
     private FileEntityAccessor createEntityAccessor() {
@@ -135,5 +147,18 @@ public class File {
         public String getMediaType();
 
         public String getFileName();
+    }
+    
+    private static class FileStateCreator {
+        private Map<FileStatus, FileStateFactory> STATE_FACTORIES = new HashMap<>();
+        
+        public FileState createStateFor(FileStatus status, FileEntityAccessor accessor) {
+            return STATE_FACTORIES.get(status).create(accessor);
+        }
+        
+        public FileStateCreator registerStateFactory(FileStatus status, FileStateFactory stateFactory) {
+            STATE_FACTORIES.put(status, stateFactory);
+            return this;
+        }
     }
 }

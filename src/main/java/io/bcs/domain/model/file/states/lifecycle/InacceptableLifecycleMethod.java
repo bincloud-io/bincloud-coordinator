@@ -1,4 +1,4 @@
-package io.bcs.domain.model.file;
+package io.bcs.domain.model.file.states.lifecycle;
 
 import io.bce.domain.errors.ApplicationException;
 import io.bce.promises.Promise;
