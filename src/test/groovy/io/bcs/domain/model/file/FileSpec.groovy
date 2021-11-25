@@ -5,12 +5,12 @@ import static io.bcs.domain.model.file.FileStatus.DISPOSED
 import static io.bcs.domain.model.file.FileStatus.DISTRIBUTING
 import static io.bcs.domain.model.file.FileStatus.DRAFT
 
-
+import groovy.util.logging.Log
 import io.bce.interaction.streaming.Destination
 import io.bce.interaction.streaming.Source
 import io.bce.interaction.streaming.Stream
-import io.bce.interaction.streaming.Stream.Stat
 import io.bce.interaction.streaming.Streamer
+import io.bce.interaction.streaming.Stream.Stat
 import io.bce.interaction.streaming.binary.BinaryChunk
 import io.bce.promises.Promise
 import io.bce.promises.Promises
@@ -18,14 +18,17 @@ import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ErrorHandler
 import io.bce.promises.Promise.ResponseHandler
 import io.bcs.domain.model.Constants
+import io.bcs.domain.model.ContentFragment
 import io.bcs.domain.model.ContentLocator
 import io.bcs.domain.model.FileStorage
 import io.bcs.domain.model.FileStorageException
 import io.bcs.domain.model.file.File.CreateFile
+import io.bcs.domain.model.file.FileContent.ContentPart
+import io.bcs.domain.model.file.FileContent.ContentType
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
-import io.bcs.domain.model.file.states.FileDisposedException
 import io.bcs.domain.model.file.states.ContentNotUploadedException
 import io.bcs.domain.model.file.states.ContentUploadedException
+import io.bcs.domain.model.file.states.FileDisposedException
 import spock.lang.Specification
 
 class FileSpec extends Specification {
@@ -106,7 +109,7 @@ class FileSpec extends Specification {
         and: "The file content length should be 0 bytes"
         fileMetadata.getTotalLength() == 0L
     }
-    
+
     def "Scenario: create new file with file storage error"() {
         FileStorageException fileStorageException
         given: """The file storage creates the file, located: {storageName: ${STORAGE_NAME}, storageFileName: ${STORAGE_FILE_NAME}} for ${MEDIA_TYPE}"""
@@ -120,7 +123,7 @@ class FileSpec extends Specification {
 
         when: "The file is created"
         WaitingPromise.of(File.create(fileStorage, command)).error(errorHandler).await()
-        
+
         then: "The file storage error should be happened"
         1 * errorHandler.onError(_) >> {fileStorageException = it[0]}
         fileStorageException.getContextId() == Constants.CONTEXT
@@ -189,7 +192,7 @@ class FileSpec extends Specification {
 
     def "Scenario: successfully upload file content to file in the draft state"() {
         FileUploadStatistic uploadStatistic
-        
+
         given: "The file in draft state"
         File file = createDraftFile()
 
@@ -203,29 +206,29 @@ class FileSpec extends Specification {
         Stream<BinaryChunk> stream = Mock(Stream)
         streamer.createStream(source, destination) >> stream
         stream.start() >> Promises.resolvedBy(createStat(DISTRIBUTIONING_CONTENT_LENGTH))
-        
+
         and: "The promise response handler"
         ResponseHandler<FileUploadStatistic> responseHandler = Mock(ResponseHandler)
-        
+
         when: "The file is uploaded"
         WaitingPromise.of(uploadFile(file, streamer, source)).then(responseHandler).await()
         FileMetadata fileMetadata = file.getFileMetadata()
         ContentLocator fileLocator = file.getLocator()
-        
+
         then: "The file upload should be completed successfully"
         1 * responseHandler.onResponse(_) >> {uploadStatistic = it[0]}
         ContentLocator statisticLocator = uploadStatistic.getLocator()
         statisticLocator.getStorageFileName() == fileLocator.getStorageFileName()
         statisticLocator.getStorageName() == fileLocator.getStorageName()
         uploadStatistic.getContentLength() == DISTRIBUTIONING_CONTENT_LENGTH
-        
+
         and: "The content length should be updated"
         fileMetadata.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
     }
 
     def "Scenario: upload file content with error to file in the draft state"() {
         FileStorageException fileStorageException
-        
+
         given: "The file in draft state"
         File file = createDraftFile()
 
@@ -236,20 +239,20 @@ class FileSpec extends Specification {
         Streamer streamer = Mock(Streamer)
         Destination<BinaryChunk> destination = Mock(Destination)
         fileStorage.getAccessOnWrite(_) >> {throw new FileStorageException(new RuntimeException())}
-            
+
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
-        
+
         when: "The file is uploaded"
         WaitingPromise.of(uploadFile(file, streamer, source)).error(errorHandler).await()
         FileMetadata fileMetadata = file.getFileMetadata()
         ContentLocator fileLocator = file.getLocator()
-        
+
         then: "The file storage error should be happened"
         1 * errorHandler.onError(_) >> {fileStorageException = it[0]}
         fileStorageException.getContextId() == Constants.CONTEXT
         fileStorageException.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
-        
+
         and: "The content length should not be updated"
         fileMetadata.getTotalLength() == DEFAULT_CONTENT_LENGTH
     }
@@ -299,42 +302,213 @@ class FileSpec extends Specification {
         error.getContextId() == Constants.CONTEXT
         error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
     }
-    
+
     def "Scenario: download file content from file in the draft state"() {
         ContentNotUploadedException error
         given: "The file in disposed state"
         File file = createDraftFile()
-        
+
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is uploaded"
         WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, Collections.emptyList())).error(errorHandler).await()
-        
+
         then: "The file has already been exception should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
         error.getContextId() == Constants.CONTEXT
         error.getErrorCode() == Constants.CONTENT_IS_NOT_UPLOADED_ERROR
     }
-    
+
     def "Scenario: download file content from file in the disposed state"() {
         FileDisposedException error
         given: "The file in disposed state"
         File file = createDisposedFile()
-        
+
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is uploaded"
         WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, Collections.emptyList())).error(errorHandler).await()
-        
+
         then: "The file has already been exception should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
         error.getContextId() == Constants.CONTEXT
         error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
     }
+
+    def "Scenario: download full file content"() {
+        FileContent fileContent
+        given: "The file in distribution state"
+        File file = createDistributionFile()
+
+        and: "The promise response handler"
+        ResponseHandler responseHandler = Mock(ResponseHandler)
+
+        and: "The content parts should not be passed"
+        Collection<ContentFragment> fragments = Collections.emptyList()
+
+        and: "The file storage should return binary source for download"
+        Source<BinaryChunk> source = Stub(Source)
+        fileStorage.getAccessOnRead(_, _) >> source
+
+        when: "The file is downloaded"
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+        
+        then: "The operation should be completed without error"
+        1 * responseHandler.onResponse(_)
+        
+        and: "The full content download operation should be passed"
+        1 * contentDownloader.downloadFullContent(_) >> {
+            fileContent = it[0]
+            return Promises.resolvedBy(null)
+        }
+        
+        and: "The file content type should be ${ContentType.FULL}"
+        fileContent.getType() == ContentType.FULL
+        
+        and: "The file locator from file should be equal to file locator from the file content"
+        file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
+        file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
+        
+        and: "The file metadata from file should be equal to file metadata from the file content"
+        FileMetadata fileMetadata = file.getFileMetadata()
+        FileMetadata contentMetadata = fileContent.getFileMetadata()
+        fileMetadata.getFileName() == contentMetadata.getFileName()
+        fileMetadata.getMediaType() == contentMetadata.getMediaType()
+        fileMetadata.getStatus() == contentMetadata.getStatus()
+        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
+        
+        and: "The content part should represent whole file"
+        fileContent.getParts().size() == 1
+        ContentPart contentPart = fileContent.getParts()[0]
+        contentPart.getContentFragment().getOffset() == 0L
+        contentPart.getContentFragment().getLength() == fileMetadata.getTotalLength()
+        contentPart.getContentSource() == source
+    }
     
+    def "Scenario: download partial file content"() {
+        FileContent fileContent
+        given: "The file in distribution state"
+        File file = createDistributionFile()
+
+        and: "The promise response handler"
+        ResponseHandler responseHandler = Mock(ResponseHandler)
+
+        and: "The content parts should not be passed"
+        Collection<ContentFragment> fragments = Arrays.asList(createContentFragment(10L, 20L))
+
+        and: "The file storage should return binary source for download"
+        Source<BinaryChunk> source = Stub(Source)
+        fileStorage.getAccessOnRead(_, _) >> source
+
+        when: "The file is downloaded"
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+        
+        then: "The operation should be completed without error"
+        1 * responseHandler.onResponse(_)
+        
+        and: "The full content download operation should be passed"
+        1 * contentDownloader.downloadContentRange(_) >> {
+            fileContent = it[0]
+            return Promises.resolvedBy(null)
+        }
+        
+        and: "The file content type should be ${ContentType.RANGE}"
+        fileContent.getType() == ContentType.RANGE
+        
+        and: "The file locator from file should be equal to file locator from the file content"
+        file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
+        file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
+        
+        and: "The file metadata from file should be equal to file metadata from the file content"
+        FileMetadata fileMetadata = file.getFileMetadata()
+        FileMetadata contentMetadata = fileContent.getFileMetadata()
+        fileMetadata.getFileName() == contentMetadata.getFileName()
+        fileMetadata.getMediaType() == contentMetadata.getMediaType()
+        fileMetadata.getStatus() == contentMetadata.getStatus()
+        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
+        
+        and: "The content part should represent single specified fragment"
+        fileContent.getParts().size() == 1
+        ContentPart contentPart = fileContent.getParts()[0]
+        contentPart.getContentFragment().getOffset() == 10L
+        contentPart.getContentFragment().getLength() == 20L
+        contentPart.getContentSource() == source
+    }
     
+    def "Scenario: download multirange file content"() {
+        FileContent fileContent
+        given: "The file in distribution state"
+        File file = createDistributionFile()
+
+        and: "The promise response handler"
+        ResponseHandler responseHandler = Mock(ResponseHandler)
+
+        and: "The content parts should not be passed"
+        Collection<ContentFragment> fragments = Arrays.asList(createContentFragment(10L, 20L), createContentFragment(30L, 20L))
+
+        and: "The file storage should return binary source for download"
+        Source<BinaryChunk> firstSource = Stub(Source)
+        Source<BinaryChunk> secondSource = Stub(Source)
+        fileStorage.getAccessOnRead(_, _) >> firstSource >> secondSource
+
+        when: "The file is downloaded"
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+        
+        then: "The operation should be completed without error"
+        1 * responseHandler.onResponse(_)
+        
+        and: "The full content download operation should be passed"
+        1 * contentDownloader.downloadContentRanges(_) >> {
+            fileContent = it[0]
+            return Promises.resolvedBy(null)
+        }
+        
+        and: "The file content type should be ${ContentType.MULTIRANGE}"
+        fileContent.getType() == ContentType.MULTIRANGE
+        
+        and: "The file locator from file should be equal to file locator from the file content"
+        file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
+        file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
+        
+        and: "The file metadata from file should be equal to file metadata from the file content"
+        FileMetadata fileMetadata = file.getFileMetadata()
+        FileMetadata contentMetadata = fileContent.getFileMetadata()
+        fileMetadata.getFileName() == contentMetadata.getFileName()
+        fileMetadata.getMediaType() == contentMetadata.getMediaType()
+        fileMetadata.getStatus() == contentMetadata.getStatus()
+        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
+
+        and: "The two content parts should be contained into request"        
+        fileContent.getParts().size() == 2
+        
+        and: "The first part should represent first specified fragment"
+        ContentPart firstPart = fileContent.getParts()[0]
+        firstPart.getContentFragment().getOffset() == 10L
+        firstPart.getContentFragment().getLength() == 20L
+        firstPart.getContentSource() == firstSource
+        
+        and: "The second part should represent first specified fragment"
+        ContentPart secondPart = fileContent.getParts()[1]
+        secondPart.getContentFragment().getOffset() == 30L
+        secondPart.getContentFragment().getLength() == 20L
+        secondPart.getContentSource() == secondSource
+    }
+    
+    private ContentFragment createContentFragment(Long offset, Long size) {
+        return new ContentFragment() {
+            @Override
+            public Long getOffset() {
+                return offset;
+            }
+
+            @Override
+            public Long getLength() {
+                return size;
+            }
+        }
+    }
 
     private File createDraftFile() {
         return createFile(DRAFT, 0L)

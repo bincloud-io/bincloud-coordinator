@@ -9,6 +9,4 @@ public class Constants {
     public static final ErrorCode CONTENT_IS_UPLOADED_ERROR = ErrorCode.createFor(2L);
     public static final ErrorCode FILE_STORAGE_INCIDENT_ERROR = ErrorCode.createFor(3L);
     public static final ErrorCode CONTENT_IS_NOT_UPLOADED_ERROR = ErrorCode.createFor(4L);
-    
-
 }
