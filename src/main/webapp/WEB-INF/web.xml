@@ -3,26 +3,7 @@
 	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	version="3.1">
-	<display-name>bincloud-coordinator</display-name>
-	<module-name>coordinator</module-name>
+	<display-name>Binary Cloud Storage</display-name>
+	<module-name>bcs</module-name>
 	
-	<servlet>
-		<servlet-name>FileUploadServlet</servlet-name>
-		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.upload.HttpFileUploadServlet</servlet-class>
-		<async-supported>true</async-supported>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>FileUploadServlet</servlet-name>
-		<url-pattern>/resource/upload</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>FileDownloadServlet</servlet-name>
-		<servlet-class>io.bincloud.resources.port.adapter.endpoint.files.download.servlet.HttpSpecifiedRevisionDownloadServlet</servlet-class>
-		<async-supported>true</async-supported>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>FileDownloadServlet</servlet-name>
-		<url-pattern>/resource/revision/download</url-pattern>
-	</servlet-mapping>
 </web-app>

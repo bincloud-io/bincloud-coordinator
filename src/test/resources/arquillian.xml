@@ -15,7 +15,7 @@
 	</extension>
 	
 	<extension qualifier="jacoco">
-		<property name="includes">io.bincloud.*</property>
+		<property name="includes">io.bcs.*</property>
 	</extension>
 	
 	<container qualifier="wildfly-docker" default="true">
