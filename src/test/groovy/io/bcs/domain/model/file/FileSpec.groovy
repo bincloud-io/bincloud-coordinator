@@ -354,23 +354,23 @@ class FileSpec extends Specification {
 
         when: "The file is downloaded"
         WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
-        
+
         then: "The operation should be completed without error"
         1 * responseHandler.onResponse(_)
-        
+
         and: "The full content download operation should be passed"
         1 * contentDownloader.downloadFullContent(_) >> {
             fileContent = it[0]
             return Promises.resolvedBy(null)
         }
-        
+
         and: "The file content type should be ${ContentType.FULL}"
         fileContent.getType() == ContentType.FULL
-        
+
         and: "The file locator from file should be equal to file locator from the file content"
         file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
         file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
-        
+
         and: "The file metadata from file should be equal to file metadata from the file content"
         FileMetadata fileMetadata = file.getFileMetadata()
         FileMetadata contentMetadata = fileContent.getFileMetadata()
@@ -378,7 +378,7 @@ class FileSpec extends Specification {
         fileMetadata.getMediaType() == contentMetadata.getMediaType()
         fileMetadata.getStatus() == contentMetadata.getStatus()
         fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
-        
+
         and: "The content part should represent whole file"
         fileContent.getParts().size() == 1
         ContentPart contentPart = fileContent.getParts()[0]
@@ -386,7 +386,61 @@ class FileSpec extends Specification {
         contentPart.getContentFragment().getLength() == fileMetadata.getTotalLength()
         contentPart.getContentSource() == source
     }
-    
+
+    def "Scenario: download file content for wrong ranges"() {
+        FileContent fileContent
+        given: "The file in distribution state"
+        File file = createDistributionFile()
+
+        and: "The promise response handler"
+        ResponseHandler responseHandler = Mock(ResponseHandler)
+
+        and: "The content parts should not be passed"
+        Collection<ContentFragment> fragments = [
+            createRange(10L, 30L),
+            createRange(-10L, 100L)
+        ]
+
+        and: "The file storage should return binary source for download"
+        Source<BinaryChunk> source = Stub(Source)
+        fileStorage.getAccessOnRead(_, _) >> source
+
+        when: "The file is downloaded"
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+
+        then: "The operation should be completed without error"
+        1 * responseHandler.onResponse(_)
+
+        and: "The full content download operation should be passed"
+        1 * contentDownloader.downloadFullContent(_) >> {
+            fileContent = it[0]
+            return Promises.resolvedBy(null)
+        }
+
+        and: "The file content type should be ${ContentType.FULL}"
+        fileContent.getType() == ContentType.FULL
+
+        and: "The file locator from file should be equal to file locator from the file content"
+        file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
+        file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
+
+        and: "The file metadata from file should be equal to file metadata from the file content"
+        FileMetadata fileMetadata = file.getFileMetadata()
+        FileMetadata contentMetadata = fileContent.getFileMetadata()
+        fileMetadata.getFileName() == contentMetadata.getFileName()
+        fileMetadata.getMediaType() == contentMetadata.getMediaType()
+        fileMetadata.getStatus() == contentMetadata.getStatus()
+        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
+
+        and: "The content part should represent whole file"
+        fileContent.getParts().size() == 1
+        ContentPart contentPart = fileContent.getParts()[0]
+        contentPart.getContentFragment().getOffset() == 0L
+        contentPart.getContentFragment().getLength() == fileMetadata.getTotalLength()
+        contentPart.getContentSource() == source
+    }
+
+
     def "Scenario: download partial file content"() {
         FileContent fileContent
         given: "The file in distribution state"
@@ -396,7 +450,7 @@ class FileSpec extends Specification {
         ResponseHandler responseHandler = Mock(ResponseHandler)
 
         and: "The content parts should not be passed"
-        Collection<ContentFragment> fragments = Arrays.asList(createContentFragment(10L, 20L))
+        Collection<ContentFragment> fragments = Arrays.asList(createRange(10L, 29L))
 
         and: "The file storage should return binary source for download"
         Source<BinaryChunk> source = Stub(Source)
@@ -404,23 +458,23 @@ class FileSpec extends Specification {
 
         when: "The file is downloaded"
         WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
-        
+
         then: "The operation should be completed without error"
         1 * responseHandler.onResponse(_)
-        
+
         and: "The full content download operation should be passed"
         1 * contentDownloader.downloadContentRange(_) >> {
             fileContent = it[0]
             return Promises.resolvedBy(null)
         }
-        
+
         and: "The file content type should be ${ContentType.RANGE}"
         fileContent.getType() == ContentType.RANGE
-        
+
         and: "The file locator from file should be equal to file locator from the file content"
         file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
         file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
-        
+
         and: "The file metadata from file should be equal to file metadata from the file content"
         FileMetadata fileMetadata = file.getFileMetadata()
         FileMetadata contentMetadata = fileContent.getFileMetadata()
@@ -428,7 +482,7 @@ class FileSpec extends Specification {
         fileMetadata.getMediaType() == contentMetadata.getMediaType()
         fileMetadata.getStatus() == contentMetadata.getStatus()
         fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
-        
+
         and: "The content part should represent single specified fragment"
         fileContent.getParts().size() == 1
         ContentPart contentPart = fileContent.getParts()[0]
@@ -436,7 +490,7 @@ class FileSpec extends Specification {
         contentPart.getContentFragment().getLength() == 20L
         contentPart.getContentSource() == source
     }
-    
+
     def "Scenario: download multirange file content"() {
         FileContent fileContent
         given: "The file in distribution state"
@@ -446,7 +500,7 @@ class FileSpec extends Specification {
         ResponseHandler responseHandler = Mock(ResponseHandler)
 
         and: "The content parts should not be passed"
-        Collection<ContentFragment> fragments = Arrays.asList(createContentFragment(10L, 20L), createContentFragment(30L, 20L))
+        Collection<ContentFragment> fragments = Arrays.asList(createRange(10L, 29L), createRange(30L, 49L))
 
         and: "The file storage should return binary source for download"
         Source<BinaryChunk> firstSource = Stub(Source)
@@ -455,23 +509,23 @@ class FileSpec extends Specification {
 
         when: "The file is downloaded"
         WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
-        
+
         then: "The operation should be completed without error"
         1 * responseHandler.onResponse(_)
-        
+
         and: "The full content download operation should be passed"
         1 * contentDownloader.downloadContentRanges(_) >> {
             fileContent = it[0]
             return Promises.resolvedBy(null)
         }
-        
+
         and: "The file content type should be ${ContentType.MULTIRANGE}"
         fileContent.getType() == ContentType.MULTIRANGE
-        
+
         and: "The file locator from file should be equal to file locator from the file content"
         file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
         file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
-        
+
         and: "The file metadata from file should be equal to file metadata from the file content"
         FileMetadata fileMetadata = file.getFileMetadata()
         FileMetadata contentMetadata = fileContent.getFileMetadata()
@@ -480,34 +534,34 @@ class FileSpec extends Specification {
         fileMetadata.getStatus() == contentMetadata.getStatus()
         fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
 
-        and: "The two content parts should be contained into request"        
+        and: "The two content parts should be contained into request"
         fileContent.getParts().size() == 2
-        
+
         and: "The first part should represent first specified fragment"
         ContentPart firstPart = fileContent.getParts()[0]
         firstPart.getContentFragment().getOffset() == 10L
         firstPart.getContentFragment().getLength() == 20L
         firstPart.getContentSource() == firstSource
-        
+
         and: "The second part should represent first specified fragment"
         ContentPart secondPart = fileContent.getParts()[1]
         secondPart.getContentFragment().getOffset() == 30L
         secondPart.getContentFragment().getLength() == 20L
         secondPart.getContentSource() == secondSource
     }
-    
-    private ContentFragment createContentFragment(Long offset, Long size) {
-        return new ContentFragment() {
-            @Override
-            public Long getOffset() {
-                return offset;
-            }
 
-            @Override
-            public Long getLength() {
-                return size;
-            }
-        }
+    private Range createRange(Long start, Long end) {
+        return new Range() {
+                    @Override
+                    public Optional<Long> getStart() {
+                        return Optional.of(start);
+                    }
+
+                    @Override
+                    public Optional<Long> getEnd() {
+                        return Optional.of(end);
+                    }
+                }
     }
 
     private File createDraftFile() {

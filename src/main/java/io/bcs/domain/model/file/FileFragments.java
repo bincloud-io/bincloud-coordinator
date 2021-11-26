@@ -1,8 +1,6 @@
-package io.bcs.domain.model.file.fragments;
+package io.bcs.domain.model.file;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,42 +14,23 @@ public class FileFragments {
         super();
         this.fragments = createFragments(ranges, fileSize);
     }
-
-    public boolean isRequestedMultipleFragments() {
-        return fragments.size() > 1;
-    }
-
+    
     public Collection<ContentFragment> getParts() {
         return fragments;
     }
 
-    public ContentFragment getSinglePart() {
-        return fragments.iterator().next();
-    }
-
     private Collection<ContentFragment> createFragments(Collection<Range> ranges, Long fileSize) {
-        return Optional.of(createFragmentsFromRanges(ranges, fileSize)).filter(fragments -> !fragments.isEmpty())
-                .orElse(createFullSizeFragment(fileSize));
+        return createFragmentsFromRanges(ranges, fileSize);
     }
 
     private Collection<ContentFragment> createFragmentsFromRanges(Collection<Range> ranges, Long fileSize) {
         return ranges.stream().map(range -> new FileFragment(range, fileSize)).distinct().collect(Collectors.toList());
     }
-
-    private Collection<ContentFragment> createFullSizeFragment(Long fileSize) {
-        return new HashSet<ContentFragment>(Arrays.asList(new FileFragment(fileSize)));
-    }
-
-    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)   
     private static class FileFragment implements ContentFragment {
         private Long start;
         private Long end;
-
-        public FileFragment(Long fileSize) {
-            super();
-            this.start = 0L;
-            this.end = fileSize - 1;
-        }
 
         public FileFragment(Range range, Long fileSize) {
             super();

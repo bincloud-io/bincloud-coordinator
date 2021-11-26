@@ -1,4 +1,4 @@
-package io.bcs.domain.model.file.fragments;
+package io.bcs.domain.model.file;
 
 import java.util.Optional;
 

@@ -1,7 +1,9 @@
-package io.bcs.domain.model.file.fragments
+package io.bcs.domain.model.file
 
 import io.bcs.domain.model.ContentFragment
-import io.bcs.domain.model.file.fragments.FileFragments.UnsatisfiableRangeFormatException
+import io.bcs.domain.model.file.FileFragments
+import io.bcs.domain.model.file.Range
+import io.bcs.domain.model.file.FileFragments.UnsatisfiableRangeFormatException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -18,7 +20,7 @@ class FileFragmentsSpec extends Specification {
 		fragments.getParts().size() == 1
 		
 		and: "The fragment range offset should be ${downloadOffset}"
-		ContentFragment fragment = fragments.getSinglePart()
+		ContentFragment fragment = fragments.getParts()[0]
 		fragment.getOffset() == downloadOffset
 		
 		and: "The fragment range size should be ${downloadSize}"
@@ -53,23 +55,9 @@ class FileFragmentsSpec extends Specification {
 	}
 	
 	def "Scenario: create file fragments for empty ranges collection"() {
-		expect: "The whole file size fragment should be returned"
+		expect: "The empty fragments collection should be returned"
 		FileFragments fragments = new FileFragments([], 1000L)
-		fragments.getParts().size() == 1
-		ContentFragment fragment = fragments.getSinglePart()
-		fragment.getOffset() == 0L
-		fragment.getLength() == 1000L
-	}
-	
-	def "Scenario: check that requested multiple fragments"() {
-		expect: "Multiple fragments is requested only if ranges count > 1"
-		new FileFragments(ranges, 1000L).isRequestedMultipleFragments() == isMultipleFragmentsRequested
-		where:
-		ranges                                          || isMultipleFragmentsRequested
-		[]                                              || false
-		[createStubRange(0, 1)]                         || false
-		[createStubRange(0, 1), createStubRange(1, 1)]  || true
-		          
+		fragments.getParts().size() == 0
 	}
 	
 	private Range createStubRange(Long start, Long end) {

@@ -1,6 +1,7 @@
 package io.bcs.domain.model.file;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import io.bcs.domain.model.ContentFragment;
 import io.bcs.domain.model.ContentLocator;
 import io.bcs.domain.model.FileStorage;
 import io.bcs.domain.model.file.FileContent.ContentType;
+import io.bcs.domain.model.file.FileFragments.UnsatisfiableRangeFormatException;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;
 import io.bcs.domain.model.file.FileState.FileStateFactory;
 import io.bcs.domain.model.file.states.FileDisposedState;
@@ -106,9 +108,9 @@ public class File {
     }
 
     public Promise<Void> downloadContent(FileStorage fileStorage, ContentDownloader contentDownloader,
-            Collection<ContentFragment> fragments) {
+            Collection<Range> ranges) {
         return Promises.of(deferred -> {
-            getFileState().getContentAccess(fileStorage, fragments).chain(fileContent -> {
+            getFileState().getContentAccess(fileStorage, createFragments(ranges)).chain(fileContent -> {
                 if (fileContent.getType() == ContentType.RANGE) {
                     return contentDownloader.downloadContentRange(fileContent);
                 }
@@ -120,6 +122,15 @@ public class File {
                 return contentDownloader.downloadFullContent(fileContent);
             }).delegate(deferred);
         });
+    }
+
+    private Collection<ContentFragment> createFragments(Collection<Range> ranges) {
+        try {
+            FileFragments fragments = new FileFragments(ranges, contentLength);
+            return fragments.getParts();
+        } catch (UnsatisfiableRangeFormatException error) {
+            return Collections.emptyList();
+        }
     }
 
     public Lifecycle getLifecycle(FileStorage storage) {
