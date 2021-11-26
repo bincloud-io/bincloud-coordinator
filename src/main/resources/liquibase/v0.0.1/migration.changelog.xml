@@ -57,4 +57,40 @@
 				path="liquibase/v0.0.1/drop_sequence_generator.sql" />
 		</rollback>
 	</changeSet>
+
+	<changeSet id="CSET.FILE" author="Dmitry Mikhaylenko">
+		<createTable tableName="FILE">
+			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
+				remarks="The file name into file storage.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The storage name where file is stored.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STATUS" type="VARCHAR(16)"
+				remarks="The current file status name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="MEDIA_TYPE" type="VARCHAR(128)"
+				remarks="The storage media type name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="FILE_NAME" type="VARCHAR(256)"
+				remarks="The file download name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="CONTENT_LENGTH" type="BIGINT(20)"
+				remarks="The stored file content length.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="FILE"
+			columnNames="STORAGE_FILE_NAME" />
+	</changeSet>
 </databaseChangeLog>

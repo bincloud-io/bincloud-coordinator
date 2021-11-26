@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
@@ -56,16 +57,16 @@ public class File {
     private File(ContentLocator contentLocator, CreateFile createFileCommand) {
         super();
         this.storageName = contentLocator.getStorageName();
+        this.mediaType = extractMediaType(createFileCommand);
         this.storageFileName = contentLocator.getStorageFileName();
-        this.mediaType = createFileCommand.getMediaType();
-        this.fileName = createFileCommand.getFileName();
+        this.fileName = createFileCommand.getFileName().orElse(storageFileName);
         this.status = FileStatus.DRAFT;
         this.contentLength = 0L;
     }
 
     public static final Promise<File> create(FileStorage fileStorage, CreateFile command) {
         return Promises.of(deferred -> {
-            deferred.resolve(new File(fileStorage.create(command.getMediaType()), command));
+            deferred.resolve(new File(fileStorage.create(extractMediaType(command)), command));
         });
     }
 
@@ -137,6 +138,10 @@ public class File {
         return getFileState().getLifecycle(storage);
     }
 
+    private static String extractMediaType(CreateFile command) {
+        return command.getMediaType().orElse(DEFAULT_MEDIA_TYPE);
+    }
+
     private FileState getFileState() {
         return STATE_CREATOR.createStateFor(status, createEntityAccessor());
     }
@@ -175,9 +180,9 @@ public class File {
     }
 
     public interface CreateFile {
-        public String getMediaType();
+        public Optional<String> getMediaType();
 
-        public String getFileName();
+        public Optional<String> getFileName();
     }
 
     private static class FileStateCreator {

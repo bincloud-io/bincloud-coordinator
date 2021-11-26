@@ -78,7 +78,7 @@ class FileSpec extends Specification {
         this.fileStorage.create(MEDIA_TYPE) >> contentLocator()
 
         and: "The file creation command with media type ${MEDIA_TYPE}"
-        CreateFile command = createFileCommand()
+        CreateFile command = createFileCommand(MEDIA_TYPE, FILE_NAME)
 
         and: "The file create response handler"
         ResponseHandler responseHandler = Mock(ResponseHandler)
@@ -110,13 +110,51 @@ class FileSpec extends Specification {
         fileMetadata.getTotalLength() == 0L
     }
 
+    def "Scenario: successfully create new file for missig media type and file name"() {
+        File file
+        given: """The file storage creates the file, located: {storageName: ${STORAGE_NAME}, storageFileName: ${STORAGE_FILE_NAME}} for ${File.DEFAULT_MEDIA_TYPE}"""
+        this.fileStorage.create(File.DEFAULT_MEDIA_TYPE) >> contentLocator()
+
+        and: "The file creation command with media type empty media type and file name"
+        CreateFile command = createFileCommand(null, null)
+
+        and: "The file create response handler"
+        ResponseHandler responseHandler = Mock(ResponseHandler)
+
+        when: "The file is created"
+        WaitingPromise.of(File.create(fileStorage, command)).then(responseHandler).await()
+
+        then: "The response handler shoudl accept resolved file"
+        1 * responseHandler.onResponse(_) >> {file = it[0]}
+        ContentLocator fileContentLocator = file.getLocator();
+        FileMetadata fileMetadata = file.getFileMetadata()
+
+        and: "The storage file name should be ${STORAGE_FILE_NAME}"
+        fileContentLocator.getStorageFileName() == STORAGE_FILE_NAME
+
+        and: "The storage name should be ${STORAGE_NAME}"
+        fileContentLocator.getStorageName() == STORAGE_NAME
+
+        and: "The file name should be ${STORAGE_FILE_NAME}"
+        fileMetadata.getFileName() == STORAGE_FILE_NAME
+
+        and: "The file media type should be ${File.DEFAULT_MEDIA_TYPE}"
+        fileMetadata.getMediaType() == File.DEFAULT_MEDIA_TYPE
+
+        and: "The file status should be ${FileStatus.DRAFT}"
+        fileMetadata.getStatus() == FileStatus.DRAFT
+
+        and: "The file content length should be 0 bytes"
+        fileMetadata.getTotalLength() == 0L
+    }
+
     def "Scenario: create new file with file storage error"() {
         FileStorageException fileStorageException
         given: """The file storage creates the file, located: {storageName: ${STORAGE_NAME}, storageFileName: ${STORAGE_FILE_NAME}} for ${MEDIA_TYPE}"""
         this.fileStorage.create(MEDIA_TYPE) >> {throw new FileStorageException(new RuntimeException())}
 
         and: "The file creation command with media type ${MEDIA_TYPE}"
-        CreateFile command = createFileCommand()
+        CreateFile command = createFileCommand(MEDIA_TYPE, FILE_NAME)
 
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
@@ -604,10 +642,10 @@ class FileSpec extends Specification {
                 .build()
     }
 
-    private CreateFile createFileCommand() {
+    private CreateFile createFileCommand(String mediaType, String fileName) {
         CreateFile command = Stub(CreateFile)
-        command.getMediaType() >> MEDIA_TYPE
-        command.getFileName() >> FILE_NAME
+        command.getMediaType() >> Optional.ofNullable(mediaType)
+        command.getFileName() >> Optional.ofNullable(fileName)
         return command
     }
 
