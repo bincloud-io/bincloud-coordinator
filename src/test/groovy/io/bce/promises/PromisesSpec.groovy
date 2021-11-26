@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch
 import io.bce.promises.Promise.ChainingDeferredFunction
 import io.bce.promises.Promise.ChainingPromiseHandler
 import io.bce.promises.Promise.ErrorHandler
+import io.bce.promises.Promise.FinalizingHandler
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.promises.Promises.PromiseHasAlreadyBeenRejectedException
 import io.bce.promises.Promises.PromiseHasAlreadyBeenResolvedException
@@ -465,4 +466,42 @@ class PromisesSpec extends Specification {
 		then: "The error handler should catch the error"
 		1 * errorHandler.onError(error)
 	}
+    
+    def "Scenario: finalize on resolve"() {
+        CountDownLatch latch = new CountDownLatch(1)
+        RuntimeException error = new RuntimeException("ERROR")
+        
+        given: "The finalizer"
+        FinalizingHandler finalizer = Mock(FinalizingHandler)
+        
+        when: "The resolved promise"
+        Promises.resolvedBy(12345).finalize({
+            finalizer.onComplete()
+            latch.countDown()
+        })
+        
+        latch.await()
+        
+        then: "The finalizer should be excuted"
+        1 * finalizer.onComplete()
+    }
+    
+    def "Scenario: finalize on error"() {
+        CountDownLatch latch = new CountDownLatch(1)
+        RuntimeException error = new RuntimeException("ERROR")
+        
+        given: "The finalizer"
+        FinalizingHandler finalizer = Mock(FinalizingHandler)
+        
+        when: "The rejected promise"
+        Promises.rejectedBy(error).finalize({
+            finalizer.onComplete()
+            latch.countDown()
+        })
+        
+        latch.await()
+        
+        then: "The finalizer should be excuted"
+        1 * finalizer.onComplete()
+    }
 }
