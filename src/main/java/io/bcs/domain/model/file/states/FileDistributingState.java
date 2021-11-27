@@ -6,13 +6,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.bce.interaction.streaming.Source;
-import io.bce.interaction.streaming.Streamer;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.domain.model.ContentFragment;
 import io.bcs.domain.model.ContentLocator;
 import io.bcs.domain.model.FileStorage;
+import io.bcs.domain.model.file.ContentUploader;
 import io.bcs.domain.model.file.FileContent;
 import io.bcs.domain.model.file.FileContent.ContentPart;
 import io.bcs.domain.model.file.FileMetadata;
@@ -45,7 +45,7 @@ public class FileDistributingState extends FileState {
             }
 
             @Override
-            public LifecycleMethod<FileUploadStatistic> upload(Streamer streamer, Source<BinaryChunk> contentSource) {
+            public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
                 return new InacceptableLifecycleMethod<>(ContentUploadedException::new);
             }
         };

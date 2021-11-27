@@ -5,10 +5,8 @@ import static io.bcs.domain.model.file.FileStatus.DISPOSED
 import static io.bcs.domain.model.file.FileStatus.DISTRIBUTING
 import static io.bcs.domain.model.file.FileStatus.DRAFT
 
-import groovy.util.logging.Log
 import io.bce.interaction.streaming.Destination
 import io.bce.interaction.streaming.Source
-import io.bce.interaction.streaming.Stream
 import io.bce.interaction.streaming.Streamer
 import io.bce.interaction.streaming.Stream.Stat
 import io.bce.interaction.streaming.binary.BinaryChunk
@@ -237,19 +235,16 @@ class FileSpec extends Specification {
         and: "The content source"
         Source<BinaryChunk> source = Mock(Source)
 
-        and: "The data streamer"
-        Streamer streamer = Mock(Streamer)
+        and: "The content uploader"
         Destination<BinaryChunk> destination = Mock(Destination)
-        fileStorage.getAccessOnWrite(_) >> destination
-        Stream<BinaryChunk> stream = Mock(Stream)
-        streamer.createStream(source, destination) >> stream
-        stream.start() >> Promises.resolvedBy(createStat(DISTRIBUTIONING_CONTENT_LENGTH))
+        ContentUploader contentUploader = Mock(ContentUploader)
+        contentUploader.upload(_, _) >> Promises.resolvedBy(createStatistic(file, DISTRIBUTIONING_CONTENT_LENGTH))
 
         and: "The promise response handler"
         ResponseHandler<FileUploadStatistic> responseHandler = Mock(ResponseHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(uploadFile(file, streamer, source)).then(responseHandler).await()
+        WaitingPromise.of(uploadFile(file, contentUploader)).then(responseHandler).await()
         FileMetadata fileMetadata = file.getFileMetadata()
         ContentLocator fileLocator = file.getLocator()
 
@@ -273,16 +268,17 @@ class FileSpec extends Specification {
         and: "The content source"
         Source<BinaryChunk> source = Mock(Source)
 
-        and: "The data streamer"
-        Streamer streamer = Mock(Streamer)
-        Destination<BinaryChunk> destination = Mock(Destination)
+        and: "The content uploader"
+        ContentUploader contentUploader = Mock(ContentUploader)
+
+        and: "The file storage throws file storage exception"
         fileStorage.getAccessOnWrite(_) >> {throw new FileStorageException(new RuntimeException())}
 
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(uploadFile(file, streamer, source)).error(errorHandler).await()
+        WaitingPromise.of(uploadFile(file, contentUploader)).error(errorHandler).await()
         FileMetadata fileMetadata = file.getFileMetadata()
         ContentLocator fileLocator = file.getLocator()
 
@@ -303,14 +299,14 @@ class FileSpec extends Specification {
         and: "The content source"
         Source<BinaryChunk> source = Mock(Source)
 
-        and: "The data streamer"
-        Streamer streamer = Mock(Streamer)
+        and: "The content uploader"
+        ContentUploader contentUploader = Mock(ContentUploader)
 
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(uploadFile(file, streamer, source)).error(errorHandler).await()
+        WaitingPromise.of(uploadFile(file, contentUploader)).error(errorHandler).await()
 
         then: "The file has already been exception should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
@@ -326,14 +322,14 @@ class FileSpec extends Specification {
         and: "The content source"
         Source<BinaryChunk> source = Mock(Source)
 
-        and: "The data streamer"
-        Streamer streamer = Mock(Streamer)
+        and: "The content uploader"
+        ContentUploader contentUploader = Mock(ContentUploader)
 
         and: "The promise reject error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(uploadFile(file, streamer, source)).error(errorHandler).await()
+        WaitingPromise.of(uploadFile(file, contentUploader)).error(errorHandler).await()
 
         then: "The file has already been exception should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
@@ -614,18 +610,24 @@ class FileSpec extends Specification {
         return createFile(DISPOSED, 0L)
     }
 
-    private Promise<FileUploadStatistic> uploadFile(File file, Streamer streamer, Source<BinaryChunk> contentSource) {
-        return file.getLifecycle(fileStorage).upload(streamer, contentSource).execute()
+    private Promise<FileUploadStatistic> uploadFile(File file, ContentUploader uploader) {
+        return file.getLifecycle(fileStorage).upload(uploader).execute()
     }
 
     private Promise<Void> disposeFile(File file) {
         return file.getLifecycle(fileStorage).dispose().execute()
     }
 
-    private Stat createStat(Long contentSize) {
-        return new Stat() {
+    private FileUploadStatistic createStatistic(File file, Long contentSize) {
+        return new FileUploadStatistic() {
+
                     @Override
-                    public Long getSize() {
+                    public ContentLocator getLocator() {
+                        return file.getLocator();
+                    }
+
+                    @Override
+                    public Long getContentLength() {
                         return contentSize;
                     }
                 }
