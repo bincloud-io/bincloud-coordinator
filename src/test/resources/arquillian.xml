@@ -25,6 +25,7 @@
 			<property name="username">bincloud</property>
 			<property name="password">bincloud</property>
 			<property name="connectionTimeout">10000</property>
+			<!-- property name="javaVmArguments">-Xrunjdwp:dt_socket,address=8787,server=y,suspend=y</property-->
 		</configuration>
 	</container>
 </arquillian>

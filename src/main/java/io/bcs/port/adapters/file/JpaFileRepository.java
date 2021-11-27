@@ -3,15 +3,17 @@ package io.bcs.port.adapters.file;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import javax.transaction.TransactionManager;
 
 import io.bcs.domain.model.file.File;
 import io.bcs.domain.model.file.FileRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
 public class JpaFileRepository implements FileRepository {
     private final EntityManager entityManager;
+    private final TransactionManager transactionManager;
 
     @Override
     public Optional<File> findById(String storageFileName) {
@@ -19,17 +21,10 @@ public class JpaFileRepository implements FileRepository {
     }
 
     @Override
+    @SneakyThrows
     public void save(File file) {
-        EntityTransaction transaction = startTransaction();
+        transactionManager.begin();
         entityManager.merge(file);
-        transaction.commit();
-    }
-    
-    private EntityTransaction startTransaction() {
-        EntityTransaction transaction = entityManager.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        return transaction;
+        transactionManager.commit();
     }
 }
