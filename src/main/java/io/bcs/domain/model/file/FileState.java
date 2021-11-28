@@ -3,9 +3,6 @@ package io.bcs.domain.model.file;
 import java.util.Collection;
 
 import io.bce.promises.Promise;
-import io.bcs.domain.model.ContentFragment;
-import io.bcs.domain.model.ContentLocator;
-import io.bcs.domain.model.FileStorage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

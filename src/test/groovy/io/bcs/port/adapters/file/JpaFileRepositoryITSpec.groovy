@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 
 import io.bce.Locker
 import io.bcs.domain.model.Constants
-import io.bcs.domain.model.ContentLocator
+import io.bcs.domain.model.file.ContentLocator
 import io.bcs.domain.model.file.File
 import io.bcs.domain.model.file.FileMetadata
 import io.bcs.domain.model.file.FileRepository

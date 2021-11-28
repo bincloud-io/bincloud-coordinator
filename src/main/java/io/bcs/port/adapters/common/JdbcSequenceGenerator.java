@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.generators;
+package io.bcs.port.adapters.common;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
-public class JDBCSequenceGenerator implements Generator<Long> {
+public class JdbcSequenceGenerator implements Generator<Long> {
     private static final String KEY_GENERATION_QUERY = "SELECT SEQ_NEXT(?) FROM DUAL";
 
     private final DataSource dataSource;

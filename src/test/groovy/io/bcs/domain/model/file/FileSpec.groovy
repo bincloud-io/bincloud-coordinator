@@ -16,10 +16,6 @@ import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ErrorHandler
 import io.bce.promises.Promise.ResponseHandler
 import io.bcs.domain.model.Constants
-import io.bcs.domain.model.ContentFragment
-import io.bcs.domain.model.ContentLocator
-import io.bcs.domain.model.FileStorage
-import io.bcs.domain.model.FileStorageException
 import io.bcs.domain.model.file.File.CreateFile
 import io.bcs.domain.model.file.FileContent.ContentPart
 import io.bcs.domain.model.file.FileContent.ContentType

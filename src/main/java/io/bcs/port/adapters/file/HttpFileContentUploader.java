@@ -1,5 +1,9 @@
 package io.bcs.port.adapters.file;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.Stream;
@@ -7,16 +11,23 @@ import io.bce.interaction.streaming.Streamer;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.domain.model.ContentLocator;
+import io.bcs.domain.model.file.ContentLocator;
 import io.bcs.domain.model.file.ContentUploader;
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic;
+import io.bcs.port.adapters.common.InputStreamSource;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-public class FileContentUploader implements ContentUploader {
-    private Streamer streamer;
-    private Source<BinaryChunk> source;
+public class HttpFileContentUploader implements ContentUploader {
+    private final Streamer streamer;
+    private final Source<BinaryChunk> source;
+
+    public HttpFileContentUploader(Streamer streamer, HttpServletRequest request, int bufferSize) throws IOException {
+        super();
+        this.source = new InputStreamSource(request.getInputStream(), bufferSize);
+        this.streamer = streamer;
+    }
 
     @Override
     public Promise<FileUploadStatistic> upload(ContentLocator locator, Destination<BinaryChunk> destination) {

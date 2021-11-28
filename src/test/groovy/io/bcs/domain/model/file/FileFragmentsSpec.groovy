@@ -1,6 +1,5 @@
 package io.bcs.domain.model.file
 
-import io.bcs.domain.model.ContentFragment
 import io.bcs.domain.model.file.FileFragments
 import io.bcs.domain.model.file.Range
 import io.bcs.domain.model.file.FileFragments.UnsatisfiableRangeFormatException

@@ -13,19 +13,12 @@ public abstract class BinarySource implements Source<BinaryChunk> {
 
 	@Override
 	public void read(DestinationConnection<BinaryChunk> connection) {
-		submitChunks(connection);
-		connection.complete();
-	}
-	
-	private void submitChunks(DestinationConnection<BinaryChunk> connection) {
-		while (true) {
-			BinaryChunk chunk = reader.readChunk();
-			if (!chunk.isEmpty()) {
-				submitChunk(connection, chunk);
-			} else {
-				return;
-			}
-		}
+	    BinaryChunk chunk = reader.readChunk();
+        if (!chunk.isEmpty()) {
+            submitChunk(connection, chunk);
+        } else {
+            connection.complete();
+        }
 	}
 	
 	private void submitChunk(DestinationConnection<BinaryChunk> connection, BinaryChunk chunk) {

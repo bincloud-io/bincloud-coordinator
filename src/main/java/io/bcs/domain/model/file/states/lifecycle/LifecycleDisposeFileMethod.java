@@ -2,7 +2,7 @@ package io.bcs.domain.model.file.states.lifecycle;
 
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.domain.model.FileStorage;
+import io.bcs.domain.model.file.FileStorage;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;
 import io.bcs.domain.model.file.Lifecycle.LifecycleMethod;
 import lombok.RequiredArgsConstructor;

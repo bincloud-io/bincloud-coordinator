@@ -1,6 +1,7 @@
-package io.bcs.domain.model;
+package io.bcs.domain.model.file;
 
 import io.bce.domain.errors.ApplicationException;
+import io.bcs.domain.model.Constants;
 
 public class FileStorageException extends ApplicationException {
     private static final long serialVersionUID = -7436932297582987110L;

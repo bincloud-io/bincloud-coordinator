@@ -8,9 +8,6 @@ import java.util.Optional;
 
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.domain.model.ContentFragment;
-import io.bcs.domain.model.ContentLocator;
-import io.bcs.domain.model.FileStorage;
 import io.bcs.domain.model.file.FileContent.ContentType;
 import io.bcs.domain.model.file.FileFragments.UnsatisfiableRangeFormatException;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;

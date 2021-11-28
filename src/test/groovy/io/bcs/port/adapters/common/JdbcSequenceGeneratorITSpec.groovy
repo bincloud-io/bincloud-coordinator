@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.generators
+package io.bcs.port.adapters.common
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
@@ -18,14 +18,14 @@ import org.junit.runner.RunWith
 import io.bce.Generator
 import io.bce.MustNeverBeHappenedError
 import io.bce.domain.errors.ApplicationException
-import io.bcs.port.adapters.generators.JDBCSequenceGenerator
+import io.bcs.port.adapters.common.JdbcSequenceGenerator
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
-class JDBCSequenceGeneratorITSpec extends Specification {
+class JdbcSequenceGeneratorITSpec extends Specification {
     private static final String MIGRATION_SCRIPT ="db-init/sequence/sequence.changelog.xml"
     private static final String IN_MEM_DATABASE_URL = "jdbc:h2:mem:sequences"
     private static final String DATABASE_USERNAME = "sa"
@@ -41,7 +41,7 @@ class JDBCSequenceGeneratorITSpec extends Specification {
                 .apply()
                 .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
                 .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
-                .appendClasses(JDBCSequenceGenerator)
+                .appendClasses(JdbcSequenceGenerator)
                 .appendResource("liquibase")
                 .appendResource("db-init")
                 .appendManifestResource("META-INF/beans.xml", "beans.xml")
@@ -64,7 +64,7 @@ class JDBCSequenceGeneratorITSpec extends Specification {
         databaseConfigurer.setup(MIGRATION_SCRIPT)
 
         and: "The sequence generator connected to its one"
-        Generator<Long> generator = new JDBCSequenceGenerator(dataSource, "SEQUENCE")
+        Generator<Long> generator = new JdbcSequenceGenerator(dataSource, "SEQUENCE")
 
         expect: "The auto incremented integer numbers will be generated"
         IntStream.range(1, 10).forEach({
