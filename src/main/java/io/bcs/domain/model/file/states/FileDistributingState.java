@@ -69,7 +69,7 @@ public class FileDistributingState extends FileState {
         private Collection<ContentPart> getContentParts(FileStorage storage, Collection<ContentFragment> fragments) {
             return normalizeFragments(fragments).stream()
                     .collect(Collectors.mapping(
-                            fragment -> new StorageContentPart(fragment, storage.getAccessOnRead(locator, fragments)),
+                            fragment -> new StorageContentPart(fragment, storage.getAccessOnRead(locator, fragment)),
                             Collectors.toList()));
         }
 

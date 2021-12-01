@@ -1,8 +1,7 @@
 package io.bcs.domain.model.file
 
-import io.bcs.domain.model.file.FileFragments
-import io.bcs.domain.model.file.Range
-import io.bcs.domain.model.file.FileFragments.UnsatisfiableRangeFormatException
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
+import io.bcs.domain.model.Constants
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -43,7 +42,10 @@ class FileFragmentsSpec extends Specification {
 		new FileFragments([inputRange], totalSize)
 		
 		then: "The unsatisfiable file range exception should be thrown"
-		thrown(UnsatisfiableRangeFormatException)
+		UnsatisfiableRangeFormatException error = thrown(UnsatisfiableRangeFormatException)
+        error.getContextId() == Constants.CONTEXT
+        error.getErrorSeverity() == ErrorSeverity.BUSINESS
+        error.getErrorCode() == Constants.UNSATISFIABLE_RANGES_FORMAT_ERROR
         		
 		where:
 		start | end  | totalSize 

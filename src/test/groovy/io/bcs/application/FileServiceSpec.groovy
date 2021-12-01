@@ -6,26 +6,26 @@ import static io.bcs.domain.model.file.FileStatus.DRAFT
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bce.interaction.streaming.Destination
 import io.bce.interaction.streaming.Source
+import io.bce.promises.Promises
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ErrorHandler
 import io.bce.promises.Promise.ResponseHandler
-import io.bce.promises.Promises
 import io.bce.validation.ErrorMessage
 import io.bce.validation.ValidationService
 import io.bce.validation.ValidationState
 import io.bcs.domain.model.Constants
 import io.bcs.domain.model.PrimaryValidationException
-import io.bcs.domain.model.file.ContentDownloader
 import io.bcs.domain.model.file.ContentLocator
+import io.bcs.domain.model.file.ContentReceiver
 import io.bcs.domain.model.file.ContentUploader
 import io.bcs.domain.model.file.File
 import io.bcs.domain.model.file.FileNotExistsException
 import io.bcs.domain.model.file.FileRepository
 import io.bcs.domain.model.file.FileStatus
 import io.bcs.domain.model.file.FileStorage
-import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
-import io.bincloud.storage.port.adapter.endpoint.FileStorageService
 import io.bcs.domain.model.file.File.CreateFile
+import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
+import io.bcs.domain.model.file.FileNotSpecifiedException
 import spock.lang.Specification
 
 class FileServiceSpec extends Specification {
@@ -142,6 +142,25 @@ class FileServiceSpec extends Specification {
         error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
     }
 
+    def "Scenario: upload content for unknown file"() {
+        FileNotSpecifiedException error
+        given: "The file uploader"
+        ContentUploader contentUploader = Mock(ContentUploader)
+        
+        and: "The error handler"
+        ErrorHandler errorHandler = Mock(ErrorHandler)
+
+        
+        when: "The file is uploaded for unspecified file storage name"
+        WaitingPromise.of(fileService.upload(contentUploader).execute(Optional.empty())).error(errorHandler).await()
+        
+        then: "The file is not specified error should be happened"
+        1 * errorHandler.onError(_) >> {error = it[0]}
+        error.getContextId() == Constants.CONTEXT
+        error.getErrorSeverity() == ErrorSeverity.BUSINESS
+        error.getErrorCode() == Constants.FILE_IS_NOT_SPECIFIED
+    }
+    
     def "Scenario: upload content to existing file"() {
         File file
         FileUploadStatistic statistic
@@ -159,7 +178,7 @@ class FileServiceSpec extends Specification {
         ResponseHandler responseHandler = Mock(ResponseHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(fileService.upload(contentUploader).execute(STORAGE_FILE_NAME)).then(responseHandler).await()
+        WaitingPromise.of(fileService.upload(contentUploader).execute(Optional.ofNullable(STORAGE_FILE_NAME))).then(responseHandler).await()
 
         then: "The file should be stored in the distributing state"
         1 * fileRepository.save(_) >> {file = it[0]}
@@ -186,7 +205,7 @@ class FileServiceSpec extends Specification {
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(fileService.upload(contentUploader).execute(STORAGE_FILE_NAME)).error(errorHandler).await()
+        WaitingPromise.of(fileService.upload(contentUploader).execute(Optional.ofNullable(STORAGE_FILE_NAME))).error(errorHandler).await()
 
         then: "The file not exists error should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
@@ -194,13 +213,32 @@ class FileServiceSpec extends Specification {
         error.getErrorSeverity() == ErrorSeverity.BUSINESS
         error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
     }
+    
+    def "Scenario: download content from unknown file"() {
+        FileNotSpecifiedException error
+        given: "The file content receiver"
+        ContentReceiver contentReceiver = Mock(ContentReceiver)
+        
+        and: "The error handler"
+        ErrorHandler errorHandler = Mock(ErrorHandler)
+
+        
+        when: "The file is uploaded for unspecified file storage name"
+        WaitingPromise.of(fileService.download(contentReceiver).execute(downloadCommand(Optional.empty()))).error(errorHandler).await()
+        
+        then: "The file is not specified error should be happened"
+        1 * errorHandler.onError(_) >> {error = it[0]}
+        error.getContextId() == Constants.CONTEXT
+        error.getErrorSeverity() == ErrorSeverity.BUSINESS
+        error.getErrorCode() == Constants.FILE_IS_NOT_SPECIFIED
+    }
 
     def "Scenario: download existing file content"() {
         given: "The distributing file"
         this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createFile(DISTRIBUTING, DISTRIBUTIONING_CONTENT_LENGTH))
 
         and: "The content downloader"
-        ContentDownloader contentDownloader = Mock(ContentDownloader)
+        ContentReceiver contentDownloader = Mock(ContentReceiver)
 
 
         and: "The file storage is going get access on write"
@@ -210,10 +248,10 @@ class FileServiceSpec extends Specification {
         ResponseHandler responseHandler = Mock(ResponseHandler)
 
         when: "The file is uploaded"
-        WaitingPromise.of(fileService.download(contentDownloader).execute(downloadCommand())).then(responseHandler).await()
+        WaitingPromise.of(fileService.download(contentDownloader).execute(downloadCommand(Optional.of(STORAGE_FILE_NAME)))).then(responseHandler).await()
 
         then: "The file content downloading should be started"
-        1 * contentDownloader.downloadFullContent(_) >> Promises.resolvedBy(null)
+        1 * contentDownloader.receiveFullContent(_) >> Promises.resolvedBy(null)
 
         and: "The response handler should be resolved"
         1 * responseHandler.onResponse(_)
@@ -225,13 +263,13 @@ class FileServiceSpec extends Specification {
         this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.empty()
 
         and: "The content downloader"
-        ContentDownloader contentDownloader = Mock(ContentDownloader)
+        ContentReceiver contentDownloader = Mock(ContentReceiver)
 
         and: "The error handler"
         ErrorHandler errorHandler = Mock(ErrorHandler)
 
         when: "The file is downloaded"
-        WaitingPromise.of(fileService.download(contentDownloader).execute(downloadCommand())).error(errorHandler).await()
+        WaitingPromise.of(fileService.download(contentDownloader).execute(downloadCommand(Optional.of(STORAGE_FILE_NAME)))).error(errorHandler).await()
 
         then: "The file not exists error should be happened"
         1 * errorHandler.onError(_) >> {error = it[0]}
@@ -265,9 +303,9 @@ class FileServiceSpec extends Specification {
         return contentLocator
     }
 
-    private DownloadCommand downloadCommand() {
+    private DownloadCommand downloadCommand(Optional<String> storageFileName) {
         return Stub(DownloadCommand) {
-            getStorageFileName() >> STORAGE_FILE_NAME
+            getStorageFileName() >> storageFileName
             getRanges() >> []
         }
     }

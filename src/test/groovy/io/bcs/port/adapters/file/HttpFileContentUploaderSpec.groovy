@@ -11,13 +11,13 @@ import io.bce.interaction.streaming.Source
 import io.bce.interaction.streaming.Stream
 import io.bce.interaction.streaming.Streamer
 import io.bce.interaction.streaming.binary.BinaryChunk
+import io.bce.interaction.streaming.binary.OutputStreamDestination
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.promises.WaitingPromise
 import io.bce.streaming.DirectStreamer
 import io.bcs.domain.model.file.ContentLocator
 import io.bcs.domain.model.file.ContentUploader
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
-import io.bcs.port.adapters.common.OutputStreamDestination
 import spock.lang.Specification
 
 class HttpFileContentUploaderSpec extends Specification {

@@ -1,8 +1,9 @@
-package io.bcs.port.adapters.common
+package io.bce.interaction.streaming.binary
 
 import io.bce.domain.errors.UnexpectedErrorException
 import io.bce.interaction.streaming.Destination.SourceConnection
 import io.bce.interaction.streaming.binary.BinaryChunk
+import io.bce.interaction.streaming.binary.OutputStreamDestination
 import spock.lang.Specification
 
 class OutputStreamDestinationSpec extends Specification {

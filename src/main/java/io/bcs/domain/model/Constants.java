@@ -10,5 +10,7 @@ public class Constants {
     public static final ErrorCode CONTENT_IS_UPLOADED_ERROR = ErrorCode.createFor(3L);
     public static final ErrorCode FILE_STORAGE_INCIDENT_ERROR = ErrorCode.createFor(4L);
     public static final ErrorCode CONTENT_IS_NOT_UPLOADED_ERROR = ErrorCode.createFor(5L);
-    public static final ErrorCode FILE_NOT_EXIST_ERROR = ErrorCode.createFor(6L);
+    public static final ErrorCode UNSATISFIABLE_RANGES_FORMAT_ERROR = ErrorCode.createFor(6L);
+    public static final ErrorCode FILE_NOT_EXIST_ERROR = ErrorCode.createFor(7L);
+    public static final ErrorCode FILE_IS_NOT_SPECIFIED = ErrorCode.createFor(8L);
 }

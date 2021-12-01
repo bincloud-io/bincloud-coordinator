@@ -78,12 +78,4 @@ public class FileFragments {
             return start.compareTo(0L) < 0;
         }
     }
-    
-    public static class UnsatisfiableRangeFormatException extends RuntimeException {
-        private static final long serialVersionUID = -5482382949706358492L;
-
-        public UnsatisfiableRangeFormatException() {
-            super("Range start value should be greater than range end value and range start value should be positive!");
-        }
-    }
 }

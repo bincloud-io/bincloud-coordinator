@@ -1,7 +1,6 @@
 package io.bcs.domain.model.file;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.domain.model.file.FileContent.ContentType;
-import io.bcs.domain.model.file.FileFragments.UnsatisfiableRangeFormatException;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;
 import io.bcs.domain.model.file.FileState.FileStateFactory;
 import io.bcs.domain.model.file.states.FileDisposedState;
@@ -102,33 +100,34 @@ public class File {
             public Long getTotalLength() {
                 return contentLength;
             }
+
+            @Override
+            public Disposition getDefaultDisposition() {
+                return Disposition.INLINE;
+            }
         };
     }
 
-    public Promise<Void> downloadContent(FileStorage fileStorage, ContentDownloader contentDownloader,
+    public Promise<Void> downloadContent(FileStorage fileStorage, ContentReceiver contentDownloader,
             Collection<Range> ranges) {
         return Promises.of(deferred -> {
             getFileState().getContentAccess(fileStorage, createFragments(ranges)).chain(fileContent -> {
                 if (fileContent.getType() == ContentType.RANGE) {
-                    return contentDownloader.downloadContentRange(fileContent);
+                    return contentDownloader.receiveContentRange(fileContent);
                 }
 
                 if (fileContent.getType() == ContentType.MULTIRANGE) {
-                    return contentDownloader.downloadContentRanges(fileContent);
+                    return contentDownloader.receiveContentRanges(fileContent);
                 }
 
-                return contentDownloader.downloadFullContent(fileContent);
+                return contentDownloader.receiveFullContent(fileContent);
             }).delegate(deferred);
         });
     }
 
     private Collection<ContentFragment> createFragments(Collection<Range> ranges) {
-        try {
-            FileFragments fragments = new FileFragments(ranges, contentLength);
-            return fragments.getParts();
-        } catch (UnsatisfiableRangeFormatException error) {
-            return Collections.emptyList();
-        }
+        FileFragments fragments = new FileFragments(ranges, contentLength);
+        return fragments.getParts();
     }
 
     public Lifecycle getLifecycle(FileStorage storage) {

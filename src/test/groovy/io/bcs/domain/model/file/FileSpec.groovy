@@ -5,10 +5,9 @@ import static io.bcs.domain.model.file.FileStatus.DISPOSED
 import static io.bcs.domain.model.file.FileStatus.DISTRIBUTING
 import static io.bcs.domain.model.file.FileStatus.DRAFT
 
+import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bce.interaction.streaming.Destination
 import io.bce.interaction.streaming.Source
-import io.bce.interaction.streaming.Streamer
-import io.bce.interaction.streaming.Stream.Stat
 import io.bce.interaction.streaming.binary.BinaryChunk
 import io.bce.promises.Promise
 import io.bce.promises.Promises
@@ -19,6 +18,7 @@ import io.bcs.domain.model.Constants
 import io.bcs.domain.model.file.File.CreateFile
 import io.bcs.domain.model.file.FileContent.ContentPart
 import io.bcs.domain.model.file.FileContent.ContentType
+import io.bcs.domain.model.file.FileMetadata.Disposition
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic
 import io.bcs.domain.model.file.states.ContentNotUploadedException
 import io.bcs.domain.model.file.states.ContentUploadedException
@@ -34,11 +34,11 @@ class FileSpec extends Specification {
     public static final Long DISTRIBUTIONING_CONTENT_LENGTH = 100L
 
     private FileStorage fileStorage;
-    private ContentDownloader contentDownloader;
+    private ContentReceiver contentDownloader;
 
     def setup() {
         this.fileStorage = Stub(FileStorage)
-        this.contentDownloader = Mock(ContentDownloader)
+        this.contentDownloader = Mock(ContentReceiver)
     }
 
     def "Scenario: create file by default constructor"() {
@@ -64,6 +64,9 @@ class FileSpec extends Specification {
 
         and: "The file content length should be 0 bytes"
         fileMetadata.getTotalLength() == 0L
+        
+        and: "The file default disposition should be attachment"
+        fileMetadata.getDefaultDisposition() == Disposition.INLINE
     }
 
     def "Scenario: successfully create new file"() {
@@ -102,6 +105,9 @@ class FileSpec extends Specification {
 
         and: "The file content length should be 0 bytes"
         fileMetadata.getTotalLength() == 0L
+        
+        and: "The file default disposition should be attachment"
+        fileMetadata.getDefaultDisposition() == Disposition.INLINE
     }
 
     def "Scenario: successfully create new file for missig media type and file name"() {
@@ -140,6 +146,9 @@ class FileSpec extends Specification {
 
         and: "The file content length should be 0 bytes"
         fileMetadata.getTotalLength() == 0L
+        
+        and: "The file default disposition should be attachment"
+        fileMetadata.getDefaultDisposition() == Disposition.INLINE
     }
 
     def "Scenario: create new file with file storage error"() {
@@ -389,7 +398,7 @@ class FileSpec extends Specification {
         1 * responseHandler.onResponse(_)
 
         and: "The full content download operation should be passed"
-        1 * contentDownloader.downloadFullContent(_) >> {
+        1 * contentDownloader.receiveFullContent(_) >> {
             fileContent = it[0]
             return Promises.resolvedBy(null)
         }
@@ -418,12 +427,12 @@ class FileSpec extends Specification {
     }
 
     def "Scenario: download file content for wrong ranges"() {
-        FileContent fileContent
+        UnsatisfiableRangeFormatException error
         given: "The file in distribution state"
         File file = createDistributionFile()
 
-        and: "The promise response handler"
-        ResponseHandler responseHandler = Mock(ResponseHandler)
+        and: "The promise reject error handler"
+        ErrorHandler errorHandler = Mock(ErrorHandler)
 
         and: "The content parts should not be passed"
         Collection<ContentFragment> fragments = [
@@ -436,41 +445,15 @@ class FileSpec extends Specification {
         fileStorage.getAccessOnRead(_, _) >> source
 
         when: "The file is downloaded"
-        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+        WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).error(errorHandler).await()
 
-        then: "The operation should be completed without error"
-        1 * responseHandler.onResponse(_)
-
-        and: "The full content download operation should be passed"
-        1 * contentDownloader.downloadFullContent(_) >> {
-            fileContent = it[0]
-            return Promises.resolvedBy(null)
-        }
-
-        and: "The file content type should be ${ContentType.FULL}"
-        fileContent.getType() == ContentType.FULL
-
-        and: "The file locator from file should be equal to file locator from the file content"
-        file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
-        file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
-
-        and: "The file metadata from file should be equal to file metadata from the file content"
-        FileMetadata fileMetadata = file.getFileMetadata()
-        FileMetadata contentMetadata = fileContent.getFileMetadata()
-        fileMetadata.getFileName() == contentMetadata.getFileName()
-        fileMetadata.getMediaType() == contentMetadata.getMediaType()
-        fileMetadata.getStatus() == contentMetadata.getStatus()
-        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
-
-        and: "The content part should represent whole file"
-        fileContent.getParts().size() == 1
-        ContentPart contentPart = fileContent.getParts()[0]
-        contentPart.getContentFragment().getOffset() == 0L
-        contentPart.getContentFragment().getLength() == fileMetadata.getTotalLength()
-        contentPart.getContentSource() == source
+        then: "The unsatisfiable range format error should be happened"
+        1 * errorHandler.onError(_) >> {error = it[0]}
+        error.getContextId() == Constants.CONTEXT
+        error.getErrorSeverity() == ErrorSeverity.BUSINESS
+        error.getErrorCode() == Constants.UNSATISFIABLE_RANGES_FORMAT_ERROR
     }
-
-
+    
     def "Scenario: download partial file content"() {
         FileContent fileContent
         given: "The file in distribution state"
@@ -493,7 +476,7 @@ class FileSpec extends Specification {
         1 * responseHandler.onResponse(_)
 
         and: "The full content download operation should be passed"
-        1 * contentDownloader.downloadContentRange(_) >> {
+        1 * contentDownloader.receiveContentRange(_) >> {
             fileContent = it[0]
             return Promises.resolvedBy(null)
         }
@@ -544,7 +527,7 @@ class FileSpec extends Specification {
         1 * responseHandler.onResponse(_)
 
         and: "The full content download operation should be passed"
-        1 * contentDownloader.downloadContentRanges(_) >> {
+        1 * contentDownloader.receiveContentRanges(_) >> {
             fileContent = it[0]
             return Promises.resolvedBy(null)
         }

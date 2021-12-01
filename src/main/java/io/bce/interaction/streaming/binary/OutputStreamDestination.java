@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.common;
+package io.bce.interaction.streaming.binary;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 import io.bce.domain.errors.UnexpectedErrorException;
 import io.bce.interaction.streaming.binary.BinaryChunk.BinaryChunkWriter;
-import io.bce.interaction.streaming.binary.BinaryDestination;
 import lombok.NonNull;
 
 public class OutputStreamDestination extends BinaryDestination implements Closeable {

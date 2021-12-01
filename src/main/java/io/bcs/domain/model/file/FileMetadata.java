@@ -8,4 +8,10 @@ public interface FileMetadata {
     public String getFileName();
 
     public Long getTotalLength();
+
+    public Disposition getDefaultDisposition();
+
+    public enum Disposition {
+        INLINE, ATTACHMENT;
+    }
 }
