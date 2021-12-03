@@ -262,6 +262,7 @@ class FileSpec extends Specification {
 
         and: "The content length should be updated"
         fileMetadata.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
+        fileMetadata.getStatus() == FileStatus.DISTRIBUTING
     }
 
     def "Scenario: upload file content with error to file in the draft state"() {

@@ -35,22 +35,22 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
 
     @Override
     public Promise<Void> receiveFullContent(FileContent content) {
-        return transferContent(new SingleRangeContentSource(content)).chain(stat -> {
-            return HttpFileDataReceiver.super.receiveFullContent(content);
+        return HttpFileDataReceiver.super.receiveFullContent(content).chain((v, deferred) -> {
+            transferContent(new SingleRangeContentSource(content)).then(s -> deferred.resolve(null));
         });
     }
 
     @Override
     public Promise<Void> receiveContentRange(FileContent content) {
-        return transferContent(new SingleRangeContentSource(content)).chain(stat -> {
-            return HttpFileDataReceiver.super.receiveContentRange(content);
+        return HttpFileDataReceiver.super.receiveContentRange(content).chain((v, deferred) -> {
+            transferContent(new SingleRangeContentSource(content)).then(s -> deferred.resolve(null));
         });
     }
 
     @Override
     public Promise<Void> receiveContentRanges(FileContent content) {
-        return transferContent(new MultiRangeContentSource(content)).chain(stat -> {
-            return HttpFileDataReceiver.super.receiveContentRanges(content);
+        return HttpFileDataReceiver.super.receiveContentRanges(content).chain((v, deferred) -> {
+            transferContent(new MultiRangeContentSource(content)).then(s -> deferred.resolve(null));
         });
     }
 

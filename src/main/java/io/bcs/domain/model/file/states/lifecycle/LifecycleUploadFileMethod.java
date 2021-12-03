@@ -22,7 +22,7 @@ public class LifecycleUploadFileMethod implements LifecycleMethod<FileUploadStat
         return Promises.of(deferred -> {
             Destination<BinaryChunk> destination = storage.getAccessOnWrite(entityAccessor.getLocator());
             uploader.upload(entityAccessor.getLocator(), destination).then(statistic -> {
-                entityAccessor.updateContentLength(statistic.getContentLength());
+                entityAccessor.startFileDistribution(statistic.getContentLength());
             }).delegate(deferred);
         });
     }

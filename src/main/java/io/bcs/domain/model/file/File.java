@@ -160,14 +160,15 @@ public class File {
             }
 
             @Override
-            public void updateContentLength(Long contentLength) {
-                File.this.updateContentLength(contentLength);
+            public void startFileDistribution(Long contentLength) {
+                File.this.startFileDistribution(contentLength);
             }
         };
     }
 
-    private void updateContentLength(Long contentLength) {
+    private void startFileDistribution(Long contentLength) {
         this.contentLength = contentLength;
+        this.status = FileStatus.DISTRIBUTING;
     }
 
     private void dispose() {

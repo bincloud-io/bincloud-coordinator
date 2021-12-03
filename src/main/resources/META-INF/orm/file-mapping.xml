@@ -17,6 +17,7 @@
 
 			<basic name="status">
 				<column name="STATUS" />
+				<enumerated>STRING</enumerated>
 			</basic>
 
 			<basic name="mediaType">

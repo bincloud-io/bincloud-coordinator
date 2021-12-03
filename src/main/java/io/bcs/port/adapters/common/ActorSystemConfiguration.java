@@ -4,8 +4,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -14,13 +12,13 @@ import io.bce.actor.ActorSystem;
 import io.bce.actor.Actors;
 import io.bce.actor.CorrelationKeyGenerator;
 import io.bce.actor.EventLoop.Dispatcher;
-import io.bcs.port.adapters.ActorSystemProperties;
 import io.bce.actor.ExecutorServiceDispatcher;
+import io.bcs.port.adapters.ActorSystemProperties;
 
 @ApplicationScoped
 public class ActorSystemConfiguration {
     public static final int THREADS_PER_CORE = 10;
-    
+
     @Inject
     private ActorSystemProperties actorSystemProperties;
 
@@ -39,22 +37,12 @@ public class ActorSystemConfiguration {
     @Produces
     @ApplicationScoped
     public ActorSystem actorSystem() {
-        return Actors.create(configurer -> {
+        ActorSystem actorSystem = Actors.create(configurer -> {
             return configurer.withCorrelationKeyGenerator(correlationKeyGenerator()).withDispatcher(dispatcher())
                     .configure();
         });
-    }
-
-    @PostConstruct
-    public void initializeActorSystem() {
-        ActorSystem actorSystem = actorSystem();
         actorSystem.start();
-    }
-
-    @PreDestroy
-    public void shutdownActorSystem() {
-        ActorSystem actorSystem = actorSystem();
-        actorSystem.shutdown();
+        return actorSystem;
     }
 
     private int processorsCount() {

@@ -2,7 +2,6 @@ package io.bcs.port.adapters.file;
 
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -13,6 +12,7 @@ import javax.transaction.TransactionManager;
 import io.bce.Generator;
 import io.bce.validation.DefaultValidationContext;
 import io.bce.validation.ValidationService;
+import io.bcs.application.ContentService;
 import io.bcs.application.FileService;
 import io.bcs.domain.model.file.FileRepository;
 import io.bcs.domain.model.file.FileStorage;
@@ -23,7 +23,8 @@ public class ContentLoadingConfiguration {
     @PersistenceContext(unitName = "central")
     private EntityManager entityManager;
 
-    @Resource
+    @Inject
+    @SuppressWarnings("cdi-ambiguous-dependency")
     private TransactionManager transactionManager;
 
     @Inject
@@ -48,6 +49,11 @@ public class ContentLoadingConfiguration {
     public FileStorage fileStorage() {
         return new LocalFileSystemStorage(fileNameGenerator(), contentLoadingProperties.getStorageName(),
                 contentLoadingProperties.getBaseDirectory(), contentLoadingProperties.getBufferSize());
+    }
+    
+    @Produces
+    public ContentService contentService() {
+        return new ContentService(fileRepository(), fileStorage());
     }
 
     @Produces

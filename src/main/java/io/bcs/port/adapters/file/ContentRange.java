@@ -12,7 +12,7 @@ public class ContentRange {
     public ContentRange(FileMetadata metadata, ContentPart contentPart) {
         ContentFragment fragment = contentPart.getContentFragment();
         this.rangeStart = fragment.getOffset();
-        this.rangeEnd = this.rangeStart + fragment.getLength();
+        this.rangeEnd = this.rangeStart + fragment.getLength() - 1;
         this.totalLength = metadata.getTotalLength();
     }
     

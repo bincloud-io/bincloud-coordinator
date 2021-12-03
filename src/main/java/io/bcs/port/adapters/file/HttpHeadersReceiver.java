@@ -22,7 +22,7 @@ public class HttpHeadersReceiver implements ContentReceiver {
             setFileContentTypeHeader(content);
             setDispositionHeader(content);
             setAcceptRangesHeader();
-            setContentLengthHeader(content);
+            setFullContentLengthHeader(content);
             setSuccessResponseCode();
             deferred.resolve(null);
         });
@@ -34,7 +34,7 @@ public class HttpHeadersReceiver implements ContentReceiver {
             setFileContentTypeHeader(content);
             setDispositionHeader(content);
             setAcceptRangesHeader();
-            setContentLengthHeader(content);
+            setRangeContentLengthHeader(content);
             setContentRangeHeader(content);
             setPartialContentResponseCode();
             deferred.resolve(null);
@@ -51,14 +51,22 @@ public class HttpHeadersReceiver implements ContentReceiver {
             deferred.resolve(null);
         });
     }
-    
+
     private void setContentRangeHeader(FileContent content) {
         ContentPart contentPart = content.getParts().iterator().next();
         servletResponse.setHeader("Content-Range", new ContentRange(content.getFileMetadata(), contentPart).toString());
     }
-    
-    private void setContentLengthHeader(FileContent content) {
-        servletResponse.setHeader("Content-Length", String.valueOf(content.getFileMetadata().getTotalLength()));
+
+    private void setRangeContentLengthHeader(FileContent content) {
+        setContetLengthHeader(content.getParts().iterator().next().getContentFragment().getLength());
+    }
+
+    private void setFullContentLengthHeader(FileContent content) {
+        setContetLengthHeader(content.getFileMetadata().getTotalLength());
+    }
+
+    private void setContetLengthHeader(Long length) {
+        servletResponse.setHeader("Content-Length", String.valueOf(length));
     }
 
     private void setFileContentTypeHeader(FileContent fileContent) {

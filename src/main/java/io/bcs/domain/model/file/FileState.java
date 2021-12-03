@@ -21,7 +21,7 @@ public abstract class FileState {
         
         public FileMetadata getFileMetadata();
         
-        public void updateContentLength(Long contentLength);
+        public void startFileDistribution(Long contentLength);
 
         public void dispose();
     }

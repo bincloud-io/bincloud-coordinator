@@ -2,6 +2,7 @@ package io.bce.promises;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -55,6 +56,7 @@ public final class Promises {
     private static final class DeferredPromise<T> implements Promise<T> {
         private final Collection<ResponseHandlerDescriptor> responseHandlers = new LinkedList<>();
         private final Collection<ErrorHandlerDescriptor> errorHandlers = new LinkedList<>();
+        private final Collection<ErrorHandlerDescriptor> defaultErrorHandlers = new LinkedList<>();
         private final Collection<FinalizingHandlerDescriptor> finalizerHandlers = new LinkedList<>();
         private State state = new PendingState();
 
@@ -77,6 +79,11 @@ public final class Promises {
         }
 
         @Override
+        public Promise<T> then(Deferred<T> resolver) {
+            return then(response -> resolver.resolve(response));
+        }
+
+        @Override
         public <E extends Throwable> Promise<T> error(@NonNull Class<E> errorType,
                 @NonNull ErrorHandler<E> errorHandler) {
             state.addErrorHandler(errorType, errorHandler);
@@ -84,14 +91,20 @@ public final class Promises {
         }
 
         @Override
-        public Promise<T> finalize(FinalizingHandler finalizer) {
-            state.addFinalizer(finalizer);
+        public Promise<T> error(@NonNull ErrorHandler<Throwable> errorHandler) {
+            state.addDefaultErrorHandler(errorHandler);
             return this;
         }
 
         @Override
-        public Promise<T> error(@NonNull ErrorHandler<Throwable> errorHandler) {
-            return error(Throwable.class, errorHandler);
+        public Promise<T> error(Deferred<T> rejector) {
+            return error(error -> rejector.reject(error));
+        }
+
+        @Override
+        public Promise<T> finalize(FinalizingHandler finalizer) {
+            state.addFinalizer(finalizer);
+            return this;
         }
 
         @Override
@@ -105,16 +118,6 @@ public final class Promises {
             return new DeferredPromise<C>(createChainingDeferredFunctionExecutor((previousResult, deferred) -> {
                 chainingPromiseProvider.derivePromise(previousResult).delegate(deferred);
             }));
-        }
-
-        @Override
-        public Promise<T> then(Deferred<T> resolver) {
-            return then(response -> resolver.resolve(response));
-        }
-
-        @Override
-        public Promise<T> error(Deferred<T> rejector) {
-            return error(error -> rejector.reject(error));
         }
 
         @Override
@@ -194,8 +197,10 @@ public final class Promises {
         }
 
         private Collection<ErrorHandlerDescriptor> getAcceptableDescriptorsFor(Throwable error) {
-            return errorHandlers.stream().filter(handlerDescriptor -> handlerDescriptor.isAcceptableFor(error))
-                    .collect(Collectors.toList());
+            return Optional.<Collection<ErrorHandlerDescriptor>>of(errorHandlers.stream()
+                    .filter(handlerDescriptor -> handlerDescriptor.isAcceptableFor(error)).collect(Collectors.toList()))
+                    .filter(descriptors -> !descriptors.isEmpty())
+                    .orElse(defaultErrorHandlers);
         }
 
         private interface ErrorHandlerDescriptorState {
@@ -212,6 +217,11 @@ public final class Promises {
             @SuppressWarnings("unchecked")
             public <E extends Throwable> void addErrorHandler(Class<E> errorType, ErrorHandler<E> errorHandler) {
                 errorHandlers.add(new ErrorHandlerDescriptor(errorType, (ErrorHandler<Throwable>) errorHandler));
+            }
+
+            public void addDefaultErrorHandler(ErrorHandler<Throwable> errorHandler) {
+                defaultErrorHandlers
+                        .add(new ErrorHandlerDescriptor(Throwable.class, (ErrorHandler<Throwable>) errorHandler));
             }
 
             public void addFinalizer(FinalizingHandler finalizer) {
@@ -279,12 +289,18 @@ public final class Promises {
                 super.addErrorHandler(errorType, errorHandler);
                 handleError(error);
             }
+            
+            @Override
+            public void addDefaultErrorHandler(ErrorHandler<Throwable> errorHandler) {
+                super.addDefaultErrorHandler(errorHandler);
+                handleError(error);
+            }
 
             @Override
             public void addFinalizer(FinalizingHandler finalizer) {
                 super.addFinalizer(finalizer);
                 finalizePromise();
-            }
+            }          
         }
 
         private abstract class HandlerDescriptor<S> {

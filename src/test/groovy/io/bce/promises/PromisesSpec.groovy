@@ -81,7 +81,7 @@ class PromisesSpec extends Specification {
 
 		and: "The error handler shouldn't be notified"
 		1 * firstErrorHandler.onError(TYPED_EXCEPTION)
-		1 * secondErrorHandler.onError(TYPED_EXCEPTION)
+		0 * secondErrorHandler.onError(TYPED_EXCEPTION)
 		1 * thirdErrorHandler.onError(TYPED_EXCEPTION)
 	}
 
@@ -327,7 +327,7 @@ class PromisesSpec extends Specification {
 		and: "All error handlers should be called"
 		1 * firstErrorHandler.onError(error)
 		1 * secondErrorHandler.onError(error)
-		1 * thirdErrorHandler.onError(error)
+		0 * thirdErrorHandler.onError(error)
 	}
 	
 	def "Scnario: reject chained promise using chaining deferred function if an error is thrown"() {
@@ -428,7 +428,7 @@ class PromisesSpec extends Specification {
 		and: "All error handlers should be called on the failed promise only"
 		0 * firstErrorHandler.onError(error)
 		1 * secondErrorHandler.onError(error)
-		1 * thirdErrorHandler.onError(error)
+		0 * thirdErrorHandler.onError(error)
 	}
 	
 	def "Scenario: create the resolved promise by a value"() {
