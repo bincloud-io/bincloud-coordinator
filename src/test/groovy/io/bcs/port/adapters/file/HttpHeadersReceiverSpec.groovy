@@ -71,10 +71,10 @@ class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
         1 * servletResponse.setHeader("Accept-Ranges", "bytes")
 
         and: "The \"Content-Length\" header should be set to the file total length"
-        1 * servletResponse.setHeader("Content-Length", String.valueOf(DISTRIBUTIONING_CONTENT_LENGTH))
+        1 * servletResponse.setHeader("Content-Length", "14")
         
-        and: "The \"Content-Range\" header shoudl be set to the \"bytes 0-14/${DISTRIBUTIONING_CONTENT_LENGTH}\" value"
-        1 * servletResponse.setHeader("Content-Range", "bytes 0-14/${DISTRIBUTIONING_CONTENT_LENGTH}")
+        and: "The \"Content-Range\" header should be set to the \"bytes 0-13/14\" value"
+        1 * servletResponse.setHeader("Content-Range", "bytes 0-13/${DISTRIBUTIONING_CONTENT_LENGTH}")
 
         and: "The response status should be set to ${HttpServletResponse.SC_PARTIAL_CONTENT}"
         1 * servletResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT)

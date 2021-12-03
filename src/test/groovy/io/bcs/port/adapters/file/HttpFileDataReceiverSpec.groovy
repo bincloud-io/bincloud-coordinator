@@ -97,10 +97,10 @@ class HttpFileDataReceiverSpec extends ContentReceiverSpecification {
         1 * servletResponse.setHeader("Accept-Ranges", "bytes")
 
         and: "The \"Content-Length\" header should be set to the file total length"
-        1 * servletResponse.setHeader("Content-Length", String.valueOf(DISTRIBUTIONING_CONTENT_LENGTH))
+        1 * servletResponse.setHeader("Content-Length", String.valueOf(14L))
         
-        and: "The \"Content-Range\" header shoudl be set to the \"bytes 0-14/${DISTRIBUTIONING_CONTENT_LENGTH}\" value"
-        1 * servletResponse.setHeader("Content-Range", "bytes 0-14/${DISTRIBUTIONING_CONTENT_LENGTH}")
+        and: "The \"Content-Range\" header shoudl be set to the \"bytes 0-13/${DISTRIBUTIONING_CONTENT_LENGTH}\" value"
+        1 * servletResponse.setHeader("Content-Range", "bytes 0-13/${DISTRIBUTIONING_CONTENT_LENGTH}")
 
         and: "The response status should be set to ${HttpServletResponse.SC_PARTIAL_CONTENT}"
         1 * servletResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT)
@@ -152,12 +152,12 @@ class HttpFileDataReceiverSpec extends ContentReceiverSpecification {
                 .append("\n")
                 .append("${MULTIPART_SEPARATOR}\n")
                 .append("Content-Type: ${MEDIA_TYPE}\n")
-                .append("Content-Range: bytes 0-14/${DISTRIBUTIONING_CONTENT_LENGTH}\n")
+                .append("Content-Range: bytes 0-13/${DISTRIBUTIONING_CONTENT_LENGTH}\n")
                 .append("Hello World!!!")
                 .append("\n")
                 .append("${MULTIPART_SEPARATOR}\n")
                 .append("Content-Type: ${MEDIA_TYPE}\n")
-                .append("Content-Range: bytes 20-35/${DISTRIBUTIONING_CONTENT_LENGTH}\n")
+                .append("Content-Range: bytes 20-34/${DISTRIBUTIONING_CONTENT_LENGTH}\n")
                 .append("Hello People!!!")
                 .append("\n")
                 .append(MULTIPART_ENDING + "\n")
