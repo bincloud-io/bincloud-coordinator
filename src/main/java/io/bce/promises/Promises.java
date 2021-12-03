@@ -3,7 +3,6 @@ package io.bce.promises;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
@@ -15,8 +14,16 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public final class Promises {
-    public interface DeferredFunctionExecutor {
+    private static DeferredFunctionRunner promiseDeferredFunctionRunner = new ExecutorBasedDeferredFunctionRunner(
+            Executors::newSingleThreadExecutor);
 
+    /**
+     * Specify the deferred function running mechanism for all promises.
+     * 
+     * @param deferredFunctionRunner The deferred function runner
+     */
+    public static void configureDeferredFunctionRunner(DeferredFunctionRunner deferredFunctionRunner) {
+        promiseDeferredFunctionRunner = deferredFunctionRunner;
     }
 
     /**
@@ -140,26 +147,7 @@ public final class Promises {
         }
 
         private void executeDeferredOperation(DeferredFunction<T> deferredOperationExecutor) {
-            ExecutorService singleThreadPool = Executors.newSingleThreadExecutor();
-            singleThreadPool.execute(() -> {
-                executeDeferredOperationSafely(deferredOperationExecutor, createDeferred());
-                singleThreadPool.shutdown();
-            });
-        }
-
-        private void executeDeferredOperationSafely(DeferredFunction<T> deferredOperationExecutor,
-                Deferred<T> deferred) {
-            createSafeDeferredFunction(deferredOperationExecutor).execute(deferred);
-        }
-
-        private DeferredFunction<T> createSafeDeferredFunction(DeferredFunction<T> deferredOperationExecutor) {
-            return deferred -> {
-                try {
-                    deferredOperationExecutor.execute(deferred);
-                } catch (Throwable error) {
-                    deferred.reject(error);
-                }
-            };
+            promiseDeferredFunctionRunner.executeDeferredOperation(deferredOperationExecutor, createDeferred());
         }
 
         private void appendAllErrorHandlers(Collection<ErrorHandlerDescriptorState> descriptors) {
@@ -197,10 +185,11 @@ public final class Promises {
         }
 
         private Collection<ErrorHandlerDescriptor> getAcceptableDescriptorsFor(Throwable error) {
-            return Optional.<Collection<ErrorHandlerDescriptor>>of(errorHandlers.stream()
-                    .filter(handlerDescriptor -> handlerDescriptor.isAcceptableFor(error)).collect(Collectors.toList()))
-                    .filter(descriptors -> !descriptors.isEmpty())
-                    .orElse(defaultErrorHandlers);
+            return Optional
+                    .<Collection<ErrorHandlerDescriptor>>of(
+                            errorHandlers.stream().filter(handlerDescriptor -> handlerDescriptor.isAcceptableFor(error))
+                                    .collect(Collectors.toList()))
+                    .filter(descriptors -> !descriptors.isEmpty()).orElse(defaultErrorHandlers);
         }
 
         private interface ErrorHandlerDescriptorState {
@@ -289,7 +278,7 @@ public final class Promises {
                 super.addErrorHandler(errorType, errorHandler);
                 handleError(error);
             }
-            
+
             @Override
             public void addDefaultErrorHandler(ErrorHandler<Throwable> errorHandler) {
                 super.addDefaultErrorHandler(errorHandler);
@@ -300,7 +289,7 @@ public final class Promises {
             public void addFinalizer(FinalizingHandler finalizer) {
                 super.addFinalizer(finalizer);
                 finalizePromise();
-            }          
+            }
         }
 
         private abstract class HandlerDescriptor<S> {
@@ -357,6 +346,10 @@ public final class Promises {
                 errorHandler.onError(response);
             }
         }
+    }
+
+    public interface DeferredFunctionRunner {
+        public <T> void executeDeferredOperation(DeferredFunction<T> deferredExecutor, Deferred<T> deferred);
     }
 
     public static class PromiseHasAlreadyBeenRejectedException extends RuntimeException {
