@@ -94,7 +94,35 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+
 		<addPrimaryKey tableName="FILE"
 			columnNames="STORAGE_FILE_NAME" />
+	</changeSet>
+
+	<changeSet id="CSET.FILE_MEDIA_TYPES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_MEDIA_TYPES">
+			<column name="MEDIA_TYPE" type="VARCHAR(128)"
+				remarks="The supported file media type">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONTENT_DISPOSITION" type="VARCHAR(12)"
+				remarks="The content disposition for specified media-type">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_MEDIA_TYPES"
+			columnNames="MEDIA_TYPE" />
+
+		<insert tableName="REF_MEDIA_TYPES">
+			<column name="MEDIA_TYPE" value="application/octet-stream" />
+			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
+		</insert>
+
+		<addForeignKeyConstraint
+			constraintName="FK_FILE$REF_MEDIA_TYPES" baseTableName="FILE"
+			baseColumnNames="MEDIA_TYPE" referencedTableName="REF_MEDIA_TYPES"
+			referencedColumnNames="MEDIA_TYPE" />
 	</changeSet>
 </databaseChangeLog>
