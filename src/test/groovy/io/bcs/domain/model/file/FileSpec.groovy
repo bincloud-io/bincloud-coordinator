@@ -45,7 +45,6 @@ class FileSpec extends Specification {
         when: "The file is created by default constructor"
         File file = new File();
         ContentLocator fileContentLocator = file.getLocator();
-        FileMetadata fileMetadata = file.getFileMetadata()
 
         then: "The storage file name should be ${File.DEFAULT_STORAGE_FILE_NAME}"
         fileContentLocator.getStorageFileName() == File.DEFAULT_STORAGE_FILE_NAME
@@ -54,19 +53,16 @@ class FileSpec extends Specification {
         fileContentLocator.getStorageName() == File.DEFAULT_STORAGE_NAME
 
         and: "The file name should be ${File.DEFAULT_FILE_NAME}"
-        fileMetadata.getFileName() == File.DEFAULT_FILE_NAME
+        file.getFileName() == File.DEFAULT_FILE_NAME
 
         and: "The file media type should be ${File.DEFAULT_MEDIA_TYPE}"
-        fileMetadata.getMediaType() == File.DEFAULT_MEDIA_TYPE
+        file.getMediaType() == File.DEFAULT_MEDIA_TYPE
 
         and: "The file status should be ${FileStatus.DRAFT}"
-        fileMetadata.getStatus() == FileStatus.DRAFT
+        file.getStatus() == FileStatus.DRAFT
 
         and: "The file content length should be 0 bytes"
-        fileMetadata.getTotalLength() == 0L
-        
-        and: "The file default disposition should be attachment"
-        fileMetadata.getDefaultDisposition() == Disposition.INLINE
+        file.getTotalLength() == 0L
     }
 
     def "Scenario: successfully create new file"() {
@@ -86,7 +82,6 @@ class FileSpec extends Specification {
         then: "The response handler shoudl accept resolved file"
         1 * responseHandler.onResponse(_) >> {file = it[0]}
         ContentLocator fileContentLocator = file.getLocator();
-        FileMetadata fileMetadata = file.getFileMetadata()
 
         and: "The storage file name should be ${STORAGE_FILE_NAME}"
         fileContentLocator.getStorageFileName() == STORAGE_FILE_NAME
@@ -95,19 +90,16 @@ class FileSpec extends Specification {
         fileContentLocator.getStorageName() == STORAGE_NAME
 
         and: "The file name should be ${FILE_NAME}"
-        fileMetadata.getFileName() == FILE_NAME
+        file.getFileName() == FILE_NAME
 
         and: "The file media type should be ${MEDIA_TYPE}"
-        fileMetadata.getMediaType() == MEDIA_TYPE
+        file.getMediaType() == MEDIA_TYPE
 
         and: "The file status should be ${FileStatus.DRAFT}"
-        fileMetadata.getStatus() == FileStatus.DRAFT
+        file.getStatus() == FileStatus.DRAFT
 
         and: "The file content length should be 0 bytes"
-        fileMetadata.getTotalLength() == 0L
-        
-        and: "The file default disposition should be attachment"
-        fileMetadata.getDefaultDisposition() == Disposition.INLINE
+        file.getTotalLength() == 0L
     }
 
     def "Scenario: successfully create new file for missig media type and file name"() {
@@ -127,7 +119,6 @@ class FileSpec extends Specification {
         then: "The response handler shoudl accept resolved file"
         1 * responseHandler.onResponse(_) >> {file = it[0]}
         ContentLocator fileContentLocator = file.getLocator();
-        FileMetadata fileMetadata = file.getFileMetadata()
 
         and: "The storage file name should be ${STORAGE_FILE_NAME}"
         fileContentLocator.getStorageFileName() == STORAGE_FILE_NAME
@@ -136,19 +127,16 @@ class FileSpec extends Specification {
         fileContentLocator.getStorageName() == STORAGE_NAME
 
         and: "The file name should be ${STORAGE_FILE_NAME}"
-        fileMetadata.getFileName() == STORAGE_FILE_NAME
+        file.getFileName() == STORAGE_FILE_NAME
 
         and: "The file media type should be ${File.DEFAULT_MEDIA_TYPE}"
-        fileMetadata.getMediaType() == File.DEFAULT_MEDIA_TYPE
+        file.getMediaType() == File.DEFAULT_MEDIA_TYPE
 
         and: "The file status should be ${FileStatus.DRAFT}"
-        fileMetadata.getStatus() == FileStatus.DRAFT
+        file.getStatus() == FileStatus.DRAFT
 
         and: "The file content length should be 0 bytes"
-        fileMetadata.getTotalLength() == 0L
-        
-        and: "The file default disposition should be attachment"
-        fileMetadata.getDefaultDisposition() == Disposition.INLINE
+        file.getTotalLength() == 0L
     }
 
     def "Scenario: create new file with file storage error"() {
@@ -180,16 +168,15 @@ class FileSpec extends Specification {
 
         when: "The file is disposed"
         WaitingPromise.of(disposeFile(file)).then(responseHandler).await()
-        FileMetadata fileMetadata = file.getFileMetadata()
 
         then: "The response handler should be resolved"
         1 * responseHandler.onResponse(_)
 
         and: "The file status should be changed to the disposed"
-        fileMetadata.getStatus() == FileStatus.DISPOSED
+        file.getStatus() == FileStatus.DISPOSED
 
         and: "The content length should be set to zero"
-        fileMetadata.getTotalLength() == 0L
+        file.getTotalLength() == 0L
     }
 
 
@@ -202,16 +189,15 @@ class FileSpec extends Specification {
 
         when: "The file is disposed"
         WaitingPromise.of(disposeFile(file)).then(responseHandler).await()
-        FileMetadata fileMetadata = file.getFileMetadata()
 
         then: "The response handler should be resolved"
         1 * responseHandler.onResponse(_)
 
         and: "The file status should be changed to the disposed"
-        fileMetadata.getStatus() == FileStatus.DISPOSED
+        file.getStatus() == FileStatus.DISPOSED
 
         and: "The content length should be set to zero"
-        fileMetadata.getTotalLength() == 0L
+        file.getTotalLength() == 0L
     }
 
     def "Scenario: dispose disposed file"() {
@@ -250,7 +236,6 @@ class FileSpec extends Specification {
 
         when: "The file is uploaded"
         WaitingPromise.of(uploadFile(file, contentUploader)).then(responseHandler).await()
-        FileMetadata fileMetadata = file.getFileMetadata()
         ContentLocator fileLocator = file.getLocator()
 
         then: "The file upload should be completed successfully"
@@ -258,11 +243,11 @@ class FileSpec extends Specification {
         ContentLocator statisticLocator = uploadStatistic.getLocator()
         statisticLocator.getStorageFileName() == fileLocator.getStorageFileName()
         statisticLocator.getStorageName() == fileLocator.getStorageName()
-        uploadStatistic.getContentLength() == DISTRIBUTIONING_CONTENT_LENGTH
+        uploadStatistic.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
 
         and: "The content length should be updated"
-        fileMetadata.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
-        fileMetadata.getStatus() == FileStatus.DISTRIBUTING
+        file.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
+        file.getStatus() == FileStatus.DISTRIBUTING
     }
 
     def "Scenario: upload file content with error to file in the draft state"() {
@@ -285,7 +270,6 @@ class FileSpec extends Specification {
 
         when: "The file is uploaded"
         WaitingPromise.of(uploadFile(file, contentUploader)).error(errorHandler).await()
-        FileMetadata fileMetadata = file.getFileMetadata()
         ContentLocator fileLocator = file.getLocator()
 
         then: "The file storage error should be happened"
@@ -294,7 +278,7 @@ class FileSpec extends Specification {
         fileStorageException.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
 
         and: "The content length should not be updated"
-        fileMetadata.getTotalLength() == DEFAULT_CONTENT_LENGTH
+        file.getTotalLength() == DEFAULT_CONTENT_LENGTH
     }
 
     def "Scenario: upload file content to file in the distributioning state"() {
@@ -411,19 +395,11 @@ class FileSpec extends Specification {
         file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
         file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
 
-        and: "The file metadata from file should be equal to file metadata from the file content"
-        FileMetadata fileMetadata = file.getFileMetadata()
-        FileMetadata contentMetadata = fileContent.getFileMetadata()
-        fileMetadata.getFileName() == contentMetadata.getFileName()
-        fileMetadata.getMediaType() == contentMetadata.getMediaType()
-        fileMetadata.getStatus() == contentMetadata.getStatus()
-        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
-
         and: "The content part should represent whole file"
         fileContent.getParts().size() == 1
         ContentPart contentPart = fileContent.getParts()[0]
         contentPart.getContentFragment().getOffset() == 0L
-        contentPart.getContentFragment().getLength() == fileMetadata.getTotalLength()
+        contentPart.getContentFragment().getLength() == file.getTotalLength()
         contentPart.getContentSource() == source
     }
 
@@ -454,7 +430,7 @@ class FileSpec extends Specification {
         error.getErrorSeverity() == ErrorSeverity.BUSINESS
         error.getErrorCode() == Constants.UNSATISFIABLE_RANGES_FORMAT_ERROR
     }
-    
+
     def "Scenario: download partial file content"() {
         FileContent fileContent
         given: "The file in distribution state"
@@ -488,14 +464,6 @@ class FileSpec extends Specification {
         and: "The file locator from file should be equal to file locator from the file content"
         file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
         file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
-
-        and: "The file metadata from file should be equal to file metadata from the file content"
-        FileMetadata fileMetadata = file.getFileMetadata()
-        FileMetadata contentMetadata = fileContent.getFileMetadata()
-        fileMetadata.getFileName() == contentMetadata.getFileName()
-        fileMetadata.getMediaType() == contentMetadata.getMediaType()
-        fileMetadata.getStatus() == contentMetadata.getStatus()
-        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
 
         and: "The content part should represent single specified fragment"
         fileContent.getParts().size() == 1
@@ -539,14 +507,6 @@ class FileSpec extends Specification {
         and: "The file locator from file should be equal to file locator from the file content"
         file.getLocator().getStorageName() == fileContent.getLocator().getStorageName()
         file.getLocator().getStorageFileName() == fileContent.getLocator().getStorageFileName()
-
-        and: "The file metadata from file should be equal to file metadata from the file content"
-        FileMetadata fileMetadata = file.getFileMetadata()
-        FileMetadata contentMetadata = fileContent.getFileMetadata()
-        fileMetadata.getFileName() == contentMetadata.getFileName()
-        fileMetadata.getMediaType() == contentMetadata.getMediaType()
-        fileMetadata.getStatus() == contentMetadata.getStatus()
-        fileMetadata.getTotalLength() == contentMetadata.getTotalLength()
 
         and: "The two content parts should be contained into request"
         fileContent.getParts().size() == 2
@@ -607,7 +567,7 @@ class FileSpec extends Specification {
                     }
 
                     @Override
-                    public Long getContentLength() {
+                    public Long getTotalLength() {
                         return contentSize;
                     }
                 }
@@ -620,7 +580,7 @@ class FileSpec extends Specification {
                 .status(status)
                 .mediaType(MEDIA_TYPE)
                 .fileName(FILE_NAME)
-                .contentLength(contentLength)
+                .totalLength(contentLength)
                 .build()
     }
 

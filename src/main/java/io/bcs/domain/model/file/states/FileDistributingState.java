@@ -14,7 +14,6 @@ import io.bcs.domain.model.file.ContentLocator;
 import io.bcs.domain.model.file.ContentUploader;
 import io.bcs.domain.model.file.FileContent;
 import io.bcs.domain.model.file.FileContent.ContentPart;
-import io.bcs.domain.model.file.FileMetadata;
 import io.bcs.domain.model.file.FileState;
 import io.bcs.domain.model.file.FileStorage;
 import io.bcs.domain.model.file.Lifecycle;
@@ -55,14 +54,12 @@ public class FileDistributingState extends FileState {
     private class StorageFileContent implements FileContent {
         private ContentType type;
         private ContentLocator locator;
-        private FileMetadata fileMetadata;
         private Collection<ContentPart> parts;
 
         public StorageFileContent(FileStorage storage, Collection<ContentFragment> fragments) {
             super();
             this.type = recognizeContentType(fragments.size());
             this.locator = getFileEntityAccessor().getLocator();
-            this.fileMetadata = getFileEntityAccessor().getFileMetadata();
             this.parts = getContentParts(storage, fragments);
         }
 
@@ -99,7 +96,7 @@ public class FileDistributingState extends FileState {
 
         @Override
         public Long getLength() {
-            return getFileEntityAccessor().getFileMetadata().getTotalLength();
+            return getFileEntityAccessor().getTotalLength();
         }
     }
 

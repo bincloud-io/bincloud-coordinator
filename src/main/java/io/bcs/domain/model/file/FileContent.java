@@ -10,8 +10,6 @@ public interface FileContent {
 
     public ContentLocator getLocator();
 
-    public FileMetadata getFileMetadata();
-
     public Collection<ContentPart> getParts();
 
     public interface ContentPart {

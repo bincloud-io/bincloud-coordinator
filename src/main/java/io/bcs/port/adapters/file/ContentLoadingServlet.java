@@ -49,6 +49,9 @@ public class ContentLoadingServlet extends HttpServlet {
 
     @Inject
     private ContentLoadingProperties contentLoadingProperties;
+    
+    @Inject
+    private FileMetadataProvider metadataProvider;
 
     @Override
     protected void doHead(HttpServletRequest request, HttpServletResponse response)
@@ -71,7 +74,6 @@ public class ContentLoadingServlet extends HttpServlet {
             throws ServletException, IOException {
         executeAsynchronously(request, response, asyncContext -> {
             uploadContent(asyncContext, request, response);
-
         });
     }
 
@@ -105,7 +107,7 @@ public class ContentLoadingServlet extends HttpServlet {
         return result -> {
             response.setHeader(BOUNDED_CONTEXT_HEADER, Constants.CONTEXT.toString());
             response.setHeader(ERROR_CODE_HEADER, ErrorCode.SUCCESSFUL_COMPLETED_CODE.extract().toString());
-            response.setHeader(UPLOADED_SIZE_HEADER, result.getContentLength().toString());
+            response.setHeader(UPLOADED_SIZE_HEADER, result.getTotalLength().toString());
             response.setStatus(HttpServletResponse.SC_OK);
         };
     }
@@ -132,12 +134,12 @@ public class ContentLoadingServlet extends HttpServlet {
     }
 
     private ContentReceiver createHeadersOnlyContentReceiver(HttpServletResponse response) {
-        return new HttpHeadersReceiver(response);
+        return new HttpHeadersReceiver(response, metadataProvider);
     }
 
     private ContentReceiver createFileDataContentReceiver(HttpServletResponse response) {
         try {
-            return new HttpFileDataReceiver(streamer, response);
+            return new HttpFileDataReceiver(streamer, response, metadataProvider);
         } catch (IOException error) {
             throw new UnexpectedErrorException(error);
         }

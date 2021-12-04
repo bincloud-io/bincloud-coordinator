@@ -85,13 +85,13 @@ class ContentServiceSpec extends Specification {
         1 * fileRepository.save(_) >> {file = it[0]}
         file.getLocator().getStorageFileName() == STORAGE_FILE_NAME
         file.getLocator().getStorageName() == STORAGE_NAME
-        file.getFileMetadata().getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
+        file.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
 
         and: "The response handler should be resolved"
         1 * responseHandler.onResponse(_) >> {statistic = it[0]}
         statistic.getLocator().getStorageFileName() == STORAGE_FILE_NAME
         statistic.getLocator().getStorageName() == STORAGE_NAME
-        statistic.getContentLength() ==  DISTRIBUTIONING_CONTENT_LENGTH
+        statistic.getTotalLength() ==  DISTRIBUTIONING_CONTENT_LENGTH
     }
 
     def "Scenario: upload content to unknown file"() {
@@ -193,14 +193,14 @@ class ContentServiceSpec extends Specification {
                 .status(status)
                 .mediaType(MEDIA_TYPE)
                 .fileName(FILE_NAME)
-                .contentLength(contentLength)
+                .totalLength(contentLength)
                 .build()
     }
 
     private FileUploadStatistic fileUploadStatistic() {
         return Stub(FileUploadStatistic) {
             getLocator() >> contentLocator()
-            getContentLength() >> DISTRIBUTIONING_CONTENT_LENGTH
+            getTotalLength() >> DISTRIBUTIONING_CONTENT_LENGTH
         }
     }
 

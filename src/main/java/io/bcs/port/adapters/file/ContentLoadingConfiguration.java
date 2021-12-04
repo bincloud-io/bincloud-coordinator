@@ -16,6 +16,7 @@ import io.bcs.application.ContentService;
 import io.bcs.application.FileService;
 import io.bcs.domain.model.file.FileRepository;
 import io.bcs.domain.model.file.FileStorage;
+import io.bcs.domain.model.file.metadata.FileMetadataRepository;
 import io.bcs.port.adapters.ContentLoadingProperties;
 
 @ApplicationScoped
@@ -50,7 +51,19 @@ public class ContentLoadingConfiguration {
         return new LocalFileSystemStorage(fileNameGenerator(), contentLoadingProperties.getStorageName(),
                 contentLoadingProperties.getBaseDirectory(), contentLoadingProperties.getBufferSize());
     }
+
+    @Produces
+    public FileMetadataRepository fileMetadataRepository() {
+        return new JpaFileMetadataRepository(entityManager);
+    }
     
+    @Produces
+    public FileMetadataProvider fileMetadataProvider() {
+        return contentLocator -> {
+            return fileMetadataRepository().findById(contentLocator.getStorageFileName()).get();
+        };
+    }
+
     @Produces
     public ContentService contentService() {
         return new ContentService(fileRepository(), fileStorage());

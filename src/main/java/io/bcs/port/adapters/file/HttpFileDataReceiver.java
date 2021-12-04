@@ -26,10 +26,13 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
     private static final String MULTIPART_ENDING = MULTIPART_SEPARATOR + "--";
     private final Streamer streamer;
     private final Destination<BinaryChunk> destination;
+    private final FileMetadataProvider metadataProvider;
 
-    public HttpFileDataReceiver(Streamer streamer, HttpServletResponse servletResponse) throws IOException {
-        super(servletResponse);
+    public HttpFileDataReceiver(Streamer streamer, HttpServletResponse servletResponse,
+            FileMetadataProvider metadataProvider) throws IOException {
+        super(servletResponse, metadataProvider);
         this.destination = new OutputStreamDestination(servletResponse.getOutputStream());
+        this.metadataProvider = metadataProvider;
         this.streamer = streamer;
     }
 
@@ -50,7 +53,7 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
     @Override
     public Promise<Void> receiveContentRanges(FileContent content) {
         return HttpFileDataReceiver.super.receiveContentRanges(content).chain((v, deferred) -> {
-            transferContent(new MultiRangeContentSource(content)).then(s -> deferred.resolve(null));
+            transferContent(new MultiRangeContentSource(content, metadataProvider)).then(s -> deferred.resolve(null));
         });
     }
 
@@ -71,13 +74,14 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
     }
 
     private static class MultiRangeContentSource extends RechargeableSource<BinaryChunk> {
-        public MultiRangeContentSource(FileContent content) {
-            super(createSourcesQueue(content));
+        public MultiRangeContentSource(FileContent content, FileMetadataProvider fileMetadataProvider) {
+            super(createSourcesQueue(content, fileMetadataProvider));
         }
 
-        private static Queue<Source<BinaryChunk>> createSourcesQueue(FileContent content) {
+        private static Queue<Source<BinaryChunk>> createSourcesQueue(FileContent content,
+                FileMetadataProvider fileMetadataProvider) {
             LinkedList<Source<BinaryChunk>> queue = new LinkedList<Source<BinaryChunk>>();
-            FileMetadata metadata = content.getFileMetadata();
+            FileMetadata metadata = fileMetadataProvider.getMetadataFor(content.getLocator());
             content.getParts().forEach(part -> queue.add(createPartSource(metadata, part)));
             byte[] contentEnding = createContentEnding();
             queue.add(new InputStreamSource(new ByteArrayInputStream(contentEnding), contentEnding.length));

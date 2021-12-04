@@ -1,20 +1,25 @@
 package io.bcs.port.adapters.file
 
 import javax.servlet.ServletOutputStream
-import javax.servlet.WriteListener
 import javax.servlet.http.HttpServletResponse
 
-
-import io.bce.promises.Promise.ResponseHandler
 import io.bce.promises.WaitingPromise
+import io.bce.promises.Promise.ResponseHandler
 import io.bce.streaming.DirectStreamer
 import io.bcs.domain.model.file.FileContent
+import io.bcs.domain.model.file.FileMetadata.Disposition
 
 class HttpFileDataReceiverSpec extends ContentReceiverSpecification {
     protected static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
     private static final String MULTIPART_SEPARATOR = "--" + MULTIPART_BOUNDARY;
     private static final String MULTIPART_ENDING = MULTIPART_SEPARATOR + "--";
-
+    
+    private FileMetadataProvider metadataProvider
+    
+    def setup() {
+        this.metadataProvider = Mock(FileMetadataProvider)
+    }
+    
     def "Scenario: receive data for full content"() {
         given: "The http servlet response"
         ByteArrayOutputStream destination = new ByteArrayOutputStream()
@@ -27,9 +32,10 @@ class HttpFileDataReceiverSpec extends ContentReceiverSpecification {
 
         and: "The full size file content"
         FileContent fileContent = super.createFullSizeContent()
+        metadataProvider.getMetadataFor(_) >> createFileMetadata(Disposition.INLINE, 14L)
 
         and: "The file data receiver"
-        HttpFileDataReceiver receiver = new HttpFileDataReceiver(new DirectStreamer(), servletResponse)
+        HttpFileDataReceiver receiver = new HttpFileDataReceiver(new DirectStreamer(), servletResponse, metadataProvider)
 
         and: "The promise resolve response handler"
         ResponseHandler<Void> responseHandler = Mock(ResponseHandler)
@@ -71,9 +77,10 @@ class HttpFileDataReceiverSpec extends ContentReceiverSpecification {
 
         and: "The single-range file content part"
         FileContent fileContent = super.createSingleRangeContent()
+        metadataProvider.getMetadataFor(_) >> createFileMetadata(Disposition.ATTACHMENT, DISTRIBUTIONING_CONTENT_LENGTH)
 
         and: "The file data receiver"
-        HttpFileDataReceiver receiver = new HttpFileDataReceiver(new DirectStreamer(), servletResponse)
+        HttpFileDataReceiver receiver = new HttpFileDataReceiver(new DirectStreamer(), servletResponse, metadataProvider)
 
         and: "The promise resolve response handler"
         ResponseHandler<Void> responseHandler = Mock(ResponseHandler)
@@ -118,9 +125,10 @@ class HttpFileDataReceiverSpec extends ContentReceiverSpecification {
 
         and: "The multi-range file content parts"
         FileContent fileContent = super.createMultiRangeContent()
+        metadataProvider.getMetadataFor(_) >> createFileMetadata(Disposition.ATTACHMENT, DISTRIBUTIONING_CONTENT_LENGTH)
 
         and: "The file data receiver"
-        HttpFileDataReceiver receiver = new HttpFileDataReceiver(new DirectStreamer(), servletResponse)
+        HttpFileDataReceiver receiver = new HttpFileDataReceiver(new DirectStreamer(), servletResponse, metadataProvider)
 
         and: "The promise resolve response handler"
         ResponseHandler<Void> responseHandler = Mock(ResponseHandler)

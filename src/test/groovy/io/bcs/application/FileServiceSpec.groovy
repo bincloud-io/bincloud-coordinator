@@ -70,7 +70,7 @@ class FileServiceSpec extends Specification {
         1 * fileRepository.save(_) >> {file = it[0]}
         file.getLocator().getStorageFileName() == STORAGE_FILE_NAME
         file.getLocator().getStorageName() == STORAGE_NAME
-        file.getFileMetadata().getStatus() == FileStatus.DRAFT
+        file.getStatus() == FileStatus.DRAFT
     }
 
     def "Scenario: create new file with invalid request"() {
@@ -116,7 +116,7 @@ class FileServiceSpec extends Specification {
         1 * fileRepository.save(_) >> {file = it[0]}
         file.getLocator().getStorageFileName() == STORAGE_FILE_NAME
         file.getLocator().getStorageName() == STORAGE_NAME
-        file.getFileMetadata().getStatus() == FileStatus.DISPOSED
+        file.getStatus() == FileStatus.DISPOSED
 
         and: "The file content should be removed from file storage"
         1 * this.fileStorage.delete(_) >> {removedFileLocator = it[0]}
@@ -150,7 +150,7 @@ class FileServiceSpec extends Specification {
                 .status(status)
                 .mediaType(MEDIA_TYPE)
                 .fileName(FILE_NAME)
-                .contentLength(contentLength)
+                .totalLength(contentLength)
                 .build()
     }
 

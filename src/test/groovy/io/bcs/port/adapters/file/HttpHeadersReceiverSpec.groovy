@@ -5,17 +5,28 @@ import javax.servlet.http.HttpServletResponse
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bcs.domain.model.file.FileContent
+import io.bcs.domain.model.file.FileMetadata
+import io.bcs.domain.model.file.FileMetadata.Disposition
+import io.bincloud.storage.port.adapter.endpoint.ContentDispositionType
+import io.bcs.domain.model.file.FileStatus
 
 class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
+    private FileMetadataProvider metadataProvider
+    
+    def setup() {
+        this.metadataProvider = Mock(FileMetadataProvider)
+    }
+    
     def "Scenario: receive headers for full content"() {
         given: "The http servlet response"
         HttpServletResponse servletResponse = Mock(HttpServletResponse)
 
         and: "The full size file content"
         FileContent fileContent = super.createFullSizeContent()
+        1 * metadataProvider.getMetadataFor(_) >> createFileMetadata(Disposition.INLINE, 14L)
 
         and: "The http headers receiver"
-        HttpHeadersReceiver receiver = new HttpHeadersReceiver(servletResponse)
+        HttpHeadersReceiver receiver = new HttpHeadersReceiver(servletResponse, metadataProvider)
 
         and: "The promise resolve response handler"
         ResponseHandler<Void> responseHandler = Mock(ResponseHandler)
@@ -48,9 +59,10 @@ class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
 
         and: "The single-range file content part"
         FileContent fileContent = super.createSingleRangeContent()
+        1 * metadataProvider.getMetadataFor(_) >> createFileMetadata(Disposition.ATTACHMENT, DISTRIBUTIONING_CONTENT_LENGTH)
 
         and: "The http headers receiver"
-        HttpHeadersReceiver receiver = new HttpHeadersReceiver(servletResponse)
+        HttpHeadersReceiver receiver = new HttpHeadersReceiver(servletResponse, metadataProvider)
 
         and: "The promise resolve response handler"
         ResponseHandler<Void> responseHandler = Mock(ResponseHandler)
@@ -86,9 +98,10 @@ class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
 
         and: "The multi-range file content parts"
         FileContent fileContent = super.createMultiRangeContent()
+        1 * metadataProvider.getMetadataFor(_) >> createFileMetadata(Disposition.ATTACHMENT, DISTRIBUTIONING_CONTENT_LENGTH)
 
         and: "The http headers receiver"
-        HttpHeadersReceiver receiver = new HttpHeadersReceiver(servletResponse)
+        HttpHeadersReceiver receiver = new HttpHeadersReceiver(servletResponse, metadataProvider)
 
         and: "The promise resolve response handler"
         ResponseHandler<Void> responseHandler = Mock(ResponseHandler)
@@ -111,4 +124,6 @@ class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
         and: "The response status should be set to ${HttpServletResponse.SC_PARTIAL_CONTENT}"
         1 * servletResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT)
     }
+    
+    
 }

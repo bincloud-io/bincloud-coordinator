@@ -21,7 +21,6 @@ abstract class ContentReceiverSpecification extends Specification {
     
     protected FileContent createFullSizeContent() {
         return Stub(FileContent) {
-            getFileMetadata() >> createFileMetadata(INLINE, 14L)
             getParts() >> [
                 createContentPart(0L, 14L, new InputStreamSource(new ByteArrayInputStream("Hello World!!!".getBytes()), 1000))
             ]
@@ -30,7 +29,6 @@ abstract class ContentReceiverSpecification extends Specification {
 
     protected FileContent createSingleRangeContent() {
         return Stub(FileContent) {
-            getFileMetadata() >> createFileMetadata(ATTACHMENT, DISTRIBUTIONING_CONTENT_LENGTH)
             getParts() >> [
                 createContentPart(0L, 14L, new InputStreamSource(new ByteArrayInputStream("Hello World!!!".getBytes()), 1000))
             ]
@@ -39,7 +37,6 @@ abstract class ContentReceiverSpecification extends Specification {
 
     protected FileContent createMultiRangeContent() {
         return Stub(FileContent) {
-            getFileMetadata() >> createFileMetadata(ATTACHMENT, DISTRIBUTIONING_CONTENT_LENGTH)
             getParts() >> [
                 createContentPart(0L, 14L, new InputStreamSource(new ByteArrayInputStream("Hello World!!!".getBytes()), 1000)),
                 createContentPart(20L, 15L, new InputStreamSource(new ByteArrayInputStream("Hello People!!!".getBytes()), 1000))
@@ -59,9 +56,8 @@ abstract class ContentReceiverSpecification extends Specification {
 
     protected FileMetadata createFileMetadata(Disposition disposition, Long totalLength) {
         return Stub(FileMetadata) {
-            getStatus() >> FileStatus.DISTRIBUTING
             getFileName() >> FILE_NAME
-            getDefaultDisposition() >> disposition
+            getContentDisposition() >> disposition
             getMediaType() >> MEDIA_TYPE
             getTotalLength() >> totalLength
         }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	<changeSet id="CSET.CREATE_FILE" author="Dmitry Mikhaylenko">
+		<sql>
+			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
+			`CONTENT_DISPOSITION`)
+			VALUES ('application/mediatype', 'INLINE');
+			
+			INSERT INTO `FILES` SELECT 
+				'e95b72b3-54dd-11ec-8d39-0242ac130002' AS STORAGE_FILE_NAME, 
+				'LOCAL' AS STORAGE_NAME, 'DRAFT', 
+				'application/mediatype' AS MEDIA_TYPE, 
+				'file.txt' AS FILE_NAME, 
+				1000 AS CONTENT_LENGTH FROM DUAL;
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM `FILES` WHERE 1=1;
+				DELETE FROM `REF_MEDIA_TYPES`
+				WHERE 1=1;
+			</sql>
+		</rollback>
+	</changeSet>
+</databaseChangeLog>

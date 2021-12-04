@@ -14,6 +14,6 @@ public interface Lifecycle {
     public interface FileUploadStatistic {
         public ContentLocator getLocator();
 
-        public Long getContentLength();
+        public Long getTotalLength();
     }
 }

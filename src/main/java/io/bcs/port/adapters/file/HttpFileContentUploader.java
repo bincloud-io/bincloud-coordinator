@@ -47,6 +47,6 @@ public class HttpFileContentUploader implements ContentUploader {
     @RequiredArgsConstructor
     private static class UploadStatistic implements FileUploadStatistic {
         private final ContentLocator locator;
-        private final Long contentLength;
+        private final Long totalLength;
     }
 }

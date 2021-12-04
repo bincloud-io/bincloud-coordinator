@@ -15,11 +15,13 @@ import io.bcs.domain.model.file.states.FileDistributingState;
 import io.bcs.domain.model.file.states.FileDraftState;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.EqualsAndHashCode.Include;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+@Getter
 @ToString
 @SuperBuilder
 @NoArgsConstructor
@@ -47,7 +49,7 @@ public class File {
     @Default
     private String fileName = DEFAULT_FILE_NAME;
     @Default
-    private Long contentLength = 0L;
+    private Long totalLength = 0L;
 
     private File(ContentLocator contentLocator, CreateFile createFileCommand) {
         super();
@@ -56,7 +58,7 @@ public class File {
         this.storageFileName = contentLocator.getStorageFileName();
         this.fileName = createFileCommand.getFileName().orElse(storageFileName);
         this.status = FileStatus.DRAFT;
-        this.contentLength = 0L;
+        this.totalLength = 0L;
     }
 
     public static final Promise<File> create(FileStorage fileStorage, CreateFile command) {
@@ -79,35 +81,6 @@ public class File {
         };
     }
 
-    public FileMetadata getFileMetadata() {
-        return new FileMetadata() {
-            @Override
-            public FileStatus getStatus() {
-                return status;
-            }
-
-            @Override
-            public String getMediaType() {
-                return mediaType;
-            }
-
-            @Override
-            public String getFileName() {
-                return fileName;
-            }
-
-            @Override
-            public Long getTotalLength() {
-                return contentLength;
-            }
-
-            @Override
-            public Disposition getDefaultDisposition() {
-                return Disposition.INLINE;
-            }
-        };
-    }
-
     public Promise<Void> downloadContent(FileStorage fileStorage, ContentReceiver contentDownloader,
             Collection<Range> ranges) {
         return Promises.of(deferred -> {
@@ -126,7 +99,7 @@ public class File {
     }
 
     private Collection<ContentFragment> createFragments(Collection<Range> ranges) {
-        FileFragments fragments = new FileFragments(ranges, contentLength);
+        FileFragments fragments = new FileFragments(ranges, totalLength);
         return fragments.getParts();
     }
 
@@ -150,8 +123,8 @@ public class File {
             }
 
             @Override
-            public FileMetadata getFileMetadata() {
-                return File.this.getFileMetadata();
+            public Long getTotalLength() {
+                return File.this.totalLength;
             }
 
             @Override
@@ -167,13 +140,13 @@ public class File {
     }
 
     private void startFileDistribution(Long contentLength) {
-        this.contentLength = contentLength;
+        this.totalLength = contentLength;
         this.status = FileStatus.DISTRIBUTING;
     }
 
     private void dispose() {
         this.status = FileStatus.DISPOSED;
-        this.contentLength = 0L;
+        this.totalLength = 0L;
     }
 
     public interface CreateFile {

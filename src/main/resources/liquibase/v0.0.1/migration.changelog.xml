@@ -62,8 +62,36 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="CSET.FILE" author="Dmitry Mikhaylenko">
-		<createTable tableName="FILE">
+	<changeSet id="CSET.REF_MEDIA_TYPES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_MEDIA_TYPES">
+			<column name="MEDIA_TYPE" type="VARCHAR(128)"
+				remarks="The supported file media type">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONTENT_DISPOSITION" type="VARCHAR(12)"
+				remarks="The content disposition for specified media-type">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_MEDIA_TYPES"
+			columnNames="MEDIA_TYPE" />
+	</changeSet>
+
+	<changeSet id="CSET.OCTET_STREAM_TYPE"
+		author="Dmitry Mikhaylenko">
+		<insert tableName="REF_MEDIA_TYPES">
+			<column name="MEDIA_TYPE" value="application/octet-stream" />
+			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
+		</insert>
+		<rollback>
+			<sql>DELETE FROM REF_MEDIA_TYPES WHERE 1=1</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="CSET.FILES" author="Dmitry Mikhaylenko">
+		<createTable tableName="FILES">
 			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
 				remarks="The file name into file storage.">
 				<constraints nullable="false" />
@@ -95,34 +123,25 @@
 			</column>
 		</createTable>
 
-		<addPrimaryKey tableName="FILE"
+		<addPrimaryKey tableName="FILES"
 			columnNames="STORAGE_FILE_NAME" />
-	</changeSet>
-
-	<changeSet id="CSET.FILE_MEDIA_TYPES"
-		author="Dmitry Mikhaylenko">
-		<createTable tableName="REF_MEDIA_TYPES">
-			<column name="MEDIA_TYPE" type="VARCHAR(128)"
-				remarks="The supported file media type">
-				<constraints nullable="false" />
-			</column>
-			<column name="CONTENT_DISPOSITION" type="VARCHAR(12)"
-				remarks="The content disposition for specified media-type">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="REF_MEDIA_TYPES"
-			columnNames="MEDIA_TYPE" />
-
-		<insert tableName="REF_MEDIA_TYPES">
-			<column name="MEDIA_TYPE" value="application/octet-stream" />
-			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
-		</insert>
 
 		<addForeignKeyConstraint
-			constraintName="FK_FILE$REF_MEDIA_TYPES" baseTableName="FILE"
+			constraintName="FK_FILES$REF_MEDIA_TYPES" baseTableName="FILES"
 			baseColumnNames="MEDIA_TYPE" referencedTableName="REF_MEDIA_TYPES"
 			referencedColumnNames="MEDIA_TYPE" />
+
+		<createView viewName="VW_FILES_METADATA"
+			replaceIfExists="false">
+			SELECT 
+				F.STORAGE_FILE_NAME, 
+				F.STATUS, 
+				F.FILE_NAME, 
+				F.CONTENT_LENGTH, 
+				MT.MEDIA_TYPE, 
+				MT.CONTENT_DISPOSITION 
+			FROM FILES F INNER JOIN 
+				REF_MEDIA_TYPES MT ON F.MEDIA_TYPE = MT.MEDIA_TYPE
+		</createView>
 	</changeSet>
 </databaseChangeLog>

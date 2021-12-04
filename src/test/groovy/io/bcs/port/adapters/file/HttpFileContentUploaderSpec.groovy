@@ -62,6 +62,6 @@ class HttpFileContentUploaderSpec extends Specification {
         and: "The promise should be resolved"
         1 * responseHandler.onResponse(_) >> {uploadStatistic = it[0]}
         uploadStatistic.getLocator().getStorageFileName() == STORAGE_FILE_NAME
-        uploadStatistic.getContentLength() == TRANSFERRED_DATA.getBytes().length
+        uploadStatistic.getTotalLength() == TRANSFERRED_DATA.getBytes().length
     }
 }
