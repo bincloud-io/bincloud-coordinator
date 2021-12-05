@@ -5,10 +5,7 @@ import javax.servlet.http.HttpServletResponse
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bcs.domain.model.file.FileContent
-import io.bcs.domain.model.file.FileMetadata
 import io.bcs.domain.model.file.FileMetadata.Disposition
-import io.bincloud.storage.port.adapter.endpoint.ContentDispositionType
-import io.bcs.domain.model.file.FileStatus
 
 class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
     private FileMetadataProvider metadataProvider

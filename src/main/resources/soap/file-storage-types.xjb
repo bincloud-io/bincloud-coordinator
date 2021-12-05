@@ -8,7 +8,7 @@
 		schemaLocation="../../webapp/WEB-INF/soap/file-storage-types.xsd" node="/xs:schema">
 		<jaxb:schemaBindings>
 			<jaxb:package
-				name="io.bincloud.storage.port.adapter.endpoint" />
+				name="io.bcs.port.adapter.file" />
 		</jaxb:schemaBindings>
 	</jaxb:bindings>
 </jaxb:bindings>

@@ -27,4 +27,5 @@ target/
 .settings/
 .tern-project
 .classpath
+.checkstyle
 .project

@@ -8,7 +8,7 @@
 		schemaLocation="../../webapp/WEB-INF/soap/global-types.xsd" node="/xs:schema">
 		<jaxb:schemaBindings>
 			<jaxb:package
-				name="io.bincloud.common.port.adapter.integration.global" />
+				name="io.bcs.port.adapter" />
 		</jaxb:schemaBindings>
 	</jaxb:bindings>
 </jaxb:bindings>
