@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.file
+package io.bcs.port.adapters.file.validation
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
@@ -17,6 +17,7 @@ import io.bce.MustNeverBeHappenedError
 import io.bcs.DictionaryValidation
 import io.bcs.DictionaryValidation.DictionaryPredicate
 import io.bcs.port.adapters.common.JdbcSequenceGenerator
+import io.bcs.port.adapters.file.validation.JdbcMediaTypeAcceptancePredicate
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase

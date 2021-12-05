@@ -9,7 +9,7 @@ public class FileNameValidation extends StringValueValidation {
     private final String fileName;
 
     public FileNameValidation(String fileName) {
-        super("file.name", 1L, 255L, Arrays.asList(PATTERN));
+        super("file.name", 1L, 400L, Arrays.asList(PATTERN));
         this.fileName = fileName;
     }
 

@@ -3,10 +3,11 @@
 	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
 	xmlns:tns="http://www.bincloud.io/storage/FileStorageService"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="FileStorageService"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="WSFileService"
 	targetNamespace="http://www.bincloud.io/storage/FileStorageService"
 	xmlns:xsd1="http://www.example.org/file-storage-types"
-	xmlns:xsd2="http://www.bincloud.io/storage/file-storage-types/">
+	xmlns:xsd2="http://www.bincloud.io/storage/file-storage-types/"
+	xmlns:xsd3="http://www.bincloud.io/common/global-types">
 
 	<wsdl:types>
 		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -14,33 +15,55 @@
 				namespace="http://www.bincloud.io/storage/file-storage-types/"
 				schemaLocation="file-storage-types.xsd">
 			</xsd:import>
+			<xsd:import
+				namespace="http://www.bincloud.io/common/global-types"
+				schemaLocation="global-types.xsd">
+			</xsd:import>
 		</xsd:schema>
 	</wsdl:types>
 
-	<wsdl:message name="createFileRevisionRequest">
-		<wsdl:part name="parameters"
-			element="xsd2:CreateFileRevisionRq"></wsdl:part>
-	</wsdl:message>
-	<wsdl:message name="createFileRevisionResponse">
-		<wsdl:part name="parameters"
-			element="xsd2:CreateFileRevisionRs"></wsdl:part>
-	</wsdl:message>
-	<wsdl:portType name="FileRevisionManager">
-        <wsdl:operation name="createFileRevision">
-        	<wsdl:input message="tns:createFileRevisionRequest"></wsdl:input>
-        	<wsdl:output message="tns:createFileRevisionResponse"></wsdl:output>
-        </wsdl:operation>
-	</wsdl:portType>
-	<wsdl:binding name="FileRevisionManagerBinding"
-		type="tns:FileRevisionManager">
 
+	<wsdl:message name="createFileRequest">
+		<wsdl:part name="parameters" element="xsd2:CreateFileRq"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="createFileResponse">
+		<wsdl:part name="parameters" element="xsd2:CreateFileRs"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="createFileFault">
+		<wsdl:part name="parameters" element="xsd3:ServiceFault"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="disposeFileRequest">
+		<wsdl:part name="parameters" element="xsd2:DisposeFileRq"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="disposeFileResponse">
+		<wsdl:part name="parameters" element="xsd2:DisposeFileRs"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="disposeFileFault">
+		<wsdl:part name="parameters" element="xsd3:ServiceFault"></wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="WSFileService">
+		<wsdl:operation name="createFile">
+			<wsdl:input message="tns:createFileRequest"></wsdl:input>
+			<wsdl:output message="tns:createFileResponse"></wsdl:output>
+			<wsdl:fault name="fault" message="tns:createFileFault"></wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="disposeFile">
+			<wsdl:input message="tns:disposeFileRequest"></wsdl:input>
+			<wsdl:output message="tns:disposeFileResponse"></wsdl:output>
+			<wsdl:fault name="fault" message="tns:disposeFileFault"></wsdl:fault>
+		</wsdl:operation>
+	</wsdl:portType>	<wsdl:binding name="WSFileServiceBinding"
+		type="tns:WSFileService">
 
 		<soap:binding style="document"
 			transport="http://schemas.xmlsoap.org/soap/http" />
-		<wsdl:operation name="createFileRevision">
+		<wsdl:operation name="createFile">
 
 			<soap:operation
-				soapAction="http://www.bincloud.io/storage/file-storage-service/createFileRevision" />
+				soapAction="http://www.bincloud.io/storage/FileStorageService/createFile" />
 			<wsdl:input>
 
 				<soap:body use="literal" />
@@ -49,12 +72,31 @@
 
 				<soap:body use="literal" />
 			</wsdl:output>
+			<wsdl:fault name="fault">
+
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="disposeFile">
+			<soap:operation
+				soapAction="http://www.bincloud.io/storage/FileStorageService/disposeFile" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="fault">
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
 		</wsdl:operation>
 	</wsdl:binding>
-	<wsdl:service name="FileStorageService">
-		<wsdl:port binding="tns:FileRevisionManagerBinding"
-			name="FileRevisionManagerPort">
-			<soap:address location="http://www.bincloud.io/storage/FileRevisionManager" />
+
+	<wsdl:service name="WSFileServiceEndpoint">
+		<wsdl:port binding="tns:WSFileServiceBinding"
+			name="WSFileServicePort">
+			<soap:address
+				location="http://www.bincloud.io/bcs/WSFileService" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

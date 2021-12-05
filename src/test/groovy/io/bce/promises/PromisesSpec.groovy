@@ -504,4 +504,20 @@ class PromisesSpec extends Specification {
         then: "The finalizer should be excuted"
         1 * finalizer.onComplete()
     }
+    
+    def "Scenario: get successfully resolved response synchronously"() {
+        expect: "The promise error should be returned synchronously"
+        Promises.resolvedBy(1000L).get(1L) == 1000L
+    }
+    
+    def "Scenario: rethrow exceptionally completed promise on synchronously read"() {
+        RuntimeException error = new RuntimeException()
+        RuntimeException thrownError
+        when: "The value is tried to be obtained from exceptionally rejected promise"
+        Promises.rejectedBy(error).get(1L)
+        
+        then: "The rejected error should be rethrown"
+        thrownError = thrown()
+        thrownError.is(error)
+    }
 }

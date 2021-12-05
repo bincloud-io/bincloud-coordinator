@@ -2,5 +2,4 @@
 	wsdlLocation="../../webapp/WEB-INF/soap/file-storage-service.wsdl" version="2.1">
 	<package
 		name="io.bcs.port.adapter.file.endpoint" />
-	<enableAsyncMapping>true</enableAsyncMapping>
 </bindings>

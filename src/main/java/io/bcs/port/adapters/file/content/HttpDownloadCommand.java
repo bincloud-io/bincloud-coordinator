@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.file;
+package io.bcs.port.adapters.file.content;
 
 import java.util.Collection;
 import java.util.Optional;

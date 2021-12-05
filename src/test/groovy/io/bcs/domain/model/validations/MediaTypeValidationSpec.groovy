@@ -13,6 +13,12 @@ class MediaTypeValidationSpec extends ValidationSpecification {
     "gwKNyrpLBpIUYArpdXJMIL5YHwDEP9TgjiiZArjO3dA1LKGrhVp4Rx7YscRI7BuhcfatMpYtZfVL4K16R" +
     "B65XA6QmRmnZgLpBfwQBU5ydJz4NGZ9kSSEbZ9QArZgNEKCNHoNifrYP8DvhR9X7DuObumK7XGtANwekC" + 
     "D6ceersXBlJipCrduk7mSVHWAZIrYLCcGKpTuAoB1BlD1DwnFqlNDE1UhtM2uInKGLuyKUsDk3YECxg3v" +
+    "B65XA6QmRmnZgLpBfwQBU5ydJz4NGZ9kSSEbZ9QArZgNEKCNHoNifrYP8DvhR9X7DuObumK7XGtANwekC" +
+    "D6ceersXBlJipCrduk7mSVHWAZIrYLCcGKpTuAoB1BlD1DwnFqlNDE1UhtM2uInKGLuyKUsDk3YECxg3v" +
+    "B65XA6QmRmnZgLpBfwQBU5ydJz4NGZ9kSSEbZ9QArZgNEKCNHoNifrYP8DvhR9X7DuObumK7XGtANwekC" +
+    "D6ceersXBlJipCrduk7mSVHWAZIrYLCcGKpTuAoB1BlD1DwnFqlNDE1UhtM2uInKGLuyKUsDk3YECxg3v" +
+    "B65XA6QmRmnZgLpBfwQBU5ydJz4NGZ9kSSEbZ9QArZgNEKCNHoNifrYP8DvhR9X7DuObumK7XGtANwekC" +
+    "D6ceersXBlJipCrduk7mSVHWAZIrYLCcGKpTuAoB1BlD1DwnFqlNDE1UhtM2uInKGLuyKUsDk3YECxg3v" +
     "QkptWgaV5FC1WFSORdOLkEg3osICQF7Wgxk5p"
     
     private static final String BAD_FORMATTED_TYPE = "Bad Formatted Type"

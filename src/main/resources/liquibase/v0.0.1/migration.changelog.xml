@@ -107,12 +107,12 @@
 				<constraints nullable="false" />
 			</column>
 
-			<column name="MEDIA_TYPE" type="VARCHAR(128)"
+			<column name="MEDIA_TYPE" type="VARCHAR(200)"
 				remarks="The storage media type name.">
 				<constraints nullable="false" />
 			</column>
 
-			<column name="FILE_NAME" type="VARCHAR(256)"
+			<column name="FILE_NAME" type="VARCHAR(400)"
 				remarks="The file download name.">
 				<constraints nullable="false" />
 			</column>

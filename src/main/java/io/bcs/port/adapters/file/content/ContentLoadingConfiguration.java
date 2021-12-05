@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.file;
+package io.bcs.port.adapters.file.content;
 
 import java.util.UUID;
 
@@ -18,6 +18,8 @@ import io.bcs.domain.model.file.FileRepository;
 import io.bcs.domain.model.file.FileStorage;
 import io.bcs.domain.model.file.metadata.FileMetadataRepository;
 import io.bcs.port.adapters.ContentLoadingProperties;
+import io.bcs.port.adapters.file.JpaFileMetadataRepository;
+import io.bcs.port.adapters.file.JpaFileRepository;
 
 @ApplicationScoped
 public class ContentLoadingConfiguration {

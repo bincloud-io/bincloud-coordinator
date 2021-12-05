@@ -3,7 +3,10 @@ package io.bce.promises;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.bce.promises.Deferred.DeferredFunction;
@@ -14,8 +17,11 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public final class Promises {
-    private static DeferredFunctionRunner promiseDeferredFunctionRunner = new ExecutorBasedDeferredFunctionRunner(
-            Executors::newSingleThreadExecutor);
+    private static DeferredFunctionRunner promiseDeferredFunctionRunner;
+
+    static {
+        configureDeferredFunctionRunner(new ExecutorBasedDeferredFunctionRunner(Executors::newSingleThreadExecutor));
+    }
 
     /**
      * Specify the deferred function running mechanism for all promises.
@@ -130,6 +136,17 @@ public final class Promises {
         @Override
         public Promise<T> delegate(Deferred<T> deferred) {
             return this.then(deferred).error(deferred);
+        }
+
+        @Override
+        public T get(long timeout) throws Exception {
+            try {
+                CompletableFuture<T> future = new CompletableFuture<>();
+                then(result -> future.complete(result)).error(error -> future.completeExceptionally(error));
+                return future.get(timeout, TimeUnit.SECONDS);
+            } catch (ExecutionException error) {
+                throw (Exception) error.getCause();
+            }
         }
 
         private <C> DeferredFunction<C> createChainingDeferredFunctionExecutor(

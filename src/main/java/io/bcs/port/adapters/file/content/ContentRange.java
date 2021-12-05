@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.file;
+package io.bcs.port.adapters.file.content;
 
 import io.bcs.domain.model.file.FileMetadata;
 import io.bcs.domain.model.file.ContentFragment;

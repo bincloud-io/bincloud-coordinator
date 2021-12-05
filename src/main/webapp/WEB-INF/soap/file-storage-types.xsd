@@ -7,60 +7,78 @@
 
 	<import schemaLocation="global-types.xsd"
 		namespace="http://www.bincloud.io/common/global-types"></import>
-	<complexType name="CreateFileRevisionRq_Type">
+	<complexType name="CreateFileRq_Type">
 		<sequence>
-			<element name="attributes" type="tns:FileAttributes_Type"></element>
+            <element name="fileName" type="tns:FileName_Type"></element>
+            <element name="mediaType" type="tns:MimeType_Type"></element>
 		</sequence>
 	</complexType>
 
-	<element name="CreateFileRevisionRq"
-		type="tns:CreateFileRevisionRq_Type"></element>
+	<element name="CreateFileRq"
+		type="tns:CreateFileRq_Type"></element>
 
-	<complexType name="CreateFileRevisionRs_Type">
+	<complexType name="CreateFileRs_Type">
 		<complexContent>
 			<extension base="global:ServiceResponse_Type">
 				<sequence>
-					<element name="revisionPointer" type="tns:RevisionPointer_Type"></element>
+					<element name="fileReference" type="tns:URL_Type" minOccurs="1" maxOccurs="1"></element>
+					<element name="storageFileName" type="tns:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
 				</sequence>
 			</extension>
 		</complexContent>
 	</complexType>
 
-	<element name="CreateFileRevisionRs"
-		type="tns:CreateFileRevisionRs_Type"></element>
+	<element name="CreateFileRs"
+		type="tns:CreateFileRs_Type"></element>
 
-	<complexType name="FileAttributes_Type">
+
+	<simpleType name="FileName_Type">
+		<restriction base="string">
+			<minLength value="1"></minLength>
+			<maxLength value="256"></maxLength>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="URL_Type">
+    	<restriction base="string">
+
+    		<minLength value="1"></minLength>
+    		<maxLength value="2048"></maxLength>
+    		<whiteSpace value="collapse"></whiteSpace>
+    	</restriction>
+    </simpleType>
+
+	<simpleType name="MimeType_Type">
+		<restriction base="string">
+			<minLength value="1"></minLength>
+			<maxLength value="200"></maxLength>
+			<whiteSpace value="collapse"></whiteSpace>
+		</restriction>
+	</simpleType>
+
+
+
+	<complexType name="DisposeFileRq_Type">
 		<sequence>
-			<element name="fileName" type="tns:FileName_Type"></element>
-			<element name="mediaType" type="tns:MimeType_Type"></element>
-			<element name="contentDisposition" type="tns:ContentDisposition_Type"></element>
+			<element name="storageFileName" type="tns:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
 		</sequence>
 	</complexType>
+
+	<complexType name="DisposeFileRs_Type">
+		<complexContent>
+			<extension base="global:ServiceResponse_Type"></extension>
+		</complexContent>
+	</complexType>
 	
-    <simpleType name="FileName_Type">
+    <simpleType name="StorageFileName_Type">
     	<restriction base="string">
     		<minLength value="1"></minLength>
-    		<maxLength value="256"></maxLength>
+    		<maxLength value="64"></maxLength>
+    		<whiteSpace value="collapse"></whiteSpace>
     	</restriction>
     </simpleType>
 
-    <simpleType name="RevisionPointer_Type">
-    	<restriction base="string">
-    		<length value="64"></length>
-    	</restriction>
-    </simpleType>
+    <element name="DisposeFileRq" type="tns:DisposeFileRq_Type"></element>
 
-    <simpleType name="MimeType_Type">
-    	<restriction base="string">
-    		<minLength value="1"></minLength>
-    		<maxLength value="20"></maxLength>
-    	</restriction>
-    </simpleType>
-
-    <simpleType name="ContentDisposition_Type">
-    	<restriction base="string">
-    		<enumeration value="INLINE"></enumeration>
-    		<enumeration value="ATTACHMENT"></enumeration>
-    	</restriction>
-    </simpleType>
+    <element name="DisposeFileRs" type="tns:DisposeFileRs_Type"></element>
 </schema>

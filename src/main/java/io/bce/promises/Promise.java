@@ -31,8 +31,10 @@ public interface Promise<T> {
     public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider);
 
     public Promise<T> delegate(Deferred<T> deferred);
-    
+
     public Promise<T> finalize(FinalizingHandler finalizer);
+
+    public T get(long timeout) throws Exception;
 
     /**
      * This interface declares the contract for the component which handles result

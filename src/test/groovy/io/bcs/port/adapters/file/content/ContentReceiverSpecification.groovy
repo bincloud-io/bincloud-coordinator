@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.file
+package io.bcs.port.adapters.file.content
 
 import static io.bcs.domain.model.file.FileMetadata.Disposition.ATTACHMENT
 import static io.bcs.domain.model.file.FileMetadata.Disposition.INLINE

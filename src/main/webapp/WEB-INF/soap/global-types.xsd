@@ -19,12 +19,13 @@
 					<element name="severity" minOccurs="1" maxOccurs="1"
 						type="tns:FaultSeverity_Type">
 					</element>
-					<element name="errorNumber" minOccurs="1" maxOccurs="1"
-						type="tns:FaultCode_Type" nillable="false">
+					<element name="errorNumber" minOccurs="1"
+						maxOccurs="1" type="tns:FaultCode_Type" nillable="false">
 					</element>
 					<element name="message" minOccurs="1" maxOccurs="1"
 						type="tns:FaultDescription_Type" nillable="false">
 					</element>
+					<element name="validationErrors" type="tns:ValidationErrors_Type" minOccurs="0" maxOccurs="1"></element>
 				</sequence>
 			</extension>
 		</complexContent>
@@ -48,7 +49,7 @@
 		<restriction base="string">
 			<whiteSpace value="collapse"></whiteSpace>
 			<minLength value="1"></minLength>
-			<maxLength value="64"></maxLength>
+			<maxLength value="60"></maxLength>
 		</restriction>
 	</simpleType>
 
@@ -60,6 +61,41 @@
 	<simpleType name="FaultDescription_Type">
 		<restriction base="string">
 			<whiteSpace value="collapse"></whiteSpace>
+			<maxLength value="1000"></maxLength>
+			<minLength value="0"></minLength>
 		</restriction>
 	</simpleType>
+
+	<simpleType name="ValidationErrorMessage_Type">
+		<restriction base="string">
+
+			<whiteSpace value="collapse"></whiteSpace>
+			<maxLength value="1000"></maxLength>
+			<minLength value="0"></minLength>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="ValidationGroupName_Type">
+		<restriction base="string">
+			<minLength value="1"></minLength>
+
+			<whiteSpace value="collapse"></whiteSpace>
+			<maxLength value="500"></maxLength>
+		</restriction>
+	</simpleType>
+
+
+	<complexType name="ValidationGroupedError_Type">
+		<sequence>
+			<element name="groupName" type="tns:ValidationGroupName_Type" minOccurs="1" maxOccurs="1"></element>
+			<element name="messages" type="tns:ValidationErrorMessage_Type" minOccurs="0" maxOccurs="unbounded"></element>
+		</sequence>
+	</complexType>
+	
+    <complexType name="ValidationErrors_Type">
+    	<sequence>
+    		<element name="ungroupedErrors" type="tns:ValidationErrorMessage_Type" minOccurs="0" maxOccurs="unbounded"></element>
+    		<element name="groupedErrors" type="tns:ValidationGroupedError_Type" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
 </schema>

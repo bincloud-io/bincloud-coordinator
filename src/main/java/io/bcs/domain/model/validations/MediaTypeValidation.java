@@ -9,7 +9,7 @@ public class MediaTypeValidation extends StringValueValidation {
             + "[0-9A-Za-z!#$%&'*+.^_`|~-]+)");
 
     public MediaTypeValidation(String mediaType) {
-        super("media.type", 1L, 100L, Arrays.asList(PATTERN));
+        super("media.type", 1L, 200L, Arrays.asList(PATTERN));
         this.mediaType = mediaType;
     }
 

@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.file
+package io.bcs.port.adapters.file.content
 
 import io.bcs.domain.model.file.Range
 import io.bcs.domain.model.file.UnsatisfiableRangeFormatException
