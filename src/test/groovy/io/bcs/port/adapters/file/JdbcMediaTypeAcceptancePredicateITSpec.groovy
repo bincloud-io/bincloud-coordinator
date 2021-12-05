@@ -1,10 +1,8 @@
-package io.bcs.port.adapters.common
+package io.bcs.port.adapters.file
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
-
-import java.util.stream.IntStream
 
 import javax.annotation.Resource
 import javax.inject.Inject
@@ -15,9 +13,9 @@ import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 
-import io.bce.Generator
 import io.bce.MustNeverBeHappenedError
-import io.bce.domain.errors.ApplicationException
+import io.bcs.DictionaryValidation
+import io.bcs.DictionaryValidation.DictionaryPredicate
 import io.bcs.port.adapters.common.JdbcSequenceGenerator
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
@@ -25,14 +23,14 @@ import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
-class JdbcSequenceGeneratorITSpec extends Specification {
-    private static final String MIGRATION_SCRIPT ="db-init/sequence/sequence.changelog.xml"
-    private static final String DATABASE_USERNAME = "sa"
-    private static final String DATABASE_PASSWORD = ""
-
+class JdbcMediaTypeAcceptancePredicateITSpec extends Specification {
+    private static final String MIGRATION_SCRIPT ="db-init/file/ref.mediatype.changelog.xml"
+    private static final String EXISTING_MEDIATYPE = "application/well-mediatype"
+    private static final String MISSING_MEDIATYPE = "application/bad-mediatype"
+    
     @Deployment
     public static Archive "create deployment"() {
-        return ArchiveBuilder.jar("jdbc-sequence-generator-spec.jar")
+        return ArchiveBuilder.jar("jdbc-media-type-acceptance-predicate-spec.jar")
                 .resolveDependencies("pom.xml")
                 .withScopes(COMPILE, RUNTIME, TEST)
                 .resolveDependency("org.liquibase", "liquibase-core")
@@ -40,7 +38,7 @@ class JdbcSequenceGeneratorITSpec extends Specification {
                 .apply()
                 .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
                 .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
-                .appendClasses(JdbcSequenceGenerator)
+                .appendClasses(JdbcMediaTypeAcceptancePredicate, DictionaryValidation, DictionaryPredicate)
                 .appendResource("liquibase")
                 .appendResource("db-init")
                 .appendManifestResource("META-INF/beans.xml", "beans.xml")
@@ -54,23 +52,24 @@ class JdbcSequenceGeneratorITSpec extends Specification {
     @Resource(lookup="java:/jdbc/BC_CENTRAL")
     private DataSource dataSource;
 
+    private JdbcMediaTypeAcceptancePredicate predicate
+    
     def setup() {
         databaseConfigurer.setup("liquibase/master.changelog.xml")
-    }
-
-    def "Scenario: generate sequence of numbers"() {
-        given: "The prepared database with registered sequence"
         databaseConfigurer.setup(MIGRATION_SCRIPT)
-
-        and: "The sequence generator connected to its one"
-        Generator<Long> generator = new JdbcSequenceGenerator(dataSource, "SEQUENCE")
-
-        expect: "The auto incremented integer numbers will be generated"
-        IntStream.range(1, 10).forEach({
-            generator.generateNext() == it
-        })
+        this.predicate = new JdbcMediaTypeAcceptancePredicate(dataSource)
     }
 
+    def "Scenario: check existing mediatype"() {        
+        expect: "The predicate should pass existing mediatype"
+        predicate.isSatisfiedBy(EXISTING_MEDIATYPE) == true        
+    }
+
+    def "Scenario: check missing mediatype"() {
+        expect: "The predicate should fail missing mediatype"
+        predicate.isSatisfiedBy(MISSING_MEDIATYPE) == false        
+    }
+    
     def cleanup() {
         databaseConfigurer.tearDown();
     }
