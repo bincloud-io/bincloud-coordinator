@@ -8,7 +8,7 @@
 
 	<servlet>
 		<servlet-name>ContentLoadingServlet</servlet-name>
-		<servlet-class>io.bcs.port.adapters.file.ContentLoadingServlet</servlet-class>
+		<servlet-class>io.bcs.port.adapters.file.content.ContentLoadingServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 
