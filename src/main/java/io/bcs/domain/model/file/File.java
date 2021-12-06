@@ -5,8 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import io.bce.logging.ApplicationLogger;
+import io.bce.logging.Level;
+import io.bce.logging.LogRecord;
+import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
+import io.bce.text.TextTemplates;
 import io.bcs.domain.model.file.FileContent.ContentType;
 import io.bcs.domain.model.file.FileState.FileEntityAccessor;
 import io.bcs.domain.model.file.FileState.FileStateFactory;
@@ -15,8 +20,8 @@ import io.bcs.domain.model.file.states.FileDistributingState;
 import io.bcs.domain.model.file.states.FileDraftState;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.EqualsAndHashCode.Include;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -27,6 +32,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class File {
+    private static final ApplicationLogger log = Loggers.applicationLogger(File.class);
+    
     static final String DEFAULT_STORAGE_NAME = "unknown";
     static final String DEFAULT_STORAGE_FILE_NAME = "unknown";
     static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
@@ -86,6 +93,7 @@ public class File {
         return Promises.of(deferred -> {
             getFileState().getContentAccess(fileStorage, createFragments(ranges)).chain(fileContent -> {
                 if (fileContent.getType() == ContentType.RANGE) {
+                    
                     return contentDownloader.receiveContentRange(fileContent);
                 }
 
@@ -159,6 +167,7 @@ public class File {
         private Map<FileStatus, FileStateFactory> STATE_FACTORIES = new HashMap<>();
 
         public FileState createStateFor(FileStatus status, FileEntityAccessor accessor) {
+            log.log(new LogRecord(Level.DEBUG, TextTemplates.createBy("Create ").withParameter("status", status)));
             return STATE_FACTORIES.get(status).create(accessor);
         }
 
