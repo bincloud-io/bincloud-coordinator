@@ -1,5 +1,7 @@
 package io.bce.logging;
 
+import java.util.Optional;
+
 import io.bce.logging.audit.ServiceAuditEvent;
 import io.bce.logging.audit.ServiceAuditLogger;
 import lombok.experimental.UtilityClass;
@@ -10,11 +12,11 @@ public class Loggers {
     private ServiceAuditLogger eventsLogger = new NullEventsLogger();
 
     public final ApplicationLogger applicationLogger() {
-        return applicationLogger;
+        return new ApplicationLoggerProxy();
     }
 
     public final ApplicationLogger applicationLogger(String loggerOwner) {
-        return applicationLogger.named(loggerOwner);
+        return applicationLogger().named(loggerOwner);
     }
 
     public final ApplicationLogger applicationLogger(Class<?> loggerOwner) {
@@ -22,7 +24,7 @@ public class Loggers {
     }
 
     public final ServiceAuditLogger eventsLogger() {
-        return eventsLogger;
+        return new ServiceAuditLoggerProxy();
     }
 
     public final Registry registry() {
@@ -45,6 +47,32 @@ public class Loggers {
         public Registry registerApplicationLogger(ApplicationLogger applicationLogger);
 
         public Registry registerEventsLogger(ServiceAuditLogger eventsLogger);
+    }
+
+    private static class ApplicationLoggerProxy extends AbstractLogger {
+        private Optional<String> loggerName = Optional.empty();
+
+        @Override
+        public void log(LogRecord logRecord) {
+            getNamedLoggerInstance().log(logRecord);
+        }
+
+        @Override
+        public ApplicationLogger named(String loggerName) {
+            this.loggerName = Optional.of(loggerName);
+            return this;
+        }
+
+        private ApplicationLogger getNamedLoggerInstance() {
+            return loggerName.map(applicationLogger::named).orElse(applicationLogger);
+        }
+    }
+
+    private static class ServiceAuditLoggerProxy implements ServiceAuditLogger {
+        @Override
+        public void log(ServiceAuditEvent auditEvent) {
+            eventsLogger.log(auditEvent);
+        }
     }
 
     private static class NullApplicatioLogger extends AbstractLogger {

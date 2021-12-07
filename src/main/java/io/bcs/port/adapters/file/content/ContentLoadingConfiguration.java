@@ -10,7 +10,6 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.TransactionManager;
 
 import io.bce.Generator;
-import io.bce.validation.DefaultValidationContext;
 import io.bce.validation.ValidationService;
 import io.bcs.application.ContentService;
 import io.bcs.application.FileService;
@@ -33,10 +32,8 @@ public class ContentLoadingConfiguration {
     @Inject
     private ContentLoadingProperties contentLoadingProperties;
 
-    @Produces
-    public ValidationService validationService() {
-        return DefaultValidationContext.createValidationService();
-    }
+    @Inject
+    private ValidationService validationService;
 
     @Produces
     public FileRepository fileRepository() {
@@ -58,7 +55,7 @@ public class ContentLoadingConfiguration {
     public FileMetadataRepository fileMetadataRepository() {
         return new JpaFileMetadataRepository(entityManager);
     }
-    
+
     @Produces
     public FileMetadataProvider fileMetadataProvider() {
         return contentLocator -> {
@@ -73,6 +70,6 @@ public class ContentLoadingConfiguration {
 
     @Produces
     public FileService fileStorageService() {
-        return new FileService(validationService(), fileRepository(), fileStorage());
+        return new FileService(validationService, fileRepository(), fileStorage());
     }
 }
