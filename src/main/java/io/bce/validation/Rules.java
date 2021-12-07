@@ -11,8 +11,8 @@ import io.bce.validation.ValidationContext.Rule;
 import lombok.NonNull;
 
 public class Rules {
-	public static final String VALIDATED_ELEMENT_PARAMETER_NAME = "$$element";
-	public static final String EXPECTED_VALUE_PARAMETER = "$$value";
+	public static final String VALIDATED_ELEMENT_PARAMETER_NAME = "$$value";
+	public static final String EXPECTED_VALUE_PARAMETER = "$$expectedValue";
 
 	public static final String MIN_PARAMETER_VALUE = "$$minValue";
 	public static final String MAX_PARAMETER_VALUE = "$$maxValue";
