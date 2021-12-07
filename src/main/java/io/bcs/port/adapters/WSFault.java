@@ -1,4 +1,4 @@
-package io.bcs.port.adapters.common;
+package io.bcs.port.adapters;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

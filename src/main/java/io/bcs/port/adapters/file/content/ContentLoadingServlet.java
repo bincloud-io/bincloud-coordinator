@@ -16,6 +16,8 @@ import io.bce.domain.errors.ApplicationException;
 import io.bce.domain.errors.ErrorDescriptor.ErrorCode;
 import io.bce.domain.errors.UnexpectedErrorException;
 import io.bce.interaction.streaming.Streamer;
+import io.bce.logging.ApplicationLogger;
+import io.bce.logging.Loggers;
 import io.bce.promises.Promise.ErrorHandler;
 import io.bce.promises.Promise.ResponseHandler;
 import io.bce.promises.Promises;
@@ -33,6 +35,8 @@ import io.bcs.domain.model.file.states.FileDisposedException;
 import io.bcs.port.adapters.ContentLoadingProperties;
 
 public class ContentLoadingServlet extends HttpServlet {
+    private static final ApplicationLogger log = Loggers.applicationLogger(ContentLoadingServlet.class);
+    
     private static final long serialVersionUID = 2026798739467262029L;
     private static final String HTTP_RANGES_HEADER = "Ranges";
     private static final String FILE_STORAGE_NAME_PARAMETER = "fileStorageName";
@@ -121,6 +125,7 @@ public class ContentLoadingServlet extends HttpServlet {
     private <E extends ApplicationException> ErrorHandler<E> applicationError(HttpServletResponse response,
             int statusCode) {
         return error -> {
+            log.error(error);
             response.setHeader(BOUNDED_CONTEXT_HEADER, error.getContextId().toString());
             response.setHeader(ERROR_CODE_HEADER, error.getErrorCode().extract().toString());
             response.setHeader(ERROR_SEVERITY_HEADER, error.getErrorSeverity().toString());

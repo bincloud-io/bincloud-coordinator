@@ -5,6 +5,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.jws.WebService;
 
+import io.bce.logging.ApplicationLogger;
+import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bcs.application.FileService;
 import io.bcs.application.acl.SafeCreateFileCommand;
@@ -19,13 +21,16 @@ import io.bcs.port.adapter.file.endpoint.DisposeFileFault;
 import io.bcs.port.adapter.file.endpoint.WSFileService;
 import io.bcs.port.adapters.FilesManagementProperties;
 import io.bcs.port.adapters.TimeoutProperties;
-import io.bcs.port.adapters.common.WSFault;
+import io.bcs.port.adapters.WSFault;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @WebService(
         serviceName = "WSFileService", 
         endpointInterface = "io.bcs.port.adapter.file.endpoint.WSFileService")
 public class WSFileServiceEndpoint implements WSFileService {
+    private static final ApplicationLogger log = Loggers.applicationLogger(WSFileServiceEndpoint.class);
+            
     @Inject
     private FileService fileService;
     
@@ -38,6 +43,7 @@ public class WSFileServiceEndpoint implements WSFileService {
     @Override
     public CreateFileRsType createFile(CreateFileRqType parameters) throws CreateFileFault {
         try {
+            
             CreateFileRsType response = new CreateFileRsType();
             CreateFile createCommand = new WSCreateFileCommand(parameters);
             Promise<String> result = fileService.createFile().execute(createCommand);
@@ -45,6 +51,7 @@ public class WSFileServiceEndpoint implements WSFileService {
             response.setFileReference(getFileReference(result.get(timeoutProperties.getSyncOperationTimeout())));
             return response;
         } catch (Exception error) {
+            log.error(error);
             WSFault faultInfo = WSFault.createFor(error);
             throw new CreateFileFault(faultInfo.getMessage(), faultInfo, error);
         }
@@ -59,6 +66,7 @@ public class WSFileServiceEndpoint implements WSFileService {
             response.setBoundedContext(Constants.CONTEXT.toString());
             return response;
         } catch (Exception error) {
+            log.error(error);
             WSFault faultInfo = WSFault.createFor(error);
             throw new DisposeFileFault(faultInfo.getMessage(), faultInfo, error);
         }
@@ -69,6 +77,7 @@ public class WSFileServiceEndpoint implements WSFileService {
                 fileStorageName);
     }
 
+    @ToString
     @RequiredArgsConstructor
     private static class WSCreateFileCommand extends SafeCreateFileCommand {
         private final CreateFileRqType request;

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
+import io.bce.logging.ApplicationLogger;
+import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.domain.model.file.ContentFragment;
@@ -23,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public class FileDistributingState extends FileState {
+    private static final ApplicationLogger log = Loggers.applicationLogger(FileDistributingState.class);
     public FileDistributingState(FileEntityAccessor fileEntityAccessor) {
         super(fileEntityAccessor);
     }
@@ -31,6 +34,7 @@ public class FileDistributingState extends FileState {
     public Promise<FileContent> getContentAccess(FileStorage fileStorage,
             Collection<ContentFragment> contentFragments) {
         return Promises.of(deferred -> {
+            log.debug("The file content download is going to be performed from distributioning file");
             deferred.resolve(new StorageFileContent(fileStorage, contentFragments));
         });
     }
@@ -40,11 +44,13 @@ public class FileDistributingState extends FileState {
         return new Lifecycle() {
             @Override
             public LifecycleMethod<Void> dispose() {
+                log.debug("The file dispose is going to be performed for distributioning file");
                 return new LifecycleDisposeFileMethod(getFileEntityAccessor(), storage);
             }
 
             @Override
             public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
+                log.debug("The file content upload is going to be performed for distributioning file");
                 return new InacceptableLifecycleMethod<>(ContentUploadedException::new);
             }
         };

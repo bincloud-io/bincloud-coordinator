@@ -2,7 +2,6 @@ package io.bce.logging;
 
 import io.bce.logging.audit.ServiceAuditEvent;
 import io.bce.logging.audit.ServiceAuditLogger;
-import io.bce.text.TextTemplate;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -48,57 +47,9 @@ public class Loggers {
         public Registry registerEventsLogger(ServiceAuditLogger eventsLogger);
     }
 
-    private static class NullApplicatioLogger implements ApplicationLogger {
+    private static class NullApplicatioLogger extends AbstractLogger {
         @Override
         public void log(LogRecord logRecord) {
-        }
-
-        @Override
-        public void trace(String message) {
-        }
-
-        @Override
-        public void trace(TextTemplate messageTemplate) {
-        }
-
-        @Override
-        public void debug(String message) {
-        }
-
-        @Override
-        public void debug(TextTemplate messageTemplate) {
-        }
-
-        @Override
-        public void error(String message) {
-        }
-
-        @Override
-        public void error(TextTemplate mmessageTemplate) {
-        }
-
-        @Override
-        public void info(String message) {
-        }
-
-        @Override
-        public void info(TextTemplate messageTemplate) {
-        }
-
-        @Override
-        public void warn(String message) {
-        }
-
-        @Override
-        public void warn(TextTemplate messageTemplate) {
-        }
-
-        @Override
-        public void critic(String message) {
-        }
-
-        @Override
-        public void critic(TextTemplate messageTemplate) {
         }
 
         @Override

@@ -3,6 +3,7 @@ package io.bcs.port.adapters.common
 import io.bce.text.TextTemplate
 import io.bce.text.TextTemplates
 import io.bce.validation.ErrorMessage
+import io.bcs.port.adapters.ErrorMessageTextTemplate
 import spock.lang.Specification
 
 class ErrorMessageTextTemplateSpec extends Specification {

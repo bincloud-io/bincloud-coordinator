@@ -11,6 +11,7 @@ import io.bce.validation.ErrorMessage
 import io.bce.validation.ValidationState
 import io.bce.validation.ValidationState.ErrorState
 import io.bcs.port.adapter.FaultSeverityType
+import io.bcs.port.adapters.WSFault
 import spock.lang.Specification
 
 class WSFaultSpec extends Specification {

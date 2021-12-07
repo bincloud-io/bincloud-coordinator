@@ -93,14 +93,16 @@ public class File {
         return Promises.of(deferred -> {
             getFileState().getContentAccess(fileStorage, createFragments(ranges)).chain(fileContent -> {
                 if (fileContent.getType() == ContentType.RANGE) {
-                    
+                    log.debug("Download single-range file content");
                     return contentDownloader.receiveContentRange(fileContent);
                 }
 
                 if (fileContent.getType() == ContentType.MULTIRANGE) {
+                    log.debug("Download multi-range file content");
                     return contentDownloader.receiveContentRanges(fileContent);
                 }
-
+                
+                log.debug("Download full-size file content");
                 return contentDownloader.receiveFullContent(fileContent);
             }).delegate(deferred);
         });
