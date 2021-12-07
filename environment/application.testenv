@@ -12,6 +12,7 @@ appserver:
   image: bincloud/appserver:v1.0.0
   hostName: appserver.bincloud.internal
   portBindings: [8080/tcp, 9990/tcp, 6300/tcp, 8787/tcp]
+  env: ['JAVA_OPTS=-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n']
   links:
     - database:database
   await:
