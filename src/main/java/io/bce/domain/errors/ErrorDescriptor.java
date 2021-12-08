@@ -1,50 +1,49 @@
 package io.bce.domain.errors;
 
-import java.util.Map;
-
 import io.bce.domain.BoundedContextId;
+import java.util.Map;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * This interface describes an abstraction which provides data about happened error
- * 
+ * This interface describes an abstraction which provides data about happened error.
+ *
  * @author Dmitry Mikhaylenko
  *
  */
 public interface ErrorDescriptor {
   /**
-   * Get the bounded context identifier the error is assigned to
-   * 
+   * Get the bounded context identifier the error is assigned to.
+   *
    * @return The bounded context identifier
    */
   public BoundedContextId getContextId();
 
   /**
-   * Get the error code identifying an error into the bounded context
-   * 
+   * Get the error code identifying an error into the bounded context.
+   *
    * @return The error code
    */
   public ErrorCode getErrorCode();
 
   /**
-   * Get the error severity showing it is a business error or an incident
-   * 
+   * Get the error severity showing it is a business error or an incident.
+   *
    * @return The error severity
    */
   public ErrorSeverity getErrorSeverity();
 
   /**
-   * Get the map of details parameters, describing the error
-   * 
+   * Get the map of details parameters, describing the error.
+   *
    * @return The details parameters map
    */
   public Map<String, Object> getErrorDetails();
 
   /**
-   * This class enumerates of the error severity variants
-   * 
+   * This class enumerates of the error severity variants.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
@@ -66,7 +65,7 @@ public interface ErrorDescriptor {
    * the error code into a bounded context semantic and not a random number value. It will prevent
    * the situation when the error code will be confused with another number value having another
    * semantic and will used for math calculations for example.
-   * 
+   *
    * @author Dmitry Mikhaylenko
    *
    */
@@ -80,8 +79,8 @@ public interface ErrorDescriptor {
     private final Long errorCode;
 
     /**
-     * Extract the error code value
-     * 
+     * Extract the error code value.
+     *
      * @return The error code value
      */
     public final Long extract() {

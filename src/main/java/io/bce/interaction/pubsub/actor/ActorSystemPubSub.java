@@ -1,7 +1,5 @@
 package io.bce.interaction.pubsub.actor;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import io.bce.actor.Actor;
 import io.bce.actor.ActorAddress;
 import io.bce.actor.ActorName;
@@ -9,9 +7,17 @@ import io.bce.actor.ActorSystem;
 import io.bce.actor.Message;
 import io.bce.interaction.pubsub.PubSub;
 import io.bce.interaction.pubsub.Topic;
+import java.util.concurrent.atomic.AtomicLong;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is the pub-sub mechanism implementation, using actor system for even transport.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <T> The publishing data base type name
+ */
 public class ActorSystemPubSub<T> implements PubSub<T> {
   private final AtomicLong sequence = new AtomicLong(0L);
 
@@ -26,12 +32,12 @@ public class ActorSystemPubSub<T> implements PubSub<T> {
   }
 
   /**
-   * The actor system factory
-   * 
+   * The actor system pub-sub transport factory.
+   *
    * @param actorSystem The actor system
    * @return The pub-sub system factory
    */
-  public static final Factory factory(@NonNull ActorSystem actorSystem) {
+  public static Factory factory(@NonNull ActorSystem actorSystem) {
     return new Factory() {
       @Override
       public <T> PubSub<T> createPubSub(@NonNull ActorName coordinatorName) {
@@ -116,16 +122,16 @@ public class ActorSystemPubSub<T> implements PubSub<T> {
 
   /**
    * This interface declares the contract of creating pub-sub channel, bound to the concrete topic
-   * with specified message type
-   * 
+   * with specified message type.
+   *
    * @author Dmitry Mikaylenko
    *
    */
   public interface Factory {
     /**
-     * Create the pub-sub channel
-     * 
-     * @param <T> The message type name
+     * Create the pub-sub channel.
+     *
+     * @param <T>             The message type name
      * @param coordinatorName The coordinator actor name
      * @return The pub-sub channel
      */

@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * This class describes the "unsubscribe" command
- * 
+ * This class describes the "unsubscribe" command.
+ *
  * @author Dmitry Mikhaylenko
  *
  */

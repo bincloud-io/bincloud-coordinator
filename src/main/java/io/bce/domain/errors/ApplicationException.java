@@ -1,13 +1,19 @@
 package io.bce.domain.errors;
 
+import io.bce.domain.BoundedContextId;
 import java.util.HashMap;
 import java.util.Map;
-
-import io.bce.domain.BoundedContextId;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
+/**
+ * This class represents the exception, assigned to your application logic. If you are going to
+ * create your own exception, assigned to your domain model, you should extend from this class.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class ApplicationException extends RuntimeException implements ErrorDescriptor {
   private static final long serialVersionUID = 49273931466407615L;
@@ -26,6 +32,14 @@ public class ApplicationException extends RuntimeException implements ErrorDescr
   @EqualsAndHashCode.Include
   private final ErrorCode errorCode;
 
+  /**
+   * Create the application exception.
+   *
+   * @param contextId     The bounded context id
+   * @param errorSeverity The error severity
+   * @param errorCode     The error code
+   * @param errorMessage  The error message
+   */
   public ApplicationException(@NonNull BoundedContextId contextId,
       @NonNull ErrorSeverity errorSeverity, @NonNull ErrorCode errorCode, String errorMessage) {
     super(errorMessage);
@@ -40,6 +54,11 @@ public class ApplicationException extends RuntimeException implements ErrorDescr
 
   }
 
+  /**
+   * If you are going to increase error details you should create derived map, containing all
+   * parameters, returned by your superclass and then increase it. Don't ignore parameters, returned
+   * by the superclass method. It might affect your application logic.
+   */
   @Override
   @EqualsAndHashCode.Include
   public Map<String, Object> getErrorDetails() {
@@ -53,5 +72,4 @@ public class ApplicationException extends RuntimeException implements ErrorDescr
   public final String toString() {
     return getMessage();
   }
-
 }

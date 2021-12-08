@@ -3,16 +3,20 @@ package io.bce.validation;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Path.Node;
 import javax.validation.Validator;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is the validation service implementation, using the JSR Bean Validation mechanism.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor
-public class JSRBeanValidationService implements ValidationService {
+public class JsrBeanValidationService implements ValidationService {
   private static final String NULL_STRING_JOINT_VALUE = "null";
   private final Validator beanValidator;
 

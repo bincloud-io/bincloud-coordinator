@@ -1,10 +1,15 @@
 package io.bce;
 
 import java.util.Comparator;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class represents the value ranges type and allows to work with them.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @Getter
 public class Range<T> {
   private final Point min;
@@ -20,11 +25,11 @@ public class Range<T> {
   }
 
   /**
-   * Create the range for case when the values comparison should be performed by the comparator
-   * 
-   * @param <T> The value type name
-   * @param min The minimal value
-   * @param max The maximal value
+   * Create the range for case when the values comparison should be performed by the comparator.
+   *
+   * @param <T>        The value type name
+   * @param min        The minimal value
+   * @param max        The maximal value
    * @param comparator The values comparator
    * @return The range value
    */
@@ -69,6 +74,13 @@ public class Range<T> {
     }
   }
 
+  /**
+   * This exception notifies about exceptional case when the range min value greater than a max
+   * value.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public static final class ThresholdsAmountsException extends RuntimeException {
     private static final long serialVersionUID = 3344037211261126041L;
 

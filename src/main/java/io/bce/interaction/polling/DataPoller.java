@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -29,7 +28,7 @@ class DataPoller<D> implements Iterable<PolledElement<D>> {
     @Override
     public PolledElement<D> next() {
       runPollingIterationStep();
-      return new PolledElement<D>(index.getAndIncrement(), polledDataIterator.next());
+      return new PollingDataHolder<D>(index.getAndIncrement(), polledDataIterator.next());
     }
 
     private void runPollingIterationStep() {

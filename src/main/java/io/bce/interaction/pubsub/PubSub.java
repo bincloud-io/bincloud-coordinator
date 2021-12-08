@@ -8,24 +8,24 @@ package io.bce.interaction.pubsub;
  * component. Subscriber is the component which is subscribed on the topic and receives the
  * messages, published to the last one. The topic is the abstraction which aggregates publishers and
  * subscribers - publishers produce messages to topics which is received by subscribers, subscribed
- * to them
- * 
+ * to them.
+ *
  * @author Dmitry Mikhaylenko
  *
  * @param <T> The base pub-sub type name
  */
 public interface PubSub<T> {
   /**
-   * Get the publisher component
-   * 
+   * Get the publisher component.
+   *
    * @param topic The topic to publishing
    * @return The publisher object
    */
   public Publisher<T> getPublisher(Topic topic);
 
   /**
-   * Subscribe on the topic
-   * 
+   * Subscribe on the topic.
+   *
    * @param <M> The message type
    * @param topic The topic to publishing
    * @param messageType The message type
@@ -36,51 +36,51 @@ public interface PubSub<T> {
       Subscriber<M> subscriber);
 
   /**
-   * Close the pub-sub channel
+   * Close the pub-sub channel.
    */
   public void close();
 
   /**
-   * This interface describes the contract for event publishing
-   * 
+   * This interface describes the contract for event publishing.
+   *
    * @author Dmitry Mikhaylenko
    *
    * @param <M> The message type name
    */
   public interface Publisher<M> {
     /**
-     * Publish the message to the topic
-     * 
+     * Publish the message to the topic.
+     *
      * @param message The message object
      */
     public void publish(M message);
   }
 
   /**
-   * This interface describes the contract for event listening
-   * 
+   * This interface describes the contract for event listening.
+   *
    * @author Dmitry Mikhaylenko
    *
    * @param <M> The message type name
    */
   public interface Subscriber<M> {
     /**
-     * React on the message
-     * 
+     * React on the message.
+     *
      * @param message The message object
      */
     public void onMessage(M message);
   }
 
   /**
-   * This interface describes the contract of subscribtion handling
-   * 
+   * This interface describes the contract of subscribtion handling.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public interface Subscribtion {
     /**
-     * Unsubscribe from the subscription
+     * Unsubscribe from the subscription.
      */
     public void unsubscribe();
   }

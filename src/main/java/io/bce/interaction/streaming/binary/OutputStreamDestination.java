@@ -1,14 +1,19 @@
 package io.bce.interaction.streaming.binary;
 
+import io.bce.domain.errors.UnexpectedErrorException;
+import io.bce.interaction.streaming.binary.BinaryChunk.BinaryChunkWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-
-import io.bce.domain.errors.UnexpectedErrorException;
-import io.bce.interaction.streaming.binary.BinaryChunk.BinaryChunkWriter;
 import lombok.NonNull;
 
+/**
+ * This class implements the binary destination, writing chunks to the output stream.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class OutputStreamDestination extends BinaryDestination implements Closeable {
   private final Closeable streamCloser;
 

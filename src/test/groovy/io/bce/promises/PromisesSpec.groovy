@@ -7,8 +7,8 @@ import io.bce.promises.Promise.ChainingPromiseHandler
 import io.bce.promises.Promise.ErrorHandler
 import io.bce.promises.Promise.FinalizingHandler
 import io.bce.promises.Promise.ResponseHandler
-import io.bce.promises.Promises.PromiseHasAlreadyBeenRejectedException
-import io.bce.promises.Promises.PromiseHasAlreadyBeenResolvedException
+import io.bce.promises.Promises.PromiseRejectionDuplicateException
+import io.bce.promises.Promises.PromiseResolutionDuplicateException
 import spock.lang.Specification
 
 class PromisesSpec extends Specification {
@@ -142,7 +142,7 @@ class PromisesSpec extends Specification {
 
   def "Scenario: resolve twice"() {
     CountDownLatch latch = new CountDownLatch(1);
-    PromiseHasAlreadyBeenResolvedException thrownError;
+    PromiseResolutionDuplicateException thrownError;
 
     given: "The response handlers"
     ResponseHandler firstResponseHandler = Mock(ResponseHandler)
@@ -158,7 +158,7 @@ class PromisesSpec extends Specification {
       try {
         resolver.resolve(RESPONSE)
         resolver.resolve(RESPONSE)
-      } catch (PromiseHasAlreadyBeenResolvedException error) {
+      } catch (PromiseResolutionDuplicateException error) {
         thrownError = error
       } finally {
         latch.countDown()
@@ -173,7 +173,7 @@ class PromisesSpec extends Specification {
 
   def "Scenario: reject twice"() {
     CountDownLatch latch = new CountDownLatch(1);
-    PromiseHasAlreadyBeenRejectedException thrownError;
+    PromiseRejectionDuplicateException thrownError;
 
     given: "The response handlers"
     ResponseHandler firstResponseHandler = Mock(ResponseHandler)
@@ -189,7 +189,7 @@ class PromisesSpec extends Specification {
       try {
         resolver.reject(UNTYPED_EXCEPTION)
         resolver.reject(UNTYPED_EXCEPTION)
-      } catch (PromiseHasAlreadyBeenRejectedException error) {
+      } catch (PromiseRejectionDuplicateException error) {
         thrownError = error
       } finally {
         latch.countDown()
@@ -204,7 +204,7 @@ class PromisesSpec extends Specification {
 
   def "Scenario: reject after resolve"() {
     CountDownLatch latch = new CountDownLatch(1);
-    PromiseHasAlreadyBeenResolvedException thrownError;
+    PromiseResolutionDuplicateException thrownError;
 
     given: "The response handlers"
     ResponseHandler firstResponseHandler = Mock(ResponseHandler)
@@ -220,7 +220,7 @@ class PromisesSpec extends Specification {
       try {
         resolver.resolve(RESPONSE)
         resolver.reject(UNTYPED_EXCEPTION)
-      } catch (PromiseHasAlreadyBeenResolvedException error) {
+      } catch (PromiseResolutionDuplicateException error) {
         thrownError = error
       } finally {
         latch.countDown()
@@ -235,7 +235,7 @@ class PromisesSpec extends Specification {
 
   def "Scenario: resolve after reject"() {
     CountDownLatch latch = new CountDownLatch(1);
-    PromiseHasAlreadyBeenRejectedException thrownError;
+    PromiseRejectionDuplicateException thrownError;
 
     given: "The response handlers"
     ResponseHandler firstResponseHandler = Mock(ResponseHandler)
@@ -251,7 +251,7 @@ class PromisesSpec extends Specification {
       try {
         resolver.reject(UNTYPED_EXCEPTION)
         resolver.resolve(RESPONSE)
-      } catch (PromiseHasAlreadyBeenRejectedException error) {
+      } catch (PromiseRejectionDuplicateException error) {
         thrownError = error
       } finally {
         latch.countDown()

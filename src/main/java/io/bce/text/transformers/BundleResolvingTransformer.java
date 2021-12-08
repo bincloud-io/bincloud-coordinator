@@ -1,10 +1,9 @@
 package io.bce.text.transformers;
 
-import java.util.Optional;
-
 import io.bce.text.TextTemplate;
 import io.bce.text.TextTemplate.Transformer;
 import io.bce.text.TextTemplates;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -13,7 +12,7 @@ import lombok.RequiredArgsConstructor;
  * text "Hello world" with identifier "hello". This transformer passes the identifier to the
  * {@link BundleResolver} and creates new text template with replaced text. If bundle id couldn't be
  * resolved it won't be replaced and will returned as is.
- * 
+ *
  * @author Dmitry Mikhaylenko
  *
  */
@@ -37,8 +36,8 @@ public class BundleResolvingTransformer implements Transformer {
   }
 
   /**
-   * This interface declares the contract for bundle resolving
-   * 
+   * This interface declares the contract for bundle resolving.
+   *
    * @author Dmitry Mikhaylenko
    *
    */

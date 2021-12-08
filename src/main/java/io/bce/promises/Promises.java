@@ -1,5 +1,6 @@
 package io.bce.promises;
 
+import io.bce.promises.Deferred.DeferredFunction;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -8,25 +9,29 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import io.bce.promises.Deferred.DeferredFunction;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 
+/**
+ * This class is responsible for deferred operation executing.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @UtilityClass
 public final class Promises {
   private static DeferredFunctionRunner promiseDeferredFunctionRunner;
 
   static {
     configureDeferredFunctionRunner(
-        new ExecutorBasedDeferredFunctionRunner(Executors::newSingleThreadExecutor));
+        new ExecutorServiceBasedDeferredFunctionRunner(Executors::newSingleThreadExecutor));
   }
 
   /**
    * Specify the deferred function running mechanism for all promises.
-   * 
+   *
    * @param deferredFunctionRunner The deferred function runner
    */
   public static void configureDeferredFunctionRunner(
@@ -35,9 +40,9 @@ public final class Promises {
   }
 
   /**
-   * Create a deferred function
-   * 
-   * @param <T> The promise resolving type name
+   * Create a deferred function.
+   *
+   * @param <T>               The promise resolving type name
    * @param deferredOperation The deferred operation function
    * @return The promise for deferred operation
    */
@@ -46,9 +51,9 @@ public final class Promises {
   }
 
   /**
-   * Create a promise resolved by the specified value
-   * 
-   * @param <T> The promise resolving type name
+   * Create a promise resolved by the specified value.
+   *
+   * @param <T>   The promise resolving type name
    * @param value The promise resolving value
    * @return The resolved promise
    */
@@ -57,10 +62,10 @@ public final class Promises {
   }
 
   /**
-   * Create a promise rejected by the specified error
-   * 
-   * @param <T>The promise resolving type name
-   * @param <E>The promise rejection error name
+   * Create a promise rejected by the specified error.
+   *
+   * @param <T>   The promise resolving type name
+   * @param <E>   The promise rejection error name
    * @param error The promise rejection error
    * @return The rejected promise
    */
@@ -261,12 +266,12 @@ public final class Promises {
 
       @Override
       public void resolve(T response) {
-        throw new PromiseHasAlreadyBeenResolvedException();
+        throw new PromiseResolutionDuplicateException();
       }
 
       @Override
       public void reject(Throwable error) {
-        throw new PromiseHasAlreadyBeenResolvedException();
+        throw new PromiseResolutionDuplicateException();
       }
 
       @Override
@@ -288,12 +293,12 @@ public final class Promises {
 
       @Override
       public void resolve(T response) {
-        throw new PromiseHasAlreadyBeenRejectedException();
+        throw new PromiseRejectionDuplicateException();
       }
 
       @Override
       public void reject(Throwable error) {
-        throw new PromiseHasAlreadyBeenRejectedException();
+        throw new PromiseRejectionDuplicateException();
       }
 
       @Override
@@ -372,23 +377,50 @@ public final class Promises {
     }
   }
 
+  /**
+   * This interface describes the function which executes deferred operations.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public interface DeferredFunctionRunner {
-    public <T> void executeDeferredOperation(DeferredFunction<T> deferredExecutor,
+    /**
+     * Execute deferred operation.
+     *
+     * @param <T>              The promise resolution data type name
+     * @param deferredFunction The deferred function
+     * @param deferred         The deferred operation resolver
+     */
+    public <T> void executeDeferredOperation(DeferredFunction<T> deferredFunction,
         Deferred<T> deferred);
   }
 
-  public static class PromiseHasAlreadyBeenRejectedException extends RuntimeException {
+  /**
+   * This exception notifies about promise rejection duplicate. By definition promise could be
+   * rejected only once.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public static class PromiseRejectionDuplicateException extends RuntimeException {
     private static final long serialVersionUID = 2952805140695891072L;
 
-    public PromiseHasAlreadyBeenRejectedException() {
+    public PromiseRejectionDuplicateException() {
       super("Promise has already been rejected");
     }
   }
 
-  public static class PromiseHasAlreadyBeenResolvedException extends RuntimeException {
+  /**
+   * This exception notifies about promise resolution duplicate. By definition promise could be
+   * resolved only once.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public static class PromiseResolutionDuplicateException extends RuntimeException {
     private static final long serialVersionUID = 2952805140695891072L;
 
-    public PromiseHasAlreadyBeenResolvedException() {
+    public PromiseResolutionDuplicateException() {
       super("Promise has already been resolved");
     }
   }

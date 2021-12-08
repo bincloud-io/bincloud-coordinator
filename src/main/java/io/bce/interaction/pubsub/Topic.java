@@ -6,6 +6,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class identifies the pub-sub topic.
+ *
+ * @author Dmitry Mikaylenko
+ *
+ */
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public final class Topic {
@@ -21,8 +27,8 @@ public final class Topic {
   }
 
   /**
-   * Create the topic object
-   * 
+   * Create the topic object.
+   *
    * @param name The topic name string value
    * @return The topic
    */
@@ -32,14 +38,19 @@ public final class Topic {
   }
 
   /**
-   * This exception is happened if a topic name is badly formatted
-   * 
+   * This exception is happened if a topic name is badly formatted.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public static class WrongTopicNameFormatException extends RuntimeException {
     private static final long serialVersionUID = -3671386257899005216L;
 
+    /**
+     * Create the exception by a topic name string.
+     *
+     * @param topicName The topic name string
+     */
     public WrongTopicNameFormatException(String topicName) {
       super(String.format(
           "The topic name \"%s\" has wrong format. It should be matched to the pattern \"%s\"",

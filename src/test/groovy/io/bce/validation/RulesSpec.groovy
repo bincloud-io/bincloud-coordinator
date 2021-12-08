@@ -1,13 +1,12 @@
 package io.bce.validation
 
 import static io.bce.validation.Rules.*
-import java.util.regex.Pattern
 
 import io.bce.Range.ThresholdsAmountsException
 import io.bce.validation.RuleExecutor.RuleExecutionReport
 import io.bce.validation.Rules.RulePredicate;
 import io.bce.validation.Rules.SizeMustNotBeNegativeValue
-import spock.lang.Ignore
+import java.util.regex.Pattern
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -206,7 +205,7 @@ class RulesSpec extends Specification {
   private static final RulePredicate createStaticPredicate(boolean result) {
     return new RulePredicate() {
           @Override
-          public boolean checkRuleFor(Object value) {
+          public boolean isSatisfiedBy(Object value) {
             return result;
           }
         }

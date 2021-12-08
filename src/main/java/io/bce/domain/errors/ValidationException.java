@@ -1,17 +1,22 @@
 package io.bce.domain.errors;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.bce.domain.BoundedContextId;
 import io.bce.validation.ErrorMessage;
 import io.bce.validation.ValidationState;
 import io.bce.validation.ValidationState.ErrorState;
 import io.bce.validation.ValidationState.GroupedError;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.Getter;
 
+/**
+ * This exception notifies about primary validation process fail.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @Getter
 public class ValidationException extends ApplicationException {
   private static final long serialVersionUID = -2959637114905553972L;
@@ -23,6 +28,13 @@ public class ValidationException extends ApplicationException {
 
   private final ErrorState errorState;
 
+  /**
+   * Create the validation exception by a bounded context, error number and validation state.
+   *
+   * @param context         The bouned context id
+   * @param errorNumber     The error number
+   * @param validationState The validation state
+   */
   public ValidationException(BoundedContextId context, ErrorCode errorNumber,
       ValidationState validationState) {
     super(context, ErrorSeverity.BUSINESS, errorNumber,

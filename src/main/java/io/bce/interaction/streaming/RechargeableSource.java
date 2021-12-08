@@ -2,13 +2,24 @@ package io.bce.interaction.streaming;
 
 import java.util.Optional;
 import java.util.Queue;
-
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is the source implementation which allows to stream from multiple source.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <T> The streaming data type.
+ */
 public class RechargeableSource<T> implements Source<T> {
   private final Queue<Source<T>> sourcesQueue;
   private Optional<Source<T>> current = Optional.empty();
 
+  /**
+   * Create the data source.
+   *
+   * @param sourcesQueue The sources queue
+   */
   public RechargeableSource(Queue<Source<T>> sourcesQueue) {
     super();
     this.sourcesQueue = sourcesQueue;

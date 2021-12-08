@@ -5,9 +5,9 @@ import io.bce.actor.Message.MessageHandleFunction
 import spock.lang.Specification
 
 class MessageSpec extends Specification {
-  private static final ActorAddress SENDER_ADDRESS = ActorAddress.ofURN("urn:actor:SENDER")
-  private static final ActorAddress RECEIVER_ADDRESS = ActorAddress.ofURN("urn:actor:RECEIVER")
-  private static final ActorAddress ANOTHER_ADDRESS = ActorAddress.ofURN("urn:actor:ANOTHER")
+  private static final ActorAddress SENDER_ADDRESS = ActorAddress.ofUrn("urn:actor:SENDER")
+  private static final ActorAddress RECEIVER_ADDRESS = ActorAddress.ofUrn("urn:actor:RECEIVER")
+  private static final ActorAddress ANOTHER_ADDRESS = ActorAddress.ofUrn("urn:actor:ANOTHER")
   private static final CorrelationKey CORRELATION_KEY = CorrelationKey.wrap("123456")
   private static final CorrelationKey ANOTHER_CORRELATION_KEY = CorrelationKey.wrap("123456")
 

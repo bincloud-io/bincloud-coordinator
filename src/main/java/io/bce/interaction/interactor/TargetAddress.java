@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * This class represents the target address value that identifies the component in the system that
  * provides an API to communicate with.
- * 
+ *
  * @author Dmitry Mikhaylenko
  *
  */
@@ -24,16 +24,16 @@ public final class TargetAddress {
   }
 
   /**
-   * Create the target address of an URN-address string value
-   * 
-   * @param urnAddress The URN-address string value
+   * Create the target address of an URN-address string value.
+   *
+   * @param urnAddress The URN-address string value.
    * @return The target address
    */
-  public static final TargetAddress ofURN(@NonNull String urnAddress) {
-    return ofURN(Urn.ofURN(urnAddress));
+  public static final TargetAddress ofUrn(@NonNull String urnAddress) {
+    return ofUrn(Urn.ofUrn(urnAddress));
   }
 
-  private static final TargetAddress ofURN(@NonNull Urn urn) {
+  private static final TargetAddress ofUrn(@NonNull Urn urn) {
     return new TargetAddress(urn);
   }
 }

@@ -3,12 +3,11 @@ package io.bce.text;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import lombok.EqualsAndHashCode;
 
 /**
  * This class provides text templates creators which the platform provides for usage by default.
- * 
+ *
  * @author Dmitry Mikhaylenko
  *
  */
@@ -16,7 +15,7 @@ public class TextTemplates {
   /**
    * Create text template is initialized by the empty string. Null pattern won't affect to the
    * template text, because it isn't initialized by null.
-   * 
+   *
    * @return The result text template
    */
   public static final DefaultTextTemplate emptyTemplate() {
@@ -26,10 +25,9 @@ public class TextTemplates {
   /**
    * Create the text message from a random object. Object is converted to string using
    * {@link Object#toString()} method and then the text template is initialized by the converted
-   * string
-   * 
+   * string.
+   *
    * @param object A random object
-   * 
    * @return The result text template
    */
   public static final DefaultTextTemplate createBy(Object object) {
@@ -41,7 +39,7 @@ public class TextTemplates {
    * Create the text message from the string value. Derived text template is null-safe, because if
    * null value receives, the null pattern will returned by {@link TextTemplate#getTemplateText()}
    * in the derived object.
-   * 
+   *
    * @param template The template text
    * @return The result text template
    */
@@ -53,9 +51,9 @@ public class TextTemplates {
    * Create the text message from the string value and parameters map. Derived text template
    * isnull-safe, because if null values receives, the null pattern will returned by
    * {@link TextTemplate#getTemplateText()} in the derived object and empty map will returned by
-   * {@link TextTemplate#getParameters()}
-   * 
-   * @param template The template text
+   * {@link TextTemplate#getParameters()}.
+   *
+   * @param template   The template text
    * @param parameters The parameters for template processing
    * @return The text template
    */
@@ -68,8 +66,8 @@ public class TextTemplates {
    * Create the text message duplicate from the existing text template. Derived text template
    * isnull-safe, because if null values receives, the null pattern will returned by
    * {@link TextTemplate#getTemplateText()} in the derived object and empty map will returned by
-   * {@link TextTemplate#getParameters()}
-   * 
+   * {@link TextTemplate#getParameters()}.
+   *
    * @param textTemplate The existing template
    * @return The text template
    */
@@ -86,7 +84,7 @@ public class TextTemplates {
    * situation when your source text template {@link TextTemplate#getTemplateText()} or/and
    * {@link TextTemplate#getParameters()} methods returns computed values and you needs to prevent
    * multiple computes.
-   * 
+   *
    * @param template The source template
    * @return The result text template
    */
@@ -99,7 +97,7 @@ public class TextTemplates {
    * can't create this object directly, but can re-configure this. To create this template you
    * should use creation methods from the {@link TextTemplates} class. They cover most of cases
    * assigned to text templates creation.
-   * 
+   *
    * @author Dmitry Mikhaylenko
    *
    */
@@ -143,10 +141,23 @@ public class TextTemplates {
       return transformer.transform(this);
     }
 
+    /**
+     * Initialize text template by a null pattern.
+     *
+     * @param nullPattern The null pattern
+     * @return The derived message template
+     */
     public final DefaultTextTemplate withNullPattern(String nullPattern) {
       return new DefaultTextTemplate(templateText, nullPattern, parameters);
     }
 
+    /**
+     * Initialize text template by a parameter.
+     *
+     * @param key   The parameter key
+     * @param value The parameter value
+     * @return The derived message template
+     */
     public final DefaultTextTemplate withParameter(String key, Object value) {
       DefaultTextTemplate derived = new DefaultTextTemplate(templateText, nullPattern, parameters);
       derived.appendParameter(key, value);

@@ -1,9 +1,15 @@
 package io.bce.text;
 
 import javax.validation.constraints.NotNull;
-
 import lombok.experimental.UtilityClass;
 
+/**
+ * This class is the text processing global access mechanism. It includes text processor registry
+ * and helper methods, allow to use this mechanism independently of architectural layer.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @UtilityClass
 public class Text {
   private TextProcessor textProcessor;
@@ -13,8 +19,8 @@ public class Text {
   }
 
   /**
-   * Get the text processor
-   * 
+   * Get the text processor.
+   *
    * @return text processor
    */
   public final TextProcessor processor() {
@@ -22,8 +28,8 @@ public class Text {
   }
 
   /**
-   * Interpolate text template
-   * 
+   * Interpolate text template.
+   *
    * @param textTemplate The text template
    * @return The interpolated text
    */
@@ -32,8 +38,8 @@ public class Text {
   }
 
   /**
-   * Configure the processor
-   * 
+   * Configure the processor.
+   *
    * @param textProcessor The text processor
    */
   public final void configureProcessor(@NotNull TextProcessor textProcessor) {
@@ -41,7 +47,7 @@ public class Text {
   }
 
   /**
-   * Reset the text processor configuration
+   * Reset the text processor configuration.
    */
   public void reset() {
     configureProcessor(TextProcessor.create());

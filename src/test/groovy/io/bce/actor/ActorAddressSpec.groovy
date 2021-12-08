@@ -15,7 +15,7 @@ class ActorAddressSpec extends Specification {
 
   def "Scenario: create the actor addres from the URN address"() {
     given: "The actor created from URN address\"urn:address:SOME_ACTOR\""
-    ActorAddress actorAddress = ActorAddress.ofURN("urn:actor:SOME_ACTOR")
+    ActorAddress actorAddress = ActorAddress.ofUrn("urn:actor:SOME_ACTOR")
 
     expect: "The actor should be correctly initialized without error and URN transformations"
     actorAddress.toString() == "urn:actor:SOME_ACTOR"
@@ -23,7 +23,7 @@ class ActorAddressSpec extends Specification {
 
   def "Scenario: create the actor address from incorrect URN format"() {
     when: "The actor address is initialized by the wrong URN address syntax"
-    ActorAddress.ofURN("WRONG ADDRESS")
+    ActorAddress.ofUrn("WRONG ADDRESS")
 
     then: "The wrong address format exception should be happened"
     WrongActorAddressFormatException error = thrown(WrongActorAddressFormatException)
@@ -32,7 +32,7 @@ class ActorAddressSpec extends Specification {
 
   def "Scenario: extract the actor name"() {
     given: "The actor with URN address \"urn:actor:SOME_ACTOR\""
-    ActorAddress actorAddress = ActorAddress.ofURN("urn:actor:SOME_ACTOR")
+    ActorAddress actorAddress = ActorAddress.ofUrn("urn:actor:SOME_ACTOR")
 
     expect: "The actor name should be \"SOME_ACTOR\""
     actorAddress.getActorName() == ActorName.wrap("SOME_ACTOR")

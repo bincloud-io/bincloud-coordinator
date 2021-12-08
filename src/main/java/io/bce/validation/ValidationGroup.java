@@ -1,7 +1,6 @@
 package io.bce.validation;
 
 import java.util.regex.Pattern;
-
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -11,7 +10,7 @@ import lombok.RequiredArgsConstructor;
  * This class represents the validation group name value and it is responsible for manipulations
  * with this. You should wrap your string values by this type so this class . The validation group
  * name length must not exceed 1000 characters.
- * 
+ *
  * @author Dmitry Mikhaylenko
  *
  */
@@ -24,6 +23,12 @@ final class ValidationGroup {
   @NonNull
   private final String value;
 
+  /**
+   * Create the validation group for specified name.
+   *
+   * @param name The validation group name
+   * @return The validation group
+   */
   public static final ValidationGroup createFor(String name) {
     checkThatGroupNameIsMatchedToPattern(name);
     return new ValidationGroup(name);

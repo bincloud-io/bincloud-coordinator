@@ -4,6 +4,14 @@ import io.bce.domain.errors.ErrorStackTrace;
 import io.bce.text.TextTemplate;
 import io.bce.text.TextTemplates;
 
+/**
+ * This class is the base logger implementation which implements all logging functional which
+ * doesn't depends on choosen logging framework. If you are going to implement additional logger,
+ * you should extends this class in the most cases.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public abstract class AbstractLogger implements ApplicationLogger {
   public AbstractLogger() {
     super();

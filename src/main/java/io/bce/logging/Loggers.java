@@ -1,11 +1,17 @@
 package io.bce.logging;
 
-import java.util.Optional;
-
 import io.bce.logging.audit.ServiceAuditEvent;
 import io.bce.logging.audit.ServiceAuditLogger;
+import java.util.Optional;
 import lombok.experimental.UtilityClass;
 
+/**
+ * This class is the logging global access mechanism. It includes loggers registry and helper
+ * methods, allow to use this mechanism independently of architectural layer.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @UtilityClass
 public class Loggers {
   private ApplicationLogger applicationLogger = new NullApplicatioLogger();
@@ -27,6 +33,11 @@ public class Loggers {
     return new ServiceAuditLoggerProxy();
   }
 
+  /**
+   * Get the loggers registry.
+   *
+   * @return The loggers registry
+   */
   public final Registry registry() {
     return new Registry() {
       @Override
@@ -43,9 +54,27 @@ public class Loggers {
     };
   }
 
+  /**
+   * This interface declares the contract for loggers registration.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public interface Registry {
+    /**
+     * Register application logger {@link ApplicationLogger}.
+     *
+     * @param applicationLogger The application logger
+     * @return The registry instance
+     */
     public Registry registerApplicationLogger(ApplicationLogger applicationLogger);
 
+    /**
+     * Register events logger {@link ServiceAuditLogger}.
+     *
+     * @param eventsLogger The audit events logger
+     * @return The registry instance
+     */
     public Registry registerEventsLogger(ServiceAuditLogger eventsLogger);
   }
 

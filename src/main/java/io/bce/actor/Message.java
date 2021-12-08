@@ -1,15 +1,14 @@
 package io.bce.actor;
 
 import java.util.function.Predicate;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * This class represents the message object, wrapping data transferring between actors
- * 
+ * This class represents the message object, wrapping data transferring between actors.
+ *
  * @author Dmitry Mikhaylenko
  *
  * @param <B> The body type
@@ -25,9 +24,9 @@ public final class Message<B> {
   private final B body;
 
   /**
-   * Convert the message body
-   * 
-   * @param <T> The message body
+   * Convert the message body.
+   *
+   * @param <T>       The message body
    * @param converter The message body converter
    * @return The result message
    */
@@ -36,8 +35,8 @@ public final class Message<B> {
   }
 
   /**
-   * Create the message correlated by the specified correlation key
-   * 
+   * Create the message correlated by the specified correlation key.
+   *
    * @param correlationKey The correlation key value
    * @return The message with correlation key
    */
@@ -49,9 +48,9 @@ public final class Message<B> {
   }
 
   /**
-   * Create reply message to the sender
-   * 
-   * @param <T> The reply message body type
+   * Create reply message to the sender.
+   *
+   * @param <T>       The reply message body type
    * @param replyBody The reply message body
    * @return The reply message
    */
@@ -60,11 +59,11 @@ public final class Message<B> {
   }
 
   /**
-   * Create reply message to the specified destination
-   * 
-   * @param <T> The reply message body type
+   * Create reply message to the specified destination.
+   *
+   * @param <T>         The reply message body type
    * @param destination The destination address
-   * @param replyBody The reply message body
+   * @param replyBody   The reply message body
    * @return The reply message
    */
   public <T> Message<T> replyWith(ActorAddress destination, T replyBody) {
@@ -72,8 +71,8 @@ public final class Message<B> {
   }
 
   /**
-   * Change the message sender
-   * 
+   * Change the message sender.
+   *
    * @param sender The message sender
    * @return The message with changed sender
    */
@@ -82,8 +81,8 @@ public final class Message<B> {
   }
 
   /**
-   * Change the message destination
-   * 
+   * Change the message destination.
+   *
    * @param destination The message destination address
    * @return The message with changed destination
    */
@@ -92,9 +91,9 @@ public final class Message<B> {
   }
 
   /**
-   * Create message to the destination, from the anonymous sender
-   * 
-   * @param <B> The message body type name
+   * Create message to the destination, from the anonymous sender.
+   *
+   * @param <B>         The message body type name
    * @param destination The message destination address
    * @param messageBody The message body
    * @return The created message
@@ -104,10 +103,10 @@ public final class Message<B> {
   }
 
   /**
-   * Create message to the destination, from the specified sender
-   * 
-   * @param <B> The message body type name
-   * @param sender The message sender address
+   * Create message to the destination, from the specified sender.
+   *
+   * @param <B>         The message body type name
+   * @param sender      The message sender address
    * @param destination The message destination address
    * @param messageBody The message body
    * @return The created message
@@ -118,12 +117,12 @@ public final class Message<B> {
   }
 
   /**
-   * Match that message body has specified type
-   * 
-   * @param <T> The expected body type name
+   * Match that message body has specified type.
+   *
+   * @param <T>              The expected body type name
    * @param expectedBodyType The expected body type class
-   * @param matchedReceiver The message handle function receiver for case when the message body is
-   * matched to specified typee
+   * @param matchedReceiver  The message handle function receiver for case when the message body is
+   *                         matched to specified typee
    * 
    */
   public <T> void whenIsMatchedTo(Class<T> expectedBodyType,
@@ -133,14 +132,14 @@ public final class Message<B> {
   }
 
   /**
-   * Match that message body has specified type
-   * 
-   * @param <T> The expected body type name
-   * @param expectedBodyType The expected body type class
-   * @param matchedReceiver The message handle function receiver for case when the message body is
-   * matched to specified type
+   * Match that message body has specified type.
+   *
+   * @param <T>               The expected body type name
+   * @param expectedBodyType  The expected body type class
+   * @param matchedReceiver   The message handle function receiver for case when the message body is
+   *                          matched to specified type
    * @param unmatchedReceiver The message handle function receiver for case when the message body is
-   * unmatched to specified type
+   *                          unmatched to specified type
    * 
    */
   public <T> void whenIsMatchedTo(Class<T> expectedBodyType,
@@ -153,11 +152,11 @@ public final class Message<B> {
   }
 
   /**
-   * Match body by a predicate
-   * 
-   * @param predicate The predicate
+   * Match body by a predicate.
+   *
+   * @param predicate       The predicate
    * @param matchedReceiver The message handle function receiver for case when the message body is
-   * matched by the specified predicate
+   *                        matched by the specified predicate
    */
   public void whenIsMatchedTo(Predicate<B> predicate, MessageHandleFunction<B> matchedReceiver) {
     whenIsMatchedTo(predicate, matchedReceiver, body -> {
@@ -165,13 +164,13 @@ public final class Message<B> {
   }
 
   /**
-   * Match body by a predicate
-   * 
-   * @param predicate The predicate
-   * @param matchedReceiver The message handle function receiver for case when the message body is
-   * matched by the specified predicate
+   * Match body by a predicate.
+   *
+   * @param predicate         The predicate
+   * @param matchedReceiver   The message handle function receiver for case when the message body is
+   *                          matched by the specified predicate
    * @param unmatchedReceiver The message handle function receiver for case when the message body is
-   * unmatched by the specified predicate
+   *                          unmatched by the specified predicate
    */
   public void whenIsMatchedTo(Predicate<B> predicate, MessageHandleFunction<B> matchedReceiver,
       MessageHandleFunction<B> unmatchedReceiver) {
@@ -187,8 +186,8 @@ public final class Message<B> {
   }
 
   /**
-   * This interface declares the contract of the message body transformer
-   * 
+   * This interface declares the contract of the message body transformer.
+   *
    * @author Dmitry Mikhaylenko
    *
    * @param <B> The current body type name
@@ -196,8 +195,8 @@ public final class Message<B> {
    */
   public interface MessageBodyConverter<B, T> {
     /**
-     * Transform the message body type
-     * 
+     * Transform the message body type.
+     *
      * @param currentBody The current body
      * @return The transformed body
      */
@@ -205,16 +204,16 @@ public final class Message<B> {
   }
 
   /**
-   * This interface declares the contract of the message handling on matched condition
-   * 
+   * This interface declares the contract of the message handling on matched condition.
+   *
    * @author Dmitry Mikhaylenko
    *
    * @param <B> The message body type name
    */
   public interface MessageHandleFunction<B> {
     /**
-     * Consume the message body
-     * 
+     * Consume the message body.
+     *
      * @param body The message body
      */
     public void receive(B body);

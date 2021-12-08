@@ -1,5 +1,6 @@
 package io.bce.text.transformers.resolvers;
 
+import io.bce.text.transformers.BundleResolvingTransformer.BundleResolver;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
@@ -10,8 +11,13 @@ import java.util.ResourceBundle.Control;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.bce.text.transformers.BundleResolvingTransformer.BundleResolver;
-
+/**
+ * This class is the bundle resolver implementation, which retrieves the messages from resource
+ * bundles {@link ResourceBundle}.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public final class ResourceBundleResolver implements BundleResolver {
   private static final KeyMatcher DEFAULT_KEY_MATCHER =
       (containingKey, requestedKey) -> containingKey.equals(requestedKey);
@@ -21,8 +27,8 @@ public final class ResourceBundleResolver implements BundleResolver {
   private final KeyMatcher keyMatcher;
 
   /**
-   * Create the resource bundle provider
-   * 
+   * Create the resource bundle provider.
+   *
    * @param localeProvider The locale provider
    */
   public ResourceBundleResolver(LocaleProvider localeProvider) {
@@ -30,10 +36,10 @@ public final class ResourceBundleResolver implements BundleResolver {
   }
 
   /**
-   * Create the resource bundle provider
-   * 
+   * Create the resource bundle provider.
+   *
    * @param localeProvider The locale provider
-   * @param keyMatcher The key matcher
+   * @param keyMatcher     The key matcher
    */
   public ResourceBundleResolver(LocaleProvider localeProvider, KeyMatcher keyMatcher) {
     super();
@@ -62,8 +68,8 @@ public final class ResourceBundleResolver implements BundleResolver {
   }
 
   /**
-   * Create derived {@link ResourceBundleResolver} with appended resource bundle name
-   * 
+   * Create derived {@link ResourceBundleResolver} with appended resource bundle name.
+   *
    * @param bundleName The resource bundle name
    * @return The derived resource bundle resolver
    */
@@ -103,15 +109,15 @@ public final class ResourceBundleResolver implements BundleResolver {
 
   /**
    * This interface describes the contract for the locale obtaining. This component should
-   * guaranteed return the locale which should be used for the locale resolving
-   * 
+   * guaranteed return the locale which should be used for the locale resolving.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public interface LocaleProvider {
     /**
-     * Get the locale
-     * 
+     * Get the locale.
+     *
      * @return The locale
      */
     public Locale getLocale();
@@ -122,16 +128,16 @@ public final class ResourceBundleResolver implements BundleResolver {
    * allowing redefine logic of bundle key matcing with the requested key. For example if our bundle
    * keys are regular expressions and we want to use regexp matching instead equality checking. By
    * default the equality checking is used.
-   * 
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public interface KeyMatcher {
     /**
-     * Match if the key, containing into the bundle is matched to the requested key
-     * 
+     * Match if the key, containing into the bundle is matched to the requested key.
+     *
      * @param containingKey The key, containing into the bundle
-     * @param requestedKey The requested key, which should be resolved
+     * @param requestedKey  The requested key, which should be resolved
      * @return True if they are matched and false otherwise
      */
     public boolean isMatched(String containingKey, String requestedKey);

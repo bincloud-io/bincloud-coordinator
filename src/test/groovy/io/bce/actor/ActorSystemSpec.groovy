@@ -5,14 +5,14 @@ import io.bce.actor.Actor.Factory
 import io.bce.actor.Actor.FaultResolver
 import io.bce.actor.Actor.LifecycleController
 import io.bce.actor.ActorSystemSpec.PrinterLocalUsingActor.PrintLocal
-import io.bce.actor.Actors.ActorHasAlreadyBeenCreatedError
+import io.bce.actor.Actors.ActorDuplicationException
 import io.bce.actor.Actors.SystemConfigurer
 import io.bce.actor.EventLoop.Dispatcher
 import spock.lang.Specification
 
 class ActorSystemSpec extends Specification {
-  private static final ActorAddress BOB_ACTOR_ADDRESS = ActorAddress.ofURN("urn:actor:BOB")
-  private static final ActorAddress ALICE_ACTOR_ADDRESS = ActorAddress.ofURN("urn:actor:ALICE")
+  private static final ActorAddress BOB_ACTOR_ADDRESS = ActorAddress.ofUrn("urn:actor:BOB")
+  private static final ActorAddress ALICE_ACTOR_ADDRESS = ActorAddress.ofUrn("urn:actor:ALICE")
   private static final CorrelationKey GENERATED_KEY = CorrelationKey.wrap("CORRELATED_KEY")
 
   def "Scenario: tell message to the simple printer actor, registered in the actor system"() {
@@ -154,7 +154,7 @@ class ActorSystemSpec extends Specification {
     actorSystem.actorOf(PrinterActor.PRINT_ACTOR_NAME, PrinterActor.factory(printWriter))
 
     then: "The actor has already been created error should be thrown"
-    thrown(ActorHasAlreadyBeenCreatedError)
+    thrown(ActorDuplicationException)
 
     cleanup:
     actorSystem.shutdown()

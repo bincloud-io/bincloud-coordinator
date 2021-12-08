@@ -2,11 +2,17 @@ package io.bce.validation;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
+/**
+ * This class is responsible for aggregation information about one validation error (it doesn't
+ * matter if it grouped or ungrouped error).
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @Getter
 @EqualsAndHashCode
 public final class ErrorMessage {
@@ -24,8 +30,8 @@ public final class ErrorMessage {
   }
 
   /**
-   * Create the error message without pre-defined parameters
-   * 
+   * Create the error message without pre-defined parameters.
+   *
    * @param message The message text
    * @return The error message
    */
@@ -34,10 +40,10 @@ public final class ErrorMessage {
   }
 
   /**
-   * Create the error message with pre-defined parameters
-   * 
-   * @param message
-   * @param parameters
+   * Create the error message with pre-defined parameters.
+   *
+   * @param message    The message text
+   * @param parameters The error message parameters, related to the validation case
    * @return The error message
    */
   public static final ErrorMessage createFor(@NonNull String message,
@@ -51,9 +57,9 @@ public final class ErrorMessage {
   }
 
   /**
-   * Create error message with specified parameter
-   * 
-   * @param key The parameter key
+   * Create error message with specified parameter.
+   *
+   * @param key   The parameter key
    * @param value The parameter value
    * @return The error message
    */

@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 /**
- * This class is responsible for text processing
- * 
+ * This class is responsible for text processing.
+ *
  * @author Dmitry Mikhaylenko
  *
  */
@@ -15,8 +15,8 @@ public final class TextProcessor {
   private final Transformer transformersChain;
 
   /**
-   * Interpolate the text template
-   * 
+   * Interpolate the text template.
+   *
    * @param template The text template
    * @return The interpolated message
    */
@@ -25,8 +25,8 @@ public final class TextProcessor {
   }
 
   /**
-   * Create the text processor with chained transformer
-   * 
+   * Create the text processor with chained transformer.
+   *
    * @param transformer The appended transformer
    * @return The derived text processor with chained transformer
    */
@@ -35,8 +35,8 @@ public final class TextProcessor {
   }
 
   /**
-   * Create the default text processor
-   * 
+   * Create the default text processor.
+   *
    * @return The text processor
    */
   public static final TextProcessor create() {

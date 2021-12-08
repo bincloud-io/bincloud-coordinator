@@ -1,23 +1,34 @@
 package io.bce.logging;
 
+import io.bce.text.TextProcessor;
+import io.bce.text.TextTemplates;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import io.bce.text.TextProcessor;
-import io.bce.text.TextTemplates;
-
-public class JULLogger extends AbstractLogger implements ApplicationLogger {
+/**
+ * This class is the application logger implementation based on the {@link Logger} logging
+ * mechanism.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
+public class JulLogger extends AbstractLogger implements ApplicationLogger {
   private Logger logger;
   private TextProcessor messageProcessor;
 
-  public JULLogger(TextProcessor messageProcessor) {
+  /**
+   * Create logger for specified text processor.
+   *
+   * @param textProcessor The text processor
+   */
+  public JulLogger(TextProcessor textProcessor) {
     super();
     this.logger = Logger.getAnonymousLogger();
-    this.messageProcessor = messageProcessor;
+    this.messageProcessor = textProcessor;
   }
 
-  private JULLogger(TextProcessor messageProcessor, String name) {
+  private JulLogger(TextProcessor messageProcessor, String name) {
     super();
     this.messageProcessor = messageProcessor;
 
@@ -28,28 +39,28 @@ public class JULLogger extends AbstractLogger implements ApplicationLogger {
   public void log(LogRecord logRecord) {
     LogRecord transformedRecord = logRecord.transformMessage(template -> TextTemplates
         .createBy(messageProcessor.interpolate(template), template.getParameters()));
-    this.logger.log(new JULRecord(transformedRecord));
+    this.logger.log(new JulRecord(transformedRecord));
   }
 
   @Override
   public ApplicationLogger named(String loggerName) {
-    return new JULLogger(messageProcessor, loggerName);
+    return new JulLogger(messageProcessor, loggerName);
   }
 
-  private static class JULRecord extends java.util.logging.LogRecord {
+  private static class JulRecord extends java.util.logging.LogRecord {
     private static final long serialVersionUID = 196133523390302741L;
 
-    public JULRecord(LogRecord logRecord) {
-      super(new JULLevel(logRecord.getLevel()), logRecord.getMessageText());
+    public JulRecord(LogRecord logRecord) {
+      super(new JulLevel(logRecord.getLevel()), logRecord.getMessageText());
       setMillis(logRecord.getTimestamp().toEpochMilli());
     }
   }
 
-  private static class JULLevel extends java.util.logging.Level {
+  private static class JulLevel extends java.util.logging.Level {
     private static final long serialVersionUID = -6609526190118526044L;
     private static final Map<Level, Integer> SEVERITY_FACTOR_MAP = createSeverityFactorMap();
 
-    public JULLevel(Level level) {
+    public JulLevel(Level level) {
       super(level.name(), SEVERITY_FACTOR_MAP.getOrDefault(level, INFO.intValue()));
     }
   }

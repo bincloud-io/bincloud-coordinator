@@ -2,14 +2,13 @@ package io.bce.domain.errors;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * This class is responsible for the working with the stack trace
- * 
+ * This class is responsible for the working with the stack trace.
+ *
  * @author Dmitry Mikhaylenko
  *
  */

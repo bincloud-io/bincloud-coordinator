@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * This class describes the "subscribe" command
- * 
+ * This class describes the "subscribe" command.
+ *
  * @author Dmitry Mikhaylenko
  *
  */

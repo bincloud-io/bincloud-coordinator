@@ -1,24 +1,32 @@
 package io.bce.validation;
 
+import io.bce.validation.ValidationContext.Rule;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.bce.validation.ValidationContext.Rule;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class allows to perform difficult external validations, which is not fully assigned to the
+ * domain logic. For example if we want to check that the value is consistent with the state of an
+ * external system, we can register rule, performing that check here and then execute global rule by
+ * unique alias.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class GlobalValidations {
   private static final Map<String, Rule<Object>> REGISTERED_RULES = new ConcurrentHashMap<>();
 
   /**
-   * Register rule into registry
-   * 
-   * @param <T> The under validation value type name
+   * Register rule into registry.
+   *
+   * @param <T>   The under validation value type name
    * @param alias The rule alias
-   * @param rule The registered rule
-   * @throws RuleHasAlreadyBeenRegisteredException if rule is registered
+   * @param rule  The registered rule
+   * @throws DuplicateRuleRegistrationException if rule is registered
    */
   @SuppressWarnings("unchecked")
   public static final <T> void registerRule(String alias, Rule<T> rule) {
@@ -27,9 +35,9 @@ public class GlobalValidations {
   }
 
   /**
-   * Get rule which might be registered for the specified alias
-   * 
-   * @param <T> The under validation value type name
+   * Get rule which might be registered for the specified alias.
+   *
+   * @param <T>   The under validation value type name
    * @param alias The rule alias
    * @return The rule, executing original rule
    */
@@ -38,7 +46,7 @@ public class GlobalValidations {
   }
 
   /**
-   * Clear all registration
+   * Clear all registration.
    */
   public static final void clear() {
     REGISTERED_RULES.clear();
@@ -46,14 +54,20 @@ public class GlobalValidations {
 
   private static final void checkThatRuleIsNotRegistered(String alias) {
     if (REGISTERED_RULES.containsKey(alias)) {
-      throw new RuleHasAlreadyBeenRegisteredException(alias);
+      throw new DuplicateRuleRegistrationException(alias);
     }
   }
 
-  public static final class RuleHasAlreadyBeenRegisteredException extends RuntimeException {
+  /**
+   * This exception notifies about exceptional case when a rule is tried to be registered twice.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public static final class DuplicateRuleRegistrationException extends RuntimeException {
     private static final long serialVersionUID = -1455331418709482737L;
 
-    public RuleHasAlreadyBeenRegisteredException(String alias) {
+    public DuplicateRuleRegistrationException(String alias) {
       super(String.format("Rule with [%s] alias has already been registered", alias));
     }
   }

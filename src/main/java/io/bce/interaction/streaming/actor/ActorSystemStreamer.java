@@ -1,9 +1,5 @@
 package io.bce.interaction.streaming.actor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
-
 import io.bce.actor.Actor;
 import io.bce.actor.ActorAddress;
 import io.bce.actor.ActorName;
@@ -19,11 +15,20 @@ import io.bce.interaction.streaming.Streamer;
 import io.bce.promises.Deferred;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class implements the streaming mechanism over actors system.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor
 public class ActorSystemStreamer implements Streamer {
   private final ActorSystem actorSystem;

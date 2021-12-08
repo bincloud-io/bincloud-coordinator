@@ -1,13 +1,19 @@
 package io.bce.domain;
 
-import javax.validation.constraints.NotNull;
-
 import io.bce.FormatChecker;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is a value, identifying the event type.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <E> The event type name
+ */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventType<E> {
@@ -47,18 +53,23 @@ public class EventType<E> {
   }
 
   /**
-   * This exception is happened if an event type name is badly formatted
-   * 
+   * This exception is happened if an event type name is badly formatted.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public static final class WrongEventTypeFormatException extends RuntimeException {
     private static final long serialVersionUID = -1769763038225128075L;
 
-    public WrongEventTypeFormatException(String value) {
+    /**
+     * Create the exception object from the event type name.
+     *
+     * @param typeName The event type name
+     */
+    public WrongEventTypeFormatException(String typeName) {
       super(String.format(
           "The event type \"%s\" has wrong gormat. It should be matched to the \"%s\" pattern.",
-          value, PATTERN));
+          typeName, PATTERN));
     }
   }
 }

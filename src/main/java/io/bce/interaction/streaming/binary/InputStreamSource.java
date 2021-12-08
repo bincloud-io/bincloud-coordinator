@@ -1,15 +1,20 @@
 package io.bce.interaction.streaming.binary;
 
+import io.bce.domain.errors.UnexpectedErrorException;
+import io.bce.interaction.streaming.binary.BinaryChunk.BinaryChunkReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-
-import io.bce.domain.errors.UnexpectedErrorException;
-import io.bce.interaction.streaming.binary.BinaryChunk.BinaryChunkReader;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+/**
+ * This class implements the binary source, reading chunks from input stream.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class InputStreamSource extends BinarySource implements Closeable {
   private final Closeable streamCloser;
 

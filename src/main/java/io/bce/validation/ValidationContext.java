@@ -2,28 +2,36 @@ package io.bce.validation;
 
 import java.util.Collection;
 
+/**
+ * This interface declares the contract for validation flow imperative handling. It contains the set
+ * of operations, allows affect to the validation process and aggregate the validation result into
+ * the assigned context.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public interface ValidationContext {
 
   /**
-   * Get the result validation state
-   * 
+   * Get the result validation state.
+   *
    * @return The validation state
    */
   public ValidationState getState();
 
   /**
-   * Validate an object, implementing the {@link Validatable} interface
-   * 
-   * @param validatable The validatable object
+   * Validate an object, implementing the {@link Validatable} interface.
+   *
+   * @param validatable The validatable object.
    * @return The derived context
    */
   public ValidationContext validate(Validatable validatable);
 
   /**
    * Validate an object, implementing the {@link Validatable} interface using specified derivation
-   * policy
-   * 
-   * @param validatable The validatable object
+   * policy.
+   *
+   * @param validatable      The validatable object
    * @param derivationPolicy The derivation policy
    * @return The derived context
    */
@@ -31,9 +39,9 @@ public interface ValidationContext {
 
   /**
    * Validate an object, implementing the {@link Validatable} interface, grouped by a specified
-   * group
-   * 
-   * @param groupName The validation group
+   * group.
+   *
+   * @param groupName   The validation group
    * @param validatable The validatable object
    * @return The derived context
    */
@@ -41,10 +49,10 @@ public interface ValidationContext {
 
   /**
    * Validate an object, implementing the {@link Validatable} interface, grouped by a specified
-   * group, using specified derivation policy
-   * 
-   * @param groupName The validation group
-   * @param validatable The validatable object
+   * group, using specified derivation policy.
+   *
+   * @param groupName        The validation group
+   * @param validatable      The validatable object
    * @param derivationPolicy The derivation policy
    * @return The derived context
    */
@@ -53,62 +61,62 @@ public interface ValidationContext {
 
   /**
    * Validate all objects inside a collection, implementing the {@link Validatable} interface,
-   * grouped by a specified group
-   * 
-   * @param groupName The validation group
+   * grouped by a specified group.
+   *
+   * @param groupName  The validation group
    * @param collection The validatable collection
    * @return The derived context
    */
   public <T> ValidationContext validate(String groupName, Collection<T> collection);
 
   /**
-   * Append ungrouped rule checking for the value, obtained by the provider
-   * 
-   * @param <T> The value type name
+   * Append ungrouped rule checking for the value, obtained by the provider.
+   *
+   * @param <T>           The value type name
    * @param valueProvider The under validation value provider
-   * @param rule The rule under validation
+   * @param rule          The rule under validation
    * @return The validation context
    */
   <T> ValidationContext withRule(ValueProvider<T> valueProvider, Rule<T> rule);
 
   /**
-   * Append grouped rule checking for the value, obtained by the provider
-   * 
-   * @param <T> The value type name
-   * @param groupName The validation group name
+   * Append grouped rule checking for the value, obtained by the provider.
+   *
+   * @param <T>           The value type name
+   * @param groupName     The validation group name
    * @param valueProvider The under validation value provider
-   * @param rule The rule under validation
+   * @param rule          The rule under validation
    * @return The validation context
    */
   <T> ValidationContext withRule(String groupName, ValueProvider<T> valueProvider, Rule<T> rule);
 
   /**
-   * Append the ungrouped error to the validation state
-   * 
+   * Append the ungrouped error to the validation state.
+   *
    * @param errors The error messages
    * @return The validation context
    */
   ValidationContext withErrors(ErrorMessage... errors);
 
   /**
-   * Append the grouped error to the validation state
-   * 
+   * Append the grouped error to the validation state.
+   *
    * @param groupName The group name
-   * @param errors The error messages
+   * @param errors    The error messages
    * @return The validation context
    */
   ValidationContext withErrors(String groupName, ErrorMessage... errors);
 
   /**
    * This interface declares the contract for object validation.
-   * 
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public interface Validatable {
     /**
-     * Validate object state inside the context
-     * 
+     * Validate object state inside the context.
+     *
      * @param context The validation context
      * @return The derived context with applied validations
      */
@@ -117,13 +125,13 @@ public interface ValidationContext {
 
   /**
    * This class enumerates the variants of derivation policies.
-   * 
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public static enum DerivationPolicy {
     /**
-     * Derive only groups of the grouped messages excluding ungrouped
+     * Derive only groups of the grouped messages excluding ungrouped.
      */
     DERIVE_GROUPES {
       @Override
@@ -133,7 +141,7 @@ public interface ValidationContext {
     },
     /**
      * Derive all state including ungrouped(it will be represented as a grouped messages of the base
-     * group)
+     * group).
      */
     DERIVE_STATE {
       @Override
@@ -147,25 +155,49 @@ public interface ValidationContext {
 
   /**
    * This interface declares the rule of the value providing.
-   * 
+   *
    * @author Dmitry Mikhaylenko
    *
    * @param <T> The type of value
    */
   public interface ValueProvider<T> {
     /**
-     * Get the value
-     * 
+     * Get the value.
+     *
      * @return The value
      */
     public T getValue();
   }
 
+  /**
+   * This interface declares the contract for single validation rule check.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   * @param <T> The validatable value type
+   */
   public interface Rule<T> {
+    /**
+     * Check that the value is acceptable for checking by the rule.
+     *
+     * @param value The validatable value
+     * @return True if is acceptable and false otherwise
+     */
     public boolean isAcceptableFor(T value);
 
+    /**
+     * Perform rule check.
+     *
+     * @param value The validatable value
+     * @return Collection of validation error messages
+     */
     public Collection<ErrorMessage> check(T value);
 
+    /**
+     * Invert the rule.
+     *
+     * @return The inverted validation rule
+     */
     public Rule<T> invert();
   }
 }

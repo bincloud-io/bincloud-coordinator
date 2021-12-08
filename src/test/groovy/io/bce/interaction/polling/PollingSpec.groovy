@@ -27,14 +27,14 @@ class PollingSpec extends Specification {
 
     then: "The result data collection sould be ordered the same as the input data"
     pollingResult == [
-      new PolledElement<Long>(0, 1),
-      new PolledElement<Long>(1, 2),
-      new PolledElement<Long>(2, 3),
-      new PolledElement<Long>(3, 4),
-      new PolledElement<Long>(4, 5),
-      new PolledElement<Long>(5, 6),
-      new PolledElement<Long>(6, 7),
-      new PolledElement<Long>(7, 8)
+      new PollingDataHolder<Long>(0, 1),
+      new PollingDataHolder<Long>(1, 2),
+      new PollingDataHolder<Long>(2, 3),
+      new PollingDataHolder<Long>(3, 4),
+      new PollingDataHolder<Long>(4, 5),
+      new PollingDataHolder<Long>(5, 6),
+      new PollingDataHolder<Long>(6, 7),
+      new PollingDataHolder<Long>(7, 8)
     ]
   }
 
@@ -51,14 +51,14 @@ class PollingSpec extends Specification {
 
     then: "The result data collection sould be ordered the same as the input data"
     pollingResult == [
-      new PolledElement<Long>(0, 1),
-      new PolledElement<Long>(1, 2),
-      new PolledElement<Long>(2, 3),
-      new PolledElement<Long>(3, 4),
-      new PolledElement<Long>(4, 5),
-      new PolledElement<Long>(5, 6),
-      new PolledElement<Long>(6, 7),
-      new PolledElement<Long>(7, 8)
+      new PollingDataHolder<Long>(0, 1),
+      new PollingDataHolder<Long>(1, 2),
+      new PollingDataHolder<Long>(2, 3),
+      new PollingDataHolder<Long>(3, 4),
+      new PollingDataHolder<Long>(4, 5),
+      new PollingDataHolder<Long>(5, 6),
+      new PollingDataHolder<Long>(6, 7),
+      new PollingDataHolder<Long>(7, 8)
     ]
   }
 

@@ -1,16 +1,21 @@
 package io.bce.text;
 
+import io.bce.text.TextTemplate.Transformer;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import io.bce.text.TextTemplate.Transformer;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class provides text transformers creators which the platform provides for usage by default.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class TextTransformers {
   /**
-   * Create the transformer trimming the {@link TextTemplate#getTemplateText()} value
-   * 
+   * Create the transformer trimming the {@link TextTemplate#getTemplateText()} value.
+   *
    * @return The trimming transformer
    */
   public static final Transformer trimming() {
@@ -19,9 +24,9 @@ public class TextTransformers {
 
   /**
    * Create transformer chaining two transformers.
-   * 
+   *
    * @param original An original transformer applying first
-   * @param next A transformer applying after the original transformer
+   * @param next     A transformer applying after the original transformer
    * @return The result of two transformation applying
    */
   public static final Transformer chain(Transformer original, Transformer next) {
@@ -34,10 +39,10 @@ public class TextTransformers {
    * with transformed parameters. Then it applies the transformation to the derived text template.
    * It is important that the transformer traverses all parameters recursively (parameters of root,
    * parameters of the parameters of root...).
-   * 
+   *
    * @param transformer The non-recursive transformer applying to the message template
    * @return The recursive deep-dive transformer applying the non-recursive transformer to the
-   * parameters recursively
+   *         parameters recursively
    */
   public static final Transformer deepDive(Transformer transformer) {
     return new DeepDiveTransformer(transformer);

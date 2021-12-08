@@ -5,6 +5,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class represents the URN addresses and allows to work with them.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public final class Urn {
@@ -20,19 +26,19 @@ public final class Urn {
   }
 
   /**
-   * Create the target address of an URN-address string value
-   * 
+   * Create the target address of an URN-address string value.
+   *
    * @param urnAddress The URN-address string value
    * @return The target address
    */
-  public static final Urn ofURN(@NonNull String urnAddress) {
+  public static Urn ofUrn(@NonNull String urnAddress) {
     URN_FORMAT_CHECKER.checkThatValueIsWellFormatted(urnAddress);
     return new Urn(urnAddress);
   }
 
   /**
-   * This exception is happened if an URN address is badly formatted
-   * 
+   * This exception is happened if an URN address is badly formatted.
+   *
    * @author Dmitry Mikhaylenko
    *
    */

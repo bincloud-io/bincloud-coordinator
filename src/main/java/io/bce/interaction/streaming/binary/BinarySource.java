@@ -6,6 +6,12 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is the binary chunks destination.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class BinarySource implements Source<BinaryChunk> {
   @NonNull

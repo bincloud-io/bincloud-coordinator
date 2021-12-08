@@ -179,7 +179,7 @@ class ActorSystemInteractorSpec extends Specification {
   private <Q, S>Interactor<Q, S> createInteractor(
       ActorSystem actorSystem, ActorAddress targetActor, Class<Q> requestType, Class<S> responseType, Timeout timeout) {
     Factory interactorFactory = ActorSystemInteractor.factory(actorSystem)
-    TargetAddress targetAddress = TargetAddress.ofURN(targetActor.toString())
+    TargetAddress targetAddress = TargetAddress.ofUrn(targetActor.toString())
     return interactorFactory.createInteractor(targetAddress, requestType, responseType, timeout)
   }
 

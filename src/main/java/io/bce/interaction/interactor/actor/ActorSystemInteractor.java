@@ -1,7 +1,5 @@
 package io.bce.interaction.interactor.actor;
 
-import java.util.UUID;
-
 import io.bce.actor.Actor;
 import io.bce.actor.ActorAddress;
 import io.bce.actor.ActorName;
@@ -17,10 +15,22 @@ import io.bce.promises.Promises;
 import io.bce.timer.Timeout;
 import io.bce.timer.TimeoutException;
 import io.bce.timer.TimeoutSupervisor;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is the intractor implementation for communicating with the random actor, registered in
+ * the actor system. It will register intermediate actor into the actor system and communicate with
+ * another actors via messages {@link Message}. Requests and responses is correlated using
+ * correlation key.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <Q> The request type name
+ * @param <S> The response type name
+ */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
   private final ActorSystem actorSystem;
@@ -29,6 +39,12 @@ public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
   private final TargetAddress target;
   private final Timeout timeout;
 
+  /**
+   * Get the actor system interactor factory.
+   *
+   * @param actorSystem The actor system
+   * @return The interactor factory
+   */
   public static final Factory factory(@NonNull ActorSystem actorSystem) {
     return new ActorInteractorFactory(actorSystem);
   }
@@ -44,7 +60,7 @@ public final class ActorSystemInteractor<Q, S> implements Interactor<Q, S> {
   }
 
   private ActorAddress createTargetAddress(TargetAddress target) {
-    return ActorAddress.ofURN(target.toString());
+    return ActorAddress.ofUrn(target.toString());
   }
 
   private ActorName generateActorName() {

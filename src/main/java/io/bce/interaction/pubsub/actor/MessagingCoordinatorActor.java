@@ -1,18 +1,17 @@
 package io.bce.interaction.pubsub.actor;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.bce.actor.Actor;
 import io.bce.actor.ActorAddress;
 import io.bce.actor.Message;
 import io.bce.interaction.pubsub.Topic;
 import io.bce.interaction.pubsub.actor.Publish.PublishCommand;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import lombok.NonNull;
 
-public class MessagingCoordinatorActor extends Actor<Object> {
+class MessagingCoordinatorActor extends Actor<Object> {
   private final Subscribtions subscribtions = new Subscribtions();
 
   private MessagingCoordinatorActor(@NonNull Context context) {

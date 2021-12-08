@@ -1,12 +1,18 @@
 package io.bce.domain;
 
-import java.util.Map;
-
 import io.bce.domain.errors.ErrorDescriptor;
 import io.bce.text.TextTemplate;
 import io.bce.text.TextTemplates;
+import java.util.Map;
 import lombok.NonNull;
 
+/**
+ * This class represents the error descriptor as an text template. It is used to make human-readable
+ * message, describing error using text-processing mechanism.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class ErrorDescriptorTemplate implements TextTemplate {
   private static final String ERROR_TEMPLATE_ID = "ERROR.%s.%s";
 

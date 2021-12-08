@@ -1,11 +1,18 @@
 package io.bce.interaction;
 
+import io.bce.promises.Deferred;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import io.bce.promises.Deferred;
 import lombok.NonNull;
 
+/**
+ * This class is the deferred object wrapper, which execute promise resolving and rejection inside
+ * separated thread.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <T> The resolution data type name
+ */
 public class AsyncResolverProxy<T> implements Deferred<T> {
   private final Deferred<T> original;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();

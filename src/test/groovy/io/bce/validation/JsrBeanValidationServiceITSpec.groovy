@@ -9,7 +9,7 @@ import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 import io.bce.validation.ValidationState.ErrorState
 import spock.lang.Specification
 
-class JSRBeanValidationServiceITSpec extends Specification {
+class JsrBeanValidationServiceITSpec extends Specification {
   private Validator validator
 
   def setup() {
@@ -24,7 +24,7 @@ class JSRBeanValidationServiceITSpec extends Specification {
     WrongBean wrongBean = new WrongBean()
 
     and: "The validation service"
-    ValidationService validationService = new JSRBeanValidationService(validator)
+    ValidationService validationService = new JsrBeanValidationService(validator)
 
     when: "The validation has been requested"
     ErrorState errorState = validationService.validate(wrongBean).getErrorState()

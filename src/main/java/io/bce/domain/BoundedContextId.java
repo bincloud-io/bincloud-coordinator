@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
  * value has the bounded context identifier semantic and not a random string value. It will prevent
  * the situation when the bounded context identifier will be confused with another string value
  * having another semantic.
- * 
+ *
  * @author Dmitry Mikhaylenko
  *
  */
@@ -31,7 +31,13 @@ public class BoundedContextId {
     return contextId;
   }
 
-  public static final BoundedContextId createFor(String contextName) {
+  /**
+   * Create the bounded context id for the context name string.
+   *
+   * @param contextName The context name string
+   * @return The bounded context id
+   */
+  public static BoundedContextId createFor(String contextName) {
     CONTEXT_NAME_PATTERN_CHECKER.checkThatValueIsWellFormatted(contextName);
     BoundedContextId contextId = new BoundedContextId(contextName);
     checkThatBoundedContextIdIsNotReservedValue(contextId);
@@ -45,6 +51,13 @@ public class BoundedContextId {
     }
   }
 
+  /**
+   * This exception notifies about exceptional case when the bounded context name is badly formatted
+   * or it is reserved.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public static final class WrongBoundedContextIdFormatException extends RuntimeException {
     private static final long serialVersionUID = 8870188141820368491L;
 

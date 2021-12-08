@@ -4,32 +4,49 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
-
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is responsible for working with critical sections.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor
-public class Locker {
+public class CriticalSection {
   public static final Long DEFAULT_AWAITING_TIME_IN_SECONDS = 120L;
 
   private final Lock lock = new ReentrantLock();
   private final Long awaitTime;
   private final TimeUnit unit;
 
-  public Locker() {
+  public CriticalSection() {
     this(DEFAULT_AWAITING_TIME_IN_SECONDS, TimeUnit.SECONDS);
   }
 
-  public void executeCriticalSection(Runnable runnable) {
+  /**
+   * Execute a function which isn't return any response inside the critical section.
+   *
+   * @param function The function, running inside critical section
+   */
+  public void executeCriticalSection(Runnable function) {
     executeCriticalSection(() -> {
-      runnable.run();
+      function.run();
       return null;
     });
   }
 
-  public <D> D executeCriticalSection(Supplier<D> supplier) {
+  /**
+   * Execute a function which provides a response inside the critical section.
+   *
+   * @param <D>      The response type, provided by the function
+   * @param function The function, running inside critical section
+   * @return The result, returned by function
+   */
+  public <D> D executeCriticalSection(Supplier<D> function) {
     acquireLock();
     try {
-      return supplier.get();
+      return function.get();
     } finally {
       releaseLock();
     }
@@ -53,6 +70,12 @@ public class Locker {
     }
   }
 
+  /**
+   * This class notifies about the exceptional case when the lock release waiting time is over.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public static final class LockWaitingTimeoutException extends RuntimeException {
     private static final long serialVersionUID = 2811853824554414628L;
 

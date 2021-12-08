@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * This class describes the "publish" command
- * 
+ * This class describes the "publish" command.
+ *
  * @author Dmitry Mikhaylenko
  *
  */

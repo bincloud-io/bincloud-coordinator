@@ -12,6 +12,12 @@ import io.bce.interaction.pubsub.Topic;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class implements event bus over pub-sub interaction.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class PubSubEventBus implements EventBus {
   private final PubSub<Object> pubSubChannel;
@@ -58,8 +64,8 @@ public class PubSubEventBus implements EventBus {
   }
 
   /**
-   * This exception is happened if the event instance is not accepted to the event type
-   * 
+   * This exception is happened if the event instance is not accepted to the event type.
+   *
    * @author Dmitry Mikhaylenko
    *
    */

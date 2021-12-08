@@ -8,12 +8,18 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * This class is responsible for aggregation of information about all validation errors and managing
+ * them.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @ToString
 @NoArgsConstructor
 @EqualsAndHashCode
@@ -30,8 +36,8 @@ public final class ValidationState {
   }
 
   /**
-   * Check that the validation state has not errors
-   * 
+   * Check that the validation state has not errors.
+   *
    * @return True if valid or false otherwise
    */
   public boolean isValid() {
@@ -39,8 +45,8 @@ public final class ValidationState {
   }
 
   /**
-   * Create derived validation state with ungrouped error
-   * 
+   * Create derived validation state with ungrouped error.
+   *
    * @param errorMessage The violation descriptor
    * @return The derived validation state
    */
@@ -49,9 +55,9 @@ public final class ValidationState {
   }
 
   /**
-   * Create derived validation state with grouped error
-   * 
-   * @param group The error group
+   * Create derived validation state with grouped error.
+   *
+   * @param group        The error group
    * @param errorMessage The violation descriptor
    * @return The derived validation state
    */
@@ -63,7 +69,7 @@ public final class ValidationState {
 
   /**
    * Merge the current validation state with another state.
-   * 
+   *
    * @param stateToMerge The state to merge
    * @return The merged validation state
    */
@@ -76,7 +82,7 @@ public final class ValidationState {
   /**
    * Derive all messages of the validation state from the specified group name. All ungrouped
    * messages will have group the same as the specified group name.
-   * 
+   *
    * @param group The group name
    * @return The derived validation state
    */
@@ -89,7 +95,7 @@ public final class ValidationState {
   /**
    * Derive grouped messages of the validation state from the specified group name. Ungrouped
    * messages won't converted to the grouped messages.
-   * 
+   *
    * @param group The group name
    * @return The derived validation state
    */
@@ -187,33 +193,45 @@ public final class ValidationState {
     }
   }
 
+  /**
+   * This interface declares the contract for access to the information about all validation errors.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public interface ErrorState {
     /**
-     * Get the ungrouped errors
-     * 
+     * Get the ungrouped errors.
+     *
      * @return The ungrouped errors
      */
     public Collection<ErrorMessage> getUngroupedErrors();
 
     /**
-     * Get the grouped errors
-     * 
+     * Get the grouped errors.
+     *
      * @return The grouped errors
      */
     public Collection<GroupedError> getGroupedErrors();
   }
 
+  /**
+   * This interface declares the contract for access to the grouped error information.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public interface GroupedError {
     /**
-     * Get grouped error group name
-     * 
+     * Get grouped error group name.
+     *
      * @return The group name
      */
     public String getGroupName();
 
     /**
-     * Get grouped error messages
-     * 
+     * Get grouped error messages.
+     *
      * @return The grouped errors messages collection
      */
     public Collection<ErrorMessage> getMessages();

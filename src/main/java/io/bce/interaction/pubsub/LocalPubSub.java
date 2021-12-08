@@ -1,13 +1,19 @@
 package io.bce.interaction.pubsub;
 
+import io.bce.CriticalSection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.bce.Locker;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class implements the simple local pub-sub data transport.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <T> The publishing data base type name
+ */
 public class LocalPubSub<T> implements PubSub<T> {
   private final LocalChannel channel = new LocalChannel();
 
@@ -33,7 +39,7 @@ public class LocalPubSub<T> implements PubSub<T> {
   }
 
   private class LocalChannel {
-    private final Locker locker = new Locker();
+    private final CriticalSection locker = new CriticalSection();
     private final Map<Topic, List<LocalSubscribtion>> subscribtions = new HashMap<>();
 
     public void putMessage(Topic topic, T message) {

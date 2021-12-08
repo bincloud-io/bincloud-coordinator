@@ -8,7 +8,7 @@ class UrnSpec extends Specification {
   private static final String WRONG_URN_ADDRESS_STRING = "wrong-urn:";
   def "Scenario: create target address from correct urn address format"() {
     when: "The target address is created from well formatted urn address string value"
-    Urn urnAddress = Urn.ofURN(CORRECT_URN_ADDRESS_STRING)
+    Urn urnAddress = Urn.ofUrn(CORRECT_URN_ADDRESS_STRING)
 
     then: "The target address should be correctly created"
     urnAddress.toString() == CORRECT_URN_ADDRESS_STRING
@@ -16,7 +16,7 @@ class UrnSpec extends Specification {
 
   def "Scenario: create target address from wrong urn address format"() {
     when: "The target address is created from wrong formatted urn address string value"
-    Urn.ofURN(WRONG_URN_ADDRESS_STRING)
+    Urn.ofUrn(WRONG_URN_ADDRESS_STRING)
 
     then: "The wrong urn address format exception should be happened"
     thrown(WrongUrnAddressFormatException)

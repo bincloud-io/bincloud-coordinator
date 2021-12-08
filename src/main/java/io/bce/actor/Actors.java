@@ -1,11 +1,5 @@
 package io.bce.actor;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
 import io.bce.Generator;
 import io.bce.actor.Actor.Context;
 import io.bce.actor.Actor.Factory;
@@ -13,11 +7,22 @@ import io.bce.actor.Actor.Mailbox;
 import io.bce.actor.EventLoop.Alarm;
 import io.bce.actor.EventLoop.Dispatcher;
 import io.bce.actor.EventLoop.Worker;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 
+/**
+ * This class is responsible for actor system initialization.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @UtilityClass
 public class Actors {
   public final ActorSystem create(@NonNull SystemInitializer systemInitializer) {
@@ -26,23 +31,23 @@ public class Actors {
   }
 
   /**
-   * This interface describes the contract of actors system configuring
-   * 
+   * This interface describes the contract of actors system configuring.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public interface SystemConfigurer {
     /**
-     * Specify the dispatcher component
-     * 
+     * Specify the dispatcher component.
+     *
      * @param dispatcher The dispatcher
      * @return The system configurer instance
      */
     public SystemConfigurer withDispatcher(Dispatcher dispatcher);
 
     /**
-     * Specify the correlation key generator
-     * 
+     * Specify the correlation key generator.
+     *
      * @param correlationKeyGenerator The correlation key generator
      * @return The system configurer instance
      */
@@ -50,43 +55,64 @@ public class Actors {
         Generator<CorrelationKey> correlationKeyGenerator);
 
     /**
-     * Configure the system
-     * 
+     * Configure the system.
+     *
      * @return The system configurer instance
      */
     public SystemConfiguration configure();
   }
 
   /**
-   * This interface describes the methods getting access to the configured system dependencies
-   * 
+   * This interface describes the methods getting access to the configured system dependencies.
+   *
    * @author Dmitry Mikhaylenko
    *
    */
   public interface SystemConfiguration {
     /**
-     * Get the dispatcher
-     * 
+     * Get the dispatcher.
+     *
      * @return The dispatcher instasnce
      */
     public Dispatcher getDispatcher();
 
     /**
-     * Get the correlation key generator
-     * 
+     * Get the correlation key generator.
+     *
      * @return The correlation key generator
      */
     public Generator<CorrelationKey> getCorrelationKeyGenerator();
   }
 
+  /**
+   * This interface declares the actor system initialization mechanism.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public interface SystemInitializer {
     /**
-     * Initialize the system
-     * 
+     * Initialize the system.
+     *
      * @param configurer The system configurer
      * @return The system configuration
      */
     public SystemConfiguration initializeSystem(SystemConfigurer configurer);
+  }
+
+  /**
+   * This exception notifies about the exceptional case, when the already registered actor is tried
+   * to be created.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public class ActorDuplicationException extends RuntimeException {
+    private static final long serialVersionUID = 1357258487421540699L;
+
+    public ActorDuplicationException(ActorName actorName) {
+      super(String.format("Actor %s has already been created", actorName));
+    }
   }
 
   @Getter
@@ -167,7 +193,7 @@ public class Actors {
 
     private void checkThatActorIsNotCreated(ActorName actorName) {
       if (creatorsPool.isRegistered(actorName)) {
-        throw new ActorHasAlreadyBeenCreatedError(actorName);
+        throw new ActorDuplicationException(actorName);
       }
     }
 
@@ -285,14 +311,6 @@ public class Actors {
       public void stopAll() {
         actors.keySet().stream().forEach(this::stop);
       }
-    }
-  }
-
-  public class ActorHasAlreadyBeenCreatedError extends Error {
-    private static final long serialVersionUID = 1357258487421540699L;
-
-    public ActorHasAlreadyBeenCreatedError(ActorName actorName) {
-      super(String.format("Actor %s has already been created", actorName));
     }
   }
 }
