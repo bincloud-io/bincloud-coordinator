@@ -11,8 +11,8 @@ import io.bce.validation.ValidationContext.Rule;
 import lombok.NonNull;
 
 public class Rules {
-	public static final String VALIDATED_ELEMENT_PARAMETER_NAME = "$$element";
-	public static final String EXPECTED_VALUE_PARAMETER = "$$value";
+	public static final String VALIDATED_ELEMENT_PARAMETER_NAME = "$$value";
+	public static final String EXPECTED_VALUE_PARAMETER = "$$expectedValue";
 
 	public static final String MIN_PARAMETER_VALUE = "$$minValue";
 	public static final String MAX_PARAMETER_VALUE = "$$maxValue";
@@ -48,6 +48,28 @@ public class Rules {
 		return notNull(errorMessage).invert();
 	}
 
+	/**
+	 * Create rule checking that the optional value under validation is present
+	 * 
+	 * @param errorMessage  The error message if the rule isn't passed
+	 * @return The rule
+	 */	
+	@SuppressWarnings("rawtypes")
+	public static final Rule<Optional> isPresent(ErrorMessage errorMessage) {
+		return match(Optional.class, errorMessage, Optional::isPresent); 
+	}
+	
+	/**
+	 * Create rule checking that the optional value under validation is missing
+	 * 
+	 * @param errorMessage The error message if the rule isn't passed
+	 * @return The rule
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final Rule<Optional> isMissing(ErrorMessage errorMessage) {
+		return isPresent(errorMessage).invert();
+	}
+	
 	/**
 	 * Create rule checking that the value under validation is equal to the passed
 	 * expected value

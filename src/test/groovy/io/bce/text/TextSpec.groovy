@@ -23,4 +23,8 @@ class TextSpec extends Specification {
 		then: "The result should be the same as after text processor interpolation"
 		textProcessor.interpolate(template) == interpolatedByUtil
 	}
+    
+    def cleanup() {
+        Text.reset()
+    }
 }

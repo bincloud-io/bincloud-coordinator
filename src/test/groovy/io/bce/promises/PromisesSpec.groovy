@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch
 import io.bce.promises.Promise.ChainingDeferredFunction
 import io.bce.promises.Promise.ChainingPromiseHandler
 import io.bce.promises.Promise.ErrorHandler
+import io.bce.promises.Promise.FinalizingHandler
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.promises.Promises.PromiseHasAlreadyBeenRejectedException
 import io.bce.promises.Promises.PromiseHasAlreadyBeenResolvedException
@@ -80,7 +81,7 @@ class PromisesSpec extends Specification {
 
 		and: "The error handler shouldn't be notified"
 		1 * firstErrorHandler.onError(TYPED_EXCEPTION)
-		1 * secondErrorHandler.onError(TYPED_EXCEPTION)
+		0 * secondErrorHandler.onError(TYPED_EXCEPTION)
 		1 * thirdErrorHandler.onError(TYPED_EXCEPTION)
 	}
 
@@ -326,7 +327,7 @@ class PromisesSpec extends Specification {
 		and: "All error handlers should be called"
 		1 * firstErrorHandler.onError(error)
 		1 * secondErrorHandler.onError(error)
-		1 * thirdErrorHandler.onError(error)
+		0 * thirdErrorHandler.onError(error)
 	}
 	
 	def "Scnario: reject chained promise using chaining deferred function if an error is thrown"() {
@@ -427,7 +428,7 @@ class PromisesSpec extends Specification {
 		and: "All error handlers should be called on the failed promise only"
 		0 * firstErrorHandler.onError(error)
 		1 * secondErrorHandler.onError(error)
-		1 * thirdErrorHandler.onError(error)
+		0 * thirdErrorHandler.onError(error)
 	}
 	
 	def "Scenario: create the resolved promise by a value"() {
@@ -465,4 +466,58 @@ class PromisesSpec extends Specification {
 		then: "The error handler should catch the error"
 		1 * errorHandler.onError(error)
 	}
+    
+    def "Scenario: finalize on resolve"() {
+        CountDownLatch latch = new CountDownLatch(1)
+        RuntimeException error = new RuntimeException("ERROR")
+        
+        given: "The finalizer"
+        FinalizingHandler finalizer = Mock(FinalizingHandler)
+        
+        when: "The resolved promise"
+        Promises.resolvedBy(12345).finalize({
+            finalizer.onComplete()
+            latch.countDown()
+        })
+        
+        latch.await()
+        
+        then: "The finalizer should be excuted"
+        1 * finalizer.onComplete()
+    }
+    
+    def "Scenario: finalize on error"() {
+        CountDownLatch latch = new CountDownLatch(1)
+        RuntimeException error = new RuntimeException("ERROR")
+        
+        given: "The finalizer"
+        FinalizingHandler finalizer = Mock(FinalizingHandler)
+        
+        when: "The rejected promise"
+        Promises.rejectedBy(error).finalize({
+            finalizer.onComplete()
+            latch.countDown()
+        })
+        
+        latch.await()
+        
+        then: "The finalizer should be excuted"
+        1 * finalizer.onComplete()
+    }
+    
+    def "Scenario: get successfully resolved response synchronously"() {
+        expect: "The promise error should be returned synchronously"
+        Promises.resolvedBy(1000L).get(1L) == 1000L
+    }
+    
+    def "Scenario: rethrow exceptionally completed promise on synchronously read"() {
+        RuntimeException error = new RuntimeException()
+        RuntimeException thrownError
+        when: "The value is tried to be obtained from exceptionally rejected promise"
+        Promises.rejectedBy(error).get(1L)
+        
+        then: "The rejected error should be rethrown"
+        thrownError = thrown()
+        thrownError.is(error)
+    }
 }

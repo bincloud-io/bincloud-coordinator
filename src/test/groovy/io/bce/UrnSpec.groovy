@@ -1,14 +1,14 @@
 package io.bce
 
-import io.bce.URN.WrongUrnAddressFormatException
+import io.bce.Urn.WrongUrnAddressFormatException
 import spock.lang.Specification
 
-class URNSpec extends Specification {
+class UrnSpec extends Specification {
 	private static final String CORRECT_URN_ADDRESS_STRING = "urn:command:CREATE_SOMETHING";
 	private static final String WRONG_URN_ADDRESS_STRING = "wrong-urn:";
 	def "Scenario: create target address from correct urn address format"() {
 		when: "The target address is created from well formatted urn address string value"
-		URN urnAddress = URN.ofURN(CORRECT_URN_ADDRESS_STRING)
+		Urn urnAddress = Urn.ofURN(CORRECT_URN_ADDRESS_STRING)
 
 		then: "The target address should be correctly created"
 		urnAddress.toString() == CORRECT_URN_ADDRESS_STRING
@@ -16,7 +16,7 @@ class URNSpec extends Specification {
 	
 	def "Scenario: create target address from wrong urn address format"() {
 		when: "The target address is created from wrong formatted urn address string value"
-		URN.ofURN(WRONG_URN_ADDRESS_STRING)
+		Urn.ofURN(WRONG_URN_ADDRESS_STRING)
 		
 		then: "The wrong urn address format exception should be happened"
 		thrown(WrongUrnAddressFormatException)

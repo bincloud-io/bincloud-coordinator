@@ -13,73 +13,72 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class RuleExecutor<V> {
-	private final V validatable;
-	private final Supplier<Rule<V>> validationRule;
+    private final V validatable;
+    private final Supplier<Rule<V>> validationRule;
 
-	public RuleExecutionReport execute() {
-		try {
-			if (validationRule.get().isAcceptableFor(validatable)) {
-				return new RuleExecutionReport(true,
-						validationRule.get().check(validatable));	
-			} else {
-				return new RuleExecutionReport(false, Collections.emptyList());
-			}
-			
-		} catch (Throwable error) {
-			return new RuleExecutionReport(error);
-		}
-	}
+    public RuleExecutionReport execute() {
+        try {
+            if (validationRule.get().isAcceptableFor(validatable)) {
+                return new RuleExecutionReport(true, validationRule.get().check(validatable));
+            } else {
+                return new RuleExecutionReport(false, Collections.emptyList());
+            }
 
-	public static final class RuleExecutionReport {
-		@Getter
-		private boolean acceptable;
-		@Getter
-		private Optional<Throwable> thrownError;
-		@Getter
-		private Collection<ErrorMessage> ruleResult = new ArrayList<>();
+        } catch (Throwable error) {
+            return new RuleExecutionReport(error);
+        }
+    }
 
-		private RuleExecutionReport(boolean acceptable, Collection<ErrorMessage> errorMessages) {
-			super();
-			this.acceptable = acceptable;
-			this.ruleResult.addAll(errorMessages);
-			this.thrownError = Optional.empty();
-		}
+    public static final class RuleExecutionReport {
+        @Getter
+        private boolean acceptable;
+        @Getter
+        private Optional<Throwable> thrownError;
+        @Getter
+        private Collection<ErrorMessage> ruleResult = new ArrayList<>();
 
-		private RuleExecutionReport(Throwable thrownError) {
-			super();
-			this.thrownError = Optional.of(thrownError);
-		}
+        private RuleExecutionReport(boolean acceptable, Collection<ErrorMessage> errorMessages) {
+            super();
+            this.acceptable = acceptable;
+            this.ruleResult.addAll(errorMessages);
+            this.thrownError = Optional.empty();
+        }
 
-		public boolean completedWithError() {
-			return thrownError.isPresent();
-		}
+        private RuleExecutionReport(Throwable thrownError) {
+            super();
+            this.thrownError = Optional.of(thrownError);
+        }
 
-		public boolean completedWithoutError() {
-			return !completedWithError();
-		}
+        public boolean completedWithError() {
+            return thrownError.isPresent();
+        }
 
-		public <E extends Throwable> boolean completedWith(Class<E> errorType) {
-			return thrownError.map(error -> errorType.isInstance(error)).orElse(false);
-		}
+        public boolean completedWithoutError() {
+            return !completedWithError();
+        }
 
-		public boolean ruleIsPassed() {
-			return completedWithoutError() && ruleResult.isEmpty();
-		}
+        public <E extends Throwable> boolean completedWith(Class<E> errorType) {
+            return thrownError.map(error -> errorType.isInstance(error)).orElse(false);
+        }
 
-		public boolean ruleIsFailed() {
-			return completedWithoutError() && !ruleResult.isEmpty();
-		}
+        public boolean ruleIsPassed() {
+            return completedWithoutError() && ruleResult.isEmpty();
+        }
 
-		public Collection<String> getErrorTexts() {
-			return this.ruleResult.stream().map(ErrorMessage::toString).collect(Collectors.toList());
-		}
+        public boolean ruleIsFailed() {
+            return completedWithoutError() && !ruleResult.isEmpty();
+        }
 
-		public boolean contains(ErrorMessage textMessage) {
-			return ruleResult.contains(textMessage);
-		}
+        public Collection<String> getErrorTexts() {
+            return this.ruleResult.stream().map(ErrorMessage::toString).collect(Collectors.toList());
+        }
 
-		public boolean contains(Collection<ErrorMessage> textMessage) {
-			return this.ruleResult.containsAll(textMessage);
-		}
-	}
+        public boolean contains(ErrorMessage textMessage) {
+            return ruleResult.contains(textMessage);
+        }
+
+        public boolean contains(Collection<ErrorMessage> textMessage) {
+            return this.ruleResult.containsAll(textMessage);
+        }
+    }
 }

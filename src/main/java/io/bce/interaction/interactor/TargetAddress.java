@@ -1,6 +1,6 @@
 package io.bce.interaction.interactor;
 
-import io.bce.URN;
+import io.bce.Urn;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public final class TargetAddress {
-	private final URN urn;
+	private final Urn urn;
 	
 	@Override
 	public String toString() {
@@ -30,10 +30,10 @@ public final class TargetAddress {
 	 * @return The target address
 	 */
 	public static final TargetAddress ofURN(@NonNull String urnAddress) {
-		return ofURN(URN.ofURN(urnAddress));
+		return ofURN(Urn.ofURN(urnAddress));
 	}
 	
-	private static final TargetAddress ofURN(@NonNull URN urn) {
+	private static final TargetAddress ofURN(@NonNull Urn urn) {
 		return new TargetAddress(urn);
 	}
 }

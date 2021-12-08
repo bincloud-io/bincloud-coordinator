@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class WaitableWorker implements Worker {
-	private final Worker originalWorker;
-	private final CountDownLatch workersExecutionWaiterLatch;
-	
-	@Override
-	public void execute() {
-		originalWorker.execute();
-		workersExecutionWaiterLatch.countDown();
-	}
+    private final Worker originalWorker;
+    private final CountDownLatch workersExecutionWaiterLatch;
+
+    @Override
+    public void execute() {
+        originalWorker.execute();
+        workersExecutionWaiterLatch.countDown();
+    }
 }

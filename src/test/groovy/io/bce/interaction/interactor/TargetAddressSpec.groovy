@@ -1,6 +1,6 @@
 package io.bce.interaction.interactor
 
-import io.bce.URN.WrongUrnAddressFormatException
+import io.bce.Urn.WrongUrnAddressFormatException
 import io.bce.interaction.interactor.TargetAddress
 import spock.lang.Specification
 
