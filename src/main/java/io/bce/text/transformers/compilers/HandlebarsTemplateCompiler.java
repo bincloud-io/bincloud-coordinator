@@ -10,15 +10,15 @@ import io.bce.MustNeverBeHappenedError;
 import io.bce.text.transformers.TemplateCompilingTransformer.TemplateCompiler;
 
 public class HandlebarsTemplateCompiler implements TemplateCompiler {
-	private Handlebars handlebars = new Handlebars();
+  private Handlebars handlebars = new Handlebars();
 
-	@Override
-	public String compile(String templateText, Map<String, String> parameters) {
-		try {
-			Template template = handlebars.compileInline(templateText);
-			return template.apply(parameters);
-		} catch (IOException error) {
-			throw new MustNeverBeHappenedError(error);
-		}
-	}
+  @Override
+  public String compile(String templateText, Map<String, String> parameters) {
+    try {
+      Template template = handlebars.compileInline(templateText);
+      return template.apply(parameters);
+    } catch (IOException error) {
+      throw new MustNeverBeHappenedError(error);
+    }
+  }
 }

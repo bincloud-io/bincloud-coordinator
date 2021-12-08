@@ -8,35 +8,37 @@ import io.bce.text.TextTemplates;
 import lombok.NonNull;
 
 public class ErrorDescriptorTemplate implements TextTemplate {
-	private static final String ERROR_TEMPLATE_ID = "ERROR.%s.%s";
-	
-	private final TextTemplate errorTemplate;
+  private static final String ERROR_TEMPLATE_ID = "ERROR.%s.%s";
 
-	private ErrorDescriptorTemplate(ErrorDescriptor errorDescriptor) {
-		super();
-		this.errorTemplate = TextTemplates.createBy(getTextTemplateIdentifier(errorDescriptor), errorDescriptor.getErrorDetails());
-	}
-	
-	@Override
-	public String getTemplateText() {
-		return errorTemplate.getTemplateText();
-	}
-	
-	@Override
-	public Map<String, Object> getParameters() {
-		return errorTemplate.getParameters();
-	}
-	
-	@Override
-	public TextTemplate transformBy(Transformer transformer) {
-		return errorTemplate.transformBy(transformer);
-	}
+  private final TextTemplate errorTemplate;
 
-	private String getTextTemplateIdentifier(ErrorDescriptor errorDescriptor) {
-		return String.format(ERROR_TEMPLATE_ID, errorDescriptor.getContextId(), errorDescriptor.getErrorCode());
-	}
-	
-	public static final TextTemplate createFor(@NonNull ErrorDescriptor errorDescriptor) {
-		return new ErrorDescriptorTemplate(errorDescriptor);
-	}
+  private ErrorDescriptorTemplate(ErrorDescriptor errorDescriptor) {
+    super();
+    this.errorTemplate = TextTemplates.createBy(getTextTemplateIdentifier(errorDescriptor),
+        errorDescriptor.getErrorDetails());
+  }
+
+  @Override
+  public String getTemplateText() {
+    return errorTemplate.getTemplateText();
+  }
+
+  @Override
+  public Map<String, Object> getParameters() {
+    return errorTemplate.getParameters();
+  }
+
+  @Override
+  public TextTemplate transformBy(Transformer transformer) {
+    return errorTemplate.transformBy(transformer);
+  }
+
+  private String getTextTemplateIdentifier(ErrorDescriptor errorDescriptor) {
+    return String.format(ERROR_TEMPLATE_ID, errorDescriptor.getContextId(),
+        errorDescriptor.getErrorCode());
+  }
+
+  public static final TextTemplate createFor(@NonNull ErrorDescriptor errorDescriptor) {
+    return new ErrorDescriptorTemplate(errorDescriptor);
+  }
 }

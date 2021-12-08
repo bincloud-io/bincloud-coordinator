@@ -16,14 +16,14 @@ import lombok.ToString;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public final class Publish {
-	private final Topic topic;
-	private final Object messageBody;
+  private final Topic topic;
+  private final Object messageBody;
 
-	public void publish(Message<Object> message, Publish.PublishCommand publishHandler) {
-		publishHandler.publish(topic, message.map(v -> messageBody));
-	}
+  public void publish(Message<Object> message, Publish.PublishCommand publishHandler) {
+    publishHandler.publish(topic, message.map(v -> messageBody));
+  }
 
-	interface PublishCommand {
-		public void publish(Topic topic, Message<Object> message);
-	}
+  interface PublishCommand {
+    public void publish(Topic topic, Message<Object> message);
+  }
 }

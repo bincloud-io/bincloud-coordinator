@@ -8,8 +8,8 @@ import io.bce.actor.EventLoop.Worker
 import spock.lang.Specification
 
 class ExecutorServiceDispatcherSpec extends DispatcherSpecification {
-	@Override
-	protected Dispatcher getDispatcher() {
-		return ExecutorServiceDispatcher.createFor(Executors.newFixedThreadPool(4))
-	}
+  @Override
+  protected Dispatcher getDispatcher() {
+    return ExecutorServiceDispatcher.createFor(Executors.newFixedThreadPool(4))
+  }
 }

@@ -8,6 +8,6 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public class PolledElement<D> {
-	private final Long index;
-	private final D data;
+  private final Long index;
+  private final D data;
 }

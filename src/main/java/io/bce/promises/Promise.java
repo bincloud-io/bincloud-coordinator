@@ -1,14 +1,12 @@
 package io.bce.promises;
 
 /**
- * This interface describes the contract, promise abstraction. Promise is the
- * abstraction which can be resolved or rejected. Imagine the situation if your
- * method has to receive response asynchronously for example for long time
- * operations and you don't want waste your CPU resource on response awaiting.
- * In this situation you can return promise, which is resolved on successful
- * complete and rejected on failures. Your client code could subscribe to
- * resolve and reject operations and assign corresponding behavior on each of
- * them situation.
+ * This interface describes the contract, promise abstraction. Promise is the abstraction which can
+ * be resolved or rejected. Imagine the situation if your method has to receive response
+ * asynchronously for example for long time operations and you don't want waste your CPU resource on
+ * response awaiting. In this situation you can return promise, which is resolved on successful
+ * complete and rejected on failures. Your client code could subscribe to resolve and reject
+ * operations and assign corresponding behavior on each of them situation.
  * 
  * @author Dmitry Mikhaylenko
  *
@@ -16,107 +14,104 @@ package io.bce.promises;
  */
 public interface Promise<T> {
 
-    public Promise<T> then(ResponseHandler<T> responseHandler);
+  public Promise<T> then(ResponseHandler<T> responseHandler);
 
-    public Promise<T> then(Deferred<T> resolver);
+  public Promise<T> then(Deferred<T> resolver);
 
-    public <E extends Throwable> Promise<T> error(Class<E> errorType, ErrorHandler<E> errorHandler);
+  public <E extends Throwable> Promise<T> error(Class<E> errorType, ErrorHandler<E> errorHandler);
 
-    public Promise<T> error(ErrorHandler<Throwable> errorHandler);
+  public Promise<T> error(ErrorHandler<Throwable> errorHandler);
 
-    public Promise<T> error(Deferred<T> rejector);
+  public Promise<T> error(Deferred<T> rejector);
 
-    public <C> Promise<C> chain(ChainingDeferredFunction<T, C> chainingDeferredFunction);
+  public <C> Promise<C> chain(ChainingDeferredFunction<T, C> chainingDeferredFunction);
 
-    public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider);
+  public <C> Promise<C> chain(ChainingPromiseHandler<T, C> chainingPromiseProvider);
 
-    public Promise<T> delegate(Deferred<T> deferred);
+  public Promise<T> delegate(Deferred<T> deferred);
 
-    public Promise<T> finalize(FinalizingHandler finalizer);
+  public Promise<T> finalize(FinalizingHandler finalizer);
 
-    public T get(long timeout) throws Exception;
+  public T get(long timeout) throws Exception;
 
+  /**
+   * This interface declares the contract for the component which handles result on resolving
+   * 
+   * @author Dmitry Mikhaylenko
+   *
+   * @param <T> The promise result type name
+   */
+  public interface ResponseHandler<T> {
     /**
-     * This interface declares the contract for the component which handles result
-     * on resolving
+     * Receive response asynchronously
      * 
-     * @author Dmitry Mikhaylenko
-     *
-     * @param <T> The promise result type name
+     * @param response The response object
      */
-    public interface ResponseHandler<T> {
-        /**
-         * Receive response asynchronously
-         * 
-         * @param response The response object
-         */
-        public void onResponse(T response);
-    }
+    public void onResponse(T response);
+  }
 
+  /**
+   * This interface declares the contract for the component which handles error on rejecting
+   * 
+   * @author Dmitry Mikhaylenko
+   *
+   * @param <E> The error handler
+   */
+  public interface ErrorHandler<E extends Throwable> {
     /**
-     * This interface declares the contract for the component which handles error on
-     * rejecting
+     * Receive error asynchronously
      * 
-     * @author Dmitry Mikhaylenko
-     *
-     * @param <E> The error handler
+     * @param error The error object
      */
-    public interface ErrorHandler<E extends Throwable> {
-        /**
-         * Receive error asynchronously
-         * 
-         * @param error The error object
-         */
-        public void onError(E error);
-    }
+    public void onError(E error);
+  }
 
-    /**
-     * This interface the contract for the component which handles notifications
-     * about promise completing(it doesn't matter either promise was resolved or it
-     * was rejected)
-     * 
-     * @author Dmitry Mikhaylenko
-     *
-     */
-    public interface FinalizingHandler {
-        public void onComplete();
-    }
+  /**
+   * This interface the contract for the component which handles notifications about promise
+   * completing(it doesn't matter either promise was resolved or it was rejected)
+   * 
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public interface FinalizingHandler {
+    public void onComplete();
+  }
 
+  /**
+   * This interface declares the contract for the component which performs a intermediate deferred
+   * operation on promise chaining
+   * 
+   * @author Dmitry Mikhaylenko
+   *
+   * @param <Q> The promise input request type
+   * @param <S> The promise output response resolving type
+   */
+  public interface ChainingDeferredFunction<Q, S> {
     /**
-     * This interface declares the contract for the component which performs a
-     * intermediate deferred operation on promise chaining
+     * Execute intermediate operation
      * 
-     * @author Dmitry Mikhaylenko
-     *
-     * @param <Q> The promise input request type
-     * @param <S> The promise output response resolving type
+     * @param previousResult The previous promise result
+     * @param deferred The deferred object
      */
-    public interface ChainingDeferredFunction<Q, S> {
-        /**
-         * Execute intermediate operation
-         * 
-         * @param previousResult The previous promise result
-         * @param deferred       The deferred object
-         */
-        public void execute(Q previousResult, Deferred<S> deferred);
-    }
+    public void execute(Q previousResult, Deferred<S> deferred);
+  }
 
+  /**
+   * This interface declares the contract for alternative way of response handling on a promise
+   * chaining
+   * 
+   * @author Dmitry Mikhaylenko
+   *
+   * @param <Q> The promise input request type
+   * @param <S> The promise output response resolving type
+   */
+  public interface ChainingPromiseHandler<Q, S> {
     /**
-     * This interface declares the contract for alternative way of response handling
-     * on a promise chaining
+     * Execute intermediate operation
      * 
-     * @author Dmitry Mikhaylenko
-     *
-     * @param <Q> The promise input request type
-     * @param <S> The promise output response resolving type
+     * @param previousResult The previous promise result
+     * @return The derived promise object
      */
-    public interface ChainingPromiseHandler<Q, S> {
-        /**
-         * Execute intermediate operation
-         * 
-         * @param previousResult The previous promise result
-         * @return The derived promise object
-         */
-        public Promise<S> derivePromise(Q previousResult);
-    }
+    public Promise<S> derivePromise(Q previousResult);
+  }
 }

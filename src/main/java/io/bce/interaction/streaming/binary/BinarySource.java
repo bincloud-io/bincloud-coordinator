@@ -8,20 +8,20 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class BinarySource implements Source<BinaryChunk> {
-	@NonNull
-	private final BinaryChunkReader reader;
+  @NonNull
+  private final BinaryChunkReader reader;
 
-	@Override
-	public void read(DestinationConnection<BinaryChunk> connection) {
-	    BinaryChunk chunk = reader.readChunk();
-        if (!chunk.isEmpty()) {
-            submitChunk(connection, chunk);
-        } else {
-            connection.complete();
-        }
-	}
-	
-	private void submitChunk(DestinationConnection<BinaryChunk> connection, BinaryChunk chunk) {
-		connection.submit(chunk, chunk.getSize());
-	}	
+  @Override
+  public void read(DestinationConnection<BinaryChunk> connection) {
+    BinaryChunk chunk = reader.readChunk();
+    if (!chunk.isEmpty()) {
+      submitChunk(connection, chunk);
+    } else {
+      connection.complete();
+    }
+  }
+
+  private void submitChunk(DestinationConnection<BinaryChunk> connection, BinaryChunk chunk) {
+    connection.submit(chunk, chunk.getSize());
+  }
 }

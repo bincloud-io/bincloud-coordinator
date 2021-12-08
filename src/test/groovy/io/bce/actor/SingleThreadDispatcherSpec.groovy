@@ -6,9 +6,8 @@ import spock.lang.Specification
 
 class SingleThreadDispatcherSpec extends DispatcherSpecification {
 
-	@Override
-	protected Dispatcher getDispatcher() {
-		return new SingleThreadDispatcher()
-	}
-	
+  @Override
+  protected Dispatcher getDispatcher() {
+    return new SingleThreadDispatcher()
+  }
 }

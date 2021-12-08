@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(staticName = "createFor")
 public class ExecutorServiceDispatcher implements Dispatcher {
-	private final ExecutorService executorService;
+  private final ExecutorService executorService;
 
-	@Override
-	public void dispatch(Worker worker) {
-		executorService.execute(worker::execute);
-	}
+  @Override
+  public void dispatch(Worker worker) {
+    executorService.execute(worker::execute);
+  }
 }

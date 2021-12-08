@@ -4,5 +4,5 @@ import java.util.Collection;
 
 @FunctionalInterface
 public interface BatchPoller<D> {
-	public Collection<D> poll();
+  public Collection<D> poll();
 }

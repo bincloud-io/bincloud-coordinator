@@ -17,67 +17,71 @@ import io.bce.text.TextTemplate.Transformer;
 import lombok.Getter;
 
 public class ServiceAuditEvent {
-	@Getter	
-	private LogRecord auditLogRecord;
-	private final AuditEventType auditEventType;
-	private final Collection<String> auditParameterNames;
+  @Getter
+  private LogRecord auditLogRecord;
+  private final AuditEventType auditEventType;
+  private final Collection<String> auditParameterNames;
 
-	public ServiceAuditEvent(Level auditLevel, ErrorDescriptor errorDescriptor, Collection<String> auditParameterNames) {
-		this(new AuditEventType(errorDescriptor), new LogRecord(auditLevel, errorDescriptor), auditParameterNames);
-	}
+  public ServiceAuditEvent(Level auditLevel, ErrorDescriptor errorDescriptor,
+      Collection<String> auditParameterNames) {
+    this(new AuditEventType(errorDescriptor), new LogRecord(auditLevel, errorDescriptor),
+        auditParameterNames);
+  }
 
-	public ServiceAuditEvent(BoundedContextId contextId, Level auditLevel, TextTemplate messageTemplate,
-			Collection<String> auditParameterNames) {
-		this(new AuditEventType(contextId), new LogRecord(auditLevel, messageTemplate), auditParameterNames);
-	}
+  public ServiceAuditEvent(BoundedContextId contextId, Level auditLevel,
+      TextTemplate messageTemplate, Collection<String> auditParameterNames) {
+    this(new AuditEventType(contextId), new LogRecord(auditLevel, messageTemplate),
+        auditParameterNames);
+  }
 
-	private ServiceAuditEvent(AuditEventType auditEvent, LogRecord auditLogRecord, Collection<String> auditParameterNames) {
-		super();
-		this.auditEventType = auditEvent;
-		this.auditLogRecord = auditLogRecord;
-		this.auditParameterNames = Collections.unmodifiableCollection(auditParameterNames);
-	}
+  private ServiceAuditEvent(AuditEventType auditEvent, LogRecord auditLogRecord,
+      Collection<String> auditParameterNames) {
+    super();
+    this.auditEventType = auditEvent;
+    this.auditLogRecord = auditLogRecord;
+    this.auditParameterNames = Collections.unmodifiableCollection(auditParameterNames);
+  }
 
-	private ServiceAuditEvent(ServiceAuditEvent proto) {
-		super();
-		this.auditEventType = proto.auditEventType;
-		this.auditParameterNames = proto.auditParameterNames;
-		this.auditLogRecord = proto.auditLogRecord;
-	}
-	
-	public BoundedContextId getContextId() {
-		return auditEventType.getContextId();
-	}
+  private ServiceAuditEvent(ServiceAuditEvent proto) {
+    super();
+    this.auditEventType = proto.auditEventType;
+    this.auditParameterNames = proto.auditParameterNames;
+    this.auditLogRecord = proto.auditLogRecord;
+  }
 
-	public ErrorCode getErrorCode() {
-		return auditEventType.getErrorCode();
-	}
-	
-	public Level getAuditLogLevel() {
-		return auditLogRecord.getLevel();
-	}
+  public BoundedContextId getContextId() {
+    return auditEventType.getContextId();
+  }
 
-	public Instant getAuditLogTimestamp() {
-		return auditLogRecord.getTimestamp();
-	}
+  public ErrorCode getErrorCode() {
+    return auditEventType.getErrorCode();
+  }
 
-	public String getAuditLogMessageText() {
-		return auditLogRecord.getMessageText();
-	}
-	
-	public Map<String, String> getAuditDetailsParameters() {
-		return getAuditLogMessageParameters().entrySet().stream()
-				.filter(entry -> auditParameterNames.contains(entry.getKey()))
-				.collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().toString()));
-	}
+  public Level getAuditLogLevel() {
+    return auditLogRecord.getLevel();
+  }
 
-	public ServiceAuditEvent transformMessage(Transformer messageTransformer) {
-		ServiceAuditEvent derived = new ServiceAuditEvent(this);
-		derived.auditLogRecord = derived.auditLogRecord.transformMessage(messageTransformer);
-		return derived;
-	}
-	
-	private Map<String, Object> getAuditLogMessageParameters() {
-		return auditLogRecord.getMessageParameters();
-	}
+  public Instant getAuditLogTimestamp() {
+    return auditLogRecord.getTimestamp();
+  }
+
+  public String getAuditLogMessageText() {
+    return auditLogRecord.getMessageText();
+  }
+
+  public Map<String, String> getAuditDetailsParameters() {
+    return getAuditLogMessageParameters().entrySet().stream()
+        .filter(entry -> auditParameterNames.contains(entry.getKey()))
+        .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().toString()));
+  }
+
+  public ServiceAuditEvent transformMessage(Transformer messageTransformer) {
+    ServiceAuditEvent derived = new ServiceAuditEvent(this);
+    derived.auditLogRecord = derived.auditLogRecord.transformMessage(messageTransformer);
+    return derived;
+  }
+
+  private Map<String, Object> getAuditLogMessageParameters() {
+    return auditLogRecord.getMessageParameters();
+  }
 }

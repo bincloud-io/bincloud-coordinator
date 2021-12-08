@@ -8,10 +8,10 @@ package io.bce.domain;
  * @param <E>
  */
 public interface EventPublisher<E> {
-	/**
-	 * Publish the domain event
-	 * 
-	 * @param event The domain event
-	 */
-	public void publish(E event);
+  /**
+   * Publish the domain event
+   * 
+   * @param event The domain event
+   */
+  public void publish(E event);
 }
