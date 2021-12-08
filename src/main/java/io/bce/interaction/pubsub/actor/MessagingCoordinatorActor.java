@@ -13,70 +13,70 @@ import io.bce.interaction.pubsub.actor.Publish.PublishCommand;
 import lombok.NonNull;
 
 public class MessagingCoordinatorActor extends Actor<Object> {
-	private final Subscribtions subscribtions = new Subscribtions();
-	
-	private MessagingCoordinatorActor(@NonNull Context context) {
-		super(context);
-	}
+  private final Subscribtions subscribtions = new Subscribtions();
 
-	public static final Factory<Object> factory() {
-		return MessagingCoordinatorActor::new;
-	}
+  private MessagingCoordinatorActor(@NonNull Context context) {
+    super(context);
+  }
 
-	@Override
-	protected void receive(Message<Object> message) throws Throwable {
-		message.whenIsMatchedTo(Subscribe.class, command -> {
-			command.subscribe(subscribtions);
-		});
+  public static final Factory<Object> factory() {
+    return MessagingCoordinatorActor::new;
+  }
 
-		message.whenIsMatchedTo(Unsubscribe.class, command -> {
-			command.unsubscribe(subscribtions);
-		});
+  @Override
+  protected void receive(Message<Object> message) throws Throwable {
+    message.whenIsMatchedTo(Subscribe.class, command -> {
+      command.subscribe(subscribtions);
+    });
 
-		message.whenIsMatchedTo(Publish.class, command -> {
-			command.publish(message, publishHandler());
-		});
+    message.whenIsMatchedTo(Unsubscribe.class, command -> {
+      command.unsubscribe(subscribtions);
+    });
 
-		message.whenIsMatchedTo(Shutdown.class, command -> {
-			stop(self());
-		});
-	}
+    message.whenIsMatchedTo(Publish.class, command -> {
+      command.publish(message, publishHandler());
+    });
 
-	@Override
-	protected void afterStop() {
-		subscribtions.unsubscribeAll();
-	}
+    message.whenIsMatchedTo(Shutdown.class, command -> {
+      stop(self());
+    });
+  }
 
-	private PublishCommand publishHandler() {
-		return (topic, message) -> {
-			subscribtions.getSubscribers(topic).forEach(actorAddress -> {
-				tell(message.withDestination(actorAddress));
-			});
-		};
-	}
+  @Override
+  protected void afterStop() {
+    subscribtions.unsubscribeAll();
+  }
 
-	class Subscribtions {
-		private final Map<Topic, Set<ActorAddress>> subscribtions = new HashMap<>();
+  private PublishCommand publishHandler() {
+    return (topic, message) -> {
+      subscribtions.getSubscribers(topic).forEach(actorAddress -> {
+        tell(message.withDestination(actorAddress));
+      });
+    };
+  }
 
-		public void subscribe(Topic eventType, ActorAddress actorAddress) {
-			getSubscribers(eventType).add(actorAddress);
-		}
+  class Subscribtions {
+    private final Map<Topic, Set<ActorAddress>> subscribtions = new HashMap<>();
 
-		public void unsubscribe(Topic eventType, ActorAddress actorAddress) {
-			getSubscribers(eventType).remove(actorAddress);
-			stop(actorAddress);
-		}
+    public void subscribe(Topic eventType, ActorAddress actorAddress) {
+      getSubscribers(eventType).add(actorAddress);
+    }
 
-		public void unsubscribeAll() {
-			subscribtions.entrySet().forEach(entry -> {
-				entry.getValue().forEach(value -> unsubscribe(entry.getKey(), value));
-			});
-		}
+    public void unsubscribe(Topic eventType, ActorAddress actorAddress) {
+      getSubscribers(eventType).remove(actorAddress);
+      stop(actorAddress);
+    }
 
-		public Set<ActorAddress> getSubscribers(Topic topic) {
-			Set<ActorAddress> subscribers = subscribtions.getOrDefault(topic, new HashSet<>());
-			subscribtions.put(topic, subscribers);
-			return subscribers;
-		}
-	}
+    public void unsubscribeAll() {
+      subscribtions.entrySet().forEach(entry -> {
+        entry.getValue().forEach(value -> unsubscribe(entry.getKey(), value));
+      });
+    }
+
+    public Set<ActorAddress> getSubscribers(Topic topic) {
+      Set<ActorAddress> subscribers = subscribtions.getOrDefault(topic, new HashSet<>());
+      subscribtions.put(topic, subscribers);
+      return subscribers;
+    }
+  }
 }

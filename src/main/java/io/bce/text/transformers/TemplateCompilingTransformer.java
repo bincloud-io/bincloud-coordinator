@@ -16,36 +16,36 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class TemplateCompilingTransformer implements Transformer {
-	private final TemplateCompiler compiler;
+  private final TemplateCompiler compiler;
 
-	@Override
-	public TextTemplate transform(TextTemplate sourceTemplate) {
-		String interpolated = compiler.compile(sourceTemplate.getTemplateText(), extractParameters(sourceTemplate));
-		return TextTemplates.createBy(interpolated, sourceTemplate.getParameters());
-	}
+  @Override
+  public TextTemplate transform(TextTemplate sourceTemplate) {
+    String interpolated =
+        compiler.compile(sourceTemplate.getTemplateText(), extractParameters(sourceTemplate));
+    return TextTemplates.createBy(interpolated, sourceTemplate.getParameters());
+  }
 
-	public Map<String, String> extractParameters(TextTemplate template) {
-		return template.getParameters().entrySet().stream()
-				.collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().toString()));
-	}
-	
-	/**
-	 * This interface describes the contract for template compiling. To use
-	 * a template tool for template compiling you have to create component
-	 * implementing this interface and make template compilation in the 
-	 * implemented {@link TemplateCompiler#compile(String, Map)} method
-	 * 
-	 * @author Dmitry Mikhaylenko
-	 *
-	 */
-	public interface TemplateCompiler {
-		/**
-		 * Compile the text template to string 
-		 * 
-		 * @param template The template text
-		 * @param parameters The template parameters
-		 * @return The compiled 
-		 */
-		public String compile(String template, Map<String, String> parameters);
-	}
+  public Map<String, String> extractParameters(TextTemplate template) {
+    return template.getParameters().entrySet().stream()
+        .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().toString()));
+  }
+
+  /**
+   * This interface describes the contract for template compiling. To use a template tool for
+   * template compiling you have to create component implementing this interface and make template
+   * compilation in the implemented {@link TemplateCompiler#compile(String, Map)} method
+   * 
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public interface TemplateCompiler {
+    /**
+     * Compile the text template to string
+     * 
+     * @param template The template text
+     * @param parameters The template parameters
+     * @return The compiled
+     */
+    public String compile(String template, Map<String, String> parameters);
+  }
 }

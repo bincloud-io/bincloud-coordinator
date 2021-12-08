@@ -12,34 +12,34 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Timeout {
-	private final Long amount;
-	private final TemporalUnit unit;
-	
-	public final Long getMilliseconds() {
-		return getDuration().toMillis();
-	}
-	
-	private Duration getDuration() {
-		return Duration.of(amount, unit);
-	}
+  private final Long amount;
+  private final TemporalUnit unit;
 
-	public static final Timeout ofMilliseconds(@NonNull Long amount) {
-		return new Timeout(amount, ChronoUnit.MILLIS);
-	}
+  public final Long getMilliseconds() {
+    return getDuration().toMillis();
+  }
 
-	public static final Timeout ofSeconds(@NonNull Long amount) {
-		return new Timeout(amount, ChronoUnit.SECONDS);
-	}
+  private Duration getDuration() {
+    return Duration.of(amount, unit);
+  }
 
-	public static final Timeout ofMinutes(@NonNull Long amount) {
-		return new Timeout(amount, ChronoUnit.MINUTES);
-	}
+  public static final Timeout ofMilliseconds(@NonNull Long amount) {
+    return new Timeout(amount, ChronoUnit.MILLIS);
+  }
 
-	public static final Timeout ofHours(@NonNull Long amount) {
-		return new Timeout(amount, ChronoUnit.HOURS);
-	}
+  public static final Timeout ofSeconds(@NonNull Long amount) {
+    return new Timeout(amount, ChronoUnit.SECONDS);
+  }
 
-	public static final Timeout ofDays(@NonNull Long amount) {
-		return new Timeout(amount, ChronoUnit.DAYS);
-	}
+  public static final Timeout ofMinutes(@NonNull Long amount) {
+    return new Timeout(amount, ChronoUnit.MINUTES);
+  }
+
+  public static final Timeout ofHours(@NonNull Long amount) {
+    return new Timeout(amount, ChronoUnit.HOURS);
+  }
+
+  public static final Timeout ofDays(@NonNull Long amount) {
+    return new Timeout(amount, ChronoUnit.DAYS);
+  }
 }

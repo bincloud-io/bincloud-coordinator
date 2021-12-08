@@ -8,12 +8,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class BinaryDestination implements Destination<BinaryChunk> {
-	@NonNull
-	private final BinaryChunkWriter writer;
-	
-	@Override
-	public void write(SourceConnection connection, BinaryChunk data, Integer size) {
-		writer.writeChunk(data);
-		connection.receive();
-	}
+  @NonNull
+  private final BinaryChunkWriter writer;
+
+  @Override
+  public void write(SourceConnection connection, BinaryChunk data, Integer size) {
+    writer.writeChunk(data);
+    connection.receive();
+  }
 }

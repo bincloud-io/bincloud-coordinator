@@ -12,14 +12,14 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuditEventType {
-	private final BoundedContextId contextId;
-	private final ErrorCode errorCode;
+  private final BoundedContextId contextId;
+  private final ErrorCode errorCode;
 
-	public AuditEventType(BoundedContextId contextId) {
-		this(contextId, ErrorCode.SUCCESSFUL_COMPLETED_CODE);
-	}
+  public AuditEventType(BoundedContextId contextId) {
+    this(contextId, ErrorCode.SUCCESSFUL_COMPLETED_CODE);
+  }
 
-	public AuditEventType(ErrorDescriptor errorDescriptor) {
-		this(errorDescriptor.getContextId(), errorDescriptor.getErrorCode());
-	}
+  public AuditEventType(ErrorDescriptor errorDescriptor) {
+    this(errorDescriptor.getContextId(), errorDescriptor.getErrorCode());
+  }
 }

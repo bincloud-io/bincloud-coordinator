@@ -16,13 +16,13 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public class ErrorStackTrace {
-	@NonNull
-	private final Throwable stacktraceOwner;
+  @NonNull
+  private final Throwable stacktraceOwner;
 
-	@Override
-	public String toString() {
-		StringWriter stringWriter = new StringWriter();
-		stacktraceOwner.printStackTrace(new PrintWriter(stringWriter));
-		return stringWriter.toString();
-	}
+  @Override
+  public String toString() {
+    StringWriter stringWriter = new StringWriter();
+    stacktraceOwner.printStackTrace(new PrintWriter(stringWriter));
+    return stringWriter.toString();
+  }
 }

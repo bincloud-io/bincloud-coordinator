@@ -14,45 +14,45 @@ import io.bce.validation.ValidationState.ErrorState
 import spock.lang.Specification
 
 class JSRBeanValidationServiceITSpec extends Specification {
-	private Validator validator
+  private Validator validator
 
-	def setup() {
-		ValidatorFactory validatorFactory = Validation.byDefaultProvider().configure()
-				.messageInterpolator(new ParameterMessageInterpolator())
-				.buildValidatorFactory()
-		validator = validatorFactory.getValidator()
-	}
+  def setup() {
+    ValidatorFactory validatorFactory = Validation.byDefaultProvider().configure()
+        .messageInterpolator(new ParameterMessageInterpolator())
+        .buildValidatorFactory()
+    validator = validatorFactory.getValidator()
+  }
 
-	def "Scenario: validate object with validation framework"() {
-		given: "The wrong bean"
-		WrongBean wrongBean = new WrongBean()
+  def "Scenario: validate object with validation framework"() {
+    given: "The wrong bean"
+    WrongBean wrongBean = new WrongBean()
 
-		and: "The validation service"
-		ValidationService validationService = new JSRBeanValidationService(validator)
+    and: "The validation service"
+    ValidationService validationService = new JSRBeanValidationService(validator)
 
-		when: "The validation has been requested"
-		ErrorState errorState = validationService.validate(wrongBean).getErrorState()
+    when: "The validation has been requested"
+    ErrorState errorState = validationService.validate(wrongBean).getErrorState()
 
 
-		then: "The error state should contain ungrouped error with processed text"
-		ErrorMessage ungroupedMessage = errorState.getUngroupedErrors().iterator().next();
-		ungroupedMessage.getMessage() == "Ungrouped violation constraint"
-		ungroupedMessage.getParameters().get("passedProperty") == "Ungrouped property"  
+    then: "The error state should contain ungrouped error with processed text"
+    ErrorMessage ungroupedMessage = errorState.getUngroupedErrors().iterator().next();
+    ungroupedMessage.getMessage() == "Ungrouped violation constraint"
+    ungroupedMessage.getParameters().get("passedProperty") == "Ungrouped property"
 
-		and: "The error state should"
-		ErrorMessage groupedMessage = GroupedErrors.errorsOf("stringValue", errorState).iterator().next()
-		groupedMessage.getMessage() == "Grouped violation constraint"
-		groupedMessage.getParameters().get("passedProperty") == "Grouped property"
-	}
+    and: "The error state should"
+    ErrorMessage groupedMessage = GroupedErrors.errorsOf("stringValue", errorState).iterator().next()
+    groupedMessage.getMessage() == "Grouped violation constraint"
+    groupedMessage.getParameters().get("passedProperty") == "Grouped property"
+  }
 
-	@AlwaysFailed(passedProperty="Ungrouped property", message="Ungrouped violation constraint")
-	class WrongBean {
-		@AlwaysFailed(passedProperty="Grouped property", message="Grouped violation constraint")
-		private String stringValue;
+  @AlwaysFailed(passedProperty="Ungrouped property", message="Ungrouped violation constraint")
+  class WrongBean {
+    @AlwaysFailed(passedProperty="Grouped property", message="Grouped violation constraint")
+    private String stringValue;
 
-		public WrongBean() {
-			super();
-			this.stringValue = "WRONG VALUE";
-		}
-	}
+    public WrongBean() {
+      super();
+      this.stringValue = "WRONG VALUE";
+    }
+  }
 }

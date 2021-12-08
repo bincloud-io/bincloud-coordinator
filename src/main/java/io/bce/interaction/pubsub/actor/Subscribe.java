@@ -17,10 +17,10 @@ import lombok.ToString;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public final class Subscribe {
-	private final Topic eventType;
-	private final ActorAddress actorAddress;
+  private final Topic eventType;
+  private final ActorAddress actorAddress;
 
-	void subscribe(Subscribtions subscribtions) {
-		subscribtions.subscribe(eventType, actorAddress);
-	}
+  void subscribe(Subscribtions subscribtions) {
+    subscribtions.subscribe(eventType, actorAddress);
+  }
 }

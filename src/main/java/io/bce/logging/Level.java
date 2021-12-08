@@ -4,5 +4,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum Level {
-	CRITIC, ERROR, WARN, INFO, DEBUG, TRACE;
+  CRITIC,
+  ERROR,
+  WARN,
+  INFO,
+  DEBUG,
+  TRACE;
 }

@@ -9,24 +9,26 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ExecutorBasedDeferredFunctionRunner implements DeferredFunctionRunner {
-    private final Supplier<ExecutorService> executorServiceCreator;
+  private final Supplier<ExecutorService> executorServiceCreator;
 
-    @Override
-    public <T> void executeDeferredOperation(DeferredFunction<T> deferredExecutor, Deferred<T> deferred) {
-        ExecutorService singleThreadPool = executorServiceCreator.get();
-        singleThreadPool.execute(() -> {
-            createSafeDeferredFunction(deferredExecutor).execute(deferred);
-            singleThreadPool.shutdown();
-        });
-    }
+  @Override
+  public <T> void executeDeferredOperation(DeferredFunction<T> deferredExecutor,
+      Deferred<T> deferred) {
+    ExecutorService singleThreadPool = executorServiceCreator.get();
+    singleThreadPool.execute(() -> {
+      createSafeDeferredFunction(deferredExecutor).execute(deferred);
+      singleThreadPool.shutdown();
+    });
+  }
 
-    private <T> DeferredFunction<T> createSafeDeferredFunction(DeferredFunction<T> deferredOperationExecutor) {
-        return deferred -> {
-            try {
-                deferredOperationExecutor.execute(deferred);
-            } catch (Throwable error) {
-                deferred.reject(error);
-            }
-        };
-    }
+  private <T> DeferredFunction<T> createSafeDeferredFunction(
+      DeferredFunction<T> deferredOperationExecutor) {
+    return deferred -> {
+      try {
+        deferredOperationExecutor.execute(deferred);
+      } catch (Throwable error) {
+        deferred.reject(error);
+      }
+    };
+  }
 }

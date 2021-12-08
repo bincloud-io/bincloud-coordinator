@@ -7,13 +7,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class WorkersWaiter {
-    private final CountDownLatch workersExecutionWaiterLatch;
+  private final CountDownLatch workersExecutionWaiterLatch;
 
-    public void await() {
-        try {
-            workersExecutionWaiterLatch.await();
-        } catch (InterruptedException errors) {
-            throw new MustNeverBeHappenedError(errors);
-        }
+  public void await() {
+    try {
+      workersExecutionWaiterLatch.await();
+    } catch (InterruptedException errors) {
+      throw new MustNeverBeHappenedError(errors);
     }
+  }
 }
