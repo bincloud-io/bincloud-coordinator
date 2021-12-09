@@ -25,7 +25,7 @@
 		<handlebars.version>4.2.0</handlebars.version>
 		<hibernate.validation.version>5.4.3.Final</hibernate.validation.version>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
