@@ -1,8 +1,5 @@
 package io.bce.streaming;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Destination.SourceConnection;
 import io.bce.interaction.streaming.Source;
@@ -11,8 +8,16 @@ import io.bce.interaction.streaming.Stream;
 import io.bce.interaction.streaming.Streamer;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
+import java.util.ArrayList;
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is simple streamer implementation, which is working in single thread synchronously.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class DirectStreamer implements Streamer {
   @Override
   public <T> Stream<T> createStream(Source<T> source, Destination<T> destination) {

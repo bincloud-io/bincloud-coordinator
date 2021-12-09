@@ -1,21 +1,32 @@
 package io.bce.validation;
 
+import io.bce.validation.ValidationContext.Rule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import io.bce.validation.ValidationContext.Rule;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class executes rule and returns report about rule execution completing.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ * @param <V> The validatable value type
+ */
 @RequiredArgsConstructor
 public class RuleExecutor<V> {
   private final V validatable;
   private final Supplier<Rule<V>> validationRule;
 
+  /**
+   * Execute rule.
+   *
+   * @return The rule execution report
+   */
   public RuleExecutionReport execute() {
     try {
       if (validationRule.get().isAcceptableFor(validatable)) {
@@ -29,6 +40,12 @@ public class RuleExecutor<V> {
     }
   }
 
+  /**
+   * This class keeps report information about the rule execution.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   public static final class RuleExecutionReport {
     @Getter
     private boolean acceptable;

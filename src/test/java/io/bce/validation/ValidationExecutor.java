@@ -1,12 +1,17 @@
 package io.bce.validation;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import io.bce.validation.ValidationContext.Validatable;
 import io.bce.validation.ValidationState.ErrorState;
+import java.util.Collection;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class executes validation over validatable objects.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor
 public class ValidationExecutor {
   private final Validatable validatable;
@@ -16,13 +21,19 @@ public class ValidationExecutor {
     return new ValidationReport(validationService.validate(validatable));
   }
 
+  /**
+   * This class contains information about executed validation.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
   @RequiredArgsConstructor
   public static class ValidationReport {
     private final ValidationState validationState;
 
     /**
-     * Check that the validation has been passed
-     * 
+     * Check that the validation has been passed.
+     *
      * @return True if passed and else otherwise
      */
     public boolean isPassed() {
@@ -30,8 +41,8 @@ public class ValidationExecutor {
     }
 
     /**
-     * Check that the validaion state contains specified ungrouped error messages
-     * 
+     * Check that the validaion state contains specified ungrouped error messages.
+     *
      * @param expectedMessages The expected error messages
      * @return True if validation state contains all error messages and false otherwise
      */
@@ -40,9 +51,9 @@ public class ValidationExecutor {
     }
 
     /**
-     * Check that the validaion state contains specified grouped error messages
-     * 
-     * @param group The requested validation group
+     * Check that the validaion state contains specified grouped error messages.
+     *
+     * @param group            The requested validation group
      * @param expectedMessages The expected error messages
      * @return True if validation state contains all error messages and false otherwise
      */

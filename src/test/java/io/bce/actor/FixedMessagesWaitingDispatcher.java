@@ -1,14 +1,25 @@
 package io.bce.actor;
 
-import java.util.concurrent.CountDownLatch;
-
 import io.bce.actor.EventLoop.Dispatcher;
 import io.bce.actor.EventLoop.Worker;
+import java.util.concurrent.CountDownLatch;
 
+/**
+ * This dispatcher implementation is responsible for dispatching only specified count of messages.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class FixedMessagesWaitingDispatcher implements Dispatcher {
   private final CountDownLatch latch;
   private final Dispatcher wrappedDispatcher;
 
+  /**
+   * Create the dispatcher.
+   *
+   * @param messagesCount     The messages count
+   * @param wrappedDispatcher The dispatcher which the current dispatcher wraps
+   */
   public FixedMessagesWaitingDispatcher(int messagesCount, Dispatcher wrappedDispatcher) {
     super();
     this.latch = new CountDownLatch(messagesCount);

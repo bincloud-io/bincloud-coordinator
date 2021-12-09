@@ -1,14 +1,23 @@
 package io.bce.actor;
 
-import java.util.concurrent.CountDownLatch;
-
 import io.bce.MustNeverBeHappenedError;
+import java.util.concurrent.CountDownLatch;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This class is responsible for waiting when the {@link FixedMessagesWaitingDispatcher} will
+ * dispatch all it's events.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @RequiredArgsConstructor
 public class WorkersWaiter {
   private final CountDownLatch workersExecutionWaiterLatch;
 
+  /**
+   * Wait dispatching completion.
+   */
   public void await() {
     try {
       workersExecutionWaiterLatch.await();

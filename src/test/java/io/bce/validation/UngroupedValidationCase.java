@@ -1,10 +1,15 @@
 package io.bce.validation;
 
-import java.util.Collection;
-
 import io.bce.validation.ValidationContext.Validatable;
 import io.bce.validation.ValidationExecutor.ValidationReport;
+import java.util.Collection;
 
+/**
+ * This class executes validation case for ungrouped validations.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class UngroupedValidationCase extends ValidationCase {
   public UngroupedValidationCase(Validatable validatable, ExpectedResult expectedResult,
       Collection<String> expectedMessages) {

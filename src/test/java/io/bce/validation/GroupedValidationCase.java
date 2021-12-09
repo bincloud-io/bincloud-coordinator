@@ -1,10 +1,15 @@
 package io.bce.validation;
 
-import java.util.Collection;
-
 import io.bce.validation.ValidationContext.Validatable;
 import io.bce.validation.ValidationExecutor.ValidationReport;
+import java.util.Collection;
 
+/**
+ * This class executes validation case for grouped validations.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 public class GroupedValidationCase extends ValidationCase {
   private final String group;
 
