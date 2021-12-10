@@ -38,6 +38,17 @@
 		<integration.tests.skip>true</integration.tests.skip>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>bce</id>
+			<name>BCE Repository</name>
+			<url>https://maven.pkg.github.com/bincloud-io/bce</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -156,6 +167,28 @@
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.bce</groupId>
+			<artifactId>bce</artifactId>
+			<version>0.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.bce</groupId>
+			<artifactId>bce</artifactId>
+			<version>0.1.0</version>
+			<classifier>test-kit</classifier>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.bce</groupId>
+			<artifactId>bce</artifactId>
+			<version>0.1.0</version>
+			<classifier>spock-ext</classifier>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
