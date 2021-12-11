@@ -12,13 +12,12 @@ import lombok.NoArgsConstructor;
 @ApplicationScoped
 @NoArgsConstructor
 public class JDBCLiquibaseConfigurerProducer {
-	@Resource(lookup = "java:/jdbc/BC_CENTRAL")
-	private DataSource dataSource;
-	
-	
-	@Produces
-	@JdbcLiquibase
-	public DatabaseConfigurer databaseConfigurer() {
-		return new JDBCLiquibaseConfigurer(dataSource);
-	}
+  @Resource(lookup = "java:/jdbc/BC_CENTRAL")
+  private DataSource dataSource;
+
+  @Produces
+  @JdbcLiquibase
+  public DatabaseConfigurer databaseConfigurer() {
+    return new JDBCLiquibaseConfigurer(dataSource);
+  }
 }

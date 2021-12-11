@@ -13,10 +13,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class FileMetadataView implements FileMetadata {
-    @EqualsAndHashCode.Include
-    private String storageFileName;
-    private String fileName;
-    private Long totalLength;
-    private String mediaType;
-    private Disposition contentDisposition;
+  @EqualsAndHashCode.Include
+  private String storageFileName;
+  private String fileName;
+  private Long totalLength;
+  private String mediaType;
+  private Disposition contentDisposition;
 }

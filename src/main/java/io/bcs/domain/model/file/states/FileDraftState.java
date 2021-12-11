@@ -15,33 +15,33 @@ import io.bcs.domain.model.file.states.lifecycle.LifecycleDisposeFileMethod;
 import io.bcs.domain.model.file.states.lifecycle.LifecycleUploadFileMethod;
 
 public class FileDraftState extends FileState {
-    private static final ApplicationLogger log = Loggers.applicationLogger(FileDraftState.class);
-    
-    public FileDraftState(FileEntityAccessor fileEntityAccessor) {
-        super(fileEntityAccessor);
-    }
+  private static final ApplicationLogger log = Loggers.applicationLogger(FileDraftState.class);
 
-    @Override
-    public Promise<FileContent> getContentAccess(FileStorage fileStorage,
-            Collection<ContentFragment> contentFragments) {
-        log.debug("The file content download is going to be performed from draft file");
-        throw new ContentNotUploadedException();
-    }
+  public FileDraftState(FileEntityAccessor fileEntityAccessor) {
+    super(fileEntityAccessor);
+  }
 
-    @Override
-    public Lifecycle getLifecycle(FileStorage storage) {
-        return new Lifecycle() {
-            @Override
-            public LifecycleMethod<Void> dispose() {
-                log.debug("The file dispose is going to be performed for draft file");
-                return new LifecycleDisposeFileMethod(getFileEntityAccessor(), storage);
-            }
+  @Override
+  public Promise<FileContent> getContentAccess(FileStorage fileStorage,
+      Collection<ContentFragment> contentFragments) {
+    log.debug("The file content download is going to be performed from draft file");
+    throw new ContentNotUploadedException();
+  }
 
-            @Override
-            public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
-                log.debug("The file content upload is going to be performed for draft file");
-                return new LifecycleUploadFileMethod(getFileEntityAccessor(), storage, uploader);
-            }
-        };
-    }
+  @Override
+  public Lifecycle getLifecycle(FileStorage storage) {
+    return new Lifecycle() {
+      @Override
+      public LifecycleMethod<Void> dispose() {
+        log.debug("The file dispose is going to be performed for draft file");
+        return new LifecycleDisposeFileMethod(getFileEntityAccessor(), storage);
+      }
+
+      @Override
+      public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
+        log.debug("The file content upload is going to be performed for draft file");
+        return new LifecycleUploadFileMethod(getFileEntityAccessor(), storage, uploader);
+      }
+    };
+  }
 }

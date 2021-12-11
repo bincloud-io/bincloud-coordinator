@@ -20,38 +20,39 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ContentService {
-    private static final ApplicationLogger log = Loggers.applicationLogger(ContentService.class);
+  private static final ApplicationLogger log = Loggers.applicationLogger(ContentService.class);
 
-    private final FileRepository fileRepository;
-    private final FileStorage fileStorage;
+  private final FileRepository fileRepository;
+  private final FileStorage fileStorage;
 
-    public RequestReplyUseCase<Optional<String>, Promise<FileUploadStatistic>> upload(ContentUploader uploader) {
-        return storageFileName -> Promises.of(deferred -> {
-            log.info("Use-case: Download file.");
-            File file = retrieveExistingFile(extractStorageFileName(storageFileName));
-            file.getLifecycle(fileStorage).upload(uploader).execute().chain(statistic -> {
-                fileRepository.save(file);
-                return Promises.resolvedBy(statistic);
-            }).delegate(deferred);
-        });
-    }
+  public RequestReplyUseCase<Optional<String>, Promise<FileUploadStatistic>> upload(
+      ContentUploader uploader) {
+    return storageFileName -> Promises.of(deferred -> {
+      log.info("Use-case: Download file.");
+      File file = retrieveExistingFile(extractStorageFileName(storageFileName));
+      file.getLifecycle(fileStorage).upload(uploader).execute().chain(statistic -> {
+        fileRepository.save(file);
+        return Promises.resolvedBy(statistic);
+      }).delegate(deferred);
+    });
+  }
 
-    public RequestReplyUseCase<DownloadCommand, Promise<Void>> download(ContentReceiver downloader) {
-        return command -> Promises.of(deferred -> {
-            File file = retrieveExistingFile(extractStorageFileName(command.getStorageFileName()));
-            file.downloadContent(fileStorage, downloader, command.getRanges()).delegate(deferred);
-        });
-    }
+  public RequestReplyUseCase<DownloadCommand, Promise<Void>> download(ContentReceiver downloader) {
+    return command -> Promises.of(deferred -> {
+      File file = retrieveExistingFile(extractStorageFileName(command.getStorageFileName()));
+      file.downloadContent(fileStorage, downloader, command.getRanges()).delegate(deferred);
+    });
+  }
 
-    private File retrieveExistingFile(String storageFileName) {
-        Supplier<File> fileProvider = new FileProvider(storageFileName, fileRepository, log);
-        return fileProvider.get();
-    }
+  private File retrieveExistingFile(String storageFileName) {
+    Supplier<File> fileProvider = new FileProvider(storageFileName, fileRepository, log);
+    return fileProvider.get();
+  }
 
-    private static String extractStorageFileName(Optional<String> storageFileName) {
-        return storageFileName.orElseThrow(() -> {
-            log.warn("Storage file name has not been specified");
-            return new FileNotSpecifiedException(Constants.FILE_IS_NOT_SPECIFIED);
-        });
-    }
+  private static String extractStorageFileName(Optional<String> storageFileName) {
+    return storageFileName.orElseThrow(() -> {
+      log.warn("Storage file name has not been specified");
+      return new FileNotSpecifiedException(Constants.FILE_IS_NOT_SPECIFIED);
+    });
+  }
 }

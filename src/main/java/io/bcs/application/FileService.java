@@ -20,50 +20,53 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class FileService {
-    private static final ApplicationLogger log = Loggers.applicationLogger(FileService.class);
+  private static final ApplicationLogger log = Loggers.applicationLogger(FileService.class);
 
-    private final ValidationService validationService;
-    private final FileRepository fileRepository;
-    private final FileStorage fileStorage;
+  private final ValidationService validationService;
+  private final FileRepository fileRepository;
+  private final FileStorage fileStorage;
 
-    public RequestReplyUseCase<CreateFile, Promise<String>> createFile() {
-        return command -> Promises.of(deferred -> {
-            log.info("Use-case: Create file.");
-            checkThatCommandIsValid(command);
-            File.create(fileStorage, command).chain(file -> {
-                ContentLocator locator = file.getLocator();
-                log.debug(TextTemplates.createBy("The file {{locator}} has been successfully created in the storage")
-                        .withParameter("locator", locator));
-                fileRepository.save(file);
-                return Promises.resolvedBy(locator.getStorageFileName());
-            }).delegate(deferred);
-        });
+  public RequestReplyUseCase<CreateFile, Promise<String>> createFile() {
+    return command -> Promises.of(deferred -> {
+      log.info("Use-case: Create file.");
+      checkThatCommandIsValid(command);
+      File.create(fileStorage, command).chain(file -> {
+        ContentLocator locator = file.getLocator();
+        log.debug(TextTemplates
+            .createBy("The file {{locator}} has been successfully created in the storage")
+            .withParameter("locator", locator));
+        fileRepository.save(file);
+        return Promises.resolvedBy(locator.getStorageFileName());
+      }).delegate(deferred);
+    });
+  }
+
+  public RequestReplyUseCase<String, Promise<Void>> disposeFile() {
+    return storageFileName -> Promises.of(deferred -> {
+      log.info("Use-case: Dispose file.");
+      File file = retrieveExistingFile(storageFileName);
+      file.getLifecycle(fileStorage).dispose().execute().chain(v -> {
+        log.debug(TextTemplates
+            .createBy("The file {{locator}} has been successfully disposed from the storage")
+            .withParameter("locator", file.getLocator()));
+        fileRepository.save(file);
+        return (Promise<Void>) Promises.<Void>resolvedBy(null);
+      }).delegate(deferred);
+    });
+  }
+
+  private File retrieveExistingFile(String storageFileName) {
+    Supplier<File> fileProvider = new FileProvider(storageFileName, fileRepository, log);
+    return fileProvider.get();
+  }
+
+  private <C> void checkThatCommandIsValid(C command) {
+    ValidationState validationState = validationService.validate(command);
+    if (!validationState.isValid()) {
+      log.warn(TextTemplates
+          .createBy("The {{command}} command is invalid. Validation state: {{validationState}}")
+          .withParameter("command", command).withParameter("validationState", validationState));
+      throw new PrimaryValidationException(validationState);
     }
-
-    public RequestReplyUseCase<String, Promise<Void>> disposeFile() {
-        return storageFileName -> Promises.of(deferred -> {
-            log.info("Use-case: Dispose file.");
-            File file = retrieveExistingFile(storageFileName);
-            file.getLifecycle(fileStorage).dispose().execute().chain(v -> {
-                log.debug(TextTemplates.createBy("The file {{locator}} has been successfully disposed from the storage")
-                        .withParameter("locator", file.getLocator()));
-                fileRepository.save(file);
-                return (Promise<Void>) Promises.<Void>resolvedBy(null);
-            }).delegate(deferred);
-        });
-    }
-
-    private File retrieveExistingFile(String storageFileName) {
-        Supplier<File> fileProvider = new FileProvider(storageFileName, fileRepository, log);
-        return fileProvider.get();
-    }
-
-    private <C> void checkThatCommandIsValid(C command) {
-        ValidationState validationState = validationService.validate(command);
-        if (!validationState.isValid()) {
-            log.warn(TextTemplates.createBy("The {{command}} command is invalid. Validation state: {{validationState}}")
-                    .withParameter("command", command).withParameter("validationState", validationState));
-            throw new PrimaryValidationException(validationState);
-        }
-    }
+  }
 }

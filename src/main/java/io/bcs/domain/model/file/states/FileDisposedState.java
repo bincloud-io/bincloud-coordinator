@@ -14,33 +14,33 @@ import io.bcs.domain.model.file.Lifecycle;
 import io.bcs.domain.model.file.states.lifecycle.InacceptableLifecycleMethod;
 
 public class FileDisposedState extends FileState {
-    private static final ApplicationLogger log = Loggers.applicationLogger(FileDisposedState.class);
-    
-    public FileDisposedState(FileEntityAccessor fileEntityAccessor) {
-        super(fileEntityAccessor);
-    }
+  private static final ApplicationLogger log = Loggers.applicationLogger(FileDisposedState.class);
 
-    @Override
-    public Promise<FileContent> getContentAccess(FileStorage fileStorage,
-            Collection<ContentFragment> contentFragments) {
-        log.debug("The file content download is going to be performed from disposed file");
-        throw new FileDisposedException();
-    }
+  public FileDisposedState(FileEntityAccessor fileEntityAccessor) {
+    super(fileEntityAccessor);
+  }
 
-    @Override
-    public Lifecycle getLifecycle(FileStorage storage) {
-        return new Lifecycle() {
-            @Override
-            public LifecycleMethod<Void> dispose() {
-                log.debug("The file dispose is going to be performed for disposed file");
-                return new InacceptableLifecycleMethod<>(FileDisposedException::new);
-            }
+  @Override
+  public Promise<FileContent> getContentAccess(FileStorage fileStorage,
+      Collection<ContentFragment> contentFragments) {
+    log.debug("The file content download is going to be performed from disposed file");
+    throw new FileDisposedException();
+  }
 
-            @Override
-            public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
-                log.debug("The file content upload is going to be performed for disposed file");
-                return new InacceptableLifecycleMethod<>(FileDisposedException::new);
-            }
-        };
-    }
+  @Override
+  public Lifecycle getLifecycle(FileStorage storage) {
+    return new Lifecycle() {
+      @Override
+      public LifecycleMethod<Void> dispose() {
+        log.debug("The file dispose is going to be performed for disposed file");
+        return new InacceptableLifecycleMethod<>(FileDisposedException::new);
+      }
+
+      @Override
+      public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
+        log.debug("The file content upload is going to be performed for disposed file");
+        return new InacceptableLifecycleMethod<>(FileDisposedException::new);
+      }
+    };
+  }
 }

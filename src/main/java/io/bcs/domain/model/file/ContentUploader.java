@@ -6,5 +6,6 @@ import io.bce.promises.Promise;
 import io.bcs.domain.model.file.Lifecycle.FileUploadStatistic;
 
 public interface ContentUploader {
-    public Promise<FileUploadStatistic> upload(ContentLocator locator, Destination<BinaryChunk> destination);
+  public Promise<FileUploadStatistic> upload(ContentLocator locator,
+      Destination<BinaryChunk> destination);
 }

@@ -1,15 +1,16 @@
 package io.bcs.domain.model.file;
 
 public interface FileMetadata {
-    public String getMediaType();
+  public String getMediaType();
 
-    public String getFileName();
+  public String getFileName();
 
-    public Long getTotalLength();
+  public Long getTotalLength();
 
-    public Disposition getContentDisposition();
+  public Disposition getContentDisposition();
 
-    public enum Disposition {
-        INLINE, ATTACHMENT;
-    }
+  public enum Disposition {
+    INLINE,
+    ATTACHMENT;
+  }
 }

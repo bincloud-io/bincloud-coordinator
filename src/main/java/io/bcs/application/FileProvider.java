@@ -12,16 +12,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FileProvider implements Supplier<File> {
 
-    private final String storageFileName;
-    private final FileRepository fileRepository;
-    private final ApplicationLogger logger;
+  private final String storageFileName;
+  private final FileRepository fileRepository;
+  private final ApplicationLogger logger;
 
-    @Override
-    public File get() {
-        return fileRepository.findById(storageFileName).orElseThrow(() -> {
-            logger.warn(TextTemplates.createBy("The file with {{storageFileName}} hasn't been found.")
-                    .withParameter("storageFileName", storageFileName));
-            return new FileNotExistsException();
-        });
-    }
+  @Override
+  public File get() {
+    return fileRepository.findById(storageFileName).orElseThrow(() -> {
+      logger.warn(TextTemplates.createBy("The file with {{storageFileName}} hasn't been found.")
+          .withParameter("storageFileName", storageFileName));
+      return new FileNotExistsException();
+    });
+  }
 }

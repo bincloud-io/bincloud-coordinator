@@ -17,22 +17,25 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class LifecycleUploadFileMethod implements LifecycleMethod<FileUploadStatistic> {
-    private static final ApplicationLogger log = Loggers.applicationLogger(LifecycleUploadFileMethod.class);
-    private final FileEntityAccessor entityAccessor;
-    private final FileStorage storage;
-    private final ContentUploader uploader;
+  private static final ApplicationLogger log =
+      Loggers.applicationLogger(LifecycleUploadFileMethod.class);
+  private final FileEntityAccessor entityAccessor;
+  private final FileStorage storage;
+  private final ContentUploader uploader;
 
-    @Override
-    public Promise<FileUploadStatistic> execute() {
-        return Promises.of(deferred -> {
-            ContentLocator locator = entityAccessor.getLocator();
-            log.info(TextTemplates.createBy("Upload file content to {{locator}}").withParameter("locator", locator));
-            Destination<BinaryChunk> destination = storage.getAccessOnWrite(locator);
-            uploader.upload(entityAccessor.getLocator(), destination).then(statistic -> {
-                log.debug(TextTemplates.createBy("File content has been successfully written to {{locator}}")
-                        .withParameter("locator", locator));
-                entityAccessor.startFileDistribution(statistic.getTotalLength());
-            }).delegate(deferred);
-        });
-    }
+  @Override
+  public Promise<FileUploadStatistic> execute() {
+    return Promises.of(deferred -> {
+      ContentLocator locator = entityAccessor.getLocator();
+      log.info(TextTemplates.createBy("Upload file content to {{locator}}").withParameter("locator",
+          locator));
+      Destination<BinaryChunk> destination = storage.getAccessOnWrite(locator);
+      uploader.upload(entityAccessor.getLocator(), destination).then(statistic -> {
+        log.debug(
+            TextTemplates.createBy("File content has been successfully written to {{locator}}")
+                .withParameter("locator", locator));
+        entityAccessor.startFileDistribution(statistic.getTotalLength());
+      }).delegate(deferred);
+    });
+  }
 }

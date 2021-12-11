@@ -11,21 +11,20 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class InacceptableLifecycleMethod<R> implements LifecycleMethod<R> {
-    private static final ApplicationLogger log = Loggers.applicationLogger(InacceptableLifecycleMethod.class);
+  private static final ApplicationLogger log =
+      Loggers.applicationLogger(InacceptableLifecycleMethod.class);
 
-    private final ExceptionProvider exceptionProvider;
+  private final ExceptionProvider exceptionProvider;
 
-    @Override
-    public Promise<R> execute() {
-        ApplicationException error = exceptionProvider.createException();
-        log.warn(TextTemplates
-                .createBy("The operation is inacceptable. Operation is going "
-                        + "to be completed with {{error}} error")
-                .withParameter("error", error));
-        return Promises.rejectedBy(error);
-    }
+  @Override
+  public Promise<R> execute() {
+    ApplicationException error = exceptionProvider.createException();
+    log.warn(TextTemplates.createBy("The operation is inacceptable. Operation is going "
+        + "to be completed with {{error}} error").withParameter("error", error));
+    return Promises.rejectedBy(error);
+  }
 
-    public interface ExceptionProvider {
-        public ApplicationException createException();
-    }
+  public interface ExceptionProvider {
+    public ApplicationException createException();
+  }
 }

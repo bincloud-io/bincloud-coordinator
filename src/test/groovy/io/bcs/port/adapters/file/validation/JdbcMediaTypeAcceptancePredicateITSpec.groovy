@@ -25,53 +25,53 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JdbcMediaTypeAcceptancePredicateITSpec extends Specification {
-    private static final String MIGRATION_SCRIPT ="db-init/file/ref.mediatype.changelog.xml"
-    private static final String EXISTING_MEDIATYPE = "application/well-mediatype"
-    private static final String MISSING_MEDIATYPE = "application/bad-mediatype"
-    
-    @Deployment
-    public static Archive "create deployment"() {
-        return ArchiveBuilder.jar("jdbc-media-type-acceptance-predicate-spec.jar")
-                .resolveDependencies("pom.xml")
-                .withScopes(COMPILE, RUNTIME, TEST)
-                .resolveDependency("org.liquibase", "liquibase-core")
-                .resolveDependency("org.openclover", "clover")
-                .apply()
-                .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
-                .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
-                .appendClasses(JdbcMediaTypeAcceptancePredicate, DictionaryValidation, DictionaryPredicate)
-                .appendResource("liquibase")
-                .appendResource("db-init")
-                .appendManifestResource("META-INF/beans.xml", "beans.xml")
-                .build()
-    }
+  private static final String MIGRATION_SCRIPT ="db-init/file/ref.mediatype.changelog.xml"
+  private static final String EXISTING_MEDIATYPE = "application/well-mediatype"
+  private static final String MISSING_MEDIATYPE = "application/bad-mediatype"
 
-    @Inject
-    @JdbcLiquibase
-    private DatabaseConfigurer databaseConfigurer;
+  @Deployment
+  public static Archive "create deployment"() {
+    return ArchiveBuilder.jar("jdbc-media-type-acceptance-predicate-spec.jar")
+        .resolveDependencies("pom.xml")
+        .withScopes(COMPILE, RUNTIME, TEST)
+        .resolveDependency("org.liquibase", "liquibase-core")
+        .resolveDependency("org.openclover", "clover")
+        .apply()
+        .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
+        .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
+        .appendClasses(JdbcMediaTypeAcceptancePredicate, DictionaryValidation, DictionaryPredicate)
+        .appendResource("liquibase")
+        .appendResource("db-init")
+        .appendManifestResource("META-INF/beans.xml", "beans.xml")
+        .build()
+  }
 
-    @Resource(lookup="java:/jdbc/BC_CENTRAL")
-    private DataSource dataSource;
+  @Inject
+  @JdbcLiquibase
+  private DatabaseConfigurer databaseConfigurer;
 
-    private JdbcMediaTypeAcceptancePredicate predicate
-    
-    def setup() {
-        databaseConfigurer.setup("liquibase/master.changelog.xml")
-        databaseConfigurer.setup(MIGRATION_SCRIPT)
-        this.predicate = new JdbcMediaTypeAcceptancePredicate(dataSource)
-    }
+  @Resource(lookup="java:/jdbc/BC_CENTRAL")
+  private DataSource dataSource;
 
-    def "Scenario: check existing mediatype"() {        
-        expect: "The predicate should pass existing mediatype"
-        predicate.isSatisfiedBy(EXISTING_MEDIATYPE) == true        
-    }
+  private JdbcMediaTypeAcceptancePredicate predicate
 
-    def "Scenario: check missing mediatype"() {
-        expect: "The predicate should fail missing mediatype"
-        predicate.isSatisfiedBy(MISSING_MEDIATYPE) == false        
-    }
-    
-    def cleanup() {
-        databaseConfigurer.tearDown();
-    }
+  def setup() {
+    databaseConfigurer.setup("liquibase/master.changelog.xml")
+    databaseConfigurer.setup(MIGRATION_SCRIPT)
+    this.predicate = new JdbcMediaTypeAcceptancePredicate(dataSource)
+  }
+
+  def "Scenario: check existing mediatype"() {
+    expect: "The predicate should pass existing mediatype"
+    predicate.isSatisfiedBy(EXISTING_MEDIATYPE) == true
+  }
+
+  def "Scenario: check missing mediatype"() {
+    expect: "The predicate should fail missing mediatype"
+    predicate.isSatisfiedBy(MISSING_MEDIATYPE) == false
+  }
+
+  def cleanup() {
+    databaseConfigurer.tearDown();
+  }
 }

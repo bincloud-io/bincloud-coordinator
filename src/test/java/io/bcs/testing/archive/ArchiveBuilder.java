@@ -23,201 +23,209 @@ import org.jboss.shrinkwrap.resolver.api.maven.PomEquippedResolveStage;
 import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
 
 public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuilder<A, B>> {
-	protected A archive;
+  protected A archive;
 
-	private ArchiveBuilder(Class<A> archiveType, String archiveName) {
-		super();
-		this.archive = ShrinkWrap.create(archiveType, archiveName);
-	}
+  private ArchiveBuilder(Class<A> archiveType, String archiveName) {
+    super();
+    this.archive = ShrinkWrap.create(archiveType, archiveName);
+  }
 
-	public DependencyResolver resolveDependencies(String pomFile) {
-		return new DependencyResolver(pomFile);
-	}
+  public DependencyResolver resolveDependencies(String pomFile) {
+    return new DependencyResolver(pomFile);
+  }
 
-	public B appendLibraries(Archive<?>... libraryArchives) {
-		this.archive = this.appendLibrariesToArchive(libraryArchives);
-		return self();
-	}
+  public B appendLibraries(Archive<?>... libraryArchives) {
+    this.archive = this.appendLibrariesToArchive(libraryArchives);
+    return self();
+  }
 
-	public abstract A build();
+  public abstract A build();
 
-	@SuppressWarnings("unchecked")
-	protected B self() {
-		return (B) this;
-	}
+  @SuppressWarnings("unchecked")
+  protected B self() {
+    return (B) this;
+  }
 
-	protected abstract A appendLibrariesToArchive(Archive<?>... archives);
+  protected abstract A appendLibrariesToArchive(Archive<?>... archives);
 
-	public class DependencyResolver {
-		private PomEquippedResolveStage resolver;
-		private Set<String> profiles = new HashSet<>();
-		private Set<ScopeType> scopes = new HashSet<ScopeType>();
-		private Set<Archive<?>> resolved = new HashSet<Archive<?>>();
+  public class DependencyResolver {
+    private PomEquippedResolveStage resolver;
+    private Set<String> profiles = new HashSet<>();
+    private Set<ScopeType> scopes = new HashSet<ScopeType>();
+    private Set<Archive<?>> resolved = new HashSet<Archive<?>>();
 
-		public DependencyResolver(String pomFile) {
-			super();
-			this.resolver = loadPomFile(pomFile);
-		}
+    public DependencyResolver(String pomFile) {
+      super();
+      this.resolver = loadPomFile(pomFile);
+    }
 
-		public DependencyResolver withProfile(String profile) {
-			this.profiles.add(profile);
-			return this;
-		}
+    public DependencyResolver withProfile(String profile) {
+      this.profiles.add(profile);
+      return this;
+    }
 
-		public DependencyResolver withScopes(ScopeType... scopes) {
-			this.scopes.addAll(Arrays.asList(scopes));
-			return this;
-		}
+    public DependencyResolver withScopes(ScopeType... scopes) {
+      this.scopes.addAll(Arrays.asList(scopes));
+      return this;
+    }
 
-		public B resolveAll() {
-			this.resolved.addAll(resolveDependencies(() -> resolver.importRuntimeAndTestDependencies().resolve()));
-			return apply();
-		}
-		
-		public DependencyResolver resolveDependency(String group, String artifact) {
-			this.resolved.addAll(resolveDependencies(() -> resolver.resolve(String.format("%s:%s", group, artifact))));
-			return this;
-		}
+    public B resolveAll() {
+      this.resolved
+          .addAll(resolveDependencies(() -> resolver.importRuntimeAndTestDependencies().resolve()));
+      return apply();
+    }
 
-		private Collection<Archive<?>> resolveDependencies(Supplier<MavenStrategyStage> resolveFunction) {
-			try {
-				return Arrays.stream(resolveFunction.get().withTransitivity().asFile())
-						.map(archiveFile -> ShrinkWrap.create(ZipImporter.class, archiveFile.getName())
-								.importFrom(archiveFile).as(GenericArchive.class))
-						.collect(Collectors.toList());
-			} catch (Exception e) {
-				return Collections.emptyList();
-			}
-		}
+    public DependencyResolver resolveDependency(String group, String artifact) {
+      this.resolved.addAll(
+          resolveDependencies(() -> resolver.resolve(String.format("%s:%s", group, artifact))));
+      return this;
+    }
 
-		public B apply() {
-			appendLibrariesToArchive(resolved.toArray(new Archive<?>[resolved.size()]));
-			return self();
-		}
+    private Collection<Archive<?>> resolveDependencies(
+        Supplier<MavenStrategyStage> resolveFunction) {
+      try {
+        return Arrays.stream(resolveFunction.get().withTransitivity().asFile())
+            .map(archiveFile -> ShrinkWrap.create(ZipImporter.class, archiveFile.getName())
+                .importFrom(archiveFile).as(GenericArchive.class))
+            .collect(Collectors.toList());
+      } catch (Exception e) {
+        return Collections.emptyList();
+      }
+    }
 
-		private PomEquippedResolveStage loadPomFile(String pomFileLocation) {
-			PomEquippedResolveStage result = createDependencyLoader(pomFileLocation);
-			if (!scopes.isEmpty()) {
-				return result.importDependencies(scopes.toArray(new ScopeType[scopes.size()]));
-			}
-			return result;
-		}
+    public B apply() {
+      appendLibrariesToArchive(resolved.toArray(new Archive<?>[resolved.size()]));
+      return self();
+    }
 
-		private PomEquippedResolveStage createDependencyLoader(String pomFileLocation) {
-			return Maven.resolver().loadPomFromFile(pomFileLocation, profiles.toArray(new String[profiles.size()]));
-		}
+    private PomEquippedResolveStage loadPomFile(String pomFileLocation) {
+      PomEquippedResolveStage result = createDependencyLoader(pomFileLocation);
+      if (!scopes.isEmpty()) {
+        return result.importDependencies(scopes.toArray(new ScopeType[scopes.size()]));
+      }
+      return result;
+    }
 
-	}
+    private PomEquippedResolveStage createDependencyLoader(String pomFileLocation) {
+      return Maven.resolver().loadPomFromFile(pomFileLocation,
+          profiles.toArray(new String[profiles.size()]));
+    }
 
-	public static abstract class ClassContainingArchiveBuilder<A extends Archive<A> & ClassContainer<A> & ManifestContainer<A>, B extends ArchiveBuilder<A, B>>
-			extends ArchiveBuilder<A, B> {
+  }
 
-		protected ClassContainingArchiveBuilder(Class<A> archiveType, String archiveName) {
-			super(archiveType, archiveName);
-		}
+  public static abstract class ClassContainingArchiveBuilder<
+      A extends Archive<A> & ClassContainer<A> & ManifestContainer<A>,
+      B extends ArchiveBuilder<A, B>> extends ArchiveBuilder<A, B> {
 
-		public B appendClasses(Class<?>... appendedClasses) {
-			this.archive = this.archive.addClasses(appendedClasses);
-			return self();
-		}
+    protected ClassContainingArchiveBuilder(Class<A> archiveType, String archiveName) {
+      super(archiveType, archiveName);
+    }
 
-		public B appendPackagesRecursively(String... appendedPackages) {
-			this.archive = this.archive.addPackages(true, appendedPackages);
-			return self();
-		}
+    public B appendClasses(Class<?>... appendedClasses) {
+      this.archive = this.archive.addClasses(appendedClasses);
+      return self();
+    }
 
-		public B appendPackageNonRecursively(String... appendedPackages) {
-			this.archive = this.archive.addPackages(false, appendedPackages);
-			return self();
-		}
+    public B appendPackagesRecursively(String... appendedPackages) {
+      this.archive = this.archive.addPackages(true, appendedPackages);
+      return self();
+    }
 
-		public B appendResource(String resourcePath) {
-			this.archive = this.archive.addAsResource(resourcePath, resourcePath);
-			return self();
-		}
+    public B appendPackageNonRecursively(String... appendedPackages) {
+      this.archive = this.archive.addPackages(false, appendedPackages);
+      return self();
+    }
 
-		public B appendResource(String resourcePath, String targetPath) {
-			this.archive = this.archive.addAsResource(resourcePath, targetPath);
-			return self();
-		}
-		
-		public B appendManifestResource(String resourcePath, String targetPath) {
-			this.archive = this.archive.addAsManifestResource(resourcePath, targetPath);
-			return self();
-		}
-	}
+    public B appendResource(String resourcePath) {
+      this.archive = this.archive.addAsResource(resourcePath, resourcePath);
+      return self();
+    }
 
-	public static final class JarArchiveBuilder extends ClassContainingArchiveBuilder<JavaArchive, JarArchiveBuilder> {
-		private JarArchiveBuilder(String archiveName) {
-			super(JavaArchive.class, archiveName);
-		}
+    public B appendResource(String resourcePath, String targetPath) {
+      this.archive = this.archive.addAsResource(resourcePath, targetPath);
+      return self();
+    }
 
-		@Override
-		protected JavaArchive appendLibrariesToArchive(Archive<?>... archives) {
-			JavaArchive result = this.archive;
-			for (Archive<?> archive : archives) {
-				result = result.merge(archive);
-			}
-			return result.as(JavaArchive.class).addManifest();
-		}
+    public B appendManifestResource(String resourcePath, String targetPath) {
+      this.archive = this.archive.addAsManifestResource(resourcePath, targetPath);
+      return self();
+    }
+  }
 
-		@Override
-		public JavaArchive build() {
-			return archive.as(JavaArchive.class);
-		}
-	}
+  public static final class JarArchiveBuilder
+      extends ClassContainingArchiveBuilder<JavaArchive, JarArchiveBuilder> {
+    private JarArchiveBuilder(String archiveName) {
+      super(JavaArchive.class, archiveName);
+    }
 
-	public static final class WarArchiveBuilder extends ClassContainingArchiveBuilder<WebArchive, WarArchiveBuilder> {
-		private WarArchiveBuilder(String archiveName) {
-			super(WebArchive.class, archiveName);
-		}
+    @Override
+    protected JavaArchive appendLibrariesToArchive(Archive<?>... archives) {
+      JavaArchive result = this.archive;
+      for (Archive<?> archive : archives) {
+        result = result.merge(archive);
+      }
+      return result.as(JavaArchive.class).addManifest();
+    }
 
-		public WarArchiveBuilder appendWebResource(String resourcePath, String targetPath) {
-			this.archive = this.archive.addAsWebInfResource(resourcePath, targetPath);
-			return self();
-		}
+    @Override
+    public JavaArchive build() {
+      return archive.as(JavaArchive.class);
+    }
+  }
 
-		@Override
-		protected WebArchive appendLibrariesToArchive(Archive<?>... archives) {
-			return this.archive.addAsLibraries(archives);
-		}
+  public static final class WarArchiveBuilder
+      extends ClassContainingArchiveBuilder<WebArchive, WarArchiveBuilder> {
+    private WarArchiveBuilder(String archiveName) {
+      super(WebArchive.class, archiveName);
+    }
 
-		@Override
-		public WebArchive build() {
-			return archive.as(WebArchive.class);
-		}
-	}
+    public WarArchiveBuilder appendWebResource(String resourcePath, String targetPath) {
+      this.archive = this.archive.addAsWebInfResource(resourcePath, targetPath);
+      return self();
+    }
 
-	public static final class EarArchiveBuilder extends ArchiveBuilder<EnterpriseArchive, EarArchiveBuilder> {
-		private EarArchiveBuilder(String archiveName) {
-			super(EnterpriseArchive.class, archiveName);
-		}
+    @Override
+    protected WebArchive appendLibrariesToArchive(Archive<?>... archives) {
+      return this.archive.addAsLibraries(archives);
+    }
 
-		public EarArchiveBuilder appendModule(Archive<?> moduleArchive) {
-			this.archive = this.archive.addAsModule(moduleArchive);
-			return self();
-		}
+    @Override
+    public WebArchive build() {
+      return archive.as(WebArchive.class);
+    }
+  }
 
-		@Override
-		protected EnterpriseArchive appendLibrariesToArchive(Archive<?>... archives) {
-			return this.archive.addAsLibraries(archives);
-		}
+  public static final class EarArchiveBuilder
+      extends ArchiveBuilder<EnterpriseArchive, EarArchiveBuilder> {
+    private EarArchiveBuilder(String archiveName) {
+      super(EnterpriseArchive.class, archiveName);
+    }
 
-		@Override
-		public EnterpriseArchive build() {
-			return archive.as(EnterpriseArchive.class);
-		}
-	}
+    public EarArchiveBuilder appendModule(Archive<?> moduleArchive) {
+      this.archive = this.archive.addAsModule(moduleArchive);
+      return self();
+    }
 
-	public static final JarArchiveBuilder jar(String archiveName) {
-		return new JarArchiveBuilder(archiveName);
-	}
+    @Override
+    protected EnterpriseArchive appendLibrariesToArchive(Archive<?>... archives) {
+      return this.archive.addAsLibraries(archives);
+    }
 
-	public static final WarArchiveBuilder war(String archiveName) {
-		return new WarArchiveBuilder(archiveName);
-	}
+    @Override
+    public EnterpriseArchive build() {
+      return archive.as(EnterpriseArchive.class);
+    }
+  }
 
-	public static final EarArchiveBuilder ear(String archiveName) {
-		return new EarArchiveBuilder(archiveName);
-	}
+  public static final JarArchiveBuilder jar(String archiveName) {
+    return new JarArchiveBuilder(archiveName);
+  }
+
+  public static final WarArchiveBuilder war(String archiveName) {
+    return new WarArchiveBuilder(archiveName);
+  }
+
+  public static final EarArchiveBuilder ear(String archiveName) {
+    return new EarArchiveBuilder(archiveName);
+  }
 }

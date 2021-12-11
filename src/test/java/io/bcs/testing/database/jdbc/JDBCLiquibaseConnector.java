@@ -11,13 +11,13 @@ import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
 public class JDBCLiquibaseConnector implements Supplier<DatabaseConnection> {
-	private final DataSource dataSource;
-	
-	@Override
-	@SneakyThrows
-	public DatabaseConnection get() {
-		JdbcConnection connection = new JdbcConnection(dataSource.getConnection());
-		connection.setAutoCommit(true);
-		return connection;
-	}
+  private final DataSource dataSource;
+
+  @Override
+  @SneakyThrows
+  public DatabaseConnection get() {
+    JdbcConnection connection = new JdbcConnection(dataSource.getConnection());
+    connection.setAutoCommit(true);
+    return connection;
+  }
 }

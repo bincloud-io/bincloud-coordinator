@@ -13,19 +13,21 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class LifecycleDisposeFileMethod implements LifecycleMethod<Void> {
-    private static final ApplicationLogger log = Loggers.applicationLogger(LifecycleDisposeFileMethod.class);
+  private static final ApplicationLogger log =
+      Loggers.applicationLogger(LifecycleDisposeFileMethod.class);
 
-    private final FileEntityAccessor entityAccessor;
-    private final FileStorage storage;
+  private final FileEntityAccessor entityAccessor;
+  private final FileStorage storage;
 
-    @Override
-    public Promise<Void> execute() {
-        return Promises.of(deferred -> {
-            ContentLocator locator = entityAccessor.getLocator();
-            log.info(TextTemplates.createBy("Dispose file {{locator}}").withParameter("locator", locator));
-            storage.delete(locator);
-            entityAccessor.dispose();
-            deferred.resolve(null);
-        });
-    }
+  @Override
+  public Promise<Void> execute() {
+    return Promises.of(deferred -> {
+      ContentLocator locator = entityAccessor.getLocator();
+      log.info(
+          TextTemplates.createBy("Dispose file {{locator}}").withParameter("locator", locator));
+      storage.delete(locator);
+      entityAccessor.dispose();
+      deferred.resolve(null);
+    });
+  }
 }

@@ -12,15 +12,15 @@ import javax.inject.Inject;
 
 @ApplicationScoped
 public class LoggingConfiguration {
-    @Inject
-    private TextProcessor textProcessor;
+  @Inject
+  private TextProcessor textProcessor;
 
-    @Produces
-    public ApplicationLogger applicationLogger() {
-        return new JulLogger(textProcessor);
-    }
+  @Produces
+  public ApplicationLogger applicationLogger() {
+    return new JulLogger(textProcessor);
+  }
 
-    public void initializeLogger(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        Loggers.registry().registerApplicationLogger(applicationLogger());
-    }
+  public void initializeLogger(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    Loggers.registry().registerApplicationLogger(applicationLogger());
+  }
 }

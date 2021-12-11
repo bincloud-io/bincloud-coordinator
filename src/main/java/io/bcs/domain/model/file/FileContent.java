@@ -6,19 +6,21 @@ import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 
 public interface FileContent {
-    public ContentType getType();
+  public ContentType getType();
 
-    public ContentLocator getLocator();
+  public ContentLocator getLocator();
 
-    public Collection<ContentPart> getParts();
+  public Collection<ContentPart> getParts();
 
-    public interface ContentPart {
-        public ContentFragment getContentFragment();
+  public interface ContentPart {
+    public ContentFragment getContentFragment();
 
-        public Source<BinaryChunk> getContentSource();
-    }
+    public Source<BinaryChunk> getContentSource();
+  }
 
-    public enum ContentType {
-        FULL, RANGE, MULTIRANGE;
-    }
+  public enum ContentType {
+    FULL,
+    RANGE,
+    MULTIRANGE;
+  }
 }

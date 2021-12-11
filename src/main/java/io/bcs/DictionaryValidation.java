@@ -12,21 +12,21 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class DictionaryValidation<T> implements Validatable {
-    private final String ruleAlias;
-    @Getter(value = AccessLevel.PRIVATE)
-    private final T validatableValue;
+  private final String ruleAlias;
+  @Getter(value = AccessLevel.PRIVATE)
+  private final T validatableValue;
 
-    protected static <V> Rule<V> createGlobalRule(Class<V> valueType, ErrorMessage errorMessage,
-            DictionaryPredicate<V> predicate) {
-        return Rules.match(valueType, errorMessage, predicate::isSatisfiedBy);
-    }
+  protected static <V> Rule<V> createGlobalRule(Class<V> valueType, ErrorMessage errorMessage,
+      DictionaryPredicate<V> predicate) {
+    return Rules.match(valueType, errorMessage, predicate::isSatisfiedBy);
+  }
 
-    @Override
-    public final ValidationContext validate(ValidationContext context) {
-        return context.withRule(this::getValidatableValue, GlobalValidations.getRule(ruleAlias));
-    }
+  @Override
+  public final ValidationContext validate(ValidationContext context) {
+    return context.withRule(this::getValidatableValue, GlobalValidations.getRule(ruleAlias));
+  }
 
-    public interface DictionaryPredicate<V> {
-        boolean isSatisfiedBy(V value);
-    }
+  public interface DictionaryPredicate<V> {
+    boolean isSatisfiedBy(V value);
+  }
 }
