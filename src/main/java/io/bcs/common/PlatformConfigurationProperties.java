@@ -6,6 +6,6 @@ package io.bcs.common;
  * @author Dmitry Mikhaylenko
  *
  */
-public interface PlatformConfiguration {
+public interface PlatformConfigurationProperties {
   public String getInstanceId();
 }

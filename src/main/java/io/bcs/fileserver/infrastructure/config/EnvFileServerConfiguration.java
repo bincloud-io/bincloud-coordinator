@@ -1,17 +1,19 @@
-package io.bcs;
+package io.bcs.fileserver.infrastructure.config;
 
-import io.bcs.common.PlatformConfiguration;
-import io.bcs.fileserver.infrastructure.ContentLoadingProperties;
-import io.bcs.fileserver.infrastructure.FilesManagementProperties;
-import io.bcs.fileserver.infrastructure.TimeoutProperties;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import javax.enterprise.context.ApplicationScoped;
 
+/**
+ * This class provides file server configuration properties.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @ApplicationScoped
-public class EnvironmentVariablesConfiguration implements FilesManagementProperties,
-    ContentLoadingProperties, PlatformConfiguration, TimeoutProperties {
+public class EnvFileServerConfiguration implements FileServerConfigurationProperties {
   private static final String BUFFER_SIZE_VAR = "BC_IO_BUFFER_SIZE";
   private static final String CONTENT_FOLDER_VAR = "BC_CONTENT_FOLDER";
-  private static final String INSTANCE_ID_VAR = "BC_INSTANCE";
+
   private static final String BASE_URL_VAR = "BC_BASE_URL";
 
   @Override
@@ -32,11 +34,6 @@ public class EnvironmentVariablesConfiguration implements FilesManagementPropert
   @Override
   public String getBaseDirectory() {
     return System.getenv(CONTENT_FOLDER_VAR);
-  }
-
-  @Override
-  public String getInstanceId() {
-    return System.getenv(INSTANCE_ID_VAR);
   }
 
   @Override

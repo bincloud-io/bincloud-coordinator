@@ -20,7 +20,7 @@ import io.bcs.fileserver.domain.model.file.content.ContentManagement;
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
-import io.bcs.fileserver.infrastructure.ContentLoadingProperties;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
 import io.bcs.fileserver.infrastructure.file.content.HttpDownloadCommand;
@@ -63,7 +63,7 @@ public class ContentLoadingServlet extends HttpServlet {
   private ContentManagement contentService;
 
   @Inject
-  private ContentLoadingProperties contentLoadingProperties;
+  private FileServerConfigurationProperties contentLoadingProperties;
 
   @Inject
   private FileMetadataProvider metadataProvider;

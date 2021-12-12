@@ -8,8 +8,7 @@ import io.bcs.fileserver.Constants;
 import io.bcs.fileserver.acl.SafeCreateFileCommand;
 import io.bcs.fileserver.domain.model.file.File.CreateFile;
 import io.bcs.fileserver.domain.model.file.FileManagement;
-import io.bcs.fileserver.infrastructure.FilesManagementProperties;
-import io.bcs.fileserver.infrastructure.TimeoutProperties;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.port.adapter.file.CreateFileRqType;
 import io.bcs.port.adapter.file.CreateFileRsType;
 import io.bcs.port.adapter.file.DisposeFileRqType;
@@ -40,10 +39,7 @@ public class SoapFileServiceEndpoint implements WSFileService {
   private FileManagement fileService;
 
   @Inject
-  private TimeoutProperties timeoutProperties;
-
-  @Inject
-  private FilesManagementProperties filesManagementProperties;
+  private FileServerConfigurationProperties fileserverConfig;
 
   @Override
   public CreateFileRsType createFile(CreateFileRqType parameters) throws CreateFileFault {
@@ -54,7 +50,7 @@ public class SoapFileServiceEndpoint implements WSFileService {
       Promise<String> result = fileService.createFile(createCommand);
       response.setBoundedContext(Constants.CONTEXT.toString());
       response.setFileReference(
-          getFileReference(result.get(timeoutProperties.getSyncOperationTimeout())));
+          getFileReference(result.get(fileserverConfig.getSyncOperationTimeout())));
       return response;
     } catch (Exception error) {
       log.error(error);
@@ -68,7 +64,7 @@ public class SoapFileServiceEndpoint implements WSFileService {
     try {
       DisposeFileRsType response = new DisposeFileRsType();
       fileService.disposeFile(parameters.getStorageFileName())
-          .get(timeoutProperties.getSyncOperationTimeout());
+          .get(fileserverConfig.getSyncOperationTimeout());
       response.setBoundedContext(Constants.CONTEXT.toString());
       return response;
     } catch (Exception error) {
@@ -79,8 +75,8 @@ public class SoapFileServiceEndpoint implements WSFileService {
   }
 
   private String getFileReference(String fileStorageName) {
-    return String.format("%s/file-content?fileStorageName=%s",
-        filesManagementProperties.getBaseUrlAddress(), fileStorageName);
+    return String.format("%s/file-content?fileStorageName=%s", fileserverConfig.getBaseUrlAddress(),
+        fileStorageName);
   }
 
   @ToString

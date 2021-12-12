@@ -2,7 +2,7 @@ package io.bcs.fileserver.infrastructure.config;
 
 import io.bce.Generator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
-import io.bcs.fileserver.infrastructure.ContentLoadingProperties;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.storage.LocalFileSystemStorage;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
@@ -18,7 +18,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class FileStorageConfiguration {
   @Inject
-  private ContentLoadingProperties contentLoadingProperties;
+  private FileServerConfigurationProperties contentLoadingProperties;
 
   /**
    * File name generator configuration.

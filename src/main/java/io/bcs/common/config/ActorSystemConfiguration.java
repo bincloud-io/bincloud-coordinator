@@ -5,7 +5,7 @@ import io.bce.actor.Actors;
 import io.bce.actor.CorrelationKeyGenerator;
 import io.bce.actor.EventLoop.Dispatcher;
 import io.bce.actor.ExecutorServiceDispatcher;
-import io.bcs.common.PlatformConfiguration;
+import io.bcs.common.PlatformConfigurationProperties;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +25,7 @@ public class ActorSystemConfiguration {
 
   @Inject
   @SuppressWarnings("cdi-ambiguous-dependency")
-  private PlatformConfiguration actorSystemProperties;
+  private PlatformConfigurationProperties actorSystemProperties;
 
   /**
    * Dispatcher configuration.
