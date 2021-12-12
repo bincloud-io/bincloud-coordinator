@@ -1,2 +1,4 @@
-/deployment=mariadb_jdbc:add(runtime-name=mariadb_jdbc, content=[{url=${DEPLOYMENT_MARIADB_JDBC_CLIENT_URL}}], enabled=true)
-/subsystem=datasources/data-source=BC_CENTRAL:add(driver-name=mariadb_jdbc, jndi-name=${DB_CENTRAL_JNDI_NAME}, driver-class=org.mariadb.jdbc.Driver, connection-url=${DB_CENTRAL_CONNECTION_URL}, user-name=${DB_CENTRAL_USERNAME}, password=${DB_CENTRAL_PASSWORD})
+module add --name=org.mariadb --resources=/srv/bincloud/wildfly/mariadb-java-client.jar --dependencies=javax.api,javax.transaction.api
+/subsystem=datasources/jdbc-driver=mariadb:add(driver-name="mariadb",driver-module-name="org.mariadb",driver-class-name=org.mariadb.jdbc.Driver)
+data-source add --jndi-name=${DB_CENTRAL_JNDI_NAME} --name=BC_CENTRAL --connection-url=${DB_CENTRAL_CONNECTION_URL} --driver-name=mariadb --user-name=${DB_CENTRAL_USERNAME} --password=${DB_CENTRAL_PASSWORD} --validate-on-match=true --background-validation=false --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter --jta=true
+reload

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+	<changeSet id="CSET.SEQUENCE_GENERATOR_TABLES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="SEQUENCES"
+			remarks="The current state of sequence generator">
+			<column name="SEQUENCE_NAME" type="VARCHAR(40)"
+				remarks="The sequence generator name">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="SEQUENCE_VALUE" type="BIGINT(20)"
+				defaultValueNumeric="0" remarks="The last generated value">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LAST_HISTORY_MARKER" type="VARCHAR(36)"
+				remarks="The last histoy marker identifier in the history table">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey columnNames="SEQUENCE_NAME"
+			tableName="SEQUENCES" />
+
+		<addUniqueConstraint
+			constraintName="UNC__LAST_HISTORY_MARKER"
+			columnNames="LAST_HISTORY_MARKER" tableName="SEQUENCES" />
+
+		<createTable tableName="SEQUENCE_VALUES_HISTORY"
+			remarks="The sequences generations history table">
+			<column name="GUID" type="VARCHAR(36)"
+				remarks="The historical identifier">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="SEQUENCE_VALUE" type="BIGINT(20)"
+				remarks="The generated value">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey columnNames="GUID"
+			tableName="SEQUENCE_VALUES_HISTORY" />
+	</changeSet>
+
+	<changeSet id="CSET.SEQUENCE_GENERATOR"
+		author="Dmitry Mikhaylenko">
+		<sqlFile encoding="UTF-8" endDelimiter="/"
+			splitStatements="true" stripComments="true"
+			path="liquibase/v0.0.1/create_sequence_generator.sql" />
+
+		<rollback>
+			<sqlFile encoding="UTF-8" splitStatements="true"
+				stripComments="true"
+				path="liquibase/v0.0.1/drop_sequence_generator.sql" />
+		</rollback>
+	</changeSet>
+
+	<changeSet id="CSET.REF_MEDIA_TYPES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_MEDIA_TYPES">
+			<column name="MEDIA_TYPE" type="VARCHAR(128)"
+				remarks="The supported file media type">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONTENT_DISPOSITION" type="VARCHAR(12)"
+				remarks="The content disposition for specified media-type">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_MEDIA_TYPES"
+			columnNames="MEDIA_TYPE" />
+	</changeSet>
+
+	<changeSet id="CSET.OCTET_STREAM_TYPE"
+		author="Dmitry Mikhaylenko">
+		<insert tableName="REF_MEDIA_TYPES">
+			<column name="MEDIA_TYPE" value="application/octet-stream" />
+			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
+		</insert>
+		<rollback>
+			<sql>DELETE FROM REF_MEDIA_TYPES WHERE 1=1</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="CSET.FILES" author="Dmitry Mikhaylenko">
+		<createTable tableName="FILES">
+			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
+				remarks="The file name into file storage.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The storage name where file is stored.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STATUS" type="VARCHAR(16)"
+				remarks="The current file status name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="MEDIA_TYPE" type="VARCHAR(200)"
+				remarks="The storage media type name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="FILE_NAME" type="VARCHAR(400)"
+				remarks="The file download name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="CONTENT_LENGTH" type="BIGINT(20)"
+				remarks="The stored file content length.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="FILES"
+			columnNames="STORAGE_FILE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_FILES$REF_MEDIA_TYPES" baseTableName="FILES"
+			baseColumnNames="MEDIA_TYPE" referencedTableName="REF_MEDIA_TYPES"
+			referencedColumnNames="MEDIA_TYPE" />
+
+		<createView viewName="VW_FILES_METADATA"
+			replaceIfExists="false">
+			SELECT 
+				F.STORAGE_FILE_NAME, 
+				F.STATUS, 
+				F.FILE_NAME, 
+				F.CONTENT_LENGTH, 
+				MT.MEDIA_TYPE, 
+				MT.CONTENT_DISPOSITION 
+			FROM FILES F INNER JOIN 
+				REF_MEDIA_TYPES MT ON F.MEDIA_TYPE = MT.MEDIA_TYPE
+		</createView>
+	</changeSet>
+</databaseChangeLog>
