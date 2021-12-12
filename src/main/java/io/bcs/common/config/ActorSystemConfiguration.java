@@ -5,6 +5,7 @@ import io.bce.actor.Actors;
 import io.bce.actor.CorrelationKeyGenerator;
 import io.bce.actor.EventLoop.Dispatcher;
 import io.bce.actor.ExecutorServiceDispatcher;
+import io.bce.actor.SingleThreadDispatcher;
 import io.bcs.common.PlatformConfigurationProperties;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,15 +29,25 @@ public class ActorSystemConfiguration {
   private PlatformConfigurationProperties actorSystemProperties;
 
   /**
-   * Dispatcher configuration.
+   * Multi-threaded dispatcher configuration.
    *
    * @return The file dispatcher
    */
   @Produces
-  public Dispatcher dispatcher() {
+  public Dispatcher multiThreadedDispatcher() {
     ThreadPoolExecutor executorService = new ThreadPoolExecutor(processorsCount(), maxThreadCount(),
         10, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     return ExecutorServiceDispatcher.createFor(executorService);
+  }
+
+  /**
+   * Single-threaded dispatcher configuration.
+   *
+   * @return The file dispatcher
+   */
+  @Produces
+  public Dispatcher singleThreadDispatcher() {
+    return new SingleThreadDispatcher();
   }
 
   /**
@@ -59,7 +70,7 @@ public class ActorSystemConfiguration {
   public ActorSystem actorSystem() {
     ActorSystem actorSystem = Actors.create(configurer -> {
       return configurer.withCorrelationKeyGenerator(correlationKeyGenerator())
-          .withDispatcher(dispatcher()).configure();
+          .withDispatcher(singleThreadDispatcher()).configure();
     });
     actorSystem.start();
     return actorSystem;
