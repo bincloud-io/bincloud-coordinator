@@ -14,15 +14,4 @@ public interface FileMetadata {
   Long getTotalLength();
 
   Disposition getContentDisposition();
-
-  /**
-   * This class enumerates the available content disposition types.
-   *
-   * @author Dmitry Mikhaylenko
-   *
-   */
-  enum Disposition {
-    INLINE,
-    ATTACHMENT;
-  }
 }

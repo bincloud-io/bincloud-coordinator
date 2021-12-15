@@ -1,15 +1,13 @@
 package io.bcs.fileserver.infrastructure.fileserver.file.content
 
-import static io.bcs.fileserver.domain.model.file.metadata.FileMetadata.Disposition.ATTACHMENT
-import static io.bcs.fileserver.domain.model.file.metadata.FileMetadata.Disposition.INLINE
 
 import io.bce.interaction.streaming.Source
 import io.bce.interaction.streaming.binary.BinaryChunk
 import io.bce.interaction.streaming.binary.InputStreamSource
 import io.bcs.fileserver.domain.model.file.content.FileContent
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart
+import io.bcs.fileserver.domain.model.file.metadata.Disposition
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadata
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata.Disposition
 import io.bcs.fileserver.domain.model.file.state.FileStatus
 import io.bcs.fileserver.domain.model.storage.ContentFragment
 import spock.lang.Specification

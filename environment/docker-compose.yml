@@ -16,6 +16,8 @@ services:
     image: bincloud/appserver:v1.0.0
     hostname: appserver.bincloud.internal
     restart: always
+    env_file:
+      - docker-env
     expose:
       - 8080
       - 9990

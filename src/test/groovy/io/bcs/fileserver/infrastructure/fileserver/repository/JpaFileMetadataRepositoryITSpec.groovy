@@ -17,7 +17,6 @@ import io.bce.CriticalSection
 import io.bcs.fileserver.Constants
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadata
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata.Disposition
 import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer

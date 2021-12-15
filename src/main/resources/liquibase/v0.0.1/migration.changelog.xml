@@ -62,6 +62,49 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="CSET.REF_DISTRIBUTION_POINTS"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_DISTRIBUTION_POINTS"
+			remarks="The registered distribution points.">
+			<column name="POINT_NAME" type="VARCHAR(10)"
+				remarks="Distribution point name, identifying it.">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONNECTOR_HOST_NAME" type="VARCHAR(100)"
+				remarks="The distribution point connector load balancer address.">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONNECTOR_PORT_NUMBER" type="INT(5)"
+				remarks="The distribution point connector load balancer port number. By default the 80 port will be used.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_DISTRIBUTION_POINTS"
+			columnNames="POINT_NAME" />
+	</changeSet>
+
+	<changeSet id="CSET.REF_LOCAL_STORAGES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_LOCAL_STORAGES"
+			remarks="The registered local storages.">
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The local storage name.">
+				<constraints nullable="false" />
+			</column>
+			
+			<column name="CONTENT_FOLDER" type="VARCHAR(400)"
+				remarks="The content folder name.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="REF_FILE_STORAGES"
+			columnNames="STORAGE_NAME" />
+	</changeSet>
+
+
+
+
 	<changeSet id="CSET.REF_MEDIA_TYPES"
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="REF_MEDIA_TYPES">
@@ -77,7 +120,11 @@
 
 		<addPrimaryKey tableName="REF_MEDIA_TYPES"
 			columnNames="MEDIA_TYPE" />
+		
 	</changeSet>
+
+
+
 
 	<changeSet id="CSET.OCTET_STREAM_TYPE"
 		author="Dmitry Mikhaylenko">

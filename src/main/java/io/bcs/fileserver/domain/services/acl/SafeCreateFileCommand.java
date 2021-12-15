@@ -1,4 +1,4 @@
-package io.bcs.fileserver.acl;
+package io.bcs.fileserver.domain.services.acl;
 
 import io.bce.validation.ValidationContext;
 import io.bce.validation.ValidationContext.Validatable;

@@ -1,13 +1,12 @@
 package io.bcs.fileserver.infrastructure.fileserver.file.content
 
-import javax.servlet.http.HttpServletResponse
-
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bcs.fileserver.domain.model.file.content.FileContent
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata.Disposition
+import io.bcs.fileserver.domain.model.file.metadata.Disposition
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider
 import io.bcs.fileserver.infrastructure.file.content.HttpHeadersReceiver
+import javax.servlet.http.HttpServletResponse
 
 class HttpHeadersReceiverSpec extends ContentReceiverSpecification {
   private FileMetadataProvider metadataProvider
