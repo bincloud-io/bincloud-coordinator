@@ -1,10 +1,10 @@
-package io.bcs.fileserver;
+package io.bcs.fileserver.domain;
 
 import io.bce.domain.BoundedContextId;
 import io.bce.domain.errors.ErrorDescriptor.ErrorCode;
 
 /**
- * This class defines the basic common constants.
+ * This class defines the basic fileserver constants.
  *
  * @author Dmitry Mikhaylenko
  *

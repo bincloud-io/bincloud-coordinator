@@ -4,24 +4,19 @@ import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
 
+import io.bce.Generator
+import io.bce.MustNeverBeHappenedError
+import io.bcs.testing.archive.ArchiveBuilder
+import io.bcs.testing.database.DatabaseConfigurer
+import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import java.util.stream.IntStream
-
 import javax.annotation.Resource
 import javax.inject.Inject
 import javax.sql.DataSource
-
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
-
-import io.bce.Generator
-import io.bce.MustNeverBeHappenedError
-import io.bce.domain.errors.ApplicationException
-import io.bcs.common.generators.JdbcSequenceGenerator
-import io.bcs.testing.archive.ArchiveBuilder
-import io.bcs.testing.database.DatabaseConfigurer
-import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
@@ -37,8 +32,10 @@ class JdbcSequenceGeneratorITSpec extends Specification {
         .withScopes(COMPILE, RUNTIME, TEST)
         .resolveDependency("org.liquibase", "liquibase-core")
         .resolveDependency("org.openclover", "clover")
+        .resolveDependency("io.bce", "bce")
+        .resolveDependency("io.bce", "bce-test-kit")
+        .resolveDependency("io.bce", "bce-spock-ext")
         .apply()
-        .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
         .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
         .appendClasses(JdbcSequenceGenerator)
         .appendResource("liquibase")

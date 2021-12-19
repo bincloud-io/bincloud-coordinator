@@ -13,7 +13,7 @@ import io.bce.promises.Promise.ResponseHandler
 import io.bce.validation.ErrorMessage
 import io.bce.validation.ValidationService
 import io.bce.validation.ValidationState
-import io.bcs.fileserver.Constants
+import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.errors.PrimaryValidationException

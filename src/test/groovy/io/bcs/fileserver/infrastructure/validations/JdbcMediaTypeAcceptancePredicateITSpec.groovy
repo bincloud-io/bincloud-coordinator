@@ -1,5 +1,4 @@
-package io.bcs.fileserver.infrastructure.fileserver.validations
-
+package io.bcs.fileserver.infrastructure.validations
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
@@ -35,9 +34,10 @@ class JdbcMediaTypeAcceptancePredicateITSpec extends Specification {
         .resolveDependencies("pom.xml")
         .withScopes(COMPILE, RUNTIME, TEST)
         .resolveDependency("org.liquibase", "liquibase-core")
-        .resolveDependency("org.openclover", "clover")
+        .resolveDependency("org.openclover", "clover").resolveDependency("io.bce", "bce")
+        .resolveDependency("io.bce", "bce-test-kit")
+        .resolveDependency("io.bce", "bce-spock-ext")
         .apply()
-        .appendPackagesRecursively(MustNeverBeHappenedError.getPackage().getName())
         .appendPackagesRecursively(DatabaseConfigurer.getPackage().getName())
         .appendClasses(JdbcMediaTypeAcceptancePredicate, DictionaryValidation, DictionaryPredicate)
         .appendResource("liquibase")

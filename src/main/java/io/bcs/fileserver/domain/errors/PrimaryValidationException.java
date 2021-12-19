@@ -2,7 +2,7 @@ package io.bcs.fileserver.domain.errors;
 
 import io.bce.domain.errors.ValidationException;
 import io.bce.validation.ValidationState;
-import io.bcs.fileserver.Constants;
+import io.bcs.fileserver.domain.Constants;
 
 /**
  * This exception notifies about exceptional case, where an input data primary validation isn't

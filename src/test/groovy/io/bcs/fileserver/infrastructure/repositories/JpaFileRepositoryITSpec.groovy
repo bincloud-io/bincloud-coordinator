@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.fileserver.repository
+package io.bcs.fileserver.infrastructure.repositories
 
 import static io.bcs.fileserver.domain.model.file.state.FileStatus.DISTRIBUTING
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
@@ -15,7 +15,7 @@ import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 import io.bce.CriticalSection
-import io.bcs.fileserver.Constants
+import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.state.FileStatus
@@ -28,13 +28,12 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JpaFileRepositoryITSpec extends Specification {
-  private static final String BCE_PACKAGE_NAME = CriticalSection.getPackage().getName();
   private static final String BCE_DATABASE_CONFIGURER_PACKAGE = DatabaseConfigurer.getPackage().getName()
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
 
   private static final String FILE_STORAGE_NAME = "file.storage.name.12345"
-  private static final String FILE_STORAGE = "test-storage"
-  private static final String MEDIA_TYPE = "application/octet-stream"
+  private static final String FILE_STORAGE = "LOCAL"
+  private static final String MEDIA_TYPE = "application/mediatype"
   private static final String FILE_NAME = "file.txt"
   private static final Long CONTENT_LENGTH = 1000L
 
@@ -45,13 +44,14 @@ class JpaFileRepositoryITSpec extends Specification {
         .resolveDependencies("pom.xml")
         .withScopes(COMPILE, RUNTIME, TEST)
         .resolveDependency("org.liquibase", "liquibase-core")
+        .resolveDependency("io.bce", "bce")
+        .resolveDependency("io.bce", "bce-test-kit")
+        .resolveDependency("io.bce", "bce-spock-ext")
         .apply()
-        .appendPackagesRecursively(BCE_PACKAGE_NAME)
         .appendPackagesRecursively(BCE_DATABASE_CONFIGURER_PACKAGE)
         .appendPackagesRecursively(BCS_DOMAIN_MODEL_PACKAGE)
         .appendClasses(JpaFileRepository)
         .appendManifestResource("META-INF/beans.xml", "beans.xml")
-        .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("META-INF/orm/file-mapping.xml", "orm/file-mapping.xml")
         .appendResource("liquibase")
@@ -81,7 +81,10 @@ class JpaFileRepositoryITSpec extends Specification {
   }
 
   def "Scenario: store file entity"() {
-    given: "The file entity to save"
+    given: "The file media types and local storage is configured"
+    databaseConfigurer.setup("db-init/file/file.changelog.xml")
+    
+    and: "The file entity to save"
     File file = createFileEntity()
 
     when: "The file entity is saved"

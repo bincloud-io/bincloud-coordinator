@@ -10,7 +10,7 @@ import io.bce.promises.Promises
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ErrorHandler
 import io.bce.promises.Promise.ResponseHandler
-import io.bcs.fileserver.Constants
+import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.model.file.File
