@@ -6,10 +6,6 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 	<changeSet id="CSET.CONFIGURE_LOCAL_STORAGES" author="Dmitry Mikhaylenko">
 		<sql>
-			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
-			`CONTENT_DISPOSITION`)
-			VALUES ('application/mediatype', 'INLINE');
-
 			INSERT INTO `REF_STORAGES`(`STORAGE_NAME`, `STORAGE_TYPE`, `MEDIA_TYPE`)
 			VALUES ('LOCAL', 'LOCAL', 'application/mediatype');
 
@@ -21,7 +17,6 @@
 				DELETE FROM `FILES` WHERE 1=1;
 				DELETE FROM `REF_LOCAL_STORAGES` WHERE 1=1;
 				DELETE FROM `REF_STORAGES` WHERE 1=1;
-				DELETE FROM `REF_MEDIA_TYPES` WHERE 1=1;
 			</sql>
 		</rollback>
 	</changeSet>

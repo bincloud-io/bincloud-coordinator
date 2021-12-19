@@ -8,12 +8,15 @@
 		<sql>
 			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
 			`CONTENT_DISPOSITION`)
+			VALUES ('application/mediatype', 'INLINE');
+			
+			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
+			`CONTENT_DISPOSITION`)
 			VALUES ('application/well-mediatype', 'INLINE');
 		</sql>
 		<rollback>
 			<sql>
-				DELETE FROM `REF_MEDIA_TYPES`
-				WHERE 1=1;
+				DELETE FROM `REF_MEDIA_TYPES` WHERE 1=1;
 			</sql>
 		</rollback>
 	</changeSet>

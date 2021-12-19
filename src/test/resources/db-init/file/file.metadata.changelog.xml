@@ -6,16 +6,6 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 	<changeSet id="CSET.CREATE_FILE" author="Dmitry Mikhaylenko">
 		<sql>
-			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
-			`CONTENT_DISPOSITION`)
-			VALUES ('application/mediatype', 'INLINE');
-
-			INSERT INTO `REF_STORAGES`(`STORAGE_NAME`, `STORAGE_TYPE`, `MEDIA_TYPE`)
-			VALUES ('LOCAL', 'LOCAL', 'application/mediatype');
-
-			INSERT INTO `REF_LOCAL_STORAGES`(`STORAGE_NAME`, `BASE_DIRECTORY`)
-			VALUES ('LOCAL', '/srv/bincloud/');
-
 			INSERT INTO `FILES` SELECT
 			'e95b72b3-54dd-11ec-8d39-0242ac130002' AS STORAGE_FILE_NAME,
 			'LOCAL' AS STORAGE_NAME, 'DRAFT',
@@ -26,12 +16,6 @@
 		<rollback>
 			<sql>
 				DELETE FROM `FILES` WHERE 1=1;
-				DELETE FROM `REF_LOCAL_STORAGES`
-				WHERE 1=1;
-				DELETE FROM `REF_STORAGES` WHERE 1=1;
-				DELETE FROM
-				`REF_MEDIA_TYPES`
-				WHERE 1=1;
 			</sql>
 		</rollback>
 	</changeSet>
