@@ -9,7 +9,7 @@ import io.bce.logging.Loggers;
 import io.bce.promises.Promise.ErrorHandler;
 import io.bce.promises.Promise.ResponseHandler;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.Constants;
+import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException;
 import io.bcs.fileserver.domain.errors.ContentUploadedException;
 import io.bcs.fileserver.domain.errors.FileDisposedException;

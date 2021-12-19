@@ -5,8 +5,8 @@ import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.FileContent;
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.file.metadata.Disposition;
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadata;
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata.Disposition;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 

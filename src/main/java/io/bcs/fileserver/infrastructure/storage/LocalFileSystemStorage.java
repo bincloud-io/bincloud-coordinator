@@ -81,7 +81,7 @@ public class LocalFileSystemStorage implements FileStorage {
       throws FileNotFoundException {
     return new FileInputStream(getFileLocationPath(contentLocator));
   }
-
+  
   private void checkThatLocatedContentIsRelatedToTheCurrentStorage(ContentLocator contentLocator) {
     if (!contentLocator.getStorageName().equals(storageName)) {
       throw new FileStorageException(new UnrelatedFileStorageException(contentLocator));
@@ -91,7 +91,7 @@ public class LocalFileSystemStorage implements FileStorage {
   private File getLocatedFile(ContentLocator contentLocator) {
     return new File(getFileLocationPath(contentLocator));
   }
-
+  
   private String getFileLocationPath(ContentLocator contentLocator) {
     return String.format("%s/%s", baseDirectory, contentLocator.getStorageFileName());
   }
