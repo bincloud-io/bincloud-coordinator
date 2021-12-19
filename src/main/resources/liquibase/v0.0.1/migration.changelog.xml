@@ -62,24 +62,6 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="CSET.REF_STORAGES" author="Dmitry Mikhaylenko">
-		<createTable tableName="REF_STORAGES">
-			<column name="STORAGE_NAME" type="VARCHAR(16)"
-				remarks="The unique storage name, identifying storage inside the distribution points net. 
-				This value should be unique between all distribution points.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="STORAGE_TYPE" type="VARCHAR(12)"
-				remarks="The file storage type discriminator.">
-				<constraints nullable="true" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="REF_STORAGES"
-			columnNames="STORAGE_NAME" />
-	</changeSet>
-
 	<changeSet id="CSET.REF_MEDIA_TYPES"
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="REF_MEDIA_TYPES">
@@ -107,6 +89,65 @@
 			<sql>DELETE FROM REF_MEDIA_TYPES WHERE 1=1</sql>
 		</rollback>
 	</changeSet>
+
+	<changeSet id="CSET.REF_STORAGES" author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_STORAGES"
+			remarks="The dictionary table which enumerates registered storages.">
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The unique storage name, identifying storage inside the distribution points net. 
+				This value should be unique between all distribution points.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_TYPE" type="VARCHAR(12)"
+				remarks="The file storage type discriminator.">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="MEDIA_TYPE" type="VARCHAR(128)"
+				remarks="The media type, which the storage is associated with.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_STORAGES"
+			columnNames="STORAGE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_REF_STORAGES$REF_MEDIA_TYPES"
+			baseTableName="REF_STORAGES" baseColumnNames="MEDIA_TYPE"
+			referencedTableName="REF_MEDIA_TYPES"
+			referencedColumnNames="MEDIA_TYPE" />
+	</changeSet>
+
+	<changeSet id="CSET.REF_LOCAL_STORAGES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_LOCAL_STORAGES"
+			remarks="The dictionary table which enumerates local storages parameters. 
+			This table inherits storages dictionary table(REF_STORAGES).">
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The unique storage name, identifying storage.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="BASE_DIRECTORY" type="VARCHAR(255)"
+				remarks="The base directory on a local filesystem 
+				for current media type storage.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_LOCAL_STORAGES"
+			columnNames="STORAGE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_REF_LOCAL_STORAGES$REF_STORAGES"
+			baseTableName="REF_LOCAL_STORAGES" baseColumnNames="STORAGE_NAME"
+			referencedTableName="REF_STORAGES"
+			referencedColumnNames="STORAGE_NAME" />
+	</changeSet>
+
+
 
 	<changeSet id="CSET.FILES" author="Dmitry Mikhaylenko">
 		<createTable tableName="FILES">
@@ -148,6 +189,11 @@
 			constraintName="FK_FILES$REF_MEDIA_TYPES" baseTableName="FILES"
 			baseColumnNames="MEDIA_TYPE" referencedTableName="REF_MEDIA_TYPES"
 			referencedColumnNames="MEDIA_TYPE" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_FILES$REF_STORAGES" baseTableName="FILES"
+			baseColumnNames="STORAGE_NAME" referencedTableName="REF_STORAGES"
+			referencedColumnNames="STORAGE_NAME" />
 
 		<createView viewName="VW_FILES_METADATA"
 			replaceIfExists="false">

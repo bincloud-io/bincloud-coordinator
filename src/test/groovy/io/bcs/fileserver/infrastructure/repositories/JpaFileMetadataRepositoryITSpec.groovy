@@ -47,7 +47,6 @@ class JpaFileMetadataRepositoryITSpec extends Specification {
         .appendClasses(JpaFileMetadataRepository)
         .appendManifestResource("META-INF/beans.xml", "beans.xml")
         .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
-        .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("META-INF/orm/file-mapping.xml", "orm/file-mapping.xml")
         .appendResource("liquibase")
         .appendResource("db-init")

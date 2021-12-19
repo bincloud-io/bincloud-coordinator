@@ -32,8 +32,8 @@ class JpaFileRepositoryITSpec extends Specification {
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
 
   private static final String FILE_STORAGE_NAME = "file.storage.name.12345"
-  private static final String FILE_STORAGE = "test-storage"
-  private static final String MEDIA_TYPE = "application/octet-stream"
+  private static final String FILE_STORAGE = "LOCAL"
+  private static final String MEDIA_TYPE = "application/mediatype"
   private static final String FILE_NAME = "file.txt"
   private static final Long CONTENT_LENGTH = 1000L
 
@@ -52,7 +52,6 @@ class JpaFileRepositoryITSpec extends Specification {
         .appendPackagesRecursively(BCS_DOMAIN_MODEL_PACKAGE)
         .appendClasses(JpaFileRepository)
         .appendManifestResource("META-INF/beans.xml", "beans.xml")
-        .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("META-INF/orm/file-mapping.xml", "orm/file-mapping.xml")
         .appendResource("liquibase")
@@ -82,7 +81,10 @@ class JpaFileRepositoryITSpec extends Specification {
   }
 
   def "Scenario: store file entity"() {
-    given: "The file entity to save"
+    given: "The file media types and local storage is configured"
+    databaseConfigurer.setup("db-init/file/file.changelog.xml")
+    
+    and: "The file entity to save"
     File file = createFileEntity()
 
     when: "The file entity is saved"
