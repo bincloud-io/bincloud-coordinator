@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <wsdl:definitions
 	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-	xmlns:tns="http://www.bincloud.io/storage/FileStorageService"
+	xmlns:tns="http://www.bcs.io/fileserver/soap/endpoints/files"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="WSFileService"
-	targetNamespace="http://www.bincloud.io/storage/FileStorageService"
-	xmlns:xsd1="http://www.example.org/file-storage-types"
-	xmlns:xsd2="http://www.bincloud.io/storage/file-storage-types/"
-	xmlns:xsd3="http://www.bincloud.io/common/global-types">
+	targetNamespace="http://www.bcs.io/fileserver/soap/endpoints/files"
+	xmlns:storage="http://www.bcs.io/fileserver/soap/types/file/storage"
+	xmlns:global="http://www.bcs.io/fileserver/soap/types/common">
 
 	<wsdl:types>
 		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 			<xsd:import
-				namespace="http://www.bincloud.io/storage/file-storage-types/"
+				namespace="http://www.bcs.io/fileserver/soap/types/file/storage"
 				schemaLocation="file-storage-types.xsd">
 			</xsd:import>
 			<xsd:import
-				namespace="http://www.bincloud.io/common/global-types"
+				namespace="http://www.bcs.io/fileserver/soap/types/common"
 				schemaLocation="global-types.xsd">
 			</xsd:import>
 		</xsd:schema>
@@ -24,25 +23,25 @@
 
 
 	<wsdl:message name="createFileRequest">
-		<wsdl:part name="parameters" element="xsd2:CreateFileRq"></wsdl:part>
+		<wsdl:part name="parameters" element="storage:CreateFileRq"></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="createFileResponse">
-		<wsdl:part name="parameters" element="xsd2:CreateFileRs"></wsdl:part>
+		<wsdl:part name="parameters" element="storage:CreateFileRs"></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="createFileFault">
-		<wsdl:part name="parameters" element="xsd3:ServiceFault"></wsdl:part>
+		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="disposeFileRequest">
-		<wsdl:part name="parameters" element="xsd2:DisposeFileRq"></wsdl:part>
+		<wsdl:part name="parameters" element="storage:DisposeFileRq"></wsdl:part>
 	</wsdl:message>
 	<wsdl:message name="disposeFileResponse">
-		<wsdl:part name="parameters" element="xsd2:DisposeFileRs"></wsdl:part>
+		<wsdl:part name="parameters" element="storage:DisposeFileRs"></wsdl:part>
 	</wsdl:message>
 	<wsdl:message name="disposeFileFault">
-		<wsdl:part name="parameters" element="xsd3:ServiceFault"></wsdl:part>
+		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
 	<wsdl:portType name="WSFileService">
 		<wsdl:operation name="createFile">
@@ -55,7 +54,7 @@
 			<wsdl:output message="tns:disposeFileResponse"></wsdl:output>
 			<wsdl:fault name="fault" message="tns:disposeFileFault"></wsdl:fault>
 		</wsdl:operation>
-	</wsdl:portType>	<wsdl:binding name="WSFileServiceBinding"
+	</wsdl:portType>	<wsdl:binding name="WSFileServiceBinding"
 		type="tns:WSFileService">
 
 		<soap:binding style="document"
@@ -63,7 +62,7 @@
 		<wsdl:operation name="createFile">
 
 			<soap:operation
-				soapAction="http://www.bincloud.io/storage/FileStorageService/createFile" />
+				soapAction="http://www.bcs.io/fileserver/soap/endpoints/files/createFile" />
 			<wsdl:input>
 
 				<soap:body use="literal" />
@@ -78,15 +77,19 @@
 			</wsdl:fault>
 		</wsdl:operation>
 		<wsdl:operation name="disposeFile">
+
 			<soap:operation
-				soapAction="http://www.bincloud.io/storage/FileStorageService/disposeFile" />
+				soapAction="http://www.bcs.io/fileserver/soap/endpoints/files/disposeFile" />
 			<wsdl:input>
+
 				<soap:body use="literal" />
 			</wsdl:input>
 			<wsdl:output>
+
 				<soap:body use="literal" />
 			</wsdl:output>
 			<wsdl:fault name="fault">
+
 				<soap:fault use="literal" name="fault" />
 			</wsdl:fault>
 		</wsdl:operation>

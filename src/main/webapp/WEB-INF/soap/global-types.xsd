@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema
-	targetNamespace="http://www.bincloud.io/common/global-types"
+	targetNamespace="http://www.bcs.io/fileserver/soap/types/common"
 	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:tns="http://www.bincloud.io/common/global-types">
+	xmlns:tns="http://www.bcs.io/fileserver/soap/types/common">
 
 	<complexType name="ServiceResponse_Type">
 		<sequence>
@@ -19,13 +19,14 @@
 					<element name="severity" minOccurs="1" maxOccurs="1"
 						type="tns:FaultSeverity_Type">
 					</element>
-					<element name="errorNumber" minOccurs="1"
-						maxOccurs="1" type="tns:FaultCode_Type" nillable="false">
+					<element name="errorNumber" minOccurs="1" maxOccurs="1"
+						type="tns:FaultCode_Type" nillable="false">
 					</element>
 					<element name="message" minOccurs="1" maxOccurs="1"
 						type="tns:FaultDescription_Type" nillable="false">
 					</element>
-					<element name="validationErrors" type="tns:ValidationErrors_Type" minOccurs="0" maxOccurs="1"></element>
+					<element name="validationErrors"
+						type="tns:ValidationErrors_Type" minOccurs="0" maxOccurs="1"></element>
 				</sequence>
 			</extension>
 		</complexContent>
@@ -87,15 +88,22 @@
 
 	<complexType name="ValidationGroupedError_Type">
 		<sequence>
-			<element name="groupName" type="tns:ValidationGroupName_Type" minOccurs="1" maxOccurs="1"></element>
-			<element name="messages" type="tns:ValidationErrorMessage_Type" minOccurs="0" maxOccurs="unbounded"></element>
+			<element name="groupName" type="tns:ValidationGroupName_Type"
+				minOccurs="1" maxOccurs="1"></element>
+			<element name="messages"
+				type="tns:ValidationErrorMessage_Type" minOccurs="0"
+				maxOccurs="unbounded"></element>
 		</sequence>
 	</complexType>
-	
-    <complexType name="ValidationErrors_Type">
-    	<sequence>
-    		<element name="ungroupedErrors" type="tns:ValidationErrorMessage_Type" minOccurs="0" maxOccurs="unbounded"></element>
-    		<element name="groupedErrors" type="tns:ValidationGroupedError_Type" minOccurs="0" maxOccurs="unbounded"></element>
-    	</sequence>
-    </complexType>
+
+	<complexType name="ValidationErrors_Type">
+		<sequence>
+			<element name="ungroupedErrors"
+				type="tns:ValidationErrorMessage_Type" minOccurs="0"
+				maxOccurs="unbounded"></element>
+			<element name="groupedErrors"
+				type="tns:ValidationGroupedError_Type" minOccurs="0"
+				maxOccurs="unbounded"></element>
+		</sequence>
+	</complexType>
 </schema>

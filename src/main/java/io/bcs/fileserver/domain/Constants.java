@@ -1,4 +1,4 @@
-package io.bcs.fileserver;
+package io.bcs.fileserver.domain;
 
 import io.bce.domain.BoundedContextId;
 import io.bce.domain.errors.ErrorDescriptor.ErrorCode;

@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.fileserver.file.content
+package io.bcs.fileserver.infrastructure.file.content
 
 
 import io.bce.interaction.streaming.Source

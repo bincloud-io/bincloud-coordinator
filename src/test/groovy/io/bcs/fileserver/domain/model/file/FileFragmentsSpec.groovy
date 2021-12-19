@@ -1,7 +1,7 @@
 package io.bcs.fileserver.domain.model.file
 
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
-import io.bcs.fileserver.Constants
+import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.model.file.FileFragments
 import io.bcs.fileserver.domain.model.file.Range

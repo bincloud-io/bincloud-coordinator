@@ -62,48 +62,23 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="CSET.REF_DISTRIBUTION_POINTS"
-		author="Dmitry Mikhaylenko">
-		<createTable tableName="REF_DISTRIBUTION_POINTS"
-			remarks="The registered distribution points.">
-			<column name="POINT_NAME" type="VARCHAR(10)"
-				remarks="Distribution point name, identifying it.">
-				<constraints nullable="false" />
-			</column>
-			<column name="CONNECTOR_HOST_NAME" type="VARCHAR(100)"
-				remarks="The distribution point connector load balancer address.">
-				<constraints nullable="false" />
-			</column>
-			<column name="CONNECTOR_PORT_NUMBER" type="INT(5)"
-				remarks="The distribution point connector load balancer port number. By default the 80 port will be used.">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="REF_DISTRIBUTION_POINTS"
-			columnNames="POINT_NAME" />
-	</changeSet>
-
-	<changeSet id="CSET.REF_LOCAL_STORAGES"
-		author="Dmitry Mikhaylenko">
-		<createTable tableName="REF_LOCAL_STORAGES"
-			remarks="The registered local storages.">
+	<changeSet id="CSET.REF_STORAGES" author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_STORAGES">
 			<column name="STORAGE_NAME" type="VARCHAR(16)"
-				remarks="The local storage name.">
+				remarks="The unique storage name, identifying storage inside the distribution points net. 
+				This value should be unique between all distribution points.">
 				<constraints nullable="false" />
 			</column>
-			
-			<column name="CONTENT_FOLDER" type="VARCHAR(400)"
-				remarks="The content folder name.">
-				<constraints nullable="false" />
+
+			<column name="STORAGE_TYPE" type="VARCHAR(12)"
+				remarks="The file storage type discriminator.">
+				<constraints nullable="true" />
 			</column>
 		</createTable>
-		<addPrimaryKey tableName="REF_FILE_STORAGES"
+
+		<addPrimaryKey tableName="REF_STORAGES"
 			columnNames="STORAGE_NAME" />
 	</changeSet>
-
-
-
 
 	<changeSet id="CSET.REF_MEDIA_TYPES"
 		author="Dmitry Mikhaylenko">
@@ -120,11 +95,7 @@
 
 		<addPrimaryKey tableName="REF_MEDIA_TYPES"
 			columnNames="MEDIA_TYPE" />
-		
 	</changeSet>
-
-
-
 
 	<changeSet id="CSET.OCTET_STREAM_TYPE"
 		author="Dmitry Mikhaylenko">

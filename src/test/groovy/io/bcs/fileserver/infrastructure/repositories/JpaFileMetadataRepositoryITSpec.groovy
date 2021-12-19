@@ -1,31 +1,28 @@
-package io.bcs.fileserver.infrastructure.fileserver.repository
+package io.bcs.fileserver.infrastructure.repositories
 
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
 
+import io.bcs.fileserver.domain.Constants
+import io.bcs.fileserver.domain.model.file.metadata.Disposition
+import io.bcs.fileserver.domain.model.file.metadata.FileMetadata
+import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository
+import io.bcs.testing.archive.ArchiveBuilder
+import io.bcs.testing.database.DatabaseConfigurer
+import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import javax.inject.Inject
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
-
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
-import io.bce.CriticalSection
-import io.bcs.fileserver.Constants
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository
-import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository
-import io.bcs.testing.archive.ArchiveBuilder
-import io.bcs.testing.database.DatabaseConfigurer
-import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JpaFileMetadataRepositoryITSpec extends Specification {
-  private static final String BCE_PACKAGE_NAME = CriticalSection.getPackage().getName();
   private static final String BCE_DATABASE_CONFIGURER_PACKAGE = DatabaseConfigurer.getPackage().getName()
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
 
@@ -41,8 +38,10 @@ class JpaFileMetadataRepositoryITSpec extends Specification {
         .resolveDependencies("pom.xml")
         .withScopes(COMPILE, RUNTIME, TEST)
         .resolveDependency("org.liquibase", "liquibase-core")
+        .resolveDependency("io.bce", "bce")
+        .resolveDependency("io.bce", "bce-test-kit")
+        .resolveDependency("io.bce", "bce-spock-ext")
         .apply()
-        .appendPackagesRecursively(BCE_PACKAGE_NAME)
         .appendPackagesRecursively(BCE_DATABASE_CONFIGURER_PACKAGE)
         .appendPackagesRecursively(BCS_DOMAIN_MODEL_PACKAGE)
         .appendClasses(JpaFileMetadataRepository)

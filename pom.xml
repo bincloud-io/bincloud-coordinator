@@ -206,7 +206,7 @@
 			<artifactId>objenesis</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.jboss.arquillian.spock</groupId>
 			<artifactId>arquillian-spock-container</artifactId>
@@ -292,11 +292,11 @@
 					<wsdlFiles>
 						<wsdlFile>file-storage-service.wsdl</wsdlFile>
 					</wsdlFiles>
-					<bindingFiles>
+					<!--bindingFiles>
 						<bindingFile>file-storage-service.xjb</bindingFile>
 						<bindingFile>file-storage-types.xjb</bindingFile>
 						<bindingFile>global-types.xjb</bindingFile>
-					</bindingFiles>
+					</bindingFiles-->
 				</configuration>
 			</plugin>
 

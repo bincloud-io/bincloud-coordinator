@@ -1,7 +1,7 @@
 package io.bcs.fileserver.domain.errors;
 
 import io.bce.domain.errors.ApplicationException;
-import io.bcs.fileserver.Constants;
+import io.bcs.fileserver.domain.Constants;
 
 /**
  * This exception notifies about exceptional case, where the requested file content hasn't been
