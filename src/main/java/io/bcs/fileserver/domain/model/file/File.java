@@ -1,11 +1,8 @@
 package io.bcs.fileserver.domain.model.file;
 
-import io.bce.logging.ApplicationLogger;
-import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.FileContent.ContentType;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
 import io.bcs.fileserver.domain.model.file.state.FileStatus;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
@@ -35,8 +32,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class File {
-  private static final ApplicationLogger log = Loggers.applicationLogger(File.class);
-
   static final String DEFAULT_STORAGE_NAME = "unknown";
   static final String DEFAULT_STORAGE_FILE_NAME = "unknown";
   static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
@@ -106,22 +101,11 @@ public class File {
    * @param ranges            The file ranges
    * @return The downloading process completion promise
    */
-  public Promise<Void> downloadContent(FileStorage fileStorage, ContentReceiver contentDownloader,
+  public Promise<Void> downloadContent(FileStorage fileStorage, ContentDownloader contentDownloader,
       Collection<Range> ranges) {
     return Promises.of(deferred -> {
       getFileState().getContentAccess(fileStorage, createFragments(ranges)).chain(fileContent -> {
-        if (fileContent.getType() == ContentType.RANGE) {
-          log.debug("Download single-range file content");
-          return contentDownloader.receiveContentRange(fileContent);
-        }
-
-        if (fileContent.getType() == ContentType.MULTIRANGE) {
-          log.debug("Download multi-range file content");
-          return contentDownloader.receiveContentRanges(fileContent);
-        }
-
-        log.debug("Download full-size file content");
-        return contentDownloader.receiveFullContent(fileContent);
+        return contentDownloader.downloadContent(fileContent);
       }).delegate(deferred);
     });
   }

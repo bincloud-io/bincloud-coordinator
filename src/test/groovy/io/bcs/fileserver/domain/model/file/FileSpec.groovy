@@ -21,6 +21,7 @@ import io.bcs.fileserver.domain.errors.FileDisposedException
 import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.model.file.File.CreateFile
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver
 import io.bcs.fileserver.domain.model.file.content.ContentUploader
 import io.bcs.fileserver.domain.model.file.content.FileContent
@@ -42,11 +43,11 @@ class FileSpec extends Specification {
   public static final Long DISTRIBUTIONING_CONTENT_LENGTH = 100L
 
   private FileStorage fileStorage;
-  private ContentReceiver contentDownloader;
+  private ContentReceiver contentReceiver;
 
   def setup() {
     this.fileStorage = Stub(FileStorage)
-    this.contentDownloader = Mock(ContentReceiver)
+    this.contentReceiver = Mock(ContentReceiver)
   }
 
   def "Scenario: create file by default constructor"() {
@@ -344,7 +345,7 @@ class FileSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, Collections.emptyList())).error(errorHandler).await()
+    WaitingPromise.of(file.downloadContent(fileStorage, new ContentDownloader(contentReceiver), Collections.emptyList())).error(errorHandler).await()
 
     then: "The file has already been exception should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -361,7 +362,7 @@ class FileSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, Collections.emptyList())).error(errorHandler).await()
+    WaitingPromise.of(file.downloadContent(fileStorage, new ContentDownloader(contentReceiver), Collections.emptyList())).error(errorHandler).await()
 
     then: "The file has already been exception should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -385,13 +386,13 @@ class FileSpec extends Specification {
     fileStorage.getAccessOnRead(_, _) >> source
 
     when: "The file is downloaded"
-    WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+    WaitingPromise.of(file.downloadContent(fileStorage, new ContentDownloader(contentReceiver), fragments)).then(responseHandler).await()
 
     then: "The operation should be completed without error"
     1 * responseHandler.onResponse(_)
 
     and: "The full content download operation should be passed"
-    1 * contentDownloader.receiveFullContent(_) >> {
+    1 * contentReceiver.receiveFullContent(_) >> {
       fileContent = it[0]
       return Promises.resolvedBy(null)
     }
@@ -430,7 +431,7 @@ class FileSpec extends Specification {
     fileStorage.getAccessOnRead(_, _) >> source
 
     when: "The file is downloaded"
-    WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).error(errorHandler).await()
+    WaitingPromise.of(file.downloadContent(fileStorage, new ContentDownloader(contentReceiver), fragments)).error(errorHandler).await()
 
     then: "The unsatisfiable range format error should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -455,13 +456,13 @@ class FileSpec extends Specification {
     fileStorage.getAccessOnRead(_, _) >> source
 
     when: "The file is downloaded"
-    WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+    WaitingPromise.of(file.downloadContent(fileStorage, new ContentDownloader(contentReceiver), fragments)).then(responseHandler).await()
 
     then: "The operation should be completed without error"
     1 * responseHandler.onResponse(_)
 
     and: "The full content download operation should be passed"
-    1 * contentDownloader.receiveContentRange(_) >> {
+    1 * contentReceiver.receiveContentRange(_) >> {
       fileContent = it[0]
       return Promises.resolvedBy(null)
     }
@@ -498,13 +499,13 @@ class FileSpec extends Specification {
     fileStorage.getAccessOnRead(_, _) >> firstSource >> secondSource
 
     when: "The file is downloaded"
-    WaitingPromise.of(file.downloadContent(fileStorage, contentDownloader, fragments)).then(responseHandler).await()
+    WaitingPromise.of(file.downloadContent(fileStorage, new ContentDownloader(contentReceiver), fragments)).then(responseHandler).await()
 
     then: "The operation should be completed without error"
     1 * responseHandler.onResponse(_)
 
     and: "The full content download operation should be passed"
-    1 * contentDownloader.receiveContentRanges(_) >> {
+    1 * contentReceiver.receiveContentRanges(_) >> {
       fileContent = it[0]
       return Promises.resolvedBy(null)
     }

@@ -15,6 +15,7 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader
 import io.bcs.fileserver.domain.model.file.content.ContentManagement
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver
 import io.bcs.fileserver.domain.model.file.content.ContentUploader
@@ -126,7 +127,8 @@ class ContentServiceSpec extends Specification {
 
 
     when: "The file is uploaded for unspecified file storage name"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.empty()), contentReceiver)).error(errorHandler).await()
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.empty()), new ContentDownloader(contentReceiver)))
+        .error(errorHandler).await()
 
     then: "The file is not specified error should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -140,7 +142,7 @@ class ContentServiceSpec extends Specification {
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createFile(DISTRIBUTING, DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content downloader"
-    ContentReceiver contentDownloader = Mock(ContentReceiver)
+    ContentReceiver contentReceiver = Mock(ContentReceiver)
 
 
     and: "The file storage is going get access on write"
@@ -150,10 +152,11 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentDownloader)).then(responseHandler).await()
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), new ContentDownloader(contentReceiver)))
+        .then(responseHandler).await()
 
     then: "The file content downloading should be started"
-    1 * contentDownloader.receiveFullContent(_) >> Promises.resolvedBy(null)
+    1 * contentReceiver.receiveFullContent(_) >> Promises.resolvedBy(null)
 
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
@@ -165,13 +168,14 @@ class ContentServiceSpec extends Specification {
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.empty()
 
     and: "The content downloader"
-    ContentReceiver contentDownloader = Mock(ContentReceiver)
+    ContentReceiver contentReceiver = Mock(ContentReceiver)
 
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is downloaded"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentDownloader)).error(errorHandler).await()
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), new ContentDownloader(contentReceiver)))
+        .error(errorHandler).await()
 
     then: "The file not exists error should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}

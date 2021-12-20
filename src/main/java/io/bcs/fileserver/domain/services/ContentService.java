@@ -7,8 +7,8 @@ import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.content.ContentManagement;
-import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
@@ -57,7 +57,7 @@ public class ContentService implements ContentManagement {
    * @return The file download completion promise
    */
   @Override
-  public Promise<Void> download(DownloadCommand command, ContentReceiver downloader) {
+  public Promise<Void> download(DownloadCommand command, ContentDownloader downloader) {
     return Promises.of(deferred -> {
       File file = retrieveExistingFile(extractStorageFileName(command.getStorageFileName()));
       file.downloadContent(fileStorage, downloader, command.getRanges()).delegate(deferred);

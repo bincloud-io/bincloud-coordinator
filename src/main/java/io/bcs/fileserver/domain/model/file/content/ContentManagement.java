@@ -30,7 +30,7 @@ public interface ContentManagement {
    * @param downloader The file download command
    * @return The file download completion promise
    */
-  Promise<Void> download(DownloadCommand command, ContentReceiver downloader);
+  Promise<Void> download(DownloadCommand command, ContentDownloader downloader);
 
   /**
    * This interface describes a content download command.

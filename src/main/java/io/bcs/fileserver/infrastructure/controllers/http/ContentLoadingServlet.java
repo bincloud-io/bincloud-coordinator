@@ -16,6 +16,7 @@ import io.bcs.fileserver.domain.errors.FileDisposedException;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.content.ContentManagement;
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
@@ -115,7 +116,9 @@ public class ContentLoadingServlet extends HttpServlet {
       HttpServletResponse response, Supplier<ContentReceiver> receiverProvider) {
     Promises.<Void>of(deferred -> {
       ContentReceiver receiver = receiverProvider.get();
-      contentService.download(new HttpServletDownloadCommand(request), receiver).delegate(deferred);
+      contentService
+          .download(new HttpServletDownloadCommand(request), new ContentDownloader(receiver))
+          .delegate(deferred);
     }).error(FileNotSpecifiedException.class,
         applicationError(response, HttpServletResponse.SC_BAD_REQUEST))
         .error(FileNotExistsException.class,
