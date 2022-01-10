@@ -2,7 +2,7 @@ package io.bcs.fileserver.domain.services.acl;
 
 import io.bce.validation.ValidationContext;
 import io.bce.validation.ValidationContext.Validatable;
-import io.bcs.fileserver.domain.model.file.File.CreateFile;
+import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile;
 import io.bcs.fileserver.domain.validations.FileNameValidation;
 import io.bcs.fileserver.domain.validations.MediaTypeAcceptanceValidation;
 import io.bcs.fileserver.domain.validations.MediaTypeValidation;

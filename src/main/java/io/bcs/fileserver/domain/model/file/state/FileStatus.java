@@ -75,7 +75,5 @@ public enum FileStatus {
     Long getTotalLength();
 
     void startFileDistribution(Long contentLength);
-
-    void dispose();
   }
 }

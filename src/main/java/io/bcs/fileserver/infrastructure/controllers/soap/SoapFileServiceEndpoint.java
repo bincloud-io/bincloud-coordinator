@@ -5,7 +5,7 @@ import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bcs.common.errors.SoapFault;
 import io.bcs.fileserver.domain.Constants;
-import io.bcs.fileserver.domain.model.file.File.CreateFile;
+import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile;
 import io.bcs.fileserver.domain.model.file.FileManagement;
 import io.bcs.fileserver.domain.services.acl.SafeCreateFileCommand;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;

@@ -11,7 +11,6 @@ import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Collection;
-import java.util.Optional;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
@@ -50,29 +49,6 @@ public class File {
   private String fileName = DEFAULT_FILE_NAME;
   @Default
   private Long totalLength = 0L;
-
-  private File(ContentLocator contentLocator, CreateFile createFileCommand) {
-    super();
-    this.storageName = contentLocator.getStorageName();
-    this.mediaType = extractMediaType(createFileCommand);
-    this.storageFileName = contentLocator.getStorageFileName();
-    this.fileName = createFileCommand.getFileName().orElse(storageFileName);
-    this.status = FileStatus.DRAFT;
-    this.totalLength = 0L;
-  }
-
-  /**
-   * Create a file entity.
-   *
-   * @param fileStorage The file storage
-   * @param command     The file creation command
-   * @return The operation result promise
-   */
-  public static final Promise<File> create(FileStorage fileStorage, CreateFile command) {
-    return Promises.of(deferred -> {
-      deferred.resolve(new File(fileStorage.create(extractMediaType(command)), command));
-    });
-  }
 
   /**
    * Get the file content locator.
@@ -119,10 +95,6 @@ public class File {
     return getFileState().getLifecycle(storage);
   }
 
-  private static String extractMediaType(CreateFile command) {
-    return command.getMediaType().orElse(DEFAULT_MEDIA_TYPE);
-  }
-
   private FileState getFileState() {
     return this.status.createState(createEntityAccessor());
   }
@@ -140,11 +112,6 @@ public class File {
       }
 
       @Override
-      public void dispose() {
-        File.this.dispose();
-      }
-
-      @Override
       public void startFileDistribution(Long contentLength) {
         File.this.startFileDistribution(contentLength);
       }
@@ -154,22 +121,5 @@ public class File {
   private void startFileDistribution(Long contentLength) {
     this.totalLength = contentLength;
     this.status = FileStatus.DISTRIBUTING;
-  }
-
-  private void dispose() {
-    this.status = FileStatus.DISPOSED;
-    this.totalLength = 0L;
-  }
-
-  /**
-   * This interface describes a file entity creation command.
-   *
-   * @author Dmitry Mikhaylenko
-   *
-   */
-  public interface CreateFile {
-    Optional<String> getMediaType();
-
-    Optional<String> getFileName();
   }
 }

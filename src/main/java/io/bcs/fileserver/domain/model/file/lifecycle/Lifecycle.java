@@ -13,8 +13,6 @@ import io.bcs.fileserver.domain.model.storage.ContentLocator;
 public interface Lifecycle {
   LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader);
 
-  LifecycleMethod<Void> dispose();
-
   /**
    * This interface describes the interface of life-cycle affecting operation execution.
    *

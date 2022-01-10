@@ -7,7 +7,6 @@ import io.bcs.fileserver.domain.errors.ContentNotUploadedException;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.content.FileContent;
 import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
-import io.bcs.fileserver.domain.model.file.lifecycle.LifecycleDisposeFileMethod;
 import io.bcs.fileserver.domain.model.file.lifecycle.LifecycleUploadFileMethod;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileState;
@@ -38,12 +37,6 @@ public class FileDraftState extends FileState {
   @Override
   public Lifecycle getLifecycle(FileStorage storage) {
     return new Lifecycle() {
-      @Override
-      public LifecycleMethod<Void> dispose() {
-        log.debug("The file dispose is going to be performed for draft file");
-        return new LifecycleDisposeFileMethod(getFileEntityAccessor(), storage);
-      }
-
       @Override
       public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
         log.debug("The file content upload is going to be performed for draft file");

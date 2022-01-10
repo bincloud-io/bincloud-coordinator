@@ -20,7 +20,6 @@ import io.bcs.fileserver.domain.errors.ContentUploadedException
 import io.bcs.fileserver.domain.errors.FileDisposedException
 import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
-import io.bcs.fileserver.domain.model.file.File.CreateFile
 import io.bcs.fileserver.domain.model.file.content.ContentDownloader
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver
 import io.bcs.fileserver.domain.model.file.content.ContentUploader
@@ -72,158 +71,6 @@ class FileSpec extends Specification {
 
     and: "The file content length should be 0 bytes"
     file.getTotalLength() == 0L
-  }
-
-  def "Scenario: successfully create new file"() {
-    File file
-    given: """The file storage creates the file, located: {storageName: ${STORAGE_NAME}, storageFileName: ${STORAGE_FILE_NAME}} for ${MEDIA_TYPE}"""
-    this.fileStorage.create(MEDIA_TYPE) >> contentLocator()
-
-    and: "The file creation command with media type ${MEDIA_TYPE}"
-    CreateFile command = createFileCommand(MEDIA_TYPE, FILE_NAME)
-
-    and: "The file create response handler"
-    ResponseHandler responseHandler = Mock(ResponseHandler)
-
-    when: "The file is created"
-    WaitingPromise.of(File.create(fileStorage, command)).then(responseHandler).await()
-
-    then: "The response handler shoudl accept resolved file"
-    1 * responseHandler.onResponse(_) >> {file = it[0]}
-    ContentLocator fileContentLocator = file.getLocator();
-
-    and: "The storage file name should be ${STORAGE_FILE_NAME}"
-    fileContentLocator.getStorageFileName() == STORAGE_FILE_NAME
-
-    and: "The storage name should be ${STORAGE_NAME}"
-    fileContentLocator.getStorageName() == STORAGE_NAME
-
-    and: "The file name should be ${FILE_NAME}"
-    file.getFileName() == FILE_NAME
-
-    and: "The file media type should be ${MEDIA_TYPE}"
-    file.getMediaType() == MEDIA_TYPE
-
-    and: "The file status should be ${FileStatus.DRAFT}"
-    file.getStatus() == FileStatus.DRAFT
-
-    and: "The file content length should be 0 bytes"
-    file.getTotalLength() == 0L
-  }
-
-  def "Scenario: successfully create new file for missig media type and file name"() {
-    File file
-    given: """The file storage creates the file, located: {storageName: ${STORAGE_NAME}, storageFileName: ${STORAGE_FILE_NAME}} for ${File.DEFAULT_MEDIA_TYPE}"""
-    this.fileStorage.create(File.DEFAULT_MEDIA_TYPE) >> contentLocator()
-
-    and: "The file creation command with media type empty media type and file name"
-    CreateFile command = createFileCommand(null, null)
-
-    and: "The file create response handler"
-    ResponseHandler responseHandler = Mock(ResponseHandler)
-
-    when: "The file is created"
-    WaitingPromise.of(File.create(fileStorage, command)).then(responseHandler).await()
-
-    then: "The response handler shoudl accept resolved file"
-    1 * responseHandler.onResponse(_) >> {file = it[0]}
-    ContentLocator fileContentLocator = file.getLocator();
-
-    and: "The storage file name should be ${STORAGE_FILE_NAME}"
-    fileContentLocator.getStorageFileName() == STORAGE_FILE_NAME
-
-    and: "The storage name should be ${STORAGE_NAME}"
-    fileContentLocator.getStorageName() == STORAGE_NAME
-
-    and: "The file name should be ${STORAGE_FILE_NAME}"
-    file.getFileName() == STORAGE_FILE_NAME
-
-    and: "The file media type should be ${File.DEFAULT_MEDIA_TYPE}"
-    file.getMediaType() == File.DEFAULT_MEDIA_TYPE
-
-    and: "The file status should be ${FileStatus.DRAFT}"
-    file.getStatus() == FileStatus.DRAFT
-
-    and: "The file content length should be 0 bytes"
-    file.getTotalLength() == 0L
-  }
-
-  def "Scenario: create new file with file storage error"() {
-    FileStorageException fileStorageException
-    given: """The file storage creates the file, located: {storageName: ${STORAGE_NAME}, storageFileName: ${STORAGE_FILE_NAME}} for ${MEDIA_TYPE}"""
-    this.fileStorage.create(MEDIA_TYPE) >> {throw new FileStorageException(new RuntimeException())}
-
-    and: "The file creation command with media type ${MEDIA_TYPE}"
-    CreateFile command = createFileCommand(MEDIA_TYPE, FILE_NAME)
-
-    and: "The promise reject error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file is created"
-    WaitingPromise.of(File.create(fileStorage, command)).error(errorHandler).await()
-
-    then: "The file storage error should be happened"
-    1 * errorHandler.onError(_) >> {fileStorageException = it[0]}
-    fileStorageException.getContextId() == Constants.CONTEXT
-    fileStorageException.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
-  }
-
-  def "Scenario: dispose draft file"() {
-    given: "The file in draft state"
-    File file = createDraftFile()
-
-    and: "The promise resolve response handler"
-    ResponseHandler responseHandler = Mock(ResponseHandler)
-
-    when: "The file is disposed"
-    WaitingPromise.of(disposeFile(file)).then(responseHandler).await()
-
-    then: "The response handler should be resolved"
-    1 * responseHandler.onResponse(_)
-
-    and: "The file status should be changed to the disposed"
-    file.getStatus() == FileStatus.DISPOSED
-
-    and: "The content length should be set to zero"
-    file.getTotalLength() == 0L
-  }
-
-
-  def "Scenario: dispose distributioning file"() {
-    given: "The file in distribution state"
-    File file = createDistributionFile()
-
-    and: "The promise resolve response handler"
-    ResponseHandler responseHandler = Mock(ResponseHandler)
-
-    when: "The file is disposed"
-    WaitingPromise.of(disposeFile(file)).then(responseHandler).await()
-
-    then: "The response handler should be resolved"
-    1 * responseHandler.onResponse(_)
-
-    and: "The file status should be changed to the disposed"
-    file.getStatus() == FileStatus.DISPOSED
-
-    and: "The content length should be set to zero"
-    file.getTotalLength() == 0L
-  }
-
-  def "Scenario: dispose disposed file"() {
-    FileDisposedException error
-    given: "The file in disposed state"
-    File file = createDisposedFile()
-
-    and: "The promise reject error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file is disposed"
-    WaitingPromise.of(disposeFile(file)).error(errorHandler).await()
-
-    then: "The file has already been exception should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
   }
 
   def "Scenario: successfully upload file content to file in the draft state"() {
@@ -563,10 +410,6 @@ class FileSpec extends Specification {
     return file.getLifecycle(fileStorage).upload(uploader).execute()
   }
 
-  private Promise<Void> disposeFile(File file) {
-    return file.getLifecycle(fileStorage).dispose().execute()
-  }
-
   private FileUploadStatistic createStatistic(File file, Long contentSize) {
     return new FileUploadStatistic() {
 
@@ -591,13 +434,6 @@ class FileSpec extends Specification {
         .fileName(FILE_NAME)
         .totalLength(contentLength)
         .build()
-  }
-
-  private CreateFile createFileCommand(String mediaType, String fileName) {
-    CreateFile command = Stub(CreateFile)
-    command.getMediaType() >> Optional.ofNullable(mediaType)
-    command.getFileName() >> Optional.ofNullable(fileName)
-    return command
   }
 
   private ContentLocator contentLocator() {

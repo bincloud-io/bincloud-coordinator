@@ -38,12 +38,6 @@ public class FileDisposedState extends FileState {
   public Lifecycle getLifecycle(FileStorage storage) {
     return new Lifecycle() {
       @Override
-      public LifecycleMethod<Void> dispose() {
-        log.debug("The file dispose is going to be performed for disposed file");
-        return new InacceptableLifecycleMethod<>(FileDisposedException::new);
-      }
-
-      @Override
       public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
         log.debug("The file content upload is going to be performed for disposed file");
         return new InacceptableLifecycleMethod<>(FileDisposedException::new);

@@ -12,7 +12,6 @@ import io.bcs.fileserver.domain.model.file.content.FileContent;
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
 import io.bcs.fileserver.domain.model.file.lifecycle.InacceptableLifecycleMethod;
 import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
-import io.bcs.fileserver.domain.model.file.lifecycle.LifecycleDisposeFileMethod;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileState;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
@@ -51,12 +50,6 @@ public class FileDistributingState extends FileState {
   @Override
   public Lifecycle getLifecycle(FileStorage storage) {
     return new Lifecycle() {
-      @Override
-      public LifecycleMethod<Void> dispose() {
-        log.debug("The file dispose is going to be performed for distributioning file");
-        return new LifecycleDisposeFileMethod(getFileEntityAccessor(), storage);
-      }
-
       @Override
       public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
         log.debug("The file content upload is going to be performed for distributioning file");

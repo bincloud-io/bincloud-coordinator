@@ -1,6 +1,7 @@
 package io.bcs.fileserver.infrastructure.config;
 
 import io.bce.validation.ValidationService;
+import io.bcs.fileserver.domain.model.file.FileDescriptorRepository;
 import io.bcs.fileserver.domain.model.file.FileManagement;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository;
@@ -47,6 +48,16 @@ public class ApplicationServicesConfig {
   public FileRepository fileRepository() {
     return new JpaFileRepository(entityManager, transactionManager);
   }
+  
+  /**
+   * The file descriptors repository configuration.
+   *
+   * @return The file descriptors repository
+   */
+  @Produces
+  public FileDescriptorRepository fileDescriptorRepository() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * The file metadata repository configuration.
@@ -87,6 +98,6 @@ public class ApplicationServicesConfig {
    */
   @Produces
   public FileManagement fileService() {
-    return new FileService(validationService, fileRepository(), fileStorage);
+    return new FileService(validationService, fileStorage, fileDescriptorRepository());
   }
 }

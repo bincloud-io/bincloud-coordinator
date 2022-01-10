@@ -1,7 +1,7 @@
 package io.bcs.fileserver.domain.model.file;
 
 import io.bce.promises.Promise;
-import io.bcs.fileserver.domain.model.file.File.CreateFile;
+import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile;
 
 /**
  * This interface describes file management operations.
