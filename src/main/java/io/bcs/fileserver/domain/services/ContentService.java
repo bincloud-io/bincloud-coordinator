@@ -12,7 +12,7 @@ import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.content.ContentManagement;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class ContentService implements ContentManagement {
     return Promises.of(deferred -> {
       log.info("Use-case: Download file.");
       File file = retrieveExistingFile(extractStorageFileName(storageFileName));
-      file.getLifecycle(fileStorage).upload(uploader).execute().chain(statistic -> {
+      file.uploadContent(fileStorage, uploader).chain(statistic -> {
         fileRepository.save(file);
         return Promises.resolvedBy(statistic);
       }).delegate(deferred);

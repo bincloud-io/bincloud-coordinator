@@ -3,7 +3,8 @@ package io.bcs.fileserver.domain.model.file;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
+import io.bcs.fileserver.domain.model.file.content.ContentUploader;
+import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.file.state.FileStatus;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileState;
@@ -70,6 +71,24 @@ public class File {
   }
 
   /**
+   * Upload file content.
+   *
+   * @param fileStorage     The file storage
+   * @param contentUploader The content uploader
+   * @return The upload process completion promise
+   */
+  public Promise<FileUploadStatistic> uploadContent(FileStorage fileStorage,
+      ContentUploader contentUploader) {
+    return Promises.of(deferred -> {
+      contentUploader.upload(getLocator(), getFileState().getContentWriter(fileStorage))
+          .chain(result -> {
+            startFileDistribution(result.getTotalLength());
+            return Promises.resolvedBy(result);
+          }).then(deferred);
+    });
+  }
+
+  /**
    * Download file content.
    *
    * @param fileStorage       The file storage
@@ -91,10 +110,6 @@ public class File {
     return fragments.getParts();
   }
 
-  public Lifecycle getLifecycle(FileStorage storage) {
-    return getFileState().getLifecycle(storage);
-  }
-
   private FileState getFileState() {
     return this.status.createState(createEntityAccessor());
   }
@@ -109,11 +124,6 @@ public class File {
       @Override
       public Long getTotalLength() {
         return File.this.totalLength;
-      }
-
-      @Override
-      public void startFileDistribution(Long contentLength) {
-        File.this.startFileDistribution(contentLength);
       }
     };
   }

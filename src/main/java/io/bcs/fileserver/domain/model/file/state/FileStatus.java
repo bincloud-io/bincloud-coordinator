@@ -1,9 +1,10 @@
 package io.bcs.fileserver.domain.model.file.state;
 
+import io.bce.interaction.streaming.Destination;
+import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.promises.Promise;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.content.FileContent;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
@@ -57,9 +58,8 @@ public enum FileStatus {
     public abstract Promise<FileContent> getContentAccess(FileStorage fileStorage,
         Collection<ContentFragment> contentFragments);
 
-    public abstract Lifecycle getLifecycle(FileStorage storage);
-
     
+    public abstract Destination<BinaryChunk> getContentWriter(FileStorage fileStorage);
   }
   
   /**
@@ -73,7 +73,5 @@ public enum FileStatus {
     ContentLocator getLocator();
 
     Long getTotalLength();
-
-    void startFileDistribution(Long contentLength);
   }
 }

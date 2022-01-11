@@ -2,7 +2,6 @@ package io.bcs.fileserver.domain.model.file.content;
 
 import io.bce.promises.Promise;
 import io.bcs.fileserver.domain.model.file.Range;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
 import java.util.Collection;
 import java.util.Optional;
 

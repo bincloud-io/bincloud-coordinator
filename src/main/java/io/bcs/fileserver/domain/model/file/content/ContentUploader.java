@@ -3,7 +3,6 @@ package io.bcs.fileserver.domain.model.file.content;
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.promises.Promise;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 
 /**

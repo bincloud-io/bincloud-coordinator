@@ -20,7 +20,7 @@ import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.content.ContentManagement;
 import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;

@@ -1,13 +1,12 @@
 package io.bcs.fileserver.domain.model.file.state;
 
+import io.bce.interaction.streaming.Destination;
+import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
-import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.content.FileContent;
-import io.bcs.fileserver.domain.model.file.lifecycle.InacceptableLifecycleMethod;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
 import io.bcs.fileserver.domain.model.file.state.FileStatus.FileState;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
@@ -35,13 +34,7 @@ public class FileDisposedState extends FileState {
   }
 
   @Override
-  public Lifecycle getLifecycle(FileStorage storage) {
-    return new Lifecycle() {
-      @Override
-      public LifecycleMethod<FileUploadStatistic> upload(ContentUploader uploader) {
-        log.debug("The file content upload is going to be performed for disposed file");
-        return new InacceptableLifecycleMethod<>(FileDisposedException::new);
-      }
-    };
+  public Destination<BinaryChunk> getContentWriter(FileStorage fileStorage) {
+    throw new FileDisposedException();
   }
 }

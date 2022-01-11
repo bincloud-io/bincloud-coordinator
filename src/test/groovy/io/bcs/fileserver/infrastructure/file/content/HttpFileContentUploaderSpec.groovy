@@ -7,9 +7,8 @@ import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.streaming.DirectStreamer
 import io.bcs.fileserver.domain.model.file.content.ContentUploader
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic
+import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic
 import io.bcs.fileserver.domain.model.storage.ContentLocator
-import io.bcs.fileserver.infrastructure.file.content.HttpFileContentUploader
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletRequest
 import spock.lang.Specification

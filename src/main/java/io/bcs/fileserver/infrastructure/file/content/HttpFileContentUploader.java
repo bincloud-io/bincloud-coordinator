@@ -9,7 +9,7 @@ import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
