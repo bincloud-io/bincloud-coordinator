@@ -115,7 +115,8 @@ class FileFragments {
     }
 
     private boolean isStartValueUnsatisfiable() {
-      log.debug("The range format is unsatisfiable. Start of range is greater than end of range.");
+      log.debug("The range format is unsatisfiable. Start of range value is negative "
+          + "or greater than end of range.");
       return start.compareTo(0L) < 0;
     }
   }
