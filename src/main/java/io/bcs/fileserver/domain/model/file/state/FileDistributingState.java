@@ -1,6 +1,5 @@
 package io.bcs.fileserver.domain.model.file.state;
 
-import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.logging.ApplicationLogger;
@@ -8,10 +7,13 @@ import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.errors.ContentUploadedException;
+import io.bcs.fileserver.domain.model.file.FileFragments;
+import io.bcs.fileserver.domain.model.file.Range;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
+import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.content.FileContent;
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
-import io.bcs.fileserver.domain.model.file.state.FileStatus.FileState;
+import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
@@ -37,19 +39,23 @@ public class FileDistributingState extends FileState {
   }
 
   @Override
-  public Promise<FileContent> getContentAccess(FileStorage fileStorage,
-      Collection<ContentFragment> contentFragments) {
-    return Promises.of(deferred -> {
-      log.debug("The file content download is going to be performed from distributioning file");
-      deferred.resolve(new StorageFileContent(fileStorage, contentFragments));
-    });
+  public Promise<FileUploadStatistic> uploadContent(FileStorage fileStorage,
+      ContentUploader contentUploader) {
+    log.debug("The file content upload is going to be performed from distributed file");
+    return Promises.rejectedBy(new ContentUploadedException());
   }
 
   @Override
-  public Destination<BinaryChunk> getContentWriter(FileStorage fileStorage) {
-    throw new ContentUploadedException();
+  public Promise<Void> downloadContent(FileStorage fileStorage, ContentDownloader contentDownloader,
+      Collection<Range> ranges) {
+    return Promises.of(deferred -> {
+      FileFragments fragments = new FileFragments(ranges, getTotalLength());
+      log.debug("The file content download is going to be performed from distributioning file");
+      FileContent content = new StorageFileContent(fileStorage, fragments.getParts());
+      contentDownloader.downloadContent(content).delegate(deferred);
+    });
   }
-  
+
   @Getter
   private class StorageFileContent implements FileContent {
     private ContentType type;
@@ -59,7 +65,7 @@ public class FileDistributingState extends FileState {
     public StorageFileContent(FileStorage storage, Collection<ContentFragment> fragments) {
       super();
       this.type = recognizeContentType(fragments.size());
-      this.locator = getFileEntityAccessor().getLocator();
+      this.locator = getContentLocator();
       this.parts = getContentParts(storage, fragments);
     }
 
@@ -96,7 +102,7 @@ public class FileDistributingState extends FileState {
 
     @Override
     public Long getLength() {
-      return getFileEntityAccessor().getTotalLength();
+      return getTotalLength();
     }
   }
 

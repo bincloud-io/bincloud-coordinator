@@ -1,16 +1,6 @@
 package io.bcs.fileserver.domain.model.file.state;
 
-import io.bce.interaction.streaming.Destination;
-import io.bce.interaction.streaming.binary.BinaryChunk;
-import io.bce.promises.Promise;
-import io.bcs.fileserver.domain.model.file.File;
-import io.bcs.fileserver.domain.model.file.content.FileContent;
-import io.bcs.fileserver.domain.model.storage.ContentFragment;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
-import io.bcs.fileserver.domain.model.storage.FileStorage;
-import java.util.Collection;
-import lombok.AccessLevel;
-import lombok.Getter;
+import io.bcs.fileserver.domain.model.file.state.FileState.FileEntityAccessor;
 
 /**
  * This class enumerates the file statuses.
@@ -39,39 +29,4 @@ public enum FileStatus {
   };
 
   public abstract FileState createState(FileEntityAccessor entityAccessor);
-
-  /**
-   * This abstract class describes a file state, which affects to the life-cycle coordination.
-   *
-   * @author Dmitry Mikhaylenko
-   *
-   */
-  public abstract static class FileState {
-    @Getter(value = AccessLevel.PROTECTED)
-    private final FileEntityAccessor fileEntityAccessor;
-
-    protected FileState(FileEntityAccessor fileEntityAccessor) {
-      super();
-      this.fileEntityAccessor = fileEntityAccessor;
-    }    
-    
-    public abstract Promise<FileContent> getContentAccess(FileStorage fileStorage,
-        Collection<ContentFragment> contentFragments);
-
-    
-    public abstract Destination<BinaryChunk> getContentWriter(FileStorage fileStorage);
-  }
-  
-  /**
-   * This interface describes an operations over the {@link File} entity inside a state
-   * implementations.
-   *
-   * @author Dmitry Mikhaylenko
-   *
-   */
-  public interface FileEntityAccessor {
-    ContentLocator getLocator();
-
-    Long getTotalLength();
-  }
 }

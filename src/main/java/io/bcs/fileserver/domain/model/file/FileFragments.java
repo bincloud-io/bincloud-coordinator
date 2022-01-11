@@ -17,7 +17,7 @@ import lombok.EqualsAndHashCode;
  * @author Dmitry Mikhaylenko
  *
  */
-class FileFragments {
+public class FileFragments {
   private static final ApplicationLogger log = Loggers.applicationLogger(FileFragments.class);
 
   private final Collection<ContentFragment> fragments;
