@@ -4,6 +4,8 @@ import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
+import io.bce.text.TextTemplates;
+import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileRepository;
@@ -13,7 +15,6 @@ import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Optional;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -65,8 +66,11 @@ public class ContentService implements ContentManagement {
   }
 
   private File retrieveExistingFile(String storageFileName) {
-    Supplier<File> fileProvider = new FileProvider(storageFileName, fileRepository, log);
-    return fileProvider.get();
+    return fileRepository.findById(storageFileName).orElseThrow(() -> {
+      log.warn(TextTemplates.createBy("The file with {{storageFileName}} hasn't been found.")
+          .withParameter("storageFileName", storageFileName));
+      return new FileNotExistsException();
+    });
   }
 
   private static String extractStorageFileName(Optional<String> storageFileName) {
