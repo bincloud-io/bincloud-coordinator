@@ -2,13 +2,13 @@ package io.bcs.fileserver.infrastructure.config;
 
 import io.bce.validation.ValidationService;
 import io.bcs.fileserver.domain.model.file.FileDescriptorRepository;
-import io.bcs.fileserver.domain.model.file.FileManagement;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
+import io.bcs.fileserver.infrastructure.repositories.JpaFileDescriptorRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
 import javax.enterprise.context.ApplicationScoped;
@@ -48,7 +48,7 @@ public class ApplicationServicesConfig {
   public FileRepository fileRepository() {
     return new JpaFileRepository(entityManager, transactionManager);
   }
-  
+
   /**
    * The file descriptors repository configuration.
    *
@@ -56,7 +56,7 @@ public class ApplicationServicesConfig {
    */
   @Produces
   public FileDescriptorRepository fileDescriptorRepository() {
-    throw new UnsupportedOperationException();
+    return new JpaFileDescriptorRepository(entityManager, transactionManager);
   }
 
   /**
@@ -97,7 +97,7 @@ public class ApplicationServicesConfig {
    * @return The file service.
    */
   @Produces
-  public FileManagement fileService() {
+  public FileService fileService() {
     return new FileService(validationService, fileStorage, fileDescriptorRepository());
   }
 }

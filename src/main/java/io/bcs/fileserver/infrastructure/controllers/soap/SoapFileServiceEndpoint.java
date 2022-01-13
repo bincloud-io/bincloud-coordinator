@@ -6,7 +6,7 @@ import io.bce.promises.Promise;
 import io.bcs.common.errors.SoapFault;
 import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile;
-import io.bcs.fileserver.domain.model.file.FileManagement;
+import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.domain.services.acl.SafeCreateFileCommand;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.soap.endpoints.files.CreateFileFault;
@@ -36,7 +36,7 @@ public class SoapFileServiceEndpoint implements WSFileService {
       Loggers.applicationLogger(SoapFileServiceEndpoint.class);
 
   @Inject
-  private FileManagement fileService;
+  private FileService fileService;
 
   @Inject
   private FileServerConfigurationProperties fileserverConfig;

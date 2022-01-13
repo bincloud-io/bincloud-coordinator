@@ -16,16 +16,15 @@ import io.bcs.fileserver.domain.errors.FileDisposedException;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
-import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
-import io.bcs.fileserver.domain.model.file.content.ContentManagement;
-import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.ContentUploader;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader.ContentReceiver;
+import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
+import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
 import io.bcs.fileserver.infrastructure.file.content.HttpDownloadCommand;
-import io.bcs.fileserver.infrastructure.file.content.HttpFileContentUploader;
+import io.bcs.fileserver.infrastructure.file.content.HttpFileContentSource;
 import io.bcs.fileserver.infrastructure.file.content.HttpFileDataReceiver;
 import io.bcs.fileserver.infrastructure.file.content.HttpHeadersReceiver;
 import java.io.IOException;
@@ -61,7 +60,7 @@ public class ContentLoadingServlet extends HttpServlet {
   private Streamer streamer;
 
   @Inject
-  private ContentManagement contentService;
+  private ContentService contentService;
 
   @Inject
   private FileServerConfigurationProperties contentLoadingProperties;
@@ -98,8 +97,8 @@ public class ContentLoadingServlet extends HttpServlet {
   private void uploadContent(AsyncContext asyncContext, HttpServletRequest request,
       HttpServletResponse response) {
     Promises.<FileUploadStatistic>of(deferred -> {
-      ContentUploader contentUploader = createFileContentUploader(request);
-      contentService.upload(getStorageFileNameParam(request), contentUploader).delegate(deferred);
+      contentService.upload(getStorageFileNameParam(request), createSender(request))
+          .delegate(deferred);
     }).then(uploadSuccessHandler(response))
         .error(FileNotSpecifiedException.class,
             applicationError(response, HttpServletResponse.SC_BAD_REQUEST))
@@ -115,9 +114,8 @@ public class ContentLoadingServlet extends HttpServlet {
   private void downloadContent(AsyncContext asyncContext, HttpServletRequest request,
       HttpServletResponse response, Supplier<ContentReceiver> receiverProvider) {
     Promises.<Void>of(deferred -> {
-      ContentReceiver receiver = receiverProvider.get();
-      contentService
-          .download(new HttpServletDownloadCommand(request), new ContentDownloader(receiver))
+
+      contentService.download(new HttpServletDownloadCommand(request), receiverProvider.get())
           .delegate(deferred);
     }).error(FileNotSpecifiedException.class,
         applicationError(response, HttpServletResponse.SC_BAD_REQUEST))
@@ -176,10 +174,9 @@ public class ContentLoadingServlet extends HttpServlet {
     }
   }
 
-  private ContentUploader createFileContentUploader(HttpServletRequest request) {
+  private ContentSource createSender(HttpServletRequest request) {
     try {
-      return new HttpFileContentUploader(streamer, request,
-          contentLoadingProperties.getBufferSize());
+      return new HttpFileContentSource(streamer, request, contentLoadingProperties.getBufferSize());
     } catch (IOException error) {
       throw new UnexpectedErrorException(error);
     }

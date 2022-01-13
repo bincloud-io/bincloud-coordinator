@@ -8,7 +8,7 @@ import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.model.file.content.ContentUploader;
+import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
  * @author Dmitry Mikhaylenko
  *
  */
-public class HttpFileContentUploader implements ContentUploader {
+public class HttpFileContentSource implements ContentSource {
   private final Streamer streamer;
   private final Source<BinaryChunk> source;
 
@@ -35,7 +35,7 @@ public class HttpFileContentUploader implements ContentUploader {
    * @param bufferSize The IO buffer size
    * @throws IOException Throws if input stream couldn't be obtained from request
    */
-  public HttpFileContentUploader(Streamer streamer, HttpServletRequest request, int bufferSize)
+  public HttpFileContentSource(Streamer streamer, HttpServletRequest request, int bufferSize)
       throws IOException {
     super();
     this.source = new InputStreamSource(request.getInputStream(), bufferSize);
@@ -43,10 +43,10 @@ public class HttpFileContentUploader implements ContentUploader {
   }
 
   @Override
-  public Promise<FileUploadStatistic> upload(ContentLocator locator,
+  public Promise<FileUploadStatistic> sendContent(ContentLocator contentLocator,
       Destination<BinaryChunk> destination) {
     return Promises.of(deferred -> {
-      uploadContent(locator, streamer.createStream(source, destination)).delegate(deferred);
+      uploadContent(contentLocator, streamer.createStream(source, destination)).delegate(deferred);
     });
   }
 

@@ -5,7 +5,6 @@ import static io.bcs.fileserver.domain.model.file.state.FileStatus.DISTRIBUTING
 import static io.bcs.fileserver.domain.model.file.state.FileStatus.DRAFT
 
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
-import io.bce.interaction.streaming.Destination
 import io.bce.interaction.streaming.Source
 import io.bce.interaction.streaming.binary.BinaryChunk
 import io.bce.promises.Promises
@@ -18,24 +17,20 @@ import io.bcs.fileserver.domain.errors.ContentUploadedException
 import io.bcs.fileserver.domain.errors.FileDisposedException
 import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
-import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.Range
-import io.bcs.fileserver.domain.model.file.content.ContentDownloader
-import io.bcs.fileserver.domain.model.file.content.ContentManagement
-import io.bcs.fileserver.domain.model.file.content.ContentReceiver
-import io.bcs.fileserver.domain.model.file.content.ContentUploader
 import io.bcs.fileserver.domain.model.file.content.FileContent
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic
-import io.bcs.fileserver.domain.model.file.content.ContentManagement.DownloadCommand
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader.ContentReceiver
+import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentType
 import io.bcs.fileserver.domain.model.file.state.FileStatus
-import io.bcs.fileserver.domain.model.storage.ContentFragment
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
+import io.bcs.fileserver.domain.services.ContentService.DownloadCommand
 import spock.lang.Specification
 
 class ContentServiceSpec extends Specification {
@@ -49,7 +44,7 @@ class ContentServiceSpec extends Specification {
 
   private FileRepository fileRepository
   private FileStorage fileStorage
-  private ContentManagement fileService
+  private ContentService fileService
 
   def setup() {
     this.fileRepository = Mock(FileRepository)
@@ -59,15 +54,17 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: unsuccessfully upload file content to the unspecified file"() {
     FileNotSpecifiedException error
-    given: "The file uploader"
-    ContentUploader contentUploader = Mock(ContentUploader)
+
+    given: "The file content source"
+    ContentSource contentSource = Mock(ContentSource)
 
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
 
     when: "The file is uploaded for unspecified file storage name"
-    WaitingPromise.of(fileService.upload(Optional.empty(), contentUploader)).error(errorHandler).await()
+    WaitingPromise.of(fileService.upload(Optional.empty(), contentSource))
+        .error(errorHandler).await()
 
     then: "The file is not specified error should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -81,14 +78,15 @@ class ContentServiceSpec extends Specification {
     given: "The draft file, missing into repository"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.empty()
 
-    and: "The content uploader"
-    ContentUploader contentUploader = Mock(ContentUploader)
+    and: "The file content source"
+    ContentSource contentSource = Mock(ContentSource)
 
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentUploader)).error(errorHandler).await()
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+        .error(errorHandler).await()
 
     then: "The file not exists error should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -100,6 +98,7 @@ class ContentServiceSpec extends Specification {
   def "Scenario: successfully upload file content to the draft file"() {
     File file
     FileUploadStatistic statistic
+
     given: "The draft file, existing into repository."+
     "Storage file name: ${STORAGE_FILE_NAME}" +
     "Storage name: ${STORAGE_NAME}" +
@@ -108,18 +107,16 @@ class ContentServiceSpec extends Specification {
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDraftFile())
 
-    and: "The file uploader"
-    ContentUploader contentUploader = Mock(ContentUploader)
-    contentUploader.upload(_, _) >> Promises.resolvedBy(fileUploadStatistic())
-
-    and: "The file storage is going get access on write"
-    fileStorage.getAccessOnWrite(_) >> Stub(Destination)
+    and: "The file content source"
+    ContentSource contentSource = Mock(ContentSource)
+    contentSource.sendContent(_, _) >> Promises.resolvedBy(fileUploadStatistic())
 
     and: "The response handler"
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentUploader)).then(responseHandler).await()
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+        .then(responseHandler).await(100L)
 
     then: "The file should be stored in the distributing state"
     1 * fileRepository.save(_) >> {file = it[0]}
@@ -159,14 +156,15 @@ class ContentServiceSpec extends Specification {
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
 
-    and: "The file uploader"
-    ContentUploader contentUploader = Mock(ContentUploader)
+    and: "The file content source"
+    ContentSource contentSource = Mock(ContentSource)
 
     and: "The promise reject error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentUploader)).error(errorHandler).await()
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+        .error(errorHandler).await()
 
     then: "The file has already been exception should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -188,14 +186,15 @@ class ContentServiceSpec extends Specification {
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDisposedFile())
 
-    and: "The file uploader"
-    ContentUploader contentUploader = Mock(ContentUploader)
+    and: "The file content source"
+    ContentSource contentSource = Mock(ContentSource)
 
     and: "The promise reject error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentUploader)).error(errorHandler).await()
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+        .error(errorHandler).await()
 
     then: "The file has already been exception should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
@@ -207,33 +206,6 @@ class ContentServiceSpec extends Specification {
     0 * fileStorage.getAccessOnWrite(_)
   }
 
-  def "Scenario: unsuccessfully upload file content if filesystem access went wrong"() {
-    FileStorageException error
-    given: "The draft file, existing into repository."+
-    "Storage file name: ${STORAGE_FILE_NAME}" +
-    "Storage name: ${STORAGE_NAME}" +
-    "Media type: ${MEDIA_TYPE}" +
-    "File name: ${FILE_NAME}" +
-    "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDraftFile())
-
-    and: "The file uploader"
-    ContentUploader contentUploader = Mock(ContentUploader)
-    contentUploader.upload(_, _) >> {throw new FileStorageException(new RuntimeException())}
-
-    and: "The promise reject error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentUploader)).error(errorHandler).await()
-
-    then: "The file has already been exception should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
-    error.getErrorSeverity() == ErrorSeverity.INCIDENT
-  }
-  
   def "Scenario: unsuccessfully download file content from the unspecified file"() {
     FileNotSpecifiedException error
     given: "The file content receiver"
@@ -243,7 +215,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.empty()), new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.empty()), contentReceiver))
         .error(errorHandler).await()
 
     then: "The file is not specified error should be happened"
@@ -265,7 +237,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
         .error(errorHandler).await()
 
     then: "The file not exists error should be happened"
@@ -292,7 +264,7 @@ class ContentServiceSpec extends Specification {
 
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
         .error(errorHandler).await()
 
 
@@ -320,7 +292,7 @@ class ContentServiceSpec extends Specification {
 
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
         .error(errorHandler).await()
 
 
@@ -350,8 +322,8 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), new ContentDownloader(contentReceiver)))
-        .then(responseHandler).await()
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
+        .then(responseHandler).await(100L)
 
     then: "The file content downloading should be started"
     1 * contentReceiver.receiveFullContent(_) >> {
@@ -369,7 +341,7 @@ class ContentServiceSpec extends Specification {
 
     and: "The file content should contains one part"
     fileContent.getParts().size() == 1
-    
+
     and: "The content part should represent whole file"
     ContentPart contentPart = fileContent.getParts()[0]
     contentPart.getContentFragment().getOffset() == 0L
@@ -405,7 +377,7 @@ class ContentServiceSpec extends Specification {
 
     when: "The file is uploaded"
     DownloadCommand downloadCommand = downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts)
-    WaitingPromise.of(fileService.download(downloadCommand, new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand, contentReceiver))
         .error(errorHandler).await(100L)
 
 
@@ -441,7 +413,7 @@ class ContentServiceSpec extends Specification {
 
     when: "The file is uploaded"
     DownloadCommand downloadCommand = downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts)
-    WaitingPromise.of(fileService.download(downloadCommand, new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand, contentReceiver))
         .error(errorHandler).await(100L)
 
 
@@ -476,7 +448,7 @@ class ContentServiceSpec extends Specification {
 
     when: "The file is uploaded"
     DownloadCommand downloadCommand = downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts)
-    WaitingPromise.of(fileService.download(downloadCommand, new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand, contentReceiver))
         .error(errorHandler).await(100L)
 
 
@@ -508,7 +480,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
         .then(responseHandler).await()
 
     then: "The file content downloading should be started"
@@ -527,7 +499,7 @@ class ContentServiceSpec extends Specification {
 
     and: "The file content should contains one part"
     fileContent.getParts().size() == 1
-    
+
     and: "The content part should represent fragment: offset=${partOffset}, size=${partSize}"
     ContentPart contentPart = fileContent.getParts()[0]
     contentPart.getContentFragment().getOffset() == partOffset
@@ -536,7 +508,7 @@ class ContentServiceSpec extends Specification {
 
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
-    
+
     where:
     rangeStart      | rangeEnd                             | partOffset                           | partSize
     null            | null                                 | 0L                                   | DISTRIBUTIONING_CONTENT_LENGTH
@@ -547,7 +519,7 @@ class ContentServiceSpec extends Specification {
     0L              | DISTRIBUTIONING_CONTENT_LENGTH + 10L | 0L                                   | DISTRIBUTIONING_CONTENT_LENGTH
     10L             | DISTRIBUTIONING_CONTENT_LENGTH + 10L | 10L                                  | DISTRIBUTIONING_CONTENT_LENGTH - 10L
   }
-  
+
   def "Scenario: successfully download partial content from distributed file for multiple part"() {
     FileContent fileContent
     given: "The existing distributing file"
@@ -571,7 +543,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), new ContentDownloader(contentReceiver)))
+    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
         .then(responseHandler).await()
 
     then: "The file content downloading should be started"
@@ -596,7 +568,7 @@ class ContentServiceSpec extends Specification {
     firstContentPart.getContentFragment().getOffset() == 0L
     firstContentPart.getContentFragment().getLength() == 10L
     firstContentPart.getContentSource() == firstSource
-    
+
     and: "The second content part should represent fragment: offset=10, size=10"
     ContentPart secondContentPart = fileContent.getParts()[1]
     secondContentPart.getContentFragment().getOffset() == 10L
@@ -604,7 +576,7 @@ class ContentServiceSpec extends Specification {
     secondContentPart.getContentSource() == secondSource
 
     and: "The response handler should be resolved"
-    1 * responseHandler.onResponse(_)    
+    1 * responseHandler.onResponse(_)
   }
 
   private Range createRange(Long start, Long end) {

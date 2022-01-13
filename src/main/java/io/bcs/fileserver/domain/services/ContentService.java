@@ -9,11 +9,14 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.file.Range;
 import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
-import io.bcs.fileserver.domain.model.file.content.ContentManagement;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
+import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
+import java.util.Collection;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +27,7 @@ import lombok.RequiredArgsConstructor;
  *
  */
 @RequiredArgsConstructor
-public class ContentService implements ContentManagement {
+public class ContentService {
   private static final ApplicationLogger log = Loggers.applicationLogger(ContentService.class);
 
   private final FileRepository fileRepository;
@@ -34,16 +37,15 @@ public class ContentService implements ContentManagement {
    * Upload file content.
    *
    * @param storageFileName The storage file name
-   * @param uploader        The file content uploader
+   * @param contentSender   The file content sender
    * @return The file upload statistic promise
    */
-  @Override
   public Promise<FileUploadStatistic> upload(Optional<String> storageFileName,
-      ContentUploader uploader) {
+      ContentSource contentSender) {
     return Promises.of(deferred -> {
       log.info("Use-case: Download file.");
       File file = retrieveExistingFile(extractStorageFileName(storageFileName));
-      file.uploadContent(fileStorage, uploader).chain(statistic -> {
+      file.uploadContent(new ContentUploader(fileStorage, contentSender)).chain(statistic -> {
         fileRepository.save(file);
         return Promises.resolvedBy(statistic);
       }).delegate(deferred);
@@ -53,15 +55,15 @@ public class ContentService implements ContentManagement {
   /**
    * Download file content.
    *
-   * @param command    The storage command
-   * @param downloader The file download command
+   * @param command         The storage command
+   * @param contentReceiver The file content receiver
    * @return The file download completion promise
    */
-  @Override
-  public Promise<Void> download(DownloadCommand command, ContentDownloader downloader) {
+  public Promise<Void> download(DownloadCommand command, ContentReceiver contentReceiver) {
     return Promises.of(deferred -> {
       File file = retrieveExistingFile(extractStorageFileName(command.getStorageFileName()));
-      file.downloadContent(fileStorage, downloader, command.getRanges()).delegate(deferred);
+      file.downloadContent(new ContentDownloader(fileStorage, contentReceiver), command.getRanges())
+          .delegate(deferred);
     });
   }
 
@@ -78,5 +80,17 @@ public class ContentService implements ContentManagement {
       log.warn("Storage file name has not been specified");
       return new FileNotSpecifiedException();
     });
+  }
+  
+  /**
+   * This interface describes a content download command.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public interface DownloadCommand {
+    Optional<String> getStorageFileName();
+
+    Collection<Range> getRanges();
   }
 }

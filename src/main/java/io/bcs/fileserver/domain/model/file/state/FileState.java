@@ -6,9 +6,10 @@ import io.bcs.fileserver.domain.model.file.Range;
 import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
-import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Collection;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * This abstract class describes a file state, which affects to the life-cycle coordination.
@@ -16,59 +17,26 @@ import java.util.Collection;
  * @author Dmitry Mikhaylenko
  *
  */
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class FileState {
-  private final FileEntityAccessor fileEntityAccessor;
+  @Getter(value = AccessLevel.PROTECTED)
+  private final File file;
 
-  protected FileState(FileEntityAccessor fileEntityAccessor) {
-    super();
-    this.fileEntityAccessor = fileEntityAccessor;
-  }
-  
   /**
    * Upload file content.
    *
-   * @param fileStorage     The file storage
    * @param contentUploader The content uploader
    * @return The upload process completion promise
    */
-  public abstract Promise<FileUploadStatistic> uploadContent(FileStorage fileStorage,
-      ContentUploader contentUploader);
+  public abstract Promise<FileUploadStatistic> uploadContent(ContentUploader contentUploader);
 
   /**
    * Download file content.
    *
-   * @param fileStorage       The file storage
    * @param contentDownloader The content downloader
    * @param ranges            The file ranges
    * @return The downloading process completion promise
    */
-  public abstract Promise<Void> downloadContent(FileStorage fileStorage,
-      ContentDownloader contentDownloader, Collection<Range> ranges);
-  
-  protected final ContentLocator getContentLocator() {
-    return fileEntityAccessor.getLocator();
-  }
-  
-  protected final Long getTotalLength() {
-    return fileEntityAccessor.getTotalLength();
-  }
-  
-  protected final void startFileDistribution(Long contentLength) {
-    fileEntityAccessor.startFileDistribution(contentLength);
-  }
-
-  /**
-   * This interface describes an operations over the {@link File} entity inside a state
-   * implementations.
-   *
-   * @author Dmitry Mikhaylenko
-   *
-   */
-  public interface FileEntityAccessor {
-    ContentLocator getLocator();
-
-    Long getTotalLength();
-    
-    public void startFileDistribution(Long contentLength);
-  }
+  public abstract Promise<Void> downloadContent(ContentDownloader contentDownloader,
+      Collection<Range> ranges);
 }

@@ -13,7 +13,6 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.PrimaryValidationException
 import io.bcs.fileserver.domain.model.file.FileDescriptor
 import io.bcs.fileserver.domain.model.file.FileDescriptorRepository
-import io.bcs.fileserver.domain.model.file.FileManagement
 import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile
 import io.bcs.fileserver.domain.model.file.state.FileStatus
 import io.bcs.fileserver.domain.model.storage.ContentLocator
@@ -33,7 +32,7 @@ class FileServiceSpec extends Specification {
   private ValidationService validationService
   private FileDescriptorRepository fileDescriptorRepository;
   private FileStorage fileStorage
-  private FileManagement fileService
+  private FileService fileService
 
   def setup() {
     this.validationService = Mock(ValidationService)

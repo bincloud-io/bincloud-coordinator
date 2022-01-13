@@ -12,7 +12,6 @@ import io.bcs.fileserver.domain.errors.PrimaryValidationException;
 import io.bcs.fileserver.domain.model.file.FileDescriptor;
 import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile;
 import io.bcs.fileserver.domain.model.file.FileDescriptorRepository;
-import io.bcs.fileserver.domain.model.file.FileManagement;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +22,7 @@ import lombok.RequiredArgsConstructor;
  *
  */
 @RequiredArgsConstructor
-public class FileService implements FileManagement {
+public class FileService {
   private static final ApplicationLogger log = Loggers.applicationLogger(FileService.class);
 
   private final ValidationService validationService;
@@ -36,7 +35,6 @@ public class FileService implements FileManagement {
    * @param command The file creation command
    * @return The file creation result promise
    */
-  @Override
   public Promise<String> createFile(CreateFile command) {
     return Promises.of(deferred -> {
       log.info("Use-case: Create file.");
@@ -58,7 +56,6 @@ public class FileService implements FileManagement {
    * @param storageFileName The storage file name
    * @return The file dispose complete promise
    */
-  @Override
   public Promise<Void> disposeFile(String storageFileName) {
     return Promises.of(deferred -> {
       log.info("Use-case: Dispose file.");

@@ -9,7 +9,7 @@ import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.interaction.streaming.binary.OutputStreamDestination;
 import io.bce.promises.Promise;
-import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
+import io.bcs.fileserver.domain.model.file.content.ContentDownloader.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.FileContent;
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadata;

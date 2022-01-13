@@ -7,10 +7,8 @@ import io.bcs.fileserver.domain.model.file.content.ContentDownloader;
 import io.bcs.fileserver.domain.model.file.content.ContentUploader;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.file.state.FileState;
-import io.bcs.fileserver.domain.model.file.state.FileState.FileEntityAccessor;
 import io.bcs.fileserver.domain.model.file.state.FileStatus;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
-import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Collection;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
@@ -71,56 +69,34 @@ public class File {
     };
   }
 
+  public void startFileDistribution(Long contentLength) {
+    this.totalLength = contentLength;
+    this.status = FileStatus.DISTRIBUTING;
+  }
+
   /**
    * Upload file content.
    *
-   * @param fileStorage     The file storage
    * @param contentUploader The content uploader
    * @return The upload process completion promise
    */
-  public Promise<FileUploadStatistic> uploadContent(FileStorage fileStorage,
-      ContentUploader contentUploader) {
-    return getFileState().uploadContent(fileStorage, contentUploader);
+  public Promise<FileUploadStatistic> uploadContent(ContentUploader contentUploader) {
+    return getFileState().uploadContent(contentUploader);
   }
 
   /**
    * Download file content.
    *
-   * @param fileStorage       The file storage
    * @param contentDownloader The content downloader
    * @param ranges            The file ranges
    * @return The downloading process completion promise
    */
-  public Promise<Void> downloadContent(FileStorage fileStorage, ContentDownloader contentDownloader,
+  public Promise<Void> downloadContent(ContentDownloader contentDownloader,
       Collection<Range> ranges) {
-    return getFileState().downloadContent(fileStorage, contentDownloader, ranges);
+    return getFileState().downloadContent(contentDownloader, ranges);
   }
 
   private FileState getFileState() {
-    return this.status.createState(createEntityAccessor());
-  }
-
-  private void startFileDistribution(Long contentLength) {
-    this.totalLength = contentLength;
-    this.status = FileStatus.DISTRIBUTING;
-  }
-
-  private FileEntityAccessor createEntityAccessor() {
-    return new FileEntityAccessor() {
-      @Override
-      public ContentLocator getLocator() {
-        return File.this.getLocator();
-      }
-
-      @Override
-      public Long getTotalLength() {
-        return File.this.totalLength;
-      }
-
-      @Override
-      public void startFileDistribution(Long contentLength) {
-        File.this.startFileDistribution(contentLength);
-      }
-    };
+    return this.status.createState(this);
   }
 }
