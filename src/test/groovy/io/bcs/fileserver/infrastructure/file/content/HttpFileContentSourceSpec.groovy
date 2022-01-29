@@ -6,15 +6,12 @@ import io.bce.interaction.streaming.binary.OutputStreamDestination
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.streaming.DirectStreamer
-import io.bcs.fileserver.domain.model.file.content.ContentUploader
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic
-import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource
-import io.bcs.fileserver.domain.model.file.state.FileStatus
+import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletRequest
-import io.bcs.fileserver.domain.model.file.File
 import spock.lang.Specification
 
 class HttpFileContentSourceSpec extends Specification {

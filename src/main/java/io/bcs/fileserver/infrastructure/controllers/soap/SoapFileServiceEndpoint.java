@@ -5,8 +5,8 @@ import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bcs.common.errors.SoapFault;
 import io.bcs.fileserver.domain.Constants;
-import io.bcs.fileserver.domain.model.file.FileDescriptor.CreateFile;
 import io.bcs.fileserver.domain.services.FileService;
+import io.bcs.fileserver.domain.services.FileService.CreateFile;
 import io.bcs.fileserver.domain.services.acl.SafeCreateFileCommand;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.soap.endpoints.files.CreateFileFault;
@@ -44,7 +44,6 @@ public class SoapFileServiceEndpoint implements WSFileService {
   @Override
   public CreateFileRsType createFile(CreateFileRqType parameters) throws CreateFileFault {
     try {
-
       CreateFileRsType response = new CreateFileRsType();
       CreateFile createCommand = new WsCreateFileCommand(parameters);
       Promise<String> result = fileService.createFile(createCommand);
@@ -75,8 +74,8 @@ public class SoapFileServiceEndpoint implements WSFileService {
   }
 
   private String getFileReference(String fileStorageName) {
-    return String.format("%s/file-content?fileStorageName=%s", fileserverConfig.getBaseUrlAddress(),
-        fileStorageName);
+    return String.format("%s/file-content?fileStorageName=%s",
+        fileserverConfig.getPublicBaseUrlAddress(), fileStorageName);
   }
 
   @ToString

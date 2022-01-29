@@ -1,7 +1,8 @@
 package io.bcs.fileserver.infrastructure.repositories;
 
-import io.bcs.fileserver.domain.model.storage.LocalStorageDescriptor;
-import io.bcs.fileserver.domain.model.storage.LocalStorageDescriptorRepository;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
+import java.util.Collection;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -18,10 +19,15 @@ public class JpaLocalStorageDescriptorRepository implements LocalStorageDescript
   private final EntityManager entityManager;
 
   @Override
-  public Optional<LocalStorageDescriptor> findByMediaType(String mediaType) {
+  public Collection<LocalStorageDescriptor> findByMediaType(String mediaType) {
     TypedQuery<LocalStorageDescriptor> query = entityManager
         .createNamedQuery("LocalStorageDescriptor.findByMediaType", LocalStorageDescriptor.class);
     query.setParameter("mediaType", mediaType);
-    return query.getResultList().stream().findFirst();
+    return query.getResultList();
+  }
+
+  @Override
+  public Optional<LocalStorageDescriptor> findByName(String storageName) {
+    return Optional.ofNullable(entityManager.find(LocalStorageDescriptor.class, storageName));
   }
 }

@@ -291,6 +291,7 @@
 					<sourceDestDir>${project.build.directory}/generated-sources/</sourceDestDir>
 					<wsdlFiles>
 						<wsdlFile>file-storage-service.wsdl</wsdlFile>
+						<wsdlFile>direct-file-access-service.wsdl</wsdlFile>
 					</wsdlFiles>
 					<!--bindingFiles>
 						<bindingFile>file-storage-service.xjb</bindingFile>

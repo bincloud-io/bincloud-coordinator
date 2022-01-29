@@ -86,7 +86,9 @@
 			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
 		</insert>
 		<rollback>
-			<sql>DELETE FROM REF_MEDIA_TYPES WHERE 1=1</sql>
+			<sql>DELETE FROM REF_MEDIA_TYPES WHERE MEDIA_TYPE IN
+				('application/octet-stream')
+			</sql>
 		</rollback>
 	</changeSet>
 
@@ -120,7 +122,7 @@
 			referencedColumnNames="MEDIA_TYPE" />
 	</changeSet>
 
-	<changeSet id="CSET.REF_LOCAL_STORAGES"
+	<changeSet id="CSET.LOCAL_STORAGES"
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="REF_LOCAL_STORAGES"
 			remarks="The dictionary table which enumerates local storages parameters. 
@@ -135,6 +137,11 @@
 				for current media type storage.">
 				<constraints nullable="false" />
 			</column>
+
+			<column name="DISK_QUOTE" type="BIGINT(20)"
+				remarks="Disk quote for the storage.">
+				<constraints nullable="false" />
+			</column>
 		</createTable>
 
 		<addPrimaryKey tableName="REF_LOCAL_STORAGES"
@@ -145,9 +152,52 @@
 			baseTableName="REF_LOCAL_STORAGES" baseColumnNames="STORAGE_NAME"
 			referencedTableName="REF_STORAGES"
 			referencedColumnNames="STORAGE_NAME" />
+
+		<createTable tableName="SPACE_ALLOCATIONS_HISTORY">
+			<column name="GUID" type="VARCHAR(36)"
+				remarks="The historical identifier">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The unique storage name, identifying storage.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="OPERATION_TYPE" type="VARCHAR(16)"
+				remarks="The management operation.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="SIZE" type="BIGINT(20)"
+				remarks="Allocated or released space size.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="SPACE_ALLOCATIONS_HISTORY"
+			columnNames="GUID" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$REF_LOCAL_STORAGES"
+			baseTableName="SPACE_ALLOCATIONS_HISTORY"
+			baseColumnNames="STORAGE_NAME"
+			referencedTableName="REF_LOCAL_STORAGES"
+			referencedColumnNames="STORAGE_NAME" />
 	</changeSet>
 
+	<changeSet id="CSET.STORAGES_MANAGEMENT"
+		author="Dmitry Mikhaylenko">
+		<sqlFile encoding="UTF-8" endDelimiter="/"
+			splitStatements="true" stripComments="true"
+			path="liquibase/v0.0.1/create_space_allocation_functions.sql" />
 
+		<rollback>
+			<sqlFile encoding="UTF-8" splitStatements="true"
+				stripComments="true"
+				path="liquibase/v0.0.1/drop_space_allocation_functions.sql" />
+		</rollback>
+	</changeSet>
 
 	<changeSet id="CSET.FILES" author="Dmitry Mikhaylenko">
 		<createTable tableName="FILES">

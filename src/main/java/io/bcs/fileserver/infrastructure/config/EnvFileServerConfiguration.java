@@ -13,12 +13,18 @@ import javax.enterprise.context.ApplicationScoped;
 public class EnvFileServerConfiguration implements FileServerConfigurationProperties {
   private static final String BUFFER_SIZE_VAR = "BC_IO_BUFFER_SIZE";
   private static final String CONTENT_FOLDER_VAR = "BC_CONTENT_FOLDER";
-
-  private static final String BASE_URL_VAR = "BC_BASE_URL";
+  private static final String BASE_PUBLIC_URL_VAR = "BC_BASE_URL";
+  private static final String BASE_PRIVATE_URL_VAR = "BC_BASE_PRIVATE_URL";
+  
 
   @Override
-  public String getBaseUrlAddress() {
-    return System.getenv(BASE_URL_VAR);
+  public String getPublicBaseUrlAddress() {
+    return System.getenv(BASE_PUBLIC_URL_VAR);
+  }
+
+  @Override
+  public String getPrivateBaseUrlAddress() {
+    return System.getenv(BASE_PRIVATE_URL_VAR);
   }
 
   @Override

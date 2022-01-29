@@ -87,15 +87,16 @@
 
 	<element name="DisposeFileRs" type="tns:DisposeFileRs_Type"></element>
 
-	<complexType name="GetFileReferenceRq_Type">
+	<complexType name="GetDirectContentPartReferenceRq_Type">
 		<sequence>
 			<element name="storageFileName"
 				type="tns:StorageFileName_Type" minOccurs="1" maxOccurs="1">
 			</element>
+			<element name="fragment" type="tns:ContentFragment_Type" minOccurs="1" maxOccurs="1"></element>
 		</sequence>
 	</complexType>
 
-	<complexType name="GetFileReferenceRs_Type">
+	<complexType name="GetDirectContentPartReferenceRs_Type">
 		<complexContent>
 			<extension base="global:ServiceResponse_Type">
 				<sequence>
@@ -107,11 +108,29 @@
 		</complexContent>
 	</complexType>
 
-	<element name="GetFileReferenceRq"
-		type="tns:GetFileReferenceRq_Type">
+	<element name="GetDirectContentPartReferenceRq"
+		type="tns:GetDirectContentPartReferenceRq_Type">
 	</element>
 
-	<element name="GetFileReferenceRs"
-		type="tns:GetFileReferenceRs_Type">
+	<element name="GetDirectContentPartReferenceRs"
+		type="tns:GetDirectContentPartReferenceRs_Type">
 	</element>
+
+
+	<complexType name="ContentFragment_Type">
+		<sequence>
+			<element name="offset" type="tns:FragmentOffset_Type"
+				minOccurs="1" maxOccurs="1">
+			</element>
+			<element name="length" type="tns:FragmentLength_Type" minOccurs="1" maxOccurs="1"></element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="FragmentOffset_Type">
+    	<restriction base="long"></restriction>
+    </simpleType>
+
+    <simpleType name="FragmentLength_Type">
+    	<restriction base="long"></restriction>
+    </simpleType>
 </schema>

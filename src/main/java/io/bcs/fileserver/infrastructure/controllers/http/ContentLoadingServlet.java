@@ -1,7 +1,6 @@
 package io.bcs.fileserver.infrastructure.controllers.http;
 
 import io.bce.domain.errors.ApplicationException;
-import io.bce.domain.errors.ErrorDescriptor.ErrorCode;
 import io.bce.domain.errors.UnexpectedErrorException;
 import io.bce.interaction.streaming.Streamer;
 import io.bce.logging.ApplicationLogger;
@@ -9,16 +8,15 @@ import io.bce.logging.Loggers;
 import io.bce.promises.Promise.ErrorHandler;
 import io.bce.promises.Promise.ResponseHandler;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException;
 import io.bcs.fileserver.domain.errors.ContentUploadedException;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
-import io.bcs.fileserver.domain.model.file.content.ContentDownloader.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource;
+import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
@@ -29,7 +27,6 @@ import io.bcs.fileserver.infrastructure.file.content.HttpFileDataReceiver;
 import io.bcs.fileserver.infrastructure.file.content.HttpHeadersReceiver;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
@@ -51,9 +48,6 @@ public class ContentLoadingServlet extends HttpServlet {
   private static final long serialVersionUID = 2026798739467262029L;
   private static final String HTTP_RANGES_HEADER = "Ranges";
   private static final String FILE_STORAGE_NAME_PARAMETER = "fileStorageName";
-  private static final String BOUNDED_CONTEXT_HEADER = "X-BC-CONTEXT";
-  private static final String ERROR_CODE_HEADER = "X-BC-ERR-CODE";
-  private static final String ERROR_SEVERITY_HEADER = "X-BC-ERR-SEVERITY";
   private static final String UPLOADED_SIZE_HEADER = "X-BC-UPLOADED-SIZE";
 
   @Inject
@@ -71,16 +65,17 @@ public class ContentLoadingServlet extends HttpServlet {
   @Override
   protected void doHead(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    executeAsynchronously(request, response, asyncContext -> {
+    HttpAsyncExecutor.of(request, response).executeAsynchronously(asyncContext -> {
       downloadContent(asyncContext, request, response,
           () -> createHeadersOnlyContentReceiver(response));
     });
+
   }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    executeAsynchronously(request, response, asyncContext -> {
+    HttpAsyncExecutor.of(request, response).executeAsynchronously(asyncContext -> {
       downloadContent(asyncContext, request, response,
           () -> createFileDataContentReceiver(response));
     });
@@ -89,7 +84,7 @@ public class ContentLoadingServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    executeAsynchronously(request, response, asyncContext -> {
+    HttpAsyncExecutor.of(request, response).executeAsynchronously(asyncContext -> {
       uploadContent(asyncContext, request, response);
     });
   }
@@ -97,8 +92,8 @@ public class ContentLoadingServlet extends HttpServlet {
   private void uploadContent(AsyncContext asyncContext, HttpServletRequest request,
       HttpServletResponse response) {
     Promises.<FileUploadStatistic>of(deferred -> {
-      contentService.upload(getStorageFileNameParam(request), createSender(request))
-          .delegate(deferred);
+      contentService.upload(getStorageFileNameParam(request), request.getContentLengthLong(),
+          createSender(request)).delegate(deferred);
     }).then(uploadSuccessHandler(response))
         .error(FileNotSpecifiedException.class,
             applicationError(response, HttpServletResponse.SC_BAD_REQUEST))
@@ -114,7 +109,6 @@ public class ContentLoadingServlet extends HttpServlet {
   private void downloadContent(AsyncContext asyncContext, HttpServletRequest request,
       HttpServletResponse response, Supplier<ContentReceiver> receiverProvider) {
     Promises.<Void>of(deferred -> {
-
       contentService.download(new HttpServletDownloadCommand(request), receiverProvider.get())
           .delegate(deferred);
     }).error(FileNotSpecifiedException.class,
@@ -132,11 +126,8 @@ public class ContentLoadingServlet extends HttpServlet {
 
   private ResponseHandler<FileUploadStatistic> uploadSuccessHandler(HttpServletResponse response) {
     return result -> {
-      response.setHeader(BOUNDED_CONTEXT_HEADER, Constants.CONTEXT.toString());
-      response.setHeader(ERROR_CODE_HEADER,
-          ErrorCode.SUCCESSFUL_COMPLETED_CODE.extract().toString());
       response.setHeader(UPLOADED_SIZE_HEADER, result.getTotalLength().toString());
-      response.setStatus(HttpServletResponse.SC_OK);
+      HttpResponseContext.of(response).writeSuccessContext();
     };
   }
 
@@ -150,16 +141,8 @@ public class ContentLoadingServlet extends HttpServlet {
       HttpServletResponse response, int statusCode) {
     return error -> {
       log.error(error);
-      response.setHeader(BOUNDED_CONTEXT_HEADER, error.getContextId().toString());
-      response.setHeader(ERROR_CODE_HEADER, error.getErrorCode().extract().toString());
-      response.setHeader(ERROR_SEVERITY_HEADER, error.getErrorSeverity().toString());
-      response.setStatus(statusCode);
+      HttpResponseContext.of(response).writeErrorContext(error, statusCode);
     };
-  }
-
-  private <T> void executeAsynchronously(HttpServletRequest servletRequest,
-      HttpServletResponse response, Consumer<AsyncContext> methodExecutor) {
-    methodExecutor.accept(servletRequest.startAsync(servletRequest, response));
   }
 
   private ContentReceiver createHeadersOnlyContentReceiver(HttpServletResponse response) {

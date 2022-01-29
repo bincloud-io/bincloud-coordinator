@@ -1,6 +1,6 @@
 package io.bcs.fileserver.infrastructure.repositories
 
-import static io.bcs.fileserver.domain.model.file.state.FileStatus.DISTRIBUTING
+import static io.bcs.fileserver.domain.model.file.FileStatus.DISTRIBUTING
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
@@ -18,7 +18,7 @@ import io.bce.CriticalSection
 import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
-import io.bcs.fileserver.domain.model.file.state.FileStatus
+import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository
 import io.bcs.testing.archive.ArchiveBuilder

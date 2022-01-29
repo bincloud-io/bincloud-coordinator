@@ -10,7 +10,7 @@
 	</named-query>
 
 	<entity
-		class="io.bcs.fileserver.domain.model.storage.StorageDescriptor">
+		class="io.bcs.fileserver.domain.model.storage.descriptor.StorageDescriptor">
 		<table name="REF_STORAGES" />
 		<inheritance strategy="JOINED" />
 		<discriminator-column name="TYPE" />
@@ -27,7 +27,7 @@
 	</entity>
 
 	<entity
-		class="io.bcs.fileserver.domain.model.storage.LocalStorageDescriptor">
+		class="io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor">
 		<table name="REF_LOCAL_STORAGES" />
 		<discriminator-value>LOCAL</discriminator-value>
 

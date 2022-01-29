@@ -5,8 +5,8 @@ import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
 
 import io.bcs.fileserver.domain.Constants
-import io.bcs.fileserver.domain.model.storage.LocalStorageDescriptor
-import io.bcs.fileserver.domain.model.storage.LocalStorageDescriptorRepository
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
@@ -27,6 +27,7 @@ class JpaLocalStorageDescriptorRepositoryITSpec extends Specification {
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
 
   private static final String FILE_STORAGE_NAME = "file.storage.name.12345"
+  private static final String FILE_STORAGE_UNKNOWN_NAME = "UNKNOWN"
   private static final String FILE_STORAGE = "LOCAL"
   private static final String MEDIA_TYPE = "application/mediatype"
   private static final String FILE_NAME = "file.txt"
@@ -61,38 +62,38 @@ class JpaLocalStorageDescriptorRepositoryITSpec extends Specification {
 
   @PersistenceContext(unitName="central")
   private EntityManager entityManager;
-  
+
   private LocalStorageDescriptorRepository localStorageDescriptorRepository;
-  
+
   def setup() {
     databaseConfigurer.setup("liquibase/master.changelog.xml")
     this.localStorageDescriptorRepository = new JpaLocalStorageDescriptorRepository(entityManager)
   }
-  
+
   def cleanup() {
     databaseConfigurer.tearDown()
   }
-  
-  def "Scenario: find existing local storage descriptor"() {
+
+  def "Scenario: find existing local storage descriptor by storage file name"() {
     given: "The local file storages are configured"
     databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
-    
+
     when: "The registered local storage is requested"
-    LocalStorageDescriptor storageDescriptor = localStorageDescriptorRepository.findByMediaType("application/mediatype").get()
-    
+    LocalStorageDescriptor storageDescriptor = localStorageDescriptorRepository.findByName(FILE_STORAGE).get()
+
     then: "The registered file storage descriptor should be received"
-    storageDescriptor.getStorageName() == "LOCAL"
-    storageDescriptor.getMediaType() == "application/mediatype"
+    storageDescriptor.getStorageName() == FILE_STORAGE
+    storageDescriptor.getMediaType() == MEDIA_TYPE
     storageDescriptor.getBaseDirectory() == "/srv/bincloud/"
   }
   
-  def "Scenario: find missing local storage descriptor"() {
+  def "Scenario: find missing local storage descriptor by storage file name"() {
     given: "The local file storages are configured"
     databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
-    
+
     expect: "File storage for unknown mediatype shouldn't be found"
-    localStorageDescriptorRepository.findByMediaType("unknown/mediatype").isPresent() == false 
+    localStorageDescriptorRepository.findByName(FILE_STORAGE_UNKNOWN_NAME).isPresent() == false
   }
 }

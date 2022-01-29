@@ -1,9 +1,11 @@
 package io.bcs.fileserver.domain.services
 
-import static io.bcs.fileserver.domain.model.file.state.FileStatus.DISPOSED
-import static io.bcs.fileserver.domain.model.file.state.FileStatus.DISTRIBUTING
-import static io.bcs.fileserver.domain.model.file.state.FileStatus.DRAFT
+import static io.bcs.fileserver.domain.model.file.FileStatus.DISPOSED
+import static io.bcs.fileserver.domain.model.file.FileStatus.DISTRIBUTING
+import static io.bcs.fileserver.domain.model.file.FileStatus.DRAFT
 
+import io.bce.domain.EventBus
+import io.bce.domain.EventPublisher
 import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity
 import io.bce.interaction.streaming.Source
 import io.bce.interaction.streaming.binary.BinaryChunk
@@ -20,14 +22,14 @@ import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
+import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.file.Range
 import io.bcs.fileserver.domain.model.file.content.FileContent
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic
-import io.bcs.fileserver.domain.model.file.content.ContentDownloader.ContentReceiver
-import io.bcs.fileserver.domain.model.file.content.ContentUploader.ContentSource
+import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentType
-import io.bcs.fileserver.domain.model.file.state.FileStatus
+import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import io.bcs.fileserver.domain.services.ContentService.DownloadCommand
@@ -44,12 +46,17 @@ class ContentServiceSpec extends Specification {
 
   private FileRepository fileRepository
   private FileStorage fileStorage
+  private EventBus eventBus
+  private EventPublisher eventPublisher
   private ContentService fileService
 
   def setup() {
     this.fileRepository = Mock(FileRepository)
     this.fileStorage = Mock(FileStorage)
-    this.fileService = new ContentService(fileRepository, fileStorage)
+    this.eventBus = Mock(EventBus)
+    this.eventPublisher = Mock(EventPublisher)
+    this.eventBus.getPublisher(_, _) >> eventPublisher
+    this.fileService = new ContentService(fileRepository, fileStorage, eventBus)
   }
 
   def "Scenario: unsuccessfully upload file content to the unspecified file"() {
@@ -63,7 +70,7 @@ class ContentServiceSpec extends Specification {
 
 
     when: "The file is uploaded for unspecified file storage name"
-    WaitingPromise.of(fileService.upload(Optional.empty(), contentSource))
+    WaitingPromise.of(fileService.upload(Optional.empty(), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
     then: "The file is not specified error should be happened"
@@ -85,7 +92,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
     then: "The file not exists error should be happened"
@@ -107,6 +114,9 @@ class ContentServiceSpec extends Specification {
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDraftFile())
 
+    and: "The file will be created"
+    fileStorage.create(_, _) >> contentLocator()
+    
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
     contentSource.sendContent(_, _) >> Promises.resolvedBy(fileUploadStatistic())
@@ -115,7 +125,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .then(responseHandler).await(100L)
 
     then: "The file should be stored in the distributing state"
@@ -125,7 +135,7 @@ class ContentServiceSpec extends Specification {
     file.getStorageFileName() == STORAGE_FILE_NAME
 
     and: "The storage name should be ${STORAGE_NAME}"
-    file.getStorageName() == STORAGE_NAME
+    file.getStorageName() == Optional.of(STORAGE_NAME)
 
     and: "The file status should be ${FileStatus.DISTRIBUTING}"
 
@@ -163,7 +173,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
     then: "The file has already been exception should be happened"
@@ -193,7 +203,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), contentSource))
+    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
     then: "The file has already been exception should be happened"

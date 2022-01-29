@@ -1,5 +1,6 @@
-package io.bcs.fileserver.domain.model.storage;
+package io.bcs.fileserver.domain.model.storage.descriptor;
 
+import io.bcs.fileserver.domain.model.storage.StorageType;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
@@ -9,7 +10,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
- * This class implements the storage descriptor entity.
+ * This class implements the base storage descriptor entity.
  *
  * @author Dmitry Mikhayklenko
  *
@@ -29,4 +30,6 @@ public abstract class StorageDescriptor {
 
   @Default
   private String mediaType = DEFAULT_MEDIA_TYPE;
+  
+  public abstract StorageType getType();
 }

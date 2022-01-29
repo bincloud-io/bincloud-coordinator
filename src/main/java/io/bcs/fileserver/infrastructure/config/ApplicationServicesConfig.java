@@ -1,16 +1,17 @@
 package io.bcs.fileserver.infrastructure.config;
 
+import io.bce.Generator;
+import io.bce.domain.EventBus;
 import io.bce.validation.ValidationService;
-import io.bcs.fileserver.domain.model.file.FileDescriptorRepository;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
-import io.bcs.fileserver.infrastructure.repositories.JpaFileDescriptorRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
+import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -39,6 +40,19 @@ public class ApplicationServicesConfig {
   @Inject
   private FileStorage fileStorage;
 
+  @Inject
+  private EventBus eventBus;
+
+  /**
+   * File name generator configuration.
+   *
+   * @return The file name generator
+   */
+  @Produces
+  public Generator<String> fileNameGenerator() {
+    return () -> UUID.randomUUID().toString();
+  }
+
   /**
    * The file repository configuration.
    *
@@ -47,16 +61,6 @@ public class ApplicationServicesConfig {
   @Produces
   public FileRepository fileRepository() {
     return new JpaFileRepository(entityManager, transactionManager);
-  }
-
-  /**
-   * The file descriptors repository configuration.
-   *
-   * @return The file descriptors repository
-   */
-  @Produces
-  public FileDescriptorRepository fileDescriptorRepository() {
-    return new JpaFileDescriptorRepository(entityManager, transactionManager);
   }
 
   /**
@@ -87,8 +91,10 @@ public class ApplicationServicesConfig {
    * @return The content service
    */
   @Produces
+  @ApplicationScoped
+  @SuppressWarnings("cdi-ambiguous-dependency")
   public ContentService contentService() {
-    return new ContentService(fileRepository(), fileStorage);
+    return new ContentService(fileRepository(), fileStorage, eventBus);
   }
 
   /**
@@ -97,7 +103,9 @@ public class ApplicationServicesConfig {
    * @return The file service.
    */
   @Produces
+  @ApplicationScoped
+  @SuppressWarnings("cdi-ambiguous-dependency")
   public FileService fileService() {
-    return new FileService(validationService, fileStorage, fileDescriptorRepository());
+    return new FileService(validationService, fileRepository(), fileNameGenerator(), eventBus);
   }
 }
