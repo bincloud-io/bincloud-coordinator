@@ -152,10 +152,23 @@
 			baseTableName="REF_LOCAL_STORAGES" baseColumnNames="STORAGE_NAME"
 			referencedTableName="REF_STORAGES"
 			referencedColumnNames="STORAGE_NAME" />
+	</changeSet>
 
+	<changeSet id="CSET.SPACE_MANAGEMENT"
+		author="Dmitry Mikhaylenko">
 		<createTable tableName="SPACE_ALLOCATIONS_HISTORY">
+			<column name="ID" type="BIGINT(20)"
+				remarks="The historiy autoincremented identifier.">
+				<constraints nullable="false" />
+			</column>
+
 			<column name="GUID" type="VARCHAR(36)"
 				remarks="The historical identifier">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
+				remarks="The file name for which space is allocated.">
 				<constraints nullable="false" />
 			</column>
 
@@ -171,12 +184,26 @@
 
 			<column name="SIZE" type="BIGINT(20)"
 				remarks="Allocated or released space size.">
-				<constraints nullable="false" />
+				<constraints nullable="true" />
+			</column>
+
+			<column name="ALLOCATION_REF_ID" type="BIGINT(20)"
+				remarks="The historiy autoincremented identifier.">
+				<constraints nullable="true" />
 			</column>
 		</createTable>
 
+		<addUniqueConstraint
+			constraintName="UNC__SPACE_ALLOC_HISTORY_MARKER" columnNames="GUID"
+			tableName="SPACE_ALLOCATIONS_HISTORY" />
+
 		<addPrimaryKey tableName="SPACE_ALLOCATIONS_HISTORY"
-			columnNames="GUID" />
+			columnNames="ID" />
+
+		<addAutoIncrement
+			tableName="SPACE_ALLOCATIONS_HISTORY" columnName="ID"
+			columnDataType="BIGINT(20)" startWith="1" incrementBy="0" />
+
 
 		<addForeignKeyConstraint
 			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$REF_LOCAL_STORAGES"
@@ -184,14 +211,17 @@
 			baseColumnNames="STORAGE_NAME"
 			referencedTableName="REF_LOCAL_STORAGES"
 			referencedColumnNames="STORAGE_NAME" />
-	</changeSet>
 
-	<changeSet id="CSET.STORAGES_MANAGEMENT"
-		author="Dmitry Mikhaylenko">
+		<addForeignKeyConstraint
+			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$ALLOC_ROW_REFERENCE"
+			baseTableName="SPACE_ALLOCATIONS_HISTORY"
+			baseColumnNames="ALLOCATION_REF_ID"
+			referencedTableName="SPACE_ALLOCATIONS_HISTORY"
+			referencedColumnNames="ID" />
+
 		<sqlFile encoding="UTF-8" endDelimiter="/"
 			splitStatements="true" stripComments="true"
 			path="liquibase/v0.0.1/create_space_allocation_functions.sql" />
-
 		<rollback>
 			<sqlFile encoding="UTF-8" splitStatements="true"
 				stripComments="true"
@@ -247,15 +277,16 @@
 
 		<createView viewName="VW_FILES_METADATA"
 			replaceIfExists="false">
-			SELECT 
-				F.STORAGE_FILE_NAME, 
-				F.STATUS, 
-				F.FILE_NAME, 
-				F.CONTENT_LENGTH, 
-				MT.MEDIA_TYPE, 
-				MT.CONTENT_DISPOSITION 
-			FROM FILES F INNER JOIN 
-				REF_MEDIA_TYPES MT ON F.MEDIA_TYPE = MT.MEDIA_TYPE
+			SELECT
+			F.STORAGE_FILE_NAME,
+			F.STATUS,
+			F.FILE_NAME,
+			F.CONTENT_LENGTH,
+			MT.MEDIA_TYPE,
+			MT.CONTENT_DISPOSITION
+			FROM FILES F
+			INNER JOIN
+			REF_MEDIA_TYPES MT ON F.MEDIA_TYPE = MT.MEDIA_TYPE
 		</createView>
 	</changeSet>
 </databaseChangeLog>
