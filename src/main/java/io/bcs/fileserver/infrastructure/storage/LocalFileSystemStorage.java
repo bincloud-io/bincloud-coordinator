@@ -3,12 +3,22 @@ package io.bcs.fileserver.infrastructure.storage;
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
+import io.bce.interaction.streaming.binary.InputStreamSource;
+import io.bce.interaction.streaming.binary.OutputStreamDestination;
 import io.bcs.fileserver.domain.errors.FileStorageException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -20,27 +30,86 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class LocalFileSystemStorage implements FileStorage {
   private final FilesystemSpaceManager filesystemSpaceManager;
+  private final LocalStorageDescriptorRepository localStorageDescriptorRepository;
   private final int bufferSize;
 
   @Override
   public ContentLocator create(File file, Long contentLength) throws FileStorageException {
-    return FileStorage.super.create(file, contentLength);
+    try {
+      String storageName = filesystemSpaceManager.allocateSpace(file.getMediaType(),
+          file.getStorageFileName(), contentLength);
+      ContentLocator contentLocator =
+          new DefaultFileLocator(storageName, file.getStorageFileName());
+      getPhysicalFile(contentLocator).createNewFile();
+      return contentLocator;
+    } catch (IOException error) {
+      throw new FileStorageException(error);
+    }
   }
 
   @Override
   public Destination<BinaryChunk> getAccessOnWrite(File file) throws FileStorageException {
-    return FileStorage.super.getAccessOnWrite(file);
+    try {
+      return new OutputStreamDestination(openFileForWrite(new DefaultFileLocator(file)));
+    } catch (FileNotFoundException error) {
+      throw new FileStorageException(error);
+    }
   }
 
   @Override
   public Source<BinaryChunk> getAccessOnRead(File file, ContentFragment fragment)
       throws FileStorageException {
-    return FileStorage.super.getAccessOnRead(file, fragment);
+    try {
+      return new InputStreamSource(openFileForRead(new DefaultFileLocator(file)), bufferSize);
+    } catch (FileNotFoundException error) {
+      throw new FileStorageException(error);
+    }
   }
 
   @Override
   public void delete(File file) throws FileStorageException {
-    FileStorage.super.delete(file);
+    getPhysicalFile(new DefaultFileLocator(file)).delete();
+  }
+
+  private java.io.File getPhysicalFile(ContentLocator contentLocator) {
+    return new java.io.File(getFileLocationPath(contentLocator));
+  }
+  
+  private FileOutputStream openFileForWrite(ContentLocator contentLocator)
+      throws FileNotFoundException {
+    return new FileOutputStream(getPhysicalFile(contentLocator));
+  }
+  
+  private FileInputStream openFileForRead(ContentLocator contentLocator)
+      throws FileNotFoundException {
+    return new FileInputStream(getFileLocationPath(contentLocator));
+  }
+
+  private String getFileLocationPath(ContentLocator contentLocator) {
+    LocalStorageDescriptor localStorage =
+        findExistingStorageDescriptor(contentLocator.getStorageName());
+    return String.format("%s/%s", localStorage.getBaseDirectory(),
+        contentLocator.getStorageFileName());
+  }
+
+  private LocalStorageDescriptor findExistingStorageDescriptor(String storageName) {
+    return localStorageDescriptorRepository.findByName(storageName)
+        .orElseThrow(() -> new FileStorageException(
+            String.format("Local storage isn't registered", storageName)));
+  }
+
+  @Getter
+  @EqualsAndHashCode
+  @RequiredArgsConstructor
+  private final class DefaultFileLocator implements ContentLocator {
+    private final String storageName;
+    private final String storageFileName;
+    
+    public DefaultFileLocator(File file) {
+      super();
+      this.storageFileName = file.getStorageFileName();
+      this.storageName = file.getStorageName().get();
+    }
   }
 
   /**
@@ -54,107 +123,20 @@ public class LocalFileSystemStorage implements FileStorage {
     /**
      * Allocate space on the storage for requested length of file.
      *
-     * @param fileName      The storage file name
-     * @param contentLength The requested content length
+     * @param mediaType       The file media type
+     * @param storageFileName The storage file name
+     * @param contentLength   The requested content length
      * @return The storage name on which the space will be allocated for requested file
      */
-    String allocateSpace(String fileName, Long contentLength);
+    String allocateSpace(String mediaType, String storageFileName, Long contentLength);
 
     /**
      * Release space on the storage for requested file.
      *
-     * @param fileName The file name
+     * @param storageName     The file storage name
+     * @param storageFileName The file name
      */
-    void releaseSpace(String fileName);
+    void releaseSpace(String storageName, String storageFileName);
 
   }
-
-//  @Override
-//  public ContentLocator create(String mediaType) throws FileStorageException {
-//    try {
-//      ContentLocator contentLocator = new FileLocator();
-//      getLocatedFile(contentLocator).createNewFile();
-//      return contentLocator;
-//    } catch (IOException error) {
-//      throw new FileStorageException(error);
-//    }
-//  }
-//
-//  @Override
-//  public Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
-//      throws FileStorageException {
-//    try {
-//      checkThatLocatedContentIsRelatedToTheCurrentStorage(contentLocator);
-//      return new OutputStreamDestination(openFileForWrite(contentLocator));
-//    } catch (FileNotFoundException error) {
-//      throw new FileStorageException(error);
-//    }
-//  }
-//
-//  @Override
-//  public Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
-//      ContentFragment fragment) throws FileStorageException {
-//    try {
-//      checkThatLocatedContentIsRelatedToTheCurrentStorage(contentLocator);
-//      FileInputStream inputStream = openFileForRead(contentLocator);
-//      inputStream.skip(fragment.getOffset());
-//      return new InputStreamSource(inputStream, fragment.getLength(), bufferSize);
-//    } catch (IOException error) {
-//      throw new FileStorageException(error);
-//    }
-//  }
-//
-//  @Override
-//  public void delete(ContentLocator contentLocator) throws FileStorageException {
-//    checkThatLocatedContentIsRelatedToTheCurrentStorage(contentLocator);
-//    getLocatedFile(contentLocator).delete();
-//  }
-//
-//  private FileOutputStream openFileForWrite(ContentLocator contentLocator)
-//      throws FileNotFoundException {
-//    return new FileOutputStream(getLocatedFile(contentLocator));
-//  }
-
-//  private FileInputStream openFileForRead(ContentLocator contentLocator)
-//      throws FileNotFoundException {
-//    return new FileInputStream(getFileLocationPath(contentLocator));
-//  }
-//
-//  private void checkThatLocatedContentIsRelatedToTheCurrentStorage(ContentLocator contentLocator) {
-//    if (!contentLocator.getStorageName().equals(storageName)) {
-//      throw new FileStorageException(new UnrelatedFileStorageException(contentLocator));
-//    }
-//  }
-
-//  private File getLocatedFile(ContentLocator contentLocator) {
-//    return new File(getFileLocationPath(contentLocator));
-//  }
-
-//  private String getFileLocationPath(ContentLocator contentLocator) {
-//    return String.format("%s/%s", baseDirectory, contentLocator.getStorageFileName());
-//  }
-
-//  private final class FileLocator implements ContentLocator {
-//    @Getter
-//    private final String storageFileName;
-//
-//    public FileLocator() {
-//      super();
-//      this.storageFileName = fileNameGenerator.generateNext();
-//    }
-//
-//    @Override
-//    public String getStorageName() {
-//      return storageName;
-//    }
-//  }
-//
-//  private final class UnrelatedFileStorageException extends Exception {
-//    private static final long serialVersionUID = -2401682394723841722L;
-//
-//    public UnrelatedFileStorageException(ContentLocator contentLocator) {
-//      super(String.format("The current file storage [%s] is not the related file storage [%s]",
-//          storageName, contentLocator.getStorageName()));
-//    }
-//  }
 }

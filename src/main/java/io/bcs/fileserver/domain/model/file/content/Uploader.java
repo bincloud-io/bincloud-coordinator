@@ -84,9 +84,10 @@ public class Uploader {
         Long contentLength) {
       return Promises.<FileUploadStatistic>of(deferred -> {
         ContentLocator contentLocator = fileStorage.create(file, contentLength);
+        file.specifyContentPlacement(contentLocator.getStorageName(), contentLength);
         Destination<BinaryChunk> destination = fileStorage.getAccessOnWrite(file);
         contentSource.sendContent(contentLocator, destination).then(statistic -> {
-          file.startFileDistribution(contentLocator.getStorageName(), statistic.getTotalLength());
+          file.startFileDistribution();
         }).delegate(deferred);
       }).error(err -> fileStorage.delete(file));
     }

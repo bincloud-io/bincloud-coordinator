@@ -71,12 +71,19 @@ public class File {
 
   /**
    * Start file distribution.
+   */
+  public void startFileDistribution() {
+    this.status = FileStatus.DISTRIBUTING;
+
+  }
+
+  /**
+   * Specify where content is going to be placed and how much space is allocated on storage.
    *
    * @param storageName   The storage file name
    * @param contentLength The distributed content length
    */
-  public void startFileDistribution(String storageName, Long contentLength) {
-    this.status = FileStatus.DISTRIBUTING;
+  public void specifyContentPlacement(String storageName, Long contentLength) {
     this.totalLength = contentLength;
     this.storageName = storageName;
   }
