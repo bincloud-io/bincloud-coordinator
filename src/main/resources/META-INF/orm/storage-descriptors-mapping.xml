@@ -35,6 +35,10 @@
 			<basic name="baseDirectory">
 				<column name="BASE_DIRECTORY" />
 			</basic>
+			
+			<basic name="diskQuote">
+				<column name="DISK_QUOTE"/>
+			</basic>
 		</attributes>
 	</entity>
 </entity-mappings>

@@ -30,7 +30,7 @@ import lombok.ToString;
  */
 @WebService(
     serviceName = "WSFileService",
-    endpointInterface = "io.bcs.port.adapter.file.endpoint.WSFileService")
+    endpointInterface = "io.bcs.fileserver.soap.endpoints.files.WSFileService")
 public class SoapFileServiceEndpoint implements WSFileService {
   private static final ApplicationLogger log =
       Loggers.applicationLogger(SoapFileServiceEndpoint.class);

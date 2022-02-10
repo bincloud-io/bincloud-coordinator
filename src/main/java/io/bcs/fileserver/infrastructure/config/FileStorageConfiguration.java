@@ -3,13 +3,17 @@ package io.bcs.fileserver.infrastructure.config;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
+import io.bcs.fileserver.infrastructure.repositories.JpaLocalStorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.storage.FilesystemPhysicalFile;
 import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.JdbcFilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.LocalFileSystemStorage;
+import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 /**
@@ -20,16 +24,19 @@ import javax.sql.DataSource;
  */
 @ApplicationScoped
 public class FileStorageConfiguration {
-  @Inject
-  @SuppressWarnings("cdi-ambiguous-dependency")
+  @PersistenceContext(unitName = "central")
+  private EntityManager entityManager;
+
+  @Resource(lookup = "java:/jdbc/BC_CENTRAL")
   private DataSource dataSource;
 
   @Inject
   private FileServerConfigurationProperties contentLoadingProperties;
 
-  @Inject
-  @SuppressWarnings("cdi-ambiguous-dependency")
-  private LocalStorageDescriptorRepository localStorageDescriptorRepository;
+  @Produces
+  public LocalStorageDescriptorRepository localStorageDescriptorRepository() {
+    return new JpaLocalStorageDescriptorRepository(entityManager);
+  }
 
   /**
    * The file system space manager configuration.
@@ -48,7 +55,7 @@ public class FileStorageConfiguration {
    */
   @Produces
   public FileStorage fileStorage() {
-    return new LocalFileSystemStorage(fileSpaceManager(), localStorageDescriptorRepository,
+    return new LocalFileSystemStorage(fileSpaceManager(), localStorageDescriptorRepository(),
         FilesystemPhysicalFile.factory(), contentLoadingProperties.getBufferSize());
   }
 }

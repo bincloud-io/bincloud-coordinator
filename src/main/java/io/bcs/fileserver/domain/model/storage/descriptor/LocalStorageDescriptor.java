@@ -25,7 +25,7 @@ public class LocalStorageDescriptor extends StorageDescriptor {
   private String baseDirectory = DEFAULT_BASE_DIRECTORY;
 
   @Default
-  private Long storageSize = 0L;
+  private Long diskQuote = 0L;
   
   @Override
   public StorageType getType() {

@@ -1,6 +1,5 @@
 package io.bcs.fileserver.domain.model.storage.descriptor;
 
-import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -10,8 +9,6 @@ import java.util.Optional;
  *
  */
 public interface LocalStorageDescriptorRepository {
-  
-  public Collection<LocalStorageDescriptor> findByMediaType(String mediaType);
   
   public Optional<LocalStorageDescriptor> findByName(String storageName);
   

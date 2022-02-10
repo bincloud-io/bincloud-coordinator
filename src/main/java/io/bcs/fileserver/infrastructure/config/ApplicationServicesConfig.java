@@ -91,7 +91,6 @@ public class ApplicationServicesConfig {
    * @return The content service
    */
   @Produces
-  @ApplicationScoped
   @SuppressWarnings("cdi-ambiguous-dependency")
   public ContentService contentService() {
     return new ContentService(fileRepository(), fileStorage, eventBus);
@@ -103,7 +102,6 @@ public class ApplicationServicesConfig {
    * @return The file service.
    */
   @Produces
-  @ApplicationScoped
   @SuppressWarnings("cdi-ambiguous-dependency")
   public FileService fileService() {
     return new FileService(validationService, fileRepository(), fileNameGenerator(), eventBus);
