@@ -12,7 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class EnvFileServerConfiguration implements FileServerConfigurationProperties {
   private static final String BUFFER_SIZE_VAR = "BC_IO_BUFFER_SIZE";
-  private static final String CONTENT_FOLDER_VAR = "BC_CONTENT_FOLDER";
   private static final String BASE_PUBLIC_URL_VAR = "BC_BASE_URL";
   private static final String BASE_PRIVATE_URL_VAR = "BC_BASE_PRIVATE_URL";
   
@@ -36,12 +35,7 @@ public class EnvFileServerConfiguration implements FileServerConfigurationProper
   public String getStorageName() {
     return "LOCAL";
   }
-
-  @Override
-  public String getBaseDirectory() {
-    return System.getenv(CONTENT_FOLDER_VAR);
-  }
-
+  
   @Override
   public Long getSyncOperationTimeout() {
     return 120L;

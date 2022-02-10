@@ -11,8 +11,6 @@ public interface FileServerConfigurationProperties {
   
   String getStorageName();
 
-  String getBaseDirectory();
-
   String getPublicBaseUrlAddress();
   
   String getPrivateBaseUrlAddress();

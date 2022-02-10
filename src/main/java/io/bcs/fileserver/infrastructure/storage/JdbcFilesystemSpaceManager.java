@@ -1,7 +1,6 @@
 package io.bcs.fileserver.infrastructure.storage;
 
 import io.bcs.fileserver.domain.errors.FileStorageException;
-import io.bcs.fileserver.infrastructure.storage.LocalFileSystemStorage.FilesystemSpaceManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

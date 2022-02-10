@@ -98,9 +98,8 @@ class JpaFileRepositoryITSpec extends Specification {
     file = fileRepository.findById(FILE_STORAGE_NAME).get()
 
     then: "The found file state should be equal to the state before save"
-    ContentLocator locator = file.getLocator();
-    locator.getStorageName() == FILE_STORAGE
-    locator.getStorageFileName() == FILE_STORAGE_NAME
+    file.getStorageName() == Optional.of(FILE_STORAGE)
+    file.getStorageFileName() == FILE_STORAGE_NAME
     file.getStatus() == FileStatus.DISTRIBUTING
     file.getFileName() == FILE_NAME
     file.getMediaType() == MEDIA_TYPE

@@ -204,7 +204,6 @@
 			tableName="SPACE_ALLOCATIONS_HISTORY" columnName="ID"
 			columnDataType="BIGINT(20)" startWith="1" incrementBy="0" />
 
-
 		<addForeignKeyConstraint
 			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$REF_LOCAL_STORAGES"
 			baseTableName="SPACE_ALLOCATIONS_HISTORY"
@@ -218,10 +217,18 @@
 			baseColumnNames="ALLOCATION_REF_ID"
 			referencedTableName="SPACE_ALLOCATIONS_HISTORY"
 			referencedColumnNames="ID" />
+			
+		<rollback>
+			<dropTable tableName="SPACE_ALLOCATIONS_HISTORY" />
+		</rollback>
+	</changeSet>
 
+	<changeSet id="CSET.SPACE_MANAGEMENT_PROCEDURES"
+		author="Dmitry Mikhaylenko">
 		<sqlFile encoding="UTF-8" endDelimiter="/"
 			splitStatements="true" stripComments="true"
 			path="liquibase/v0.0.1/create_space_allocation_functions.sql" />
+
 		<rollback>
 			<sqlFile encoding="UTF-8" splitStatements="true"
 				stripComments="true"
