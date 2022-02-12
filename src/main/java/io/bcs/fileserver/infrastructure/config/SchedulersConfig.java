@@ -40,6 +40,8 @@ public class SchedulersConfig {
   @Produces
   @FilesCleanTimer
   public ScheduleExpression filesCleanJobExpression() {
-    return new ScheduleExpression().minute("*/1").hour("*");
+    return new ScheduleExpression()
+        .hour("*")
+        .minute("*/20");
   }
 }

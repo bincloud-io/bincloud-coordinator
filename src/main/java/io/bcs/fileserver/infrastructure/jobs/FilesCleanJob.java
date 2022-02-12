@@ -1,6 +1,7 @@
 package io.bcs.fileserver.infrastructure.jobs;
 
 import io.bce.domain.errors.UnexpectedErrorException;
+import io.bcs.fileserver.domain.services.ContentService;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,6 +53,9 @@ public class FilesCleanJob {
   @Inject
   @SuppressWarnings("cdi-ambiguous-dependency")
   private TransactionManager transactionManager;
+  
+  @Inject
+  private ContentService contentService;
 
   @PostConstruct
   public void initTimer() {
@@ -76,7 +80,7 @@ public class FilesCleanJob {
     getLock().ifPresent(lock -> {
       try {
         resumeTransaction(transaction);
-        System.out.println("EXECUTE FILESYSTEM CLEAN");
+        contentService.clearDisposedFiles();
       } finally {
         unlock(lock);
       }
