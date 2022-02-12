@@ -8,10 +8,11 @@ import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.domain.services.FileService;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
+import io.bcs.fileserver.infrastructure.file.StorageFileNameGenerator;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
-import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -43,6 +44,9 @@ public class ApplicationServicesConfig {
   @Inject
   private EventBus eventBus;
 
+  @Inject
+  private FileServerConfigurationProperties fileServerConfigurationProperties;
+
   /**
    * File name generator configuration.
    *
@@ -50,7 +54,8 @@ public class ApplicationServicesConfig {
    */
   @Produces
   public Generator<String> fileNameGenerator() {
-    return () -> UUID.randomUUID().toString();
+    return new StorageFileNameGenerator(
+        fileServerConfigurationProperties::getDistributionPointName);
   }
 
   /**

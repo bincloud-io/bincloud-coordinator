@@ -22,6 +22,7 @@ import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import io.bcs.fileserver.domain.services.FileService.CreateFile
+import java.time.LocalDateTime
 import spock.lang.Specification
 
 class FileServiceSpec extends Specification {
@@ -89,6 +90,13 @@ class FileServiceSpec extends Specification {
 
     and: "The file name should be ${FILE_NAME}"
     file.getFileName() == FILE_NAME
+    
+    and: "The file creation time is initialized"
+    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) && 
+    file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
+    
+    and: "The file dispose time shouldn't be specified"
+    file.getDisposedAt().isPresent() == false
 
     and: "The total length should be 0"
     file.getTotalLength() == 0L
@@ -139,6 +147,13 @@ class FileServiceSpec extends Specification {
     and: "The total length should be 0"
     file.getTotalLength() == 0L
     
+    and: "The file creation time is initialized"
+    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) && 
+    file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
+    
+    and: "The file dispose time shouldn't be specified"
+    file.getDisposedAt().isPresent() == false
+    
     and: "The system should be notified about file creation"
     1 * eventPublisher.publish(_) >> {event = it[0]}
     event.getStorageFileName() == STORAGE_FILE_NAME
@@ -183,6 +198,13 @@ class FileServiceSpec extends Specification {
 
     and: "The total length should be 0"
     file.getTotalLength() == 0L
+    
+    and: "The file creation time is initialized"
+    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) && 
+    file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
+    
+    and: "The file dispose time shouldn't be specified"
+    file.getDisposedAt().isPresent() == false
     
     and: "The system should be notified about file creation"
     1 * eventPublisher.publish(_) >> {event = it[0]}
@@ -236,7 +258,7 @@ class FileServiceSpec extends Specification {
     file.getStorageFileName() == STORAGE_FILE_NAME
 
     and: "The storage name shouldn't be assigned"
-    file.getStorageName() == Optional.empty()
+    file.getStorageName() == Optional.of(STORAGE_NAME)
 
     and: "The status should be ${FileStatus.DRAFT}"
     file.getStatus() == FileStatus.DISPOSED
@@ -247,8 +269,13 @@ class FileServiceSpec extends Specification {
     and: "The file name should be equal to storage file name"
     file.getFileName() == FILE_NAME
 
-    and: "The total length should be 0"
-    file.getTotalLength() == 0L
+    and: "The total length should not be clear"
+    file.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
+    
+    and: "The file dispose time should be initialized"
+    LocalDateTime disposedAt = file.getDisposedAt().get()
+    disposedAt.isBefore(LocalDateTime.now().plusMinutes(1L)) &&
+    disposedAt.isAfter(LocalDateTime.now().minusMinutes(1L))
 
     and: "The system should be notified that file has been disposed"
     1 * eventPublisher.publish(_) >> {event = it[0]}
@@ -293,7 +320,7 @@ class FileServiceSpec extends Specification {
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
   }
-
+  
   private File createFileDescriptor(FileStatus status, Long contentLength) {
     return File.builder()
         .storageName(STORAGE_NAME)

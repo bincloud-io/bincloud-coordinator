@@ -1,5 +1,6 @@
 package io.bcs.fileserver.domain.model.file;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -10,6 +11,8 @@ import java.util.Optional;
  */
 public interface FileRepository {
   public Optional<File> findById(String storageFileName);
-
+  
+  public Collection<File> findNotRemovedDisposedFiles();
+  
   public void save(File file);
 }

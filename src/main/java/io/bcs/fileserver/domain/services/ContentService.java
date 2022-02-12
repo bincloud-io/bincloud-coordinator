@@ -3,12 +3,14 @@ package io.bcs.fileserver.domain.services;
 import io.bce.domain.EventBus;
 import io.bce.domain.EventPublisher;
 import io.bce.domain.EventType;
+import io.bce.interaction.polling.Polling;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bce.text.TextTemplates;
 import io.bcs.fileserver.domain.Constants;
+import io.bcs.fileserver.domain.errors.FileNotDisposedException;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.model.file.File;
@@ -76,6 +78,27 @@ public class ContentService {
       Downloader downloader = new Downloader(file, fileStorage);
       downloader.receiveContent(command.getRanges(), contentReceiver).delegate(deferred);
     });
+  }
+
+  /**
+   * Clear all disposed files.
+   */
+  public void clearDisposedFiles() {
+    Polling.sequentialPolling(fileRepository::findNotRemovedDisposedFiles)
+        .forEach(this::removeDisposedFile);
+  }
+
+  private void removeDisposedFile(File file) {
+    checkThatFileHasNotBeenDisposed(file);
+    fileStorage.delete(file);
+    file.clearContentPlacement();
+    fileRepository.save(file);
+  }
+  
+  private void checkThatFileHasNotBeenDisposed(File file) {
+    if (file.isNotDisposed()) {
+      throw new FileNotDisposedException(); 
+    }
   }
 
   private <E> EventPublisher<E> createPublisher(EventType<E> eventType) {

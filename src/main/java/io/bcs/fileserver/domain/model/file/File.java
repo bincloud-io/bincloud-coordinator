@@ -4,6 +4,7 @@ import io.bce.Generator;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Builder.Default;
@@ -34,16 +35,26 @@ public class File {
   @Include
   @Default
   private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
+  
   @Getter(value = AccessLevel.NONE)
   private String storageName;
+  
   @Default
   private FileStatus status = FileStatus.DRAFT;
+  
   @Default
   private String mediaType = DEFAULT_MEDIA_TYPE;
+  
   @Default
   private String fileName = DEFAULT_FILE_NAME;
+  
   @Default
   private Long totalLength = 0L;
+
+  @Default
+  private LocalDateTime createdAt = LocalDateTime.now();
+
+  private LocalDateTime disposedAt;
 
   /**
    * Create file.
@@ -56,6 +67,7 @@ public class File {
     this.storageFileName = filenameGenerator.generateNext();
     this.mediaType = creationData.getMediaType();
     this.fileName = creationData.getFileName().orElse(storageFileName);
+    this.createdAt = LocalDateTime.now();
     this.status = FileStatus.DRAFT;
     this.totalLength = 0L;
   }
@@ -70,11 +82,32 @@ public class File {
   }
 
   /**
+   * Check that the file was disposed.
+   *
+   * @return True if file is disposed and false otherwise
+   */
+  public boolean isDisposed() {
+    return status == FileStatus.DISPOSED;
+  }
+
+  /**
+   * Check that the file wasn't disposed.
+   *
+   * @return True if file wasn't disposed and false otherwise
+   */
+  public boolean isNotDisposed() {
+    return !isDisposed();
+  }
+  
+  public Optional<LocalDateTime> getDisposedAt() {
+    return Optional.ofNullable(disposedAt);
+  }
+
+  /**
    * Start file distribution.
    */
   public void startFileDistribution() {
     this.status = FileStatus.DISTRIBUTING;
-
   }
 
   /**
@@ -88,8 +121,21 @@ public class File {
     this.storageName = storageName;
   }
 
+  /**
+   * Relocate file to another storage.
+   *
+   * @param storageName The storage name
+   */
   public void relocateFile(String storageName) {
     this.storageName = storageName;
+  }
+
+  /**
+   * Clear information about content placement.
+   */
+  public void clearContentPlacement() {
+    this.storageName = null;
+    this.totalLength = 0L;
   }
 
   /**
@@ -98,12 +144,11 @@ public class File {
   public void dispose() {
     checkThatFileHasNotBeenDisposedYet();
     this.status = FileStatus.DISPOSED;
-    this.storageName = null;
-    this.totalLength = 0L;
+    this.disposedAt = LocalDateTime.now();
   }
 
   private void checkThatFileHasNotBeenDisposedYet() {
-    if (status == FileStatus.DISPOSED) {
+    if (isDisposed()) {
       throw new FileDisposedException();
     }
   }

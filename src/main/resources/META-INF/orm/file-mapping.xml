@@ -5,8 +5,19 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
 	<access>FIELD</access>
 
+
 	<entity class="io.bcs.fileserver.domain.model.file.File">
 		<table name="FILES" />
+
+		<named-query name="File.findNotRemovedDisposedFiles">
+			<query>
+				SELECT f FROM io.bcs.fileserver.domain.model.file.File f 
+				WHERE f.disposedAt >= :disposedAfter
+				AND f.status = io.bcs.fileserver.domain.model.file.FileStatus.DRAFT
+				AND f.storageName IS NOT NULL
+			</query>
+		</named-query>
+
 		<attributes>
 			<id name="storageFileName">
 				<column name="STORAGE_FILE_NAME" />
@@ -19,6 +30,14 @@
 			<basic name="status">
 				<column name="STATUS" />
 				<enumerated>STRING</enumerated>
+			</basic>
+
+			<basic name="createdAt">
+				<column name="CREATED_AT" />
+			</basic>
+
+			<basic name="disposedAt">
+				<column name="DISPOSED_AT" />
 			</basic>
 
 			<basic name="mediaType">

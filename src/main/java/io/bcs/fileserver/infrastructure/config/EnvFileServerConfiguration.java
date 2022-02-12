@@ -12,9 +12,10 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class EnvFileServerConfiguration implements FileServerConfigurationProperties {
   private static final String BUFFER_SIZE_VAR = "BC_IO_BUFFER_SIZE";
-  private static final String BASE_PUBLIC_URL_VAR = "BC_BASE_URL";
+  private static final String BASE_PUBLIC_URL_VAR = "BC_BASE_PUBLIC_URL";
   private static final String BASE_PRIVATE_URL_VAR = "BC_BASE_PRIVATE_URL";
-  
+  private static final String DISTRIBUTION_POINT_NAME_VAR = "BC_DISTRIBUTION_POINT";
+  private static final String SYNC_OPERATION_TIMEOUT_VAR = "BC_SYNC_OPERATION_TIMEOUT";
 
   @Override
   public String getPublicBaseUrlAddress() {
@@ -32,12 +33,12 @@ public class EnvFileServerConfiguration implements FileServerConfigurationProper
   }
 
   @Override
-  public String getStorageName() {
-    return "LOCAL";
+  public String getDistributionPointName() {
+    return System.getenv(DISTRIBUTION_POINT_NAME_VAR);
   }
-  
+
   @Override
   public Long getSyncOperationTimeout() {
-    return 120L;
+    return Long.valueOf(System.getenv(SYNC_OPERATION_TIMEOUT_VAR));
   }
 }

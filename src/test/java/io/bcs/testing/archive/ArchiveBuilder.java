@@ -81,6 +81,12 @@ public abstract class ArchiveBuilder<A extends Archive<A>, B extends ArchiveBuil
       return this;
     }
 
+    public DependencyResolver resolveDependency(String group, String artifact, String packaging, String classifier) {
+      this.resolved.addAll(resolveDependencies(
+          () -> resolver.resolve(String.format("%s:%s:%s:%s", group, artifact, packaging, classifier))));
+      return this;
+    }
+
     private Collection<Archive<?>> resolveDependencies(
         Supplier<MavenStrategyStage> resolveFunction) {
       try {

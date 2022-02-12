@@ -30,6 +30,7 @@ import spock.lang.Specification
 class JpaFileRepositoryITSpec extends Specification {
   private static final String REF_MEDIATYPES_MIGRATION_SCRIPT ="db-init/file/ref.mediatypes.config.changelog.xml"
   private static final String REF_LOCAL_STORAGES_MIGRATION_SCRIPT = "db-init/file/ref.local.storages.config.changelog.xml"
+  private static final String FILES_MIGRATION_SCRIPT = "db-init/file/files.config.changelog.xml"
   private static final String BCE_DATABASE_CONFIGURER_PACKAGE = DatabaseConfigurer.getPackage().getName()
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
 
@@ -104,6 +105,19 @@ class JpaFileRepositoryITSpec extends Specification {
     file.getFileName() == FILE_NAME
     file.getMediaType() == MEDIA_TYPE
     file.getTotalLength() == CONTENT_LENGTH
+  }
+  
+  def "Scenario: find non removed disposed files"() {
+    given: "The file media types and local storage is configured"
+    databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(FILES_MIGRATION_SCRIPT)
+    
+    expect: "Non closed file entities should be found"
+    Collection<File> files = fileRepository.findNotRemovedDisposedFiles()
+    files[0].storageFileName == 'e95b72b3-54dd-11ec-8d39-0242ac130003'
+    files.size() == 1
+
   }
 
   private File createFileEntity() {

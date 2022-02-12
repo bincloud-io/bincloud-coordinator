@@ -9,7 +9,7 @@ package io.bcs.fileserver.infrastructure;
 public interface FileServerConfigurationProperties {
   int getBufferSize();
   
-  String getStorageName();
+  String getDistributionPointName();
 
   String getPublicBaseUrlAddress();
   

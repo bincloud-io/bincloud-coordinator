@@ -17,6 +17,7 @@ import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException
 import io.bcs.fileserver.domain.errors.ContentUploadedException
 import io.bcs.fileserver.domain.errors.FileDisposedException
+import io.bcs.fileserver.domain.errors.FileNotDisposedException
 import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
@@ -588,6 +589,42 @@ class ContentServiceSpec extends Specification {
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
   }
+  
+  def "Scenario: clean disposed files"() {
+    File file
+    given: "The disposed file will be returned from repository"
+    fileRepository.findNotRemovedDisposedFiles() >> [createDisposedFile()] >> []
+    
+    when: "The files clear operation is called"
+    fileService.clearDisposedFiles()
+    
+    then: "Polled file should be deleted"
+    1 * fileStorage.delete(_)
+    
+    and: "Polled file should be stored"
+    1 * fileRepository.save(_) >> {file = it[0]}
+    
+    and: "Stored file total length should be clear"
+    file.getTotalLength() == 0L 
+    
+    and: "Stored file storage name should be clear"
+    file.getStorageName().isPresent() == false
+  }
+  
+  def "Scenario: clean not disposed file"() {
+    FileNotDisposedException error
+    given: "The non-disposed file will be returned from repository"
+    fileRepository.findNotRemovedDisposedFiles() >> [createDraftFile()] >> []
+    
+    when: "The files clear operation is requested"
+    fileService.clearDisposedFiles()
+    
+    then: "The file not disposed error should be happened"
+    error = thrown(FileNotDisposedException)
+    error.getContextId() == Constants.CONTEXT
+    error.getErrorSeverity() == ErrorSeverity.INCIDENT
+    error.getErrorCode() == Constants.FILE_IS_NOT_DISPOSED_ERROR
+  }
 
   private Range createRange(Long start, Long end) {
     return new Range() {
@@ -624,7 +661,7 @@ class ContentServiceSpec extends Specification {
   }
 
   private File createDisposedFile() {
-    return createFile(DISPOSED, DEFAULT_CONTENT_LENGTH)
+    return createFile(DISPOSED, DISTRIBUTIONING_CONTENT_LENGTH)
   }
 
   private File createFile(FileStatus status, Long contentLength) {

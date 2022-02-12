@@ -217,7 +217,7 @@
 			baseColumnNames="ALLOCATION_REF_ID"
 			referencedTableName="SPACE_ALLOCATIONS_HISTORY"
 			referencedColumnNames="ID" />
-			
+
 		<rollback>
 			<dropTable tableName="SPACE_ALLOCATIONS_HISTORY" />
 		</rollback>
@@ -245,7 +245,17 @@
 
 			<column name="STORAGE_NAME" type="VARCHAR(16)"
 				remarks="The storage name where file is stored.">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="CREATED_AT" type="DATETIME"
+				remarks="A time shows when the file was created.">
 				<constraints nullable="false" />
+			</column>
+
+			<column name="DISPOSED_AT" type="DATETIME"
+				remarks="A time shows when the file was disposed.">
+				<constraints nullable="true" />
 			</column>
 
 			<column name="STATUS" type="VARCHAR(16)"
@@ -285,15 +295,42 @@
 		<createView viewName="VW_FILES_METADATA"
 			replaceIfExists="false">
 			SELECT
-			F.STORAGE_FILE_NAME,
-			F.STATUS,
-			F.FILE_NAME,
-			F.CONTENT_LENGTH,
-			MT.MEDIA_TYPE,
-			MT.CONTENT_DISPOSITION
-			FROM FILES F
-			INNER JOIN
-			REF_MEDIA_TYPES MT ON F.MEDIA_TYPE = MT.MEDIA_TYPE
+				`F`.`STORAGE_FILE_NAME`,
+				`F`.`STATUS`,
+				`F`.`FILE_NAME`,
+				`F`.`CONTENT_LENGTH`,
+				`MT`.`MEDIA_TYPE`,
+				`MT`.`CONTENT_DISPOSITION`
+			FROM `FILES` `F`
+			INNER JOIN `REF_MEDIA_TYPES` `MT` ON 
+				`F`.`MEDIA_TYPE` = `MT`.`MEDIA_TYPE`
 		</createView>
+	</changeSet>
+
+	<changeSet id="CSET.ADD_SCHEDLOCK" author="Dmitry Mikaylenko">
+		<createTable tableName="SCHEDLOCK"
+			remarks="Schedulers lock table.">
+			<column name="NAME" type="VARCHAR(64)"
+				remarks="Scheduler's name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCKED_AT" type="TIMESTAMP"
+				remarks="Lock acquiring time.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCK_UNTIL" type="TIMESTAMP"
+				remarks="Lock keeping until.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCKED_BY" type="VARCHAR2(255)"
+				remarks="Who acquired lock.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="SCHEDLOCK" columnNames="NAME" />
 	</changeSet>
 </databaseChangeLog>
