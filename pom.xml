@@ -28,6 +28,7 @@
 		<lombok.version>1.18.18</lombok.version>
 		<plugin.lombok.version>1.18.18.0</plugin.lombok.version>
 		<schedlock.version>4.33.0</schedlock.version>
+		<bce.version>0.1.1</bce.version>
 
 		<!-- spock.version>1.3-groovy-2.5</spock.version -->
 		<!--groovy.version>2.5.14</groovy.version -->
@@ -164,7 +165,7 @@
 		<dependency>
 			<groupId>io.bce</groupId>
 			<artifactId>bce</artifactId>
-			<version>0.1.0</version>
+			<version>${bce.version}</version>
 		</dependency>
 
 		<dependency>
@@ -175,15 +176,16 @@
 		<dependency>
 			<groupId>io.bce</groupId>
 			<artifactId>bce</artifactId>
-			<version>0.1.0</version>
+			<version>${bce.version}</version>
 			<classifier>test-kit</classifier>
 			<scope>test</scope>
 		</dependency>
 
+		
 		<dependency>
 			<groupId>io.bce</groupId>
 			<artifactId>bce</artifactId>
-			<version>0.1.0</version>
+			<version>${bce.version}</version>
 			<classifier>spock-ext</classifier>
 			<scope>test</scope>
 		</dependency>

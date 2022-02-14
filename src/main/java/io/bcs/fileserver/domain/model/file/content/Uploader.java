@@ -88,8 +88,14 @@ public class Uploader {
         Destination<BinaryChunk> destination = fileStorage.getAccessOnWrite(file);
         contentSource.sendContent(contentLocator, destination).then(statistic -> {
           file.startFileDistribution();
-        }).delegate(deferred);
-      }).error(err -> fileStorage.delete(file));
+        }).then(deferred).error(err -> {
+          try {
+            fileStorage.delete(file);
+          } finally {
+            deferred.reject(err);
+          }
+        });
+      });
     }
   }
 
