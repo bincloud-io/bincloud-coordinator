@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.controllers.http;
+package io.bcs.fileserver.infrastructure.api;
 
 import java.util.function.Consumer;
 import javax.servlet.AsyncContext;

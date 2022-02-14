@@ -6,11 +6,11 @@
 	<display-name>Binary Cloud Storage</display-name>
 	<servlet>
 		<servlet-name>ContentLoadingServlet</servlet-name>
-		<servlet-class>io.bcs.fileserver.infrastructure.controllers.http.ContentLoadingServlet</servlet-class>
+		<servlet-class>io.bcs.fileserver.infrastructure.api.open.HttpContentManagementServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ContentLoadingServlet</servlet-name>
-		<url-pattern>/file-content</url-pattern>
+		<url-pattern>/public/content</url-pattern>
 	</servlet-mapping>
 </web-app>

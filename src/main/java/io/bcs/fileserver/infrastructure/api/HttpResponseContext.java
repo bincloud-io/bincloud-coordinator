@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.controllers.http;
+package io.bcs.fileserver.infrastructure.api;
 
 import io.bce.domain.errors.ErrorDescriptor;
 import io.bce.domain.errors.ErrorDescriptor.ErrorCode;

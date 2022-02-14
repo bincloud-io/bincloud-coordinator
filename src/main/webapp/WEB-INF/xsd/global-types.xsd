@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.bcs.io/global/types" elementFormDefault="qualified" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.bcs.io/global/types">
+
+	<xsd:complexType name="ServiceResponse_Type">
+		<xsd:sequence>
+			<xsd:element name="boundedContext" minOccurs="1" maxOccurs="1" type="tns:BoundedContext_Type">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="ServiceFault_Type">
+		<xsd:complexContent>
+			<xsd:extension base="tns:ServiceResponse_Type">
+				<xsd:sequence>
+					<xsd:element name="severity" minOccurs="1" maxOccurs="1" type="tns:FaultSeverity_Type">
+					</xsd:element>
+					<xsd:element name="errorNumber" minOccurs="1" maxOccurs="1" type="tns:FaultCode_Type" nillable="false">
+					</xsd:element>
+					<xsd:element name="message" minOccurs="1" maxOccurs="1" type="tns:FaultDescription_Type" nillable="false">
+					</xsd:element>
+					<xsd:element name="validationErrors" type="tns:ValidationErrors_Type" minOccurs="0" maxOccurs="1"></xsd:element>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+
+	<xsd:simpleType name="FaultSeverity_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="BUSINESS"></xsd:enumeration>
+			<xsd:enumeration value="INCIDENT"></xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:element name="ServiceFault" type="tns:ServiceFault_Type"></xsd:element>
+
+
+	<xsd:simpleType name="BoundedContext_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="collapse"></xsd:whiteSpace>
+			<xsd:minLength value="1"></xsd:minLength>
+			<xsd:maxLength value="60"></xsd:maxLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+
+	<xsd:simpleType name="FaultCode_Type">
+		<xsd:restriction base="xsd:long"></xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="FaultDescription_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="collapse"></xsd:whiteSpace>
+			<xsd:maxLength value="1000"></xsd:maxLength>
+			<xsd:minLength value="0"></xsd:minLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="ValidationErrorMessage_Type">
+		<xsd:restriction base="xsd:string">
+
+			<xsd:whiteSpace value="collapse"></xsd:whiteSpace>
+			<xsd:maxLength value="1000"></xsd:maxLength>
+			<xsd:minLength value="0"></xsd:minLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="ValidationGroupName_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"></xsd:minLength>
+
+			<xsd:whiteSpace value="collapse"></xsd:whiteSpace>
+			<xsd:maxLength value="500"></xsd:maxLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+
+	<xsd:complexType name="ValidationGroupedError_Type">
+		<xsd:sequence>
+			<xsd:element name="groupName" type="tns:ValidationGroupName_Type" minOccurs="1" maxOccurs="1"></xsd:element>
+			<xsd:element name="messages" type="tns:ValidationErrorMessage_Type" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="ValidationErrors_Type">
+		<xsd:sequence>
+			<xsd:element name="ungroupedErrors" type="tns:ValidationErrorMessage_Type" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+			<xsd:element name="groupedErrors" type="tns:ValidationGroupedError_Type" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

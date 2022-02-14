@@ -298,12 +298,11 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxws-maven-plugin</artifactId>
 				<configuration>
-					<wsdlDirectory>${project.basedir}/src/main/webapp/WEB-INF/soap/</wsdlDirectory>
-					<bindingDirectory>${project.basedir}/src/main/resources/soap/</bindingDirectory>
+					<wsdlDirectory>${project.basedir}/src/main/webapp/WEB-INF/wsdl/</wsdlDirectory>
+					<!--bindingDirectory>${project.basedir}/src/main/resources/soap/</bindingDirectory-->
 					<sourceDestDir>${project.build.directory}/generated-sources/</sourceDestDir>
 					<wsdlFiles>
-						<wsdlFile>file-storage-service.wsdl</wsdlFile>
-						<wsdlFile>direct-file-access-service.wsdl</wsdlFile>
+						<wsdlFile>bcs-public-services.wsdl</wsdlFile>
 					</wsdlFiles>
 					<!--bindingFiles> <bindingFile>file-storage-service.xjb</bindingFile> 
 						<bindingFile>file-storage-types.xjb</bindingFile> <bindingFile>global-types.xjb</bindingFile> 

@@ -1,21 +1,21 @@
-package io.bcs.fileserver.infrastructure.controllers.soap;
+package io.bcs.fileserver.infrastructure.api.open;
 
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bcs.common.errors.SoapFault;
+import io.bcs.fileserver.api.services.open.CreateFileFault;
+import io.bcs.fileserver.api.services.open.DisposeFileFault;
+import io.bcs.fileserver.api.services.open.WSFileManagement;
+import io.bcs.fileserver.api.types.open.CreateFileRqType;
+import io.bcs.fileserver.api.types.open.CreateFileRsType;
+import io.bcs.fileserver.api.types.open.DisposeFileRqType;
+import io.bcs.fileserver.api.types.open.DisposeFileRsType;
 import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.domain.services.FileService.CreateFile;
 import io.bcs.fileserver.domain.services.acl.SafeCreateFileCommand;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
-import io.bcs.fileserver.soap.endpoints.files.CreateFileFault;
-import io.bcs.fileserver.soap.endpoints.files.DisposeFileFault;
-import io.bcs.fileserver.soap.endpoints.files.WSFileService;
-import io.bcs.fileserver.soap.types.file.storage.CreateFileRqType;
-import io.bcs.fileserver.soap.types.file.storage.CreateFileRsType;
-import io.bcs.fileserver.soap.types.file.storage.DisposeFileRqType;
-import io.bcs.fileserver.soap.types.file.storage.DisposeFileRsType;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.jws.WebService;
@@ -23,17 +23,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * This class implements the file management service SOAP controller.
+ * This class implements the file management service SOAP service.
  *
  * @author Dmitry Mikhaylenko
  *
  */
 @WebService(
     serviceName = "WSFileService",
-    endpointInterface = "io.bcs.fileserver.soap.endpoints.files.WSFileService")
-public class SoapFileServiceEndpoint implements WSFileService {
+    endpointInterface = "io.bcs.fileserver.api.services.open.WSFileManagement")
+public class WsFileManagementService implements WSFileManagement {
   private static final ApplicationLogger log =
-      Loggers.applicationLogger(SoapFileServiceEndpoint.class);
+      Loggers.applicationLogger(WsFileManagementService.class);
 
   @Inject
   private FileService fileService;

@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.controllers.http;
+package io.bcs.fileserver.infrastructure.api.open;
 
 import io.bce.domain.errors.ApplicationException;
 import io.bce.domain.errors.UnexpectedErrorException;
@@ -19,6 +19,8 @@ import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
+import io.bcs.fileserver.infrastructure.api.HttpAsyncExecutor;
+import io.bcs.fileserver.infrastructure.api.HttpResponseContext;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
 import io.bcs.fileserver.infrastructure.file.content.HttpDownloadCommand;
@@ -41,9 +43,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author Dmitry Mikhaylenko
  *
  */
-public class ContentLoadingServlet extends HttpServlet {
+public class HttpContentManagementServlet extends HttpServlet {
   private static final ApplicationLogger log =
-      Loggers.applicationLogger(ContentLoadingServlet.class);
+      Loggers.applicationLogger(HttpContentManagementServlet.class);
 
   private static final long serialVersionUID = 2026798739467262029L;
   private static final String HTTP_RANGES_HEADER = "Ranges";

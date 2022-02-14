@@ -8,7 +8,7 @@ import io.bce.domain.errors.ValidationException
 import io.bce.domain.errors.ErrorDescriptor.ErrorCode
 import io.bce.validation.ErrorMessage
 import io.bce.validation.ValidationState
-import io.bcs.fileserver.soap.types.common.FaultSeverityType
+import io.bcs.global.types.FaultSeverityType
 import spock.lang.Specification
 
 class WSFaultSpec extends Specification {
