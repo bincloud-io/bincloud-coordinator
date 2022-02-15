@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:tns="http://www.bcs.io/fileserver/api/wsdl/bcs-private-services.wsdl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="bcs-private-services" targetNamespace="http://www.bcs.io/fileserver/api/wsdl/bcs-private-services.wsdl"/>

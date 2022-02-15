@@ -4,6 +4,7 @@ import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bcs.fileserver.domain.errors.FileStorageException;
+import io.bcs.fileserver.domain.model.file.File;
 
 /**
  * This interface describes the file storage.
@@ -12,14 +13,26 @@ import io.bcs.fileserver.domain.errors.FileStorageException;
  *
  */
 public interface FileStorage {
-  public ContentLocator create(String mediaType) throws FileStorageException;
+  default ContentLocator create(File file, Long contentLength) throws FileStorageException {
+    throw new FileStorageException(
+        new UnsupportedOperationException("Operation not supported for current storage type."));
+  }
 
-  public Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
-      throws FileStorageException;
+  default Destination<BinaryChunk> getAccessOnWrite(File file)
+      throws FileStorageException {
+    throw new FileStorageException(
+        new UnsupportedOperationException("Operation not supported for current storage type."));
+  }
 
-  public Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
-      ContentFragment fragment) throws FileStorageException;
+  default Source<BinaryChunk> getAccessOnRead(File file,
+      ContentFragment fragment) throws FileStorageException {
+    throw new FileStorageException(
+        new UnsupportedOperationException("Operation not supported for current storage type."));
+  }
 
-  public void delete(ContentLocator contentLocator) throws FileStorageException;
+  default void delete(File file) throws FileStorageException {
+    throw new FileStorageException(
+        new UnsupportedOperationException("Operation not supported for current storage type."));
+  }
 
 }

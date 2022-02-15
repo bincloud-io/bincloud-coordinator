@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+	targetNamespace="http://www.bcs.io/fileserver/api/types/open"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.bcs.io/fileserver/api/types/open" xmlns:global="http://www.bcs.io/global/types" xmlns:common="http://www.bcs.io/fileserver/types">
+
+	<import schemaLocation="../xsd/global-types.xsd"
+		namespace="http://www.bcs.io/global/types">
+	</import>
+	<import schemaLocation="../xsd/fileserver-types.xsd"
+		namespace="http://www.bcs.io/fileserver/types"></import>
+
+	<complexType name="CreateFileRq_Type">
+		<sequence>
+			<element name="fileName" type="common:FileName_Type"
+				minOccurs="0" maxOccurs="1" />
+			<element name="mediaType" type="common:MimeType_Type"
+				minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<element name="CreateFileRq" type="tns:CreateFileRq_Type" />
+
+	<complexType name="CreateFileRs_Type">
+		<complexContent>
+			<extension base="global:ServiceResponse_Type">
+				<sequence>
+					<element name="fileReference" type="common:URL_Type"
+						minOccurs="1" maxOccurs="1" />
+					<element name="storageFileName"
+						type="common:StorageFileName_Type" minOccurs="1" maxOccurs="1" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<element name="CreateFileRs" type="tns:CreateFileRs_Type" />
+
+	<complexType name="DisposeFileRq_Type">
+		<sequence>
+			<element name="storageFileName"
+				type="common:StorageFileName_Type" minOccurs="1" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<element name="DisposeFileRq" type="tns:DisposeFileRq_Type" />
+
+	<complexType name="DisposeFileRs_Type">
+		<complexContent>
+			<extension base="global:ServiceResponse_Type" />
+		</complexContent>
+	</complexType>
+
+	<element name="DisposeFileRs" type="tns:DisposeFileRs_Type" />
+</schema>

@@ -1,20 +1,12 @@
 package io.bcs.fileserver.domain.model.file;
 
+import io.bce.Generator;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
-import io.bce.promises.Promise;
-import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.model.file.content.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.FileContent.ContentType;
-import io.bcs.fileserver.domain.model.file.lifecycle.Lifecycle;
-import io.bcs.fileserver.domain.model.file.state.FileStatus;
-import io.bcs.fileserver.domain.model.file.state.FileStatus.FileEntityAccessor;
-import io.bcs.fileserver.domain.model.file.state.FileStatus.FileState;
-import io.bcs.fileserver.domain.model.storage.ContentFragment;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
-import io.bcs.fileserver.domain.model.storage.FileStorage;
-import java.util.Collection;
+import io.bcs.fileserver.domain.errors.FileDisposedException;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import lombok.AccessLevel;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
@@ -35,157 +27,152 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class File {
-  private static final ApplicationLogger log = Loggers.applicationLogger(File.class);
-
-  static final String DEFAULT_STORAGE_NAME = "unknown";
-  static final String DEFAULT_STORAGE_FILE_NAME = "unknown";
+  protected static final ApplicationLogger log = Loggers.applicationLogger(File.class);
+  static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
   static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
-  static final String DEFAULT_FILE_NAME = "unknown";
+  static final String DEFAULT_FILE_NAME = "UNKNOWN";
 
   @Include
   @Default
   private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
-  @Default
-  private String storageName = DEFAULT_STORAGE_NAME;
+  
+  @Getter(value = AccessLevel.NONE)
+  private String storageName;
+  
   @Default
   private FileStatus status = FileStatus.DRAFT;
+  
   @Default
   private String mediaType = DEFAULT_MEDIA_TYPE;
+  
   @Default
   private String fileName = DEFAULT_FILE_NAME;
+  
   @Default
   private Long totalLength = 0L;
 
-  private File(ContentLocator contentLocator, CreateFile createFileCommand) {
+  @Default
+  private LocalDateTime createdAt = LocalDateTime.now();
+
+  private LocalDateTime disposedAt;
+
+  /**
+   * Create file.
+   *
+   * @param filenameGenerator The file name generator, generating unique filename
+   * @param creationData      The file creation data
+   */
+  public File(Generator<String> filenameGenerator, CreationData creationData) {
     super();
-    this.storageName = contentLocator.getStorageName();
-    this.mediaType = extractMediaType(createFileCommand);
-    this.storageFileName = contentLocator.getStorageFileName();
-    this.fileName = createFileCommand.getFileName().orElse(storageFileName);
+    this.storageFileName = filenameGenerator.generateNext();
+    this.mediaType = creationData.getMediaType();
+    this.fileName = creationData.getFileName().orElse(storageFileName);
+    this.createdAt = LocalDateTime.now();
     this.status = FileStatus.DRAFT;
     this.totalLength = 0L;
   }
 
   /**
-   * Create a file entity.
+   * Get the storage name value. This value is optional and may be not assigned.
    *
-   * @param fileStorage The file storage
-   * @param command     The file creation command
-   * @return The operation result promise
+   * @return The storage name
    */
-  public static final Promise<File> create(FileStorage fileStorage, CreateFile command) {
-    return Promises.of(deferred -> {
-      deferred.resolve(new File(fileStorage.create(extractMediaType(command)), command));
-    });
+  public Optional<String> getStorageName() {
+    return Optional.ofNullable(storageName);
   }
 
   /**
-   * Get the file content locator.
+   * Check that the file was disposed.
    *
-   * @return The file content locator
+   * @return True if file is disposed and false otherwise
    */
-  public ContentLocator getLocator() {
-    return new ContentLocator() {
-      @Override
-      public String getStorageName() {
-        return storageName;
-      }
-
-      @Override
-      public String getStorageFileName() {
-        return storageFileName;
-      }
-    };
+  public boolean isDisposed() {
+    return status == FileStatus.DISPOSED;
   }
 
   /**
-   * Download file content.
+   * Check that the file wasn't disposed.
    *
-   * @param fileStorage       The file storage
-   * @param contentDownloader The content downloader
-   * @param ranges            The file ranges
-   * @return The downloading process completion promise
+   * @return True if file wasn't disposed and false otherwise
    */
-  public Promise<Void> downloadContent(FileStorage fileStorage, ContentReceiver contentDownloader,
-      Collection<Range> ranges) {
-    return Promises.of(deferred -> {
-      getFileState().getContentAccess(fileStorage, createFragments(ranges)).chain(fileContent -> {
-        if (fileContent.getType() == ContentType.RANGE) {
-          log.debug("Download single-range file content");
-          return contentDownloader.receiveContentRange(fileContent);
-        }
-
-        if (fileContent.getType() == ContentType.MULTIRANGE) {
-          log.debug("Download multi-range file content");
-          return contentDownloader.receiveContentRanges(fileContent);
-        }
-
-        log.debug("Download full-size file content");
-        return contentDownloader.receiveFullContent(fileContent);
-      }).delegate(deferred);
-    });
+  public boolean isNotDisposed() {
+    return !isDisposed();
+  }
+  
+  public Optional<LocalDateTime> getDisposedAt() {
+    return Optional.ofNullable(disposedAt);
   }
 
-  private Collection<ContentFragment> createFragments(Collection<Range> ranges) {
-    FileFragments fragments = new FileFragments(ranges, totalLength);
-    return fragments.getParts();
-  }
-
-  public Lifecycle getLifecycle(FileStorage storage) {
-    return getFileState().getLifecycle(storage);
-  }
-
-  private static String extractMediaType(CreateFile command) {
-    return command.getMediaType().orElse(DEFAULT_MEDIA_TYPE);
-  }
-
-  private FileState getFileState() {
-    return this.status.createState(createEntityAccessor());
-  }
-
-  private FileEntityAccessor createEntityAccessor() {
-    return new FileEntityAccessor() {
-      @Override
-      public ContentLocator getLocator() {
-        return File.this.getLocator();
-      }
-
-      @Override
-      public Long getTotalLength() {
-        return File.this.totalLength;
-      }
-
-      @Override
-      public void dispose() {
-        File.this.dispose();
-      }
-
-      @Override
-      public void startFileDistribution(Long contentLength) {
-        File.this.startFileDistribution(contentLength);
-      }
-    };
-  }
-
-  private void startFileDistribution(Long contentLength) {
-    this.totalLength = contentLength;
+  /**
+   * Start file distribution.
+   */
+  public void startFileDistribution() {
     this.status = FileStatus.DISTRIBUTING;
   }
 
-  private void dispose() {
-    this.status = FileStatus.DISPOSED;
+  /**
+   * Specify where content is going to be placed and how much space is allocated on storage.
+   *
+   * @param storageName   The storage file name
+   * @param contentLength The distributed content length
+   */
+  public void specifyContentPlacement(String storageName, Long contentLength) {
+    this.totalLength = contentLength;
+    this.storageName = storageName;
+  }
+
+  /**
+   * Relocate file to another storage.
+   *
+   * @param storageName The storage name
+   */
+  public void relocateFile(String storageName) {
+    this.storageName = storageName;
+  }
+
+  /**
+   * Clear information about content placement.
+   */
+  public void clearContentPlacement() {
+    this.storageName = null;
     this.totalLength = 0L;
   }
 
   /**
-   * This interface describes a file entity creation command.
+   * Dispose file if it had not been disposed yet.
+   */
+  public void dispose() {
+    checkThatFileHasNotBeenDisposedYet();
+    this.status = FileStatus.DISPOSED;
+    this.disposedAt = LocalDateTime.now();
+  }
+
+  private void checkThatFileHasNotBeenDisposedYet() {
+    if (isDisposed()) {
+      throw new FileDisposedException();
+    }
+  }
+
+  /**
+   * This interface describes the data set required for file creation.
    *
    * @author Dmitry Mikhaylenko
    *
    */
-  public interface CreateFile {
-    Optional<String> getMediaType();
+  public interface CreationData {
+    /**
+     * Get media type. This is optional value and it may be absent.
+     *
+     * @return The media type
+     */
+    public String getMediaType();
 
-    Optional<String> getFileName();
+    /**
+     * Get file name which will be assigned to file on download. This is optional value and may be
+     * absent.
+     *
+     * @return The file name
+     */
+    public Optional<String> getFileName();
   }
 }

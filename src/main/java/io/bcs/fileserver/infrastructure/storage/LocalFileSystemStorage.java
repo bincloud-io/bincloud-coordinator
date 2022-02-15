@@ -1,20 +1,18 @@
 package io.bcs.fileserver.infrastructure.storage;
 
-import io.bce.Generator;
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
-import io.bce.interaction.streaming.binary.InputStreamSource;
-import io.bce.interaction.streaming.binary.OutputStreamDestination;
 import io.bcs.fileserver.domain.errors.FileStorageException;
+import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
+import io.bcs.fileserver.infrastructure.storage.PhysicalFile.Factory;
 import java.io.IOException;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -26,16 +24,19 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class LocalFileSystemStorage implements FileStorage {
-  private final Generator<String> fileNameGenerator;
-  private final String storageName;
-  private final String baseDirectory;
+  private final FilesystemSpaceManager filesystemSpaceManager;
+  private final LocalStorageDescriptorRepository localStorageDescriptorRepository;
+  private final Factory physicalFileFactory;
   private final int bufferSize;
 
   @Override
-  public ContentLocator create(String mediaType) throws FileStorageException {
+  public ContentLocator create(File file, Long contentLength) throws FileStorageException {
     try {
-      ContentLocator contentLocator = new FileLocator();
-      getLocatedFile(contentLocator).createNewFile();
+      String storageName = filesystemSpaceManager.allocateSpace(file.getMediaType(),
+          file.getStorageFileName(), contentLength);
+      ContentLocator contentLocator =
+          new DefaultFileLocator(storageName, file.getStorageFileName());
+      getPhysicalFile(contentLocator).create();
       return contentLocator;
     } catch (IOException error) {
       throw new FileStorageException(error);
@@ -43,80 +44,58 @@ public class LocalFileSystemStorage implements FileStorage {
   }
 
   @Override
-  public Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
-      throws FileStorageException {
+  public Destination<BinaryChunk> getAccessOnWrite(File file) throws FileStorageException {
     try {
-      checkThatLocatedContentIsRelatedToTheCurrentStorage(contentLocator);
-      return new OutputStreamDestination(openFileForWrite(contentLocator));
-    } catch (FileNotFoundException error) {
-      throw new FileStorageException(error);
-    }
-  }
-
-  @Override
-  public Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
-      ContentFragment fragment) throws FileStorageException {
-    try {
-      checkThatLocatedContentIsRelatedToTheCurrentStorage(contentLocator);
-      FileInputStream inputStream = openFileForRead(contentLocator);
-      inputStream.skip(fragment.getOffset());
-      return new InputStreamSource(inputStream, fragment.getLength(), bufferSize);
+      return getPhysicalFile(file).openForWrite();
     } catch (IOException error) {
       throw new FileStorageException(error);
     }
   }
 
   @Override
-  public void delete(ContentLocator contentLocator) throws FileStorageException {
-    checkThatLocatedContentIsRelatedToTheCurrentStorage(contentLocator);
-    getLocatedFile(contentLocator).delete();
-  }
-
-  private FileOutputStream openFileForWrite(ContentLocator contentLocator)
-      throws FileNotFoundException {
-    return new FileOutputStream(getLocatedFile(contentLocator));
-  }
-
-  private FileInputStream openFileForRead(ContentLocator contentLocator)
-      throws FileNotFoundException {
-    return new FileInputStream(getFileLocationPath(contentLocator));
-  }
-  
-  private void checkThatLocatedContentIsRelatedToTheCurrentStorage(ContentLocator contentLocator) {
-    if (!contentLocator.getStorageName().equals(storageName)) {
-      throw new FileStorageException(new UnrelatedFileStorageException(contentLocator));
+  public Source<BinaryChunk> getAccessOnRead(File file, ContentFragment fragment)
+      throws FileStorageException {
+    try {
+      return getPhysicalFile(file).openForRead(fragment.getOffset(), fragment.getLength(),
+          bufferSize);
+    } catch (IOException error) {
+      throw new FileStorageException(error);
     }
   }
 
-  private File getLocatedFile(ContentLocator contentLocator) {
-    return new File(getFileLocationPath(contentLocator));
-  }
-  
-  private String getFileLocationPath(ContentLocator contentLocator) {
-    return String.format("%s/%s", baseDirectory, contentLocator.getStorageFileName());
+  @Override
+  public void delete(File file) throws FileStorageException {
+    getPhysicalFile(file).delete();
   }
 
-  private final class FileLocator implements ContentLocator {
-    @Getter
+  private PhysicalFile getPhysicalFile(File file) {
+    ContentLocator contentLocator = new DefaultFileLocator(file);
+    return getPhysicalFile(contentLocator);
+  }
+
+  private PhysicalFile getPhysicalFile(ContentLocator contentLocator) {
+    LocalStorageDescriptor localStorage =
+        findExistingStorageDescriptor(contentLocator.getStorageName());
+    return physicalFileFactory.create(localStorage.getBaseDirectory(), contentLocator);
+  }
+
+  private LocalStorageDescriptor findExistingStorageDescriptor(String storageName) {
+    return localStorageDescriptorRepository.findByName(storageName)
+        .orElseThrow(() -> new FileStorageException(
+            String.format("Local storage isn't registered", storageName)));
+  }
+
+  @Getter
+  @EqualsAndHashCode
+  @RequiredArgsConstructor
+  private final class DefaultFileLocator implements ContentLocator {
+    private final String storageName;
     private final String storageFileName;
 
-    public FileLocator() {
+    public DefaultFileLocator(File file) {
       super();
-      this.storageFileName = fileNameGenerator.generateNext();
-    }
-
-    @Override
-    public String getStorageName() {
-      return storageName;
-    }
-  }
-
-  private final class UnrelatedFileStorageException extends Exception {
-    private static final long serialVersionUID = -2401682394723841722L;
-
-    public UnrelatedFileStorageException(ContentLocator contentLocator) {
-      super(String.format("The current file storage [%s] is not the related file storage [%s]",
-          storageName, contentLocator.getStorageName()));
+      this.storageFileName = file.getStorageFileName();
+      this.storageName = file.getStorageName().get();
     }
   }
 }

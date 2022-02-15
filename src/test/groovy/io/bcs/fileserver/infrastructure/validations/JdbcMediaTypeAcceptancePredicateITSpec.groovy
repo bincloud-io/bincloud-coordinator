@@ -24,7 +24,7 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JdbcMediaTypeAcceptancePredicateITSpec extends Specification {
-  private static final String MIGRATION_SCRIPT ="db-init/file/ref.mediatype.changelog.xml"
+  private static final String REF_MEDIATYPES_MIGRATION_SCRIPT ="db-init/file/ref.mediatypes.config.changelog.xml"
   private static final String EXISTING_MEDIATYPE = "application/well-mediatype"
   private static final String MISSING_MEDIATYPE = "application/bad-mediatype"
 
@@ -57,7 +57,7 @@ class JdbcMediaTypeAcceptancePredicateITSpec extends Specification {
 
   def setup() {
     databaseConfigurer.setup("liquibase/master.changelog.xml")
-    databaseConfigurer.setup(MIGRATION_SCRIPT)
+    databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
     this.predicate = new JdbcMediaTypeAcceptancePredicate(dataSource)
   }
 

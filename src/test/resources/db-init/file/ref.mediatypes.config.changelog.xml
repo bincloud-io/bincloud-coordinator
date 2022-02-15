@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	<changeSet id="CSET.MEDIA_TYPES" author="Dmitry Mikhaylenko">
+		<sql>
+			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
+			`CONTENT_DISPOSITION`)
+			VALUES ('application/mediatype', 'INLINE');
+			
+			INSERT INTO `REF_MEDIA_TYPES`(`MEDIA_TYPE`,
+			`CONTENT_DISPOSITION`)
+			VALUES ('application/well-mediatype', 'INLINE');
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM `REF_MEDIA_TYPES` WHERE 1=1;
+			</sql>
+		</rollback>
+	</changeSet>
+</databaseChangeLog>

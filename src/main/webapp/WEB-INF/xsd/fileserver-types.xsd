@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bcs.io/fileserver/types"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.bcs.io/fileserver/types" xmlns:global="http://www.bcs.io/fileserver/types">
+
+
+	<simpleType name="FileName_Type">
+		<restriction base="string">
+			<minLength value="1"></minLength>
+			<maxLength value="256"></maxLength>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="URL_Type">
+		<restriction base="string">
+
+			<minLength value="1"></minLength>
+			<maxLength value="2048"></maxLength>
+			<whiteSpace value="collapse"></whiteSpace>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="MimeType_Type">
+		<restriction base="string">
+			<minLength value="1"></minLength>
+			<maxLength value="200"></maxLength>
+			<whiteSpace value="collapse"></whiteSpace>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="StorageFileName_Type">
+		<restriction base="string">
+			<minLength value="1"></minLength>
+			<maxLength value="64"></maxLength>
+			<whiteSpace value="collapse"></whiteSpace>
+		</restriction>
+	</simpleType>
+
+	<complexType name="ContentFragment_Type">
+		<sequence>
+			<element name="offset" type="tns:FragmentOffset_Type"
+				minOccurs="1" maxOccurs="1">
+			</element>
+			<element name="length" type="tns:FragmentLength_Type"
+				minOccurs="1" maxOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="FragmentOffset_Type">
+		<restriction base="long"></restriction>
+	</simpleType>
+
+	<simpleType name="FragmentLength_Type">
+		<restriction base="long"></restriction>
+	</simpleType>
+</schema>

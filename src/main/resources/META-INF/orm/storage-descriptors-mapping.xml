@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+	<access>FIELD</access>
+	
+	<named-query name="LocalStorageDescriptor.findByMediaType">
+		<query>SELECT d from LocalStorageDescriptor d WHERE d.mediaType = :mediaType</query>
+	</named-query>
+
+	<entity
+		class="io.bcs.fileserver.domain.model.storage.descriptor.StorageDescriptor">
+		<table name="REF_STORAGES" />
+		<inheritance strategy="JOINED" />
+		<discriminator-column name="TYPE" />
+
+		<attributes>
+			<id name="storageName">
+				<column name="STORAGE_NAME" />
+			</id>
+
+			<basic name="mediaType">
+				<column name="MEDIA_TYPE" />
+			</basic>
+		</attributes>
+	</entity>
+
+	<entity
+		class="io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor">
+		<table name="REF_LOCAL_STORAGES" />
+		<discriminator-value>LOCAL</discriminator-value>
+
+		<attributes>
+			<basic name="baseDirectory">
+				<column name="BASE_DIRECTORY" />
+			</basic>
+			
+			<basic name="diskQuote">
+				<column name="DISK_QUOTE"/>
+			</basic>
+		</attributes>
+	</entity>
+</entity-mappings>
