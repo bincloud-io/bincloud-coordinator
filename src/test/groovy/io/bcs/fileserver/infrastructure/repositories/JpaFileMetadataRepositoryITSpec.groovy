@@ -23,6 +23,9 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JpaFileMetadataRepositoryITSpec extends Specification {
+  private static final String REF_MEDIATYPES_MIGRATION_SCRIPT ="db-init/file/ref.mediatypes.config.changelog.xml"
+  private static final String REF_LOCAL_STORAGES_MIGRATION_SCRIPT = "db-init/file/ref.local.storages.config.changelog.xml"
+  private static final String LOCAL_FILES_METADATA_MIGRATION_SCRIPT = "db-init/file/file.metadata.changelog.xml"
   private static final String BCE_DATABASE_CONFIGURER_PACKAGE = DatabaseConfigurer.getPackage().getName()
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
 
@@ -48,6 +51,7 @@ class JpaFileMetadataRepositoryITSpec extends Specification {
         .appendManifestResource("META-INF/beans.xml", "beans.xml")
         .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("META-INF/orm/file-mapping.xml", "orm/file-mapping.xml")
+        .appendManifestResource("META-INF/orm/storage-descriptors-mapping.xml", "orm/storage-descriptors-mapping.xml")
         .appendResource("liquibase")
         .appendResource("db-init")
         .build()
@@ -74,7 +78,9 @@ class JpaFileMetadataRepositoryITSpec extends Specification {
 
   def "Scenario: retrieve file metadata by id"() {
     given: "The file metadata is stored into repository"
-    databaseConfigurer.setup("db-init/file/file.metadata.changelog.xml")
+    databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(LOCAL_FILES_METADATA_MIGRATION_SCRIPT)
 
     when: "The file metadata is received by id"
     FileMetadata fileMetadata = fileMetadataRepository.findById(FILE_STORAGE_NAME).get()

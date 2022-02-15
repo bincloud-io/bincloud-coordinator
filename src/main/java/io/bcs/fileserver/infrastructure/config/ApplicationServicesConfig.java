@@ -1,12 +1,15 @@
 package io.bcs.fileserver.infrastructure.config;
 
+import io.bce.Generator;
+import io.bce.domain.EventBus;
 import io.bce.validation.ValidationService;
-import io.bcs.fileserver.domain.model.file.FileManagement;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.domain.services.FileService;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
+import io.bcs.fileserver.infrastructure.file.StorageFileNameGenerator;
 import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
@@ -37,6 +40,23 @@ public class ApplicationServicesConfig {
 
   @Inject
   private FileStorage fileStorage;
+
+  @Inject
+  private EventBus eventBus;
+
+  @Inject
+  private FileServerConfigurationProperties fileServerConfigurationProperties;
+
+  /**
+   * File name generator configuration.
+   *
+   * @return The file name generator
+   */
+  @Produces
+  public Generator<String> fileNameGenerator() {
+    return new StorageFileNameGenerator(
+        fileServerConfigurationProperties::getDistributionPointName);
+  }
 
   /**
    * The file repository configuration.
@@ -76,8 +96,9 @@ public class ApplicationServicesConfig {
    * @return The content service
    */
   @Produces
+  @SuppressWarnings("cdi-ambiguous-dependency")
   public ContentService contentService() {
-    return new ContentService(fileRepository(), fileStorage);
+    return new ContentService(fileRepository(), fileStorage, eventBus);
   }
 
   /**
@@ -86,7 +107,8 @@ public class ApplicationServicesConfig {
    * @return The file service.
    */
   @Produces
-  public FileManagement fileService() {
-    return new FileService(validationService, fileRepository(), fileStorage);
+  @SuppressWarnings("cdi-ambiguous-dependency")
+  public FileService fileService() {
+    return new FileService(validationService, fileRepository(), fileNameGenerator(), eventBus);
   }
 }

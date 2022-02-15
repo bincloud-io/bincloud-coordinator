@@ -86,7 +86,9 @@
 			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
 		</insert>
 		<rollback>
-			<sql>DELETE FROM REF_MEDIA_TYPES WHERE 1=1</sql>
+			<sql>DELETE FROM REF_MEDIA_TYPES WHERE MEDIA_TYPE IN
+				('application/octet-stream')
+			</sql>
 		</rollback>
 	</changeSet>
 
@@ -120,7 +122,7 @@
 			referencedColumnNames="MEDIA_TYPE" />
 	</changeSet>
 
-	<changeSet id="CSET.REF_LOCAL_STORAGES"
+	<changeSet id="CSET.LOCAL_STORAGES"
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="REF_LOCAL_STORAGES"
 			remarks="The dictionary table which enumerates local storages parameters. 
@@ -135,6 +137,11 @@
 				for current media type storage.">
 				<constraints nullable="false" />
 			</column>
+
+			<column name="DISK_QUOTE" type="BIGINT(20)"
+				remarks="Disk quote for the storage.">
+				<constraints nullable="false" />
+			</column>
 		</createTable>
 
 		<addPrimaryKey tableName="REF_LOCAL_STORAGES"
@@ -147,7 +154,87 @@
 			referencedColumnNames="STORAGE_NAME" />
 	</changeSet>
 
+	<changeSet id="CSET.SPACE_MANAGEMENT"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="SPACE_ALLOCATIONS_HISTORY">
+			<column name="ID" type="BIGINT(20)"
+				remarks="The historiy autoincremented identifier.">
+				<constraints nullable="false" />
+			</column>
 
+			<column name="GUID" type="VARCHAR(36)"
+				remarks="The historical identifier">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
+				remarks="The file name for which space is allocated.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The unique storage name, identifying storage.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="OPERATION_TYPE" type="VARCHAR(16)"
+				remarks="The management operation.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="SIZE" type="BIGINT(20)"
+				remarks="Allocated or released space size.">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="ALLOCATION_REF_ID" type="BIGINT(20)"
+				remarks="The historiy autoincremented identifier.">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
+		<addUniqueConstraint
+			constraintName="UNC__SPACE_ALLOC_HISTORY_MARKER" columnNames="GUID"
+			tableName="SPACE_ALLOCATIONS_HISTORY" />
+
+		<addPrimaryKey tableName="SPACE_ALLOCATIONS_HISTORY"
+			columnNames="ID" />
+
+		<addAutoIncrement
+			tableName="SPACE_ALLOCATIONS_HISTORY" columnName="ID"
+			columnDataType="BIGINT(20)" startWith="1" incrementBy="0" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$REF_LOCAL_STORAGES"
+			baseTableName="SPACE_ALLOCATIONS_HISTORY"
+			baseColumnNames="STORAGE_NAME"
+			referencedTableName="REF_LOCAL_STORAGES"
+			referencedColumnNames="STORAGE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$ALLOC_ROW_REFERENCE"
+			baseTableName="SPACE_ALLOCATIONS_HISTORY"
+			baseColumnNames="ALLOCATION_REF_ID"
+			referencedTableName="SPACE_ALLOCATIONS_HISTORY"
+			referencedColumnNames="ID" />
+
+		<rollback>
+			<dropTable tableName="SPACE_ALLOCATIONS_HISTORY" />
+		</rollback>
+	</changeSet>
+
+	<changeSet id="CSET.SPACE_MANAGEMENT_PROCEDURES"
+		author="Dmitry Mikhaylenko">
+		<sqlFile encoding="UTF-8" endDelimiter="/"
+			splitStatements="true" stripComments="true"
+			path="liquibase/v0.0.1/create_space_allocation_functions.sql" />
+
+		<rollback>
+			<sqlFile encoding="UTF-8" splitStatements="true"
+				stripComments="true"
+				path="liquibase/v0.0.1/drop_space_allocation_functions.sql" />
+		</rollback>
+	</changeSet>
 
 	<changeSet id="CSET.FILES" author="Dmitry Mikhaylenko">
 		<createTable tableName="FILES">
@@ -158,7 +245,17 @@
 
 			<column name="STORAGE_NAME" type="VARCHAR(16)"
 				remarks="The storage name where file is stored.">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="CREATED_AT" type="DATETIME"
+				remarks="A time shows when the file was created.">
 				<constraints nullable="false" />
+			</column>
+
+			<column name="DISPOSED_AT" type="DATETIME"
+				remarks="A time shows when the file was disposed.">
+				<constraints nullable="true" />
 			</column>
 
 			<column name="STATUS" type="VARCHAR(16)"
@@ -197,15 +294,43 @@
 
 		<createView viewName="VW_FILES_METADATA"
 			replaceIfExists="false">
-			SELECT 
-				F.STORAGE_FILE_NAME, 
-				F.STATUS, 
-				F.FILE_NAME, 
-				F.CONTENT_LENGTH, 
-				MT.MEDIA_TYPE, 
-				MT.CONTENT_DISPOSITION 
-			FROM FILES F INNER JOIN 
-				REF_MEDIA_TYPES MT ON F.MEDIA_TYPE = MT.MEDIA_TYPE
+			SELECT
+				`F`.`STORAGE_FILE_NAME`,
+				`F`.`STATUS`,
+				`F`.`FILE_NAME`,
+				`F`.`CONTENT_LENGTH`,
+				`MT`.`MEDIA_TYPE`,
+				`MT`.`CONTENT_DISPOSITION`
+			FROM `FILES` `F`
+			INNER JOIN `REF_MEDIA_TYPES` `MT` ON 
+				`F`.`MEDIA_TYPE` = `MT`.`MEDIA_TYPE`
 		</createView>
+	</changeSet>
+
+	<changeSet id="CSET.ADD_SCHEDLOCK" author="Dmitry Mikaylenko">
+		<createTable tableName="SCHEDLOCK"
+			remarks="Schedulers lock table.">
+			<column name="NAME" type="VARCHAR(64)"
+				remarks="Scheduler's name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCKED_AT" type="TIMESTAMP"
+				remarks="Lock acquiring time.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCK_UNTIL" type="TIMESTAMP"
+				remarks="Lock keeping until.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCKED_BY" type="VARCHAR2(255)"
+				remarks="Who acquired lock.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="SCHEDLOCK" columnNames="NAME" />
 	</changeSet>
 </databaseChangeLog>

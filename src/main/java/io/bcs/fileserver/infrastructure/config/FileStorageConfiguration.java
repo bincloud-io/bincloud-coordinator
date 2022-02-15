@@ -1,13 +1,20 @@
 package io.bcs.fileserver.infrastructure.config;
 
-import io.bce.Generator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
+import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
+import io.bcs.fileserver.infrastructure.repositories.JpaLocalStorageDescriptorRepository;
+import io.bcs.fileserver.infrastructure.storage.FilesystemPhysicalFile;
+import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
+import io.bcs.fileserver.infrastructure.storage.JdbcFilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.LocalFileSystemStorage;
-import java.util.UUID;
+import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.sql.DataSource;
 
 /**
  * This class configures file storage.
@@ -17,17 +24,28 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class FileStorageConfiguration {
+  @PersistenceContext(unitName = "central")
+  private EntityManager entityManager;
+
+  @Resource(lookup = "java:/jdbc/BC_CENTRAL")
+  private DataSource dataSource;
+
   @Inject
   private FileServerConfigurationProperties contentLoadingProperties;
 
+  @Produces
+  public LocalStorageDescriptorRepository localStorageDescriptorRepository() {
+    return new JpaLocalStorageDescriptorRepository(entityManager);
+  }
+
   /**
-   * File name generator configuration.
+   * The file system space manager configuration.
    *
-   * @return The file name generator
+   * @return The file system space manager
    */
   @Produces
-  public Generator<String> fileNameGenerator() {
-    return () -> UUID.randomUUID().toString();
+  public FilesystemSpaceManager fileSpaceManager() {
+    return new JdbcFilesystemSpaceManager(dataSource);
   }
 
   /**
@@ -37,8 +55,7 @@ public class FileStorageConfiguration {
    */
   @Produces
   public FileStorage fileStorage() {
-    return new LocalFileSystemStorage(fileNameGenerator(),
-        contentLoadingProperties.getStorageName(), contentLoadingProperties.getBaseDirectory(),
-        contentLoadingProperties.getBufferSize());
+    return new LocalFileSystemStorage(fileSpaceManager(), localStorageDescriptorRepository(),
+        FilesystemPhysicalFile.factory(), contentLoadingProperties.getBufferSize());
   }
 }

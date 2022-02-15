@@ -8,12 +8,12 @@ package io.bcs.fileserver.infrastructure;
  */
 public interface FileServerConfigurationProperties {
   int getBufferSize();
+  
+  String getDistributionPointName();
 
-  String getStorageName();
-
-  String getBaseDirectory();
-
-  String getBaseUrlAddress();
+  String getPublicBaseUrlAddress();
+  
+  String getPrivateBaseUrlAddress();
 
   Long getSyncOperationTimeout();
 }

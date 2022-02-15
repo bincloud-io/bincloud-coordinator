@@ -6,13 +6,14 @@ import io.bce.domain.errors.ErrorDescriptor.ErrorSeverity;
 import io.bce.domain.errors.UnexpectedErrorException;
 import io.bce.domain.errors.ValidationException;
 import io.bce.text.Text;
+import io.bce.text.TextTemplate;
 import io.bce.validation.ErrorMessage;
 import io.bce.validation.ValidationState.ErrorState;
 import io.bce.validation.ValidationState.GroupedError;
-import io.bcs.fileserver.soap.types.common.FaultSeverityType;
-import io.bcs.fileserver.soap.types.common.ServiceFaultType;
-import io.bcs.fileserver.soap.types.common.ValidationErrorsType;
-import io.bcs.fileserver.soap.types.common.ValidationGroupedErrorType;
+import io.bcs.global.types.FaultSeverityType;
+import io.bcs.global.types.ServiceFaultType;
+import io.bcs.global.types.ValidationErrorsType;
+import io.bcs.global.types.ValidationGroupedErrorType;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -81,10 +82,12 @@ public class SoapFault extends ServiceFaultType {
   }
 
   private Collection<String> interpolateErrorMessages(Collection<ErrorMessage> errorMessages) {
-    return errorMessages.stream()
-        .collect(Collectors.mapping(
-            errorMessage -> Text.interpolate(new ErrorMessageTextTemplate(errorMessage)),
-            Collectors.toList()));
+    return errorMessages.stream().map(this::stringifyErrorMessage).collect(Collectors.toList());
+  }
+
+  private String stringifyErrorMessage(ErrorMessage errorMessage) {
+    TextTemplate textTemplate = new ErrorMessageTextTemplate(errorMessage);
+    return Text.interpolate(textTemplate);
   }
 
   private FaultSeverityType extractSeverity(ApplicationException applicationError) {

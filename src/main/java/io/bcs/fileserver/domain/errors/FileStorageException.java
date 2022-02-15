@@ -16,11 +16,20 @@ public class FileStorageException extends ApplicationException {
   /**
    * Create exception.
    *
+   * @param message The error message
+   */
+  public FileStorageException(String message) {
+    super(Constants.CONTEXT, ErrorSeverity.INCIDENT, Constants.FILE_STORAGE_INCIDENT_ERROR,
+        message);
+  }
+  
+  /**
+   * Create exception.
+   *
    * @param cause The reason of this exception
    */
   public FileStorageException(Throwable cause) {
-    super(Constants.CONTEXT, ErrorSeverity.INCIDENT, Constants.FILE_STORAGE_INCIDENT_ERROR,
-        cause.getMessage());
+    this(cause.getMessage());
     initCause(cause);
-  }
+  } 
 }
