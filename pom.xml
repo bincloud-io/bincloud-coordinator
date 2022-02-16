@@ -305,6 +305,7 @@
 					<sourceDestDir>${project.build.directory}/generated-sources/</sourceDestDir>
 					<wsdlFiles>
 						<wsdlFile>bcs-public-services.wsdl</wsdlFile>
+						<wsdlFile>bcs-private-services.wsdl</wsdlFile>
 					</wsdlFiles>
 					<!--bindingFiles> <bindingFile>file-storage-service.xjb</bindingFile> 
 						<bindingFile>file-storage-types.xjb</bindingFile> <bindingFile>global-types.xjb</bindingFile> 

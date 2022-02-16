@@ -9,8 +9,20 @@
 		<servlet-class>io.bcs.fileserver.infrastructure.api.open.HttpContentManagementServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>HttpStorageManagementServlet</servlet-name>
+		<servlet-class>io.bcs.fileserver.infrastructure.api.internal.HttpStorageManagementServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>HttpContentManagementServlet</servlet-name>
 		<url-pattern>/public/content</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>HttpStorageManagementServlet</servlet-name>
+		<url-pattern>/private/access/direct/content</url-pattern>
 	</servlet-mapping>
 </web-app>

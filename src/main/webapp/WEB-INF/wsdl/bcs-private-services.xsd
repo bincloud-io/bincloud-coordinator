@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+	targetNamespace="http://www.bcs.io/fileserver/api/types/internal"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bcs.io/fileserver/api/types/internal"
+	xmlns:global="http://www.bcs.io/global/types"
+	xmlns:common="http://www.bcs.io/fileserver/types">
+	<import schemaLocation="../xsd/global-types.xsd"
+		namespace="http://www.bcs.io/global/types">
+	</import>
+	<import schemaLocation="../xsd/fileserver-types.xsd"
+		namespace="http://www.bcs.io/fileserver/types"></import>
+
+    <complexType name="GetDirectContentUrlRq_Type">
+    	<sequence>
+    		<element name="storageFileName" type="common:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
+    		<element name="fragment" type="common:ContentFragment_Type" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <element name="GetDirectContentUrlRq" type="tns:GetDirectContentUrlRq_Type" />
+
+    <complexType name="GetDirectContentUrlRs_Type">
+    	<complexContent>
+    		<extension base="global:ServiceResponse_Type">
+    			<sequence>
+    				<element name="contentRef" type="common:URL_Type" minOccurs="1" maxOccurs="1"></element>
+    			</sequence>
+    		</extension>
+    	</complexContent>
+    </complexType>
+
+    <element name="GetDirectContentUrlRs" type="tns:GetDirectContentUrlRs_Type" />
+</schema>

@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
  * @author Dmitry Mikhaylenko
  *
  */
-public class StorageManagementServlet extends HttpServlet {
+public class HttpStorageManagementServlet extends HttpServlet {
   private static final long serialVersionUID = -9219714383304325501L;
 
 }

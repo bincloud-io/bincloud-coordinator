@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema
 	targetNamespace="http://www.bcs.io/fileserver/api/types/open"
-	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.bcs.io/fileserver/api/types/open" xmlns:global="http://www.bcs.io/global/types" xmlns:common="http://www.bcs.io/fileserver/types">
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bcs.io/fileserver/api/types/open"
+	xmlns:global="http://www.bcs.io/global/types"
+	xmlns:common="http://www.bcs.io/fileserver/types">
 
 	<import schemaLocation="../xsd/global-types.xsd"
 		namespace="http://www.bcs.io/global/types">
