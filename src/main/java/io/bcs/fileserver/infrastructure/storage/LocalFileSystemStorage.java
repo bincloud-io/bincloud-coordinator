@@ -7,13 +7,13 @@ import io.bcs.fileserver.domain.errors.FileStorageException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
+import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor;
 import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.storage.PhysicalFile.Factory;
 import java.io.IOException;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -35,7 +35,7 @@ public class LocalFileSystemStorage implements FileStorage {
       String storageName = filesystemSpaceManager.allocateSpace(file.getMediaType(),
           file.getStorageFileName(), contentLength);
       ContentLocator contentLocator =
-          new DefaultFileLocator(storageName, file.getStorageFileName());
+          new DefaultContentLocator(storageName, file.getStorageFileName());
       getPhysicalFile(contentLocator).create();
       return contentLocator;
     } catch (IOException error) {
@@ -44,19 +44,20 @@ public class LocalFileSystemStorage implements FileStorage {
   }
 
   @Override
-  public Destination<BinaryChunk> getAccessOnWrite(File file) throws FileStorageException {
+  public Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
+      throws FileStorageException {
     try {
-      return getPhysicalFile(file).openForWrite();
+      return getPhysicalFile(contentLocator).openForWrite();
     } catch (IOException error) {
       throw new FileStorageException(error);
     }
   }
 
   @Override
-  public Source<BinaryChunk> getAccessOnRead(File file, ContentFragment fragment)
-      throws FileStorageException {
+  public Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
+      ContentFragment fragment) throws FileStorageException {
     try {
-      return getPhysicalFile(file).openForRead(fragment.getOffset(), fragment.getLength(),
+      return getPhysicalFile(contentLocator).openForRead(fragment.getOffset(), fragment.getLength(),
           bufferSize);
     } catch (IOException error) {
       throw new FileStorageException(error);
@@ -65,12 +66,7 @@ public class LocalFileSystemStorage implements FileStorage {
 
   @Override
   public void delete(File file) throws FileStorageException {
-    getPhysicalFile(file).delete();
-  }
-
-  private PhysicalFile getPhysicalFile(File file) {
-    ContentLocator contentLocator = new DefaultFileLocator(file);
-    return getPhysicalFile(contentLocator);
+    getPhysicalFile(new FileContentLocator(file)).delete();
   }
 
   private PhysicalFile getPhysicalFile(ContentLocator contentLocator) {
@@ -83,19 +79,5 @@ public class LocalFileSystemStorage implements FileStorage {
     return localStorageDescriptorRepository.findByName(storageName)
         .orElseThrow(() -> new FileStorageException(
             String.format("Local storage isn't registered", storageName)));
-  }
-
-  @Getter
-  @EqualsAndHashCode
-  @RequiredArgsConstructor
-  private final class DefaultFileLocator implements ContentLocator {
-    private final String storageName;
-    private final String storageFileName;
-
-    public DefaultFileLocator(File file) {
-      super();
-      this.storageFileName = file.getStorageFileName();
-      this.storageName = file.getStorageName().get();
-    }
   }
 }

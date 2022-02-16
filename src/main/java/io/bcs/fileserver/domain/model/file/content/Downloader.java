@@ -9,13 +9,13 @@ import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
 import io.bcs.fileserver.domain.model.file.File;
-import io.bcs.fileserver.domain.model.file.FileContentLocator;
 import io.bcs.fileserver.domain.model.file.FileFragments;
 import io.bcs.fileserver.domain.model.file.FileStatus;
 import io.bcs.fileserver.domain.model.file.Range;
 import io.bcs.fileserver.domain.model.file.content.FileContent.ContentType;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Arrays;
 import java.util.Collection;
@@ -137,11 +137,7 @@ public class Downloader {
       this.type = recognizeContentType(fragments.size());
       this.parts = getContentParts(fileStorage, fragments);
     }
-
-    public File getFile() {
-      return file;
-    }
-
+    
     @Override
     public ContentLocator getLocator() {
       return new FileContentLocator(file);
@@ -149,9 +145,11 @@ public class Downloader {
 
     private Collection<ContentPart> getContentParts(FileStorage storage,
         Collection<ContentFragment> fragments) {
-      return normalizeFragments(fragments).stream().collect(Collectors.mapping(
-          fragment -> new StorageContentPart(fragment, fileStorage.getAccessOnRead(file, fragment)),
-          Collectors.toList()));
+      return normalizeFragments(fragments).stream()
+          .collect(Collectors.mapping(
+              fragment -> new StorageContentPart(fragment,
+                  fileStorage.getAccessOnRead(new FileContentLocator(file), fragment)),
+              Collectors.toList()));
     }
 
     private Collection<ContentFragment> normalizeFragments(Collection<ContentFragment> fragments) {

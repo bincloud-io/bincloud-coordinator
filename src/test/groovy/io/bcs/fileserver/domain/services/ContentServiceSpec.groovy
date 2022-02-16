@@ -20,8 +20,10 @@ import io.bcs.fileserver.domain.errors.FileDisposedException
 import io.bcs.fileserver.domain.errors.FileNotDisposedException
 import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
+import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.model.file.File
+import io.bcs.fileserver.domain.model.file.FileDownloadHasBeenRequested
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.file.Range
@@ -49,7 +51,7 @@ class ContentServiceSpec extends Specification {
   private FileStorage fileStorage
   private EventBus eventBus
   private EventPublisher eventPublisher
-  private ContentService fileService
+  private ContentService contentService
 
   def setup() {
     this.fileRepository = Mock(FileRepository)
@@ -57,7 +59,7 @@ class ContentServiceSpec extends Specification {
     this.eventBus = Mock(EventBus)
     this.eventPublisher = Mock(EventPublisher)
     this.eventBus.getPublisher(_, _) >> eventPublisher
-    this.fileService = new ContentService(fileRepository, fileStorage, eventBus)
+    this.contentService = new ContentService(fileRepository, fileStorage, eventBus)
   }
 
   def "Scenario: unsuccessfully upload file content to the unspecified file"() {
@@ -69,9 +71,8 @@ class ContentServiceSpec extends Specification {
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
-
     when: "The file is uploaded for unspecified file storage name"
-    WaitingPromise.of(fileService.upload(Optional.empty(), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
+    WaitingPromise.of(contentService.upload(Optional.empty(), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
     then: "The file is not specified error should be happened"
@@ -93,7 +94,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
+    WaitingPromise.of(contentService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
     then: "The file not exists error should be happened"
@@ -117,7 +118,7 @@ class ContentServiceSpec extends Specification {
 
     and: "The file will be created"
     fileStorage.create(_, _) >> contentLocator()
-    
+
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
     contentSource.sendContent(_, _) >> Promises.resolvedBy(fileUploadStatistic())
@@ -126,7 +127,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
+    WaitingPromise.of(contentService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .then(responseHandler).await(100L)
 
     then: "The file should be stored in the distributing state"
@@ -157,6 +158,37 @@ class ContentServiceSpec extends Specification {
     statistic.getTotalLength() ==  DISTRIBUTIONING_CONTENT_LENGTH
   }
 
+  def "Scenario: unsuccessfully upload file content if we can't get access on write"() {
+    FileStorageException error
+    given: "The draft file, existing into repository."+
+    "Storage file name: ${STORAGE_FILE_NAME}" +
+    "Storage name: ${STORAGE_NAME}" +
+    "Media type: ${MEDIA_TYPE}" +
+    "File name: ${FILE_NAME}" +
+    "Total length: ${DEFAULT_CONTENT_LENGTH}"
+    this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDraftFile())
+
+    and: "The file will be created"
+    fileStorage.create(_, _) >> contentLocator()
+
+    and: "The file content source"
+    ContentSource contentSource = Mock(ContentSource)
+    contentSource.sendContent(_, _) >> Promises.rejectedBy(new FileStorageException(new IOException()))
+
+    and: "The promise reject error handler"
+    ErrorHandler errorHandler = Mock(ErrorHandler)
+
+    when: "The file is uploaded"
+    WaitingPromise.of(contentService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
+        .error(errorHandler).await(100L)
+
+    then: "The file storage exception should be happened"
+    1 * errorHandler.onError(_) >> {error = it[0]}
+    error.getContextId() == Constants.CONTEXT
+    error.getErrorCode() == Constants.FILE_STORAGE_INCIDENT_ERROR
+    error.getErrorSeverity() == ErrorSeverity.INCIDENT
+  }
+
   def "Scenario: unsuccessfully upload file content to the distributed file"() {
     ContentUploadedException error
     given: "The distributing file, existing into repository."+
@@ -174,10 +206,10 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
+    WaitingPromise.of(contentService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
-    then: "The file has already been exception should be happened"
+    then: "The file has already been uploaded exception should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
     error.getContextId() == Constants.CONTEXT
     error.getErrorCode() == Constants.CONTENT_IS_UPLOADED_ERROR
@@ -189,7 +221,7 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: unsuccessfully upload file content to the disposed file"() {
     FileDisposedException error
-    given: "The disposed file, existing into repository."+
+    given: "The distributing file, existing into repository."+
     "Storage file name: ${STORAGE_FILE_NAME}" +
     "Storage name: ${STORAGE_NAME}" +
     "Media type: ${MEDIA_TYPE}" +
@@ -204,10 +236,10 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file is uploaded"
-    WaitingPromise.of(fileService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
+    WaitingPromise.of(contentService.upload(Optional.ofNullable(STORAGE_FILE_NAME), DISTRIBUTIONING_CONTENT_LENGTH, contentSource))
         .error(errorHandler).await()
 
-    then: "The file has already been exception should be happened"
+    then: "The file has already been disposed exception should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
     error.getContextId() == Constants.CONTEXT
     error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
@@ -216,9 +248,10 @@ class ContentServiceSpec extends Specification {
     and: "Access on write shouldn't be requested"
     0 * fileStorage.getAccessOnWrite(_)
   }
-
+  
   def "Scenario: unsuccessfully download file content from the unspecified file"() {
     FileNotSpecifiedException error
+    FileDownloadHasBeenRequested event
     given: "The file content receiver"
     ContentReceiver contentReceiver = Mock(ContentReceiver)
 
@@ -226,7 +259,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.empty()), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.empty()), contentReceiver))
         .error(errorHandler).await()
 
     then: "The file is not specified error should be happened"
@@ -234,10 +267,15 @@ class ContentServiceSpec extends Specification {
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.FILE_IS_NOT_SPECIFIED
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.empty()
   }
 
   def "Scenario: unsuccessfully download file content from the unknown file"() {
     FileNotExistsException error
+    FileDownloadHasBeenRequested event
     given: "The draft file, missing into repository"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.empty()
 
@@ -248,7 +286,7 @@ class ContentServiceSpec extends Specification {
     ErrorHandler errorHandler = Mock(ErrorHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
         .error(errorHandler).await()
 
     then: "The file not exists error should be happened"
@@ -256,10 +294,15 @@ class ContentServiceSpec extends Specification {
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
   def "Scenario: unsuccessfully download file content from draft file"() {
     ContentNotUploadedException error
+    FileDownloadHasBeenRequested event
     given: "The existing draft file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDraftFile())
 
@@ -275,7 +318,7 @@ class ContentServiceSpec extends Specification {
 
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
         .error(errorHandler).await()
 
 
@@ -284,10 +327,15 @@ class ContentServiceSpec extends Specification {
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.CONTENT_IS_NOT_UPLOADED_ERROR
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
   def "Scenario: unsuccessfully download file from disposed file"() {
     FileDisposedException error
+    FileDownloadHasBeenRequested event
     given: "The existing disposed file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDisposedFile())
 
@@ -303,19 +351,23 @@ class ContentServiceSpec extends Specification {
 
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME)), contentReceiver))
         .error(errorHandler).await()
-
 
     then: "The content not uploaded error should be happened"
     1 * errorHandler.onError(_) >> {error = it[0]}
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
   def "Scenario: successfully download full file content from distributed file"() {
     FileContent fileContent
+    FileDownloadHasBeenRequested event
     given: "The existing distributing file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
 
@@ -333,7 +385,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
         .then(responseHandler).await(100L)
 
     then: "The file content downloading should be started"
@@ -361,10 +413,15 @@ class ContentServiceSpec extends Specification {
 
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
 
   def "Scenario: unsuccessfully download partial content from distributed file if negative size fragment is requested"() {
+    FileDownloadHasBeenRequested event
     UnsatisfiableRangeFormatException error
     given: "The existing distributing file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
@@ -388,7 +445,7 @@ class ContentServiceSpec extends Specification {
 
     when: "The file is uploaded"
     DownloadCommand downloadCommand = downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts)
-    WaitingPromise.of(fileService.download(downloadCommand, contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand, contentReceiver))
         .error(errorHandler).await(100L)
 
 
@@ -397,10 +454,15 @@ class ContentServiceSpec extends Specification {
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.UNSATISFIABLE_RANGES_FORMAT_ERROR
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
 
   def "Scenario: unsuccessfully download partial content from distributed file if start of range out of the total size"() {
+    FileDownloadHasBeenRequested event
     UnsatisfiableRangeFormatException error
     given: "The existing distributing file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
@@ -424,7 +486,7 @@ class ContentServiceSpec extends Specification {
 
     when: "The file is uploaded"
     DownloadCommand downloadCommand = downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts)
-    WaitingPromise.of(fileService.download(downloadCommand, contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand, contentReceiver))
         .error(errorHandler).await(100L)
 
 
@@ -433,9 +495,14 @@ class ContentServiceSpec extends Specification {
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.UNSATISFIABLE_RANGES_FORMAT_ERROR
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
   def "Scenario: unsuccessfully download partial content from distributed file if start of range is negative"() {
+    FileDownloadHasBeenRequested event
     UnsatisfiableRangeFormatException error
     given: "The existing distributing file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
@@ -444,7 +511,6 @@ class ContentServiceSpec extends Specification {
     Collection<Range> contentParts = [
       createRange(-10, 10)
     ]
-
 
     and: "The file content receiver"
     ContentReceiver contentReceiver = Mock(ContentReceiver)
@@ -459,7 +525,7 @@ class ContentServiceSpec extends Specification {
 
     when: "The file is uploaded"
     DownloadCommand downloadCommand = downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts)
-    WaitingPromise.of(fileService.download(downloadCommand, contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand, contentReceiver))
         .error(errorHandler).await(100L)
 
 
@@ -468,10 +534,15 @@ class ContentServiceSpec extends Specification {
     error.getContextId() == Constants.CONTEXT
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.UNSATISFIABLE_RANGES_FORMAT_ERROR
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
 
   def "Scenario: successfully download partial content from distributed file for single part"() {
     FileContent fileContent
+    FileDownloadHasBeenRequested event
     given: "The existing distributing file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
 
@@ -491,7 +562,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
         .then(responseHandler).await()
 
     then: "The file content downloading should be started"
@@ -520,6 +591,10 @@ class ContentServiceSpec extends Specification {
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
 
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
+
     where:
     rangeStart      | rangeEnd                             | partOffset                           | partSize
     null            | null                                 | 0L                                   | DISTRIBUTIONING_CONTENT_LENGTH
@@ -533,6 +608,7 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: successfully download partial content from distributed file for multiple part"() {
     FileContent fileContent
+    FileDownloadHasBeenRequested event
     given: "The existing distributing file"
     this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
 
@@ -554,7 +630,7 @@ class ContentServiceSpec extends Specification {
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
     when: "The file download is requested"
-    WaitingPromise.of(fileService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
+    WaitingPromise.of(contentService.download(downloadCommand(Optional.of(STORAGE_FILE_NAME), contentParts), contentReceiver))
         .then(responseHandler).await()
 
     then: "The file content downloading should be started"
@@ -588,37 +664,41 @@ class ContentServiceSpec extends Specification {
 
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
+
+    and: "The file download has been requeted event should be published"
+    1 * eventPublisher.publish(_) >> {event = it[0]}
+    event.getStorageFileName() == Optional.of(STORAGE_FILE_NAME)
   }
-  
+
   def "Scenario: clean disposed files"() {
     File file
     given: "The disposed file will be returned from repository"
     fileRepository.findNotRemovedDisposedFiles() >> [createDisposedFile()] >> []
-    
+
     when: "The files clear operation is called"
-    fileService.clearDisposedFiles()
-    
+    contentService.clearDisposedFiles()
+
     then: "Polled file should be deleted"
     1 * fileStorage.delete(_)
-    
+
     and: "Polled file should be stored"
     1 * fileRepository.save(_) >> {file = it[0]}
-    
+
     and: "Stored file total length should be clear"
-    file.getTotalLength() == 0L 
-    
+    file.getTotalLength() == 0L
+
     and: "Stored file storage name should be clear"
     file.getStorageName().isPresent() == false
   }
-  
+
   def "Scenario: clean not disposed file"() {
     FileNotDisposedException error
     given: "The non-disposed file will be returned from repository"
     fileRepository.findNotRemovedDisposedFiles() >> [createDraftFile()] >> []
-    
+
     when: "The files clear operation is requested"
-    fileService.clearDisposedFiles()
-    
+    contentService.clearDisposedFiles()
+
     then: "The file not disposed error should be happened"
     error = thrown(FileNotDisposedException)
     error.getContextId() == Constants.CONTEXT

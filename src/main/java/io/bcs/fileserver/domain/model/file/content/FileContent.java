@@ -2,7 +2,6 @@ package io.bcs.fileserver.domain.model.file.content;
 
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
-import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import java.util.Collection;
@@ -14,13 +13,11 @@ import java.util.Collection;
  *
  */
 public interface FileContent {
-  File getFile();
   
   ContentType getType();
   
   ContentLocator getLocator();
   
-
   Collection<ContentPart> getParts();
 
   /**

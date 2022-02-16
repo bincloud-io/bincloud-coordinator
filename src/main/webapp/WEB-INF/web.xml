@@ -11,8 +11,8 @@
 	</servlet>
 	
 	<servlet>
-		<servlet-name>HttpStorageManagementServlet</servlet-name>
-		<servlet-class>io.bcs.fileserver.infrastructure.api.internal.HttpStorageManagementServlet</servlet-class>
+		<servlet-name>HttpRemoteContentAccessServlet</servlet-name>
+		<servlet-class>io.bcs.fileserver.infrastructure.api.internal.HttpRemoteContentAccessServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 	
@@ -22,7 +22,7 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
-		<servlet-name>HttpStorageManagementServlet</servlet-name>
+		<servlet-name>HttpRemoteContentAccessServlet</servlet-name>
 		<url-pattern>/private/access/direct/content</url-pattern>
 	</servlet-mapping>
 </web-app>

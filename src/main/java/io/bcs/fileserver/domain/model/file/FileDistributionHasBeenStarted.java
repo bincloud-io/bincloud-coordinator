@@ -2,6 +2,7 @@ package io.bcs.fileserver.domain.model.file;
 
 import io.bce.domain.EventType;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import lombok.Getter;
 
 /**

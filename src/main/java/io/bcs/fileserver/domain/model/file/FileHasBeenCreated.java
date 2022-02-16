@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * This event notfies that the file has been disposed.
+ * This event notifies that the file has been disposed.
  *
  * @author Dmitry Mikhaylenko
  *

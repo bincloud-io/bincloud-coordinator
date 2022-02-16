@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
     endpointInterface = "io.bcs.fileserver.api.services.internal.WSContentAccess")
 public class WsContentAccessService implements WSContentAccess {
   private static final String URL_PATH_FORMAT =
-      "%s/private/access/direct/content?storageFileName=%s&offset=%s&length=%s";
+      "%s/private/access/direct/content?storageName=%s&storageFileName=%s&offset=%s&length=%s";
   ApplicationLogger logger = Loggers.applicationLogger(WsContentAccessService.class);
 
   @Inject

@@ -11,6 +11,7 @@ import io.bcs.fileserver.domain.errors.FileDisposedException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileStatus;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
 
@@ -83,18 +84,20 @@ public class Uploader {
     public Promise<FileUploadStatistic> uploadContent(ContentSource contentSource,
         Long contentLength) {
       return Promises.<FileUploadStatistic>of(deferred -> {
-        ContentLocator contentLocator = fileStorage.create(file, contentLength);
-        file.specifyContentPlacement(contentLocator.getStorageName(), contentLength);
-        Destination<BinaryChunk> destination = fileStorage.getAccessOnWrite(file);
-        contentSource.sendContent(contentLocator, destination).then(statistic -> {
-          file.startFileDistribution();
-        }).then(deferred).error(err -> {
-          try {
-            fileStorage.delete(file);
-          } finally {
-            deferred.reject(err);
-          }
-        });
+        Promises.<ContentLocator>of(def -> def.resolve(fileStorage.create(file, contentLength)))
+            .chain(contentLocator -> {
+              file.specifyContentPlacement(contentLocator.getStorageName(), contentLength);
+              Destination<BinaryChunk> destination =
+                  fileStorage.getAccessOnWrite(new FileContentLocator(file));
+              return contentSource.sendContent(contentLocator, destination)
+                  .then(stat -> file.startFileDistribution());
+            }).then(deferred).error(err -> {
+              try {
+                fileStorage.delete(file);
+              } finally {
+                deferred.reject(err);
+              }
+            });
       });
     }
   }

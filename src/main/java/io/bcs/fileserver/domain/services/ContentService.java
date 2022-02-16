@@ -15,6 +15,7 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileDistributionHasBeenStarted;
+import io.bcs.fileserver.domain.model.file.FileDownloadHasBeenRequested;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.Range;
 import io.bcs.fileserver.domain.model.file.content.Downloader;
@@ -73,7 +74,10 @@ public class ContentService {
    * @return The file download completion promise
    */
   public Promise<Void> download(DownloadCommand command, ContentReceiver contentReceiver) {
+    EventPublisher<FileDownloadHasBeenRequested> eventPublisher =
+        createPublisher(FileDownloadHasBeenRequested.EVENT_TYPE);
     return Promises.of(deferred -> {
+      eventPublisher.publish(new FileDownloadHasBeenRequested(command.getStorageFileName()));
       File file = retrieveExistingFile(extractStorageFileName(command.getStorageFileName()));
       Downloader downloader = new Downloader(file, fileStorage);
       downloader.receiveContent(command.getRanges(), contentReceiver).delegate(deferred);
@@ -94,10 +98,10 @@ public class ContentService {
     file.clearContentPlacement();
     fileRepository.save(file);
   }
-  
+
   private void checkThatFileHasNotBeenDisposed(File file) {
     if (file.isNotDisposed()) {
-      throw new FileNotDisposedException(); 
+      throw new FileNotDisposedException();
     }
   }
 
@@ -127,8 +131,18 @@ public class ContentService {
    *
    */
   public interface DownloadCommand {
+    /**
+     * Get storage file name.
+     *
+     * @return The storage file name
+     */
     Optional<String> getStorageFileName();
 
+    /**
+     * Get content ranges.
+     *
+     * @return The content ranges
+     */
     Collection<Range> getRanges();
   }
 }

@@ -18,13 +18,13 @@ public interface FileStorage {
         new UnsupportedOperationException("Operation not supported for current storage type."));
   }
 
-  default Destination<BinaryChunk> getAccessOnWrite(File file)
+  default Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
       throws FileStorageException {
     throw new FileStorageException(
         new UnsupportedOperationException("Operation not supported for current storage type."));
   }
 
-  default Source<BinaryChunk> getAccessOnRead(File file,
+  default Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
       ContentFragment fragment) throws FileStorageException {
     throw new FileStorageException(
         new UnsupportedOperationException("Operation not supported for current storage type."));
@@ -34,5 +34,4 @@ public interface FileStorage {
     throw new FileStorageException(
         new UnsupportedOperationException("Operation not supported for current storage type."));
   }
-
 }
