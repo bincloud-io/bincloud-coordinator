@@ -20,42 +20,83 @@
 		</xsd:schema>
 	</wsdl:types>
 
-	<wsdl:message name="getDirectContentUrlRequest">
+	<wsdl:message name="getContentReadUrlRequest">
 		<wsdl:part name="parameters"
-			element="xsd1:GetDirectContentUrlRq"></wsdl:part>
+			element="xsd1:GetDirectContentReadUrlRq"></wsdl:part>
 	</wsdl:message>
 
-	<wsdl:message name="getDirectContentUrlResponse">
+	<wsdl:message name="getContentReadUrlResponse">
 		<wsdl:part name="parameters"
-			element="xsd1:GetDirectContentUrlRs"></wsdl:part>
+			element="xsd1:GetDirectContentReadUrlRs"></wsdl:part>
 	</wsdl:message>
 
-	<wsdl:message name="getDirectContentUrlFault">
+	<wsdl:message name="getContentReadUrlFault">
 		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
 
+	<wsdl:message name="getContentWriteUrlRequest">
+		<wsdl:part name="parameters"
+			element="xsd1:GetDirectContentWriteUrlRq"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="getContentWriteUrlResponse">
+		<wsdl:part name="parameters"
+			element="xsd1:GetDirectContentWriteUrlRs"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="getContentWriteUrlFault">
+		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
+	</wsdl:message>
 	<wsdl:portType name="WSContentAccess">
-		<wsdl:operation name="getDirectContentUrl">
-			<wsdl:input message="tns:getDirectContentUrlRequest"></wsdl:input>
-			<wsdl:output message="tns:getDirectContentUrlResponse"></wsdl:output>
+		<wsdl:operation name="getContentReadUrl">
+			<wsdl:input message="tns:getContentReadUrlRequest"></wsdl:input>
+			<wsdl:output message="tns:getContentReadUrlResponse"></wsdl:output>
 			<wsdl:fault name="fault"
-				message="tns:getDirectContentUrlFault"></wsdl:fault>
+				message="tns:getContentReadUrlFault"></wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getContentWriteUrl">
+			<wsdl:input message="tns:getContentWriteUrlRequest"></wsdl:input>
+			<wsdl:output message="tns:getContentWriteUrlResponse"></wsdl:output>
+			<wsdl:fault name="fault"
+				message="tns:getContentWriteUrlFault"></wsdl:fault>
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="WSContentAccessBinding"
 		type="tns:WSContentAccess">
+
 		<soap:binding style="document"
 			transport="http://schemas.xmlsoap.org/soap/http" />
-		<wsdl:operation name="getDirectContentUrl">
+		<wsdl:operation name="getContentReadUrl">
+
 			<soap:operation
-				soapAction="http://www.bcs.io/fileserver/api/wsdl/bcs-private-services.wsdl/getDirectContentUrl" />
+				soapAction="http://www.bcs.io/fileserver/api/services/internal/getContentReadUrl" />
 			<wsdl:input>
+
 				<soap:body use="literal" />
 			</wsdl:input>
 			<wsdl:output>
+
 				<soap:body use="literal" />
 			</wsdl:output>
 			<wsdl:fault name="fault">
+
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getContentWriteUrl">
+
+			<soap:operation
+				soapAction="http://www.bcs.io/fileserver/api/services/internal/getContentWriteUrl" />
+			<wsdl:input>
+
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+
+				<soap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="fault">
+
 				<soap:fault use="literal" name="fault" />
 			</wsdl:fault>
 		</wsdl:operation>

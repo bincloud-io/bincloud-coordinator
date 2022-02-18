@@ -11,16 +11,42 @@
 	<import schemaLocation="../xsd/fileserver-types.xsd"
 		namespace="http://www.bcs.io/fileserver/types"></import>
 
-    <complexType name="GetDirectContentUrlRq_Type">
-    	<sequence>
-    		<element name="storageFileName" type="common:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
-    		<element name="fragment" type="common:ContentFragment_Type" minOccurs="1" maxOccurs="1"></element>
-    	</sequence>
-    </complexType>
-    
-    <element name="GetDirectContentUrlRq" type="tns:GetDirectContentUrlRq_Type" />
+	<complexType name="GetDirectContentReadUrlRq_Type">
+		<sequence>
+			<element name="locator"
+				type="common:ContentLocator_Type" minOccurs="1" maxOccurs="1">
+			</element>
+            <element name="fragment" type="common:ContentFragment_Type"
+				minOccurs="1" maxOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
 
-    <complexType name="GetDirectContentUrlRs_Type">
+	<element name="GetDirectContentReadUrlRq"
+		type="tns:GetDirectContentReadUrlRq_Type" />
+
+	<complexType name="GetDirectContentReadUrlRs_Type">
+		<complexContent>
+			<extension base="global:ServiceResponse_Type">
+				<sequence>
+					<element name="contentRef" type="common:URL_Type"
+						minOccurs="1" maxOccurs="1"></element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<element name="GetDirectContentReadUrlRs"
+		type="tns:GetDirectContentReadUrlRs_Type" />
+
+	<complexType name="GetDirectContentWriteUrlRq_Type">
+		<sequence>
+			<element name="locator" type="common:ContentLocator_Type"></element>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="GetDirectContentWriteUrlRs_Type">
     	<complexContent>
     		<extension base="global:ServiceResponse_Type">
     			<sequence>
@@ -30,5 +56,7 @@
     	</complexContent>
     </complexType>
 
-    <element name="GetDirectContentUrlRs" type="tns:GetDirectContentUrlRs_Type" />
+    <element name="GetDirectContentWriteUrlRq" type="tns:GetDirectContentWriteUrlRq_Type"></element>
+
+    <element name="GetDirectContentWriteUrlRs" type="tns:GetDirectContentWriteUrlRs_Type"></element>
 </schema>

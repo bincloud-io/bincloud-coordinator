@@ -53,4 +53,16 @@
 	<simpleType name="FragmentLength_Type">
 		<restriction base="long"></restriction>
 	</simpleType>
+
+
+	<simpleType name="StorageName_Type">
+		<restriction base="string"></restriction>
+	</simpleType>
+
+	<complexType name="ContentLocator_Type">
+		<sequence>
+			<element name="storageName" type="tns:StorageName_Type" minOccurs="1" maxOccurs="1"></element>
+			<element name="storageFileName" type="tns:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
+		</sequence>
+	</complexType>
 </schema>
