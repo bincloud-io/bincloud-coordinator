@@ -70,8 +70,6 @@ public class FileService {
    * @return The file dispose complete promise
    */
   public Promise<Void> disposeFile(String storageFileName) {
-    EventPublisher<FileHasBeenDisposed> eventPublisher =
-        createPublisher(FileHasBeenDisposed.EVENT_TYPE);
     return Promises.of(deferred -> {
       log.info("Use-case: Dispose file.");
       File file = retrieveExistingFileDescriptor(storageFileName);
@@ -83,9 +81,15 @@ public class FileService {
           .withParameter("storageFileName", contentLocator.getStorageFileName())
           .withParameter("storageName", contentLocator.getStorageName()));
       fileRepository.save(file);
-      eventPublisher.publish(new FileHasBeenDisposed(contentLocator));
+      notifyAboutDisposedOriginalFile(file);
       deferred.resolve(null);
     });
+  }
+
+  private void notifyAboutDisposedOriginalFile(File file) {
+    EventPublisher<FileHasBeenDisposed> eventPublisher =
+        createPublisher(FileHasBeenDisposed.EVENT_TYPE);
+    eventPublisher.publish(new FileHasBeenDisposed(new FileContentLocator(file)));
   }
 
   private File retrieveExistingFileDescriptor(String storageFileName) {

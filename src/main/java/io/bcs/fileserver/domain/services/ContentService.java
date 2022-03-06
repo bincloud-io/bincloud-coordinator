@@ -91,6 +91,10 @@ public class ContentService {
     Polling.sequentialPolling(fileRepository::findNotRemovedDisposedFiles)
         .forEach(this::removeDisposedFile);
   }
+  
+  public void warmContentUp(String fileName) {
+    
+  }
 
   private void removeDisposedFile(File file) {
     checkThatFileHasNotBeenDisposed(file);

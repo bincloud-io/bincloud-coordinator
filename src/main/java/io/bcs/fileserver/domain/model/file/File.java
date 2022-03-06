@@ -35,19 +35,19 @@ public class File {
   @Include
   @Default
   private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
-  
+
   @Getter(value = AccessLevel.NONE)
   private String storageName;
-  
+
   @Default
   private FileStatus status = FileStatus.DRAFT;
-  
+
   @Default
   private String mediaType = DEFAULT_MEDIA_TYPE;
-  
+
   @Default
   private String fileName = DEFAULT_FILE_NAME;
-  
+
   @Default
   private Long totalLength = 0L;
 
@@ -55,6 +55,8 @@ public class File {
   private LocalDateTime createdAt = LocalDateTime.now();
 
   private LocalDateTime disposedAt;
+
+  private StorageMode storageMode;
 
   /**
    * Create file.
@@ -67,6 +69,7 @@ public class File {
     this.storageFileName = filenameGenerator.generateNext();
     this.mediaType = creationData.getMediaType();
     this.fileName = creationData.getFileName().orElse(storageFileName);
+    this.storageMode = StorageMode.ORIGINAL;
     this.createdAt = LocalDateTime.now();
     this.status = FileStatus.DRAFT;
     this.totalLength = 0L;
@@ -98,7 +101,16 @@ public class File {
   public boolean isNotDisposed() {
     return !isDisposed();
   }
-  
+
+  /**
+   * Check that the file is original.
+   *
+   * @return True if original and false otherwise
+   */
+  public boolean isOriginal() {
+    return storageMode == StorageMode.ORIGINAL;
+  }
+
   public Optional<LocalDateTime> getDisposedAt() {
     return Optional.ofNullable(disposedAt);
   }
