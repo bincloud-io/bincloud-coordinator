@@ -39,24 +39,40 @@
 	<element name="GetDirectContentReadUrlRs"
 		type="tns:GetDirectContentReadUrlRs_Type" />
 
-	<complexType name="GetDirectContentWriteUrlRq_Type">
+
+
+
+
+
+	<complexType name="WarmContentUpRq_Type">
 		<sequence>
-			<element name="locator" type="common:ContentLocator_Type"></element>
+			<element name="fileName" type="common:FileName_Type"></element>
 		</sequence>
 	</complexType>
-
-
-	<complexType name="GetDirectContentWriteUrlRs_Type">
+	
+    <complexType name="WarmContentUpRs_Type">
     	<complexContent>
-    		<extension base="global:ServiceResponse_Type">
-    			<sequence>
-    				<element name="contentRef" type="common:URL_Type" minOccurs="1" maxOccurs="1"></element>
-    			</sequence>
-    		</extension>
+    		<extension base="global:ServiceResponse_Type"></extension>
+    	</complexContent>
+    </complexType>
+    
+    <complexType name="CoolContentDownRq_Type">
+    	<sequence>
+    		<element name="fileName" type="common:FileName_Type"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="CoolContentDownRs_Type">
+    	<complexContent>
+    		<extension base="global:ServiceResponse_Type"></extension>
     	</complexContent>
     </complexType>
 
-    <element name="GetDirectContentWriteUrlRq" type="tns:GetDirectContentWriteUrlRq_Type"></element>
+    <element name="CoolContentDownRq" type="tns:CoolContentDownRq_Type"></element>
 
-    <element name="GetDirectContentWriteUrlRs" type="tns:GetDirectContentWriteUrlRs_Type"></element>
+    <element name="CoolContentDownRs" type="tns:CoolContentDownRs_Type"></element>
+
+    <element name="WarmContentUpRq" type="tns:WarmContentUpRq_Type"></element>
+
+    <element name="WarmContentUpRs" type="tns:WarmContentUpRs_Type"></element>
 </schema>

@@ -100,10 +100,10 @@
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:service name="BCSPublicServicesEndpoint">
-		<wsdl:port name="BCSPublicServicesPort"
+		<wsdl:port name="WSFileManagementPort"
 			binding="tns:WSFileManagementBinding">
 			<soap:address
-				location="http://www.bcs.io/fileserver/api/public/BCSPublicServices" />
+				location="http://www.bcs.io/fileserver/api/public/WSFileManagement" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

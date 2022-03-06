@@ -1,6 +1,5 @@
 package io.bcs.fileserver.infrastructure.api.internal;
 
-import com.github.jknack.handlebars.internal.Throwing.Supplier;
 import io.bce.domain.errors.ApplicationException;
 import io.bce.domain.errors.UnexpectedErrorException;
 import io.bce.interaction.streaming.Destination;
@@ -10,13 +9,10 @@ import io.bce.interaction.streaming.Streamer;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.interaction.streaming.binary.OutputStreamDestination;
-import io.bce.promises.Deferred;
 import io.bce.promises.Deferred.DeferredFunction;
-import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
-import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.api.HttpAsyncExecutor;

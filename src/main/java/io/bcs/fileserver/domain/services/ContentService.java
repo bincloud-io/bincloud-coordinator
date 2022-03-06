@@ -91,9 +91,25 @@ public class ContentService {
     Polling.sequentialPolling(fileRepository::findNotRemovedDisposedFiles)
         .forEach(this::removeDisposedFile);
   }
-  
+
+  /**
+   * Warm content up. This method allocate space on a local storage and replicate file mirror from
+   * remote storage of original file.
+   *
+   * @param fileName The file name
+   */
   public void warmContentUp(String fileName) {
-    
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Cool content down. This method remove file mirror from the local storage and replace storage
+   * pointer to the remote storage.
+   *
+   * @param fileName The file name
+   */
+  public void coolContentDown(String fileName) {
+    throw new UnsupportedOperationException();
   }
 
   private void removeDisposedFile(File file) {
