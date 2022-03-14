@@ -23,9 +23,11 @@ import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.file.content.Uploader;
 import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource;
+import io.bcs.fileserver.domain.model.file.content.Warmer;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -98,7 +100,7 @@ public class ContentService {
    *
    * @param fileName The file name
    */
-  public void warmContentUp(String fileName) {
+  public Promise<Void> warmContentUp(String fileName) {
     throw new UnsupportedOperationException();
   }
 
@@ -108,7 +110,7 @@ public class ContentService {
    *
    * @param fileName The file name
    */
-  public void coolContentDown(String fileName) {
+  public Promise<Void> coolContentDown(String fileName) {
     throw new UnsupportedOperationException();
   }
 

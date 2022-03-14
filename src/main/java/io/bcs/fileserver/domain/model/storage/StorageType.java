@@ -7,5 +7,5 @@ package io.bcs.fileserver.domain.model.storage;
  *
  */
 public enum StorageType {
-  LOCAL;
+  LOCAL, REMOTE;
 }
