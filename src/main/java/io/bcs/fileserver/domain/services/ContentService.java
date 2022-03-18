@@ -23,11 +23,9 @@ import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.file.content.Uploader;
 import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource;
-import io.bcs.fileserver.domain.model.file.content.Warmer;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -57,7 +55,7 @@ public class ContentService {
     EventPublisher<FileDistributionHasBeenStarted> eventPublisher =
         createPublisher(FileDistributionHasBeenStarted.EVENT_TYPE);
     return Promises.of(deferred -> {
-      log.info("Use-case: Download file.");
+      log.info("Use-case: Upload file.");
       File file = retrieveExistingFile(extractStorageFileName(storageFileName));
       Uploader uploader = new Uploader(file, fileStorage);
       uploader.uploadContent(contentSender, contentLength).then(statistic -> {
@@ -79,6 +77,7 @@ public class ContentService {
     EventPublisher<FileDownloadHasBeenRequested> eventPublisher =
         createPublisher(FileDownloadHasBeenRequested.EVENT_TYPE);
     return Promises.of(deferred -> {
+      log.info("Use-case: Download file.");
       eventPublisher.publish(new FileDownloadHasBeenRequested(command.getStorageFileName()));
       File file = retrieveExistingFile(extractStorageFileName(command.getStorageFileName()));
       Downloader downloader = new Downloader(file, fileStorage);
@@ -90,6 +89,7 @@ public class ContentService {
    * Clear all disposed files.
    */
   public void clearDisposedFiles() {
+    log.info("Use-case: Close all disposed files.");
     Polling.sequentialPolling(fileRepository::findNotRemovedDisposedFiles)
         .forEach(this::removeDisposedFile);
   }

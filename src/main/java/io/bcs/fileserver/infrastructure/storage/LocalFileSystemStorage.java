@@ -11,7 +11,7 @@ import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor;
-import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
+import io.bcs.fileserver.domain.model.storage.descriptor.StorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.storage.PhysicalFile.Factory;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LocalFileSystemStorage implements FileStorage {
   private final FilesystemSpaceManager filesystemSpaceManager;
-  private final LocalStorageDescriptorRepository localStorageDescriptorRepository;
+  private final StorageDescriptorRepository localStorageDescriptorRepository;
   private final Factory physicalFileFactory;
   private final int bufferSize;
 
@@ -76,7 +76,7 @@ public class LocalFileSystemStorage implements FileStorage {
   }
 
   private LocalStorageDescriptor findExistingStorageDescriptor(String storageName) {
-    return localStorageDescriptorRepository.findByName(storageName)
+    return (LocalStorageDescriptor) localStorageDescriptorRepository.findByName(storageName)
         .orElseThrow(() -> new FileStorageException(
             String.format("Local storage isn't registered", storageName)));
   }

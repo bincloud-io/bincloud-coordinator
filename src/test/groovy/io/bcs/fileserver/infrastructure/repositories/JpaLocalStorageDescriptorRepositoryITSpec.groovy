@@ -6,7 +6,7 @@ import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
 
 import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptor
-import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository
+import io.bcs.fileserver.domain.model.storage.descriptor.StorageDescriptorRepository
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer
 import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
@@ -46,7 +46,7 @@ class JpaLocalStorageDescriptorRepositoryITSpec extends Specification {
         .apply()
         .appendPackagesRecursively(BCS_DATABASE_CONFIGURER_PACKAGE)
         .appendPackagesRecursively(BCS_DOMAIN_MODEL_PACKAGE)
-        .appendClasses(JpaLocalStorageDescriptorRepository)
+        .appendClasses(JpaStorageDescriptorRepository)
         .appendManifestResource("META-INF/beans.xml", "beans.xml")
         .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("META-INF/orm/file-mapping.xml", "orm/file-mapping.xml")
@@ -63,11 +63,11 @@ class JpaLocalStorageDescriptorRepositoryITSpec extends Specification {
   @PersistenceContext(unitName="central")
   private EntityManager entityManager;
 
-  private LocalStorageDescriptorRepository localStorageDescriptorRepository;
+  private StorageDescriptorRepository localStorageDescriptorRepository;
 
   def setup() {
     databaseConfigurer.setup("liquibase/master.changelog.xml")
-    this.localStorageDescriptorRepository = new JpaLocalStorageDescriptorRepository(entityManager)
+    this.localStorageDescriptorRepository = new JpaStorageDescriptorRepository(entityManager)
   }
 
   def cleanup() {

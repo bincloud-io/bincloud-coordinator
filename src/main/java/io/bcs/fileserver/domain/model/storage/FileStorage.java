@@ -13,25 +13,13 @@ import io.bcs.fileserver.domain.model.file.File;
  *
  */
 public interface FileStorage {
-  default ContentLocator create(File file, Long contentLength) throws FileStorageException {
-    throw new FileStorageException(
-        new UnsupportedOperationException("Operation not supported for current storage type."));
-  }
+  ContentLocator create(File file, Long contentLength) throws FileStorageException;
 
-  default Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
-      throws FileStorageException {
-    throw new FileStorageException(
-        new UnsupportedOperationException("Operation not supported for current storage type."));
-  }
+  Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
+      throws FileStorageException;
 
-  default Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
-      ContentFragment fragment) throws FileStorageException {
-    throw new FileStorageException(
-        new UnsupportedOperationException("Operation not supported for current storage type."));
-  }
+  Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator, ContentFragment fragment)
+      throws FileStorageException;
 
-  default void delete(File file) throws FileStorageException {
-    throw new FileStorageException(
-        new UnsupportedOperationException("Operation not supported for current storage type."));
-  }
+  void delete(File file) throws FileStorageException;
 }

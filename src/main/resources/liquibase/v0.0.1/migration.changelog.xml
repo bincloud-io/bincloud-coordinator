@@ -333,4 +333,33 @@
 
 		<addPrimaryKey tableName="SCHEDLOCK" columnNames="NAME" />
 	</changeSet>
+
+	<changeSet id="CSET.ADD_FILE_REPLICAS_JOURNAL"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="FILE_REPLICAS_JOURNAL">
+			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
+				remarks="The file name into file storage.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="REPLICA_ID" type="BIGINT(20)"
+				remarks="The corresponding file replica name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STATUS" type="VARCHAR(10)"
+				remarks="The file replica status. It may be active or passive.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="FILE_REPLICAS_JOURNAL"
+			columnNames="STORAGE_FILE_NAME,REPLICA_ID" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_FILE_REPLICAS_JOURNAL$FILES"
+			baseTableName="FILE_REPLICAS_JOURNAL"
+			baseColumnNames="STORAGE_FILE_NAME" referencedTableName="FILES"
+			referencedColumnNames="STORAGE_FILE_NAME" />
+	</changeSet>
 </databaseChangeLog>

@@ -59,6 +59,23 @@ public class File {
   private StorageMode storageMode;
 
   /**
+   * Create mirror file copy.
+   *
+   * @param fileState The created file state
+   */
+  public File(CreatedFileState fileState) {
+    super();
+    this.storageFileName = fileState.getStorageFileName();
+    this.storageName = fileState.getStorageName();
+    this.mediaType = fileState.getMediaType();
+    this.fileName = fileState.getFileName();
+    this.totalLength = fileState.getTotalLength();
+    this.createdAt = fileState.getCreatedAt();
+    this.status = FileStatus.DISTRIBUTING;
+    this.storageMode = StorageMode.MIRROR;
+  }
+
+  /**
    * Create file.
    *
    * @param filenameGenerator The file name generator, generating unique filename
@@ -186,5 +203,55 @@ public class File {
      * @return The file name
      */
     public Optional<String> getFileName();
+  }
+  
+  /**
+   * This interface describes the file state, created on another distribution point.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public interface CreatedFileState {
+    /**
+     * Get storage file name.
+     *
+     * @return The storage file name
+     */
+    String getStorageFileName();
+
+    /**
+     * Get storage name.
+     *
+     * @return The storage name
+     */
+    String getStorageName();
+
+    /**
+     * Get media type.
+     *
+     * @return The media type
+     */
+    String getMediaType();
+
+    /**
+     * Get file name.
+     *
+     * @return The file name
+     */
+    String getFileName();
+
+    /**
+     * Get total length.
+     *
+     * @return The total length
+     */
+    Long getTotalLength();
+
+    /**
+     * Get creation moment.
+     *
+     * @return The file created time
+     */
+    LocalDateTime getCreatedAt();
   }
 }

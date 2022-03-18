@@ -15,5 +15,10 @@ public enum StorageMode {
    * This mode marks that a file was created on another distribution point, but is ready to be
    * replicated.
    */
-  MIRROR;
+  MIRROR,
+  /**
+   * This mode marks that a file was created on another distribution point, but additionally it has
+   * been replicated to the local file system.
+   */
+  REPLICA;
 }

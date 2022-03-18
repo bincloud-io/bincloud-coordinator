@@ -1,9 +1,9 @@
 package io.bcs.fileserver.infrastructure.config;
 
 import io.bcs.fileserver.domain.model.storage.FileStorage;
-import io.bcs.fileserver.domain.model.storage.descriptor.LocalStorageDescriptorRepository;
+import io.bcs.fileserver.domain.model.storage.descriptor.StorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
-import io.bcs.fileserver.infrastructure.repositories.JpaLocalStorageDescriptorRepository;
+import io.bcs.fileserver.infrastructure.repositories.JpaStorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.storage.FilesystemPhysicalFile;
 import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.JdbcFilesystemSpaceManager;
@@ -34,8 +34,8 @@ public class FileStorageConfiguration {
   private FileServerConfigurationProperties contentLoadingProperties;
 
   @Produces
-  public LocalStorageDescriptorRepository localStorageDescriptorRepository() {
-    return new JpaLocalStorageDescriptorRepository(entityManager);
+  public StorageDescriptorRepository localStorageDescriptorRepository() {
+    return new JpaStorageDescriptorRepository(entityManager);
   }
 
   /**

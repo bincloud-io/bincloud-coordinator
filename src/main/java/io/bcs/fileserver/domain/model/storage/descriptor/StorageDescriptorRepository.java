@@ -8,8 +8,8 @@ import java.util.Optional;
  * @author Dmitry Mikhaylenko
  *
  */
-public interface LocalStorageDescriptorRepository {
+public interface StorageDescriptorRepository {
   
-  public Optional<LocalStorageDescriptor> findByName(String storageName);
+  public Optional<StorageDescriptor> findByName(String storageName);
   
 }
