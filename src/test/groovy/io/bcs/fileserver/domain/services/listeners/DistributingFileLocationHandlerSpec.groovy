@@ -54,5 +54,8 @@ class DistributingFileLocationHandlerSpec extends Specification {
     
     and: "The file location created date is ${TODAY}"
     fileLocation.getLastModification() == TODAY
+    
+    and: "The file location should be active"
+    fileLocation.isActive() == true
   }
 }

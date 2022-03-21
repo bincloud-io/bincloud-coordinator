@@ -2,6 +2,10 @@ package io.bcs.fileserver.domain.model.file;
 
 import io.bcs.fileserver.domain.model.file.File.CreatedFileState;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
@@ -20,6 +24,7 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class FileLocation {
   static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
@@ -36,6 +41,9 @@ public class FileLocation {
   @Default
   private LocalDateTime lastModification = LocalDateTime.now();
 
+  @Default
+  private boolean active = false;
+
   /**
    * Create file location entity from created file state.
    *
@@ -46,5 +54,22 @@ public class FileLocation {
     this.storageFileName = createdFileState.getStorageFileName();
     this.storageName = createdFileState.getStorageName();
     this.lastModification = createdFileState.getCreatedAt();
+    this.active = true;
+  }
+
+  /**
+   * Relocate file to the anotyer storage.
+   *
+   * @param storageName The storage name
+   * @return The collection, containing old passivated location and new active location
+   */
+  public Collection<FileLocation> relocateTo(String storageName) {
+    Collection<FileLocation> locations = new HashSet<FileLocation>();
+    FileLocation fileLocation =
+        new FileLocation(this.storageFileName, storageName, this.lastModification, true);
+    locations.add(fileLocation);
+    locations.add(this);
+    this.active = false;
+    return locations;
   }
 }
