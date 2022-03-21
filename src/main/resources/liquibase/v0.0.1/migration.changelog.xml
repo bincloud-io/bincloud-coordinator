@@ -334,16 +334,11 @@
 		<addPrimaryKey tableName="SCHEDLOCK" columnNames="NAME" />
 	</changeSet>
 
-	<changeSet id="CSET.ADD_FILE_REPLICAS_JOURNAL"
+	<changeSet id="CSET.ADD_FILE_RELOCATIONS_JOURNAL"
 		author="Dmitry Mikhaylenko">
-		<createTable tableName="FILE_REPLICAS_JOURNAL">
+		<createTable tableName="FILE_RELOCATIONS_JOURNAL">
 			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
 				remarks="The file name into file storage.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="REPLICA_ID" type="BIGINT(20)"
-				remarks="The corresponding file replica name.">
 				<constraints nullable="false" />
 			</column>
 
