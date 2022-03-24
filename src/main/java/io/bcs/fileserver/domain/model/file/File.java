@@ -4,6 +4,7 @@ import io.bce.Generator;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
+import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -26,7 +27,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class File {
+public class File implements FileStorage.FileDescriptor {
   protected static final ApplicationLogger log = Loggers.applicationLogger(File.class);
   static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
   static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
@@ -56,23 +57,20 @@ public class File {
 
   private LocalDateTime disposedAt;
 
-  private StorageMode storageMode;
-
   /**
    * Create mirror file copy.
    *
    * @param fileState The created file state
    */
-  public File(CreatedFileState fileState) {
+  public File(FileEntityState fileState) {
     super();
     this.storageFileName = fileState.getStorageFileName();
-    this.storageName = fileState.getStorageName();
+    this.storageName = fileState.getStorageName().orElse(null);
     this.mediaType = fileState.getMediaType();
     this.fileName = fileState.getFileName();
     this.totalLength = fileState.getTotalLength();
     this.createdAt = fileState.getCreatedAt();
     this.status = FileStatus.DISTRIBUTING;
-    this.storageMode = StorageMode.MIRROR;
   }
 
   /**
@@ -86,7 +84,6 @@ public class File {
     this.storageFileName = filenameGenerator.generateNext();
     this.mediaType = creationData.getMediaType();
     this.fileName = creationData.getFileName().orElse(storageFileName);
-    this.storageMode = StorageMode.ORIGINAL;
     this.createdAt = LocalDateTime.now();
     this.status = FileStatus.DRAFT;
     this.totalLength = 0L;
@@ -120,14 +117,10 @@ public class File {
   }
 
   /**
-   * Check that the file is original.
+   * Get file dispose time.
    *
-   * @return True if original and false otherwise
+   * @return The file dispose time
    */
-  public boolean isOriginal() {
-    return storageMode == StorageMode.ORIGINAL;
-  }
-
   public Optional<LocalDateTime> getDisposedAt() {
     return Optional.ofNullable(disposedAt);
   }
@@ -204,14 +197,14 @@ public class File {
      */
     public Optional<String> getFileName();
   }
-  
+
   /**
    * This interface describes the file state, created on another distribution point.
    *
    * @author Dmitry Mikhaylenko
    *
    */
-  public interface CreatedFileState {
+  public interface FileEntityState {
     /**
      * Get storage file name.
      *
@@ -224,7 +217,7 @@ public class File {
      *
      * @return The storage name
      */
-    String getStorageName();
+    Optional<String> getStorageName();
 
     /**
      * Get media type.

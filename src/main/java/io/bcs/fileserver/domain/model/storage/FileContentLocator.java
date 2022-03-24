@@ -1,6 +1,6 @@
 package io.bcs.fileserver.domain.model.storage;
 
-import io.bcs.fileserver.domain.model.file.File;
+import io.bcs.fileserver.domain.model.storage.FileStorage.FileDescriptor;
 import lombok.EqualsAndHashCode;
 
 /**
@@ -16,7 +16,7 @@ public class FileContentLocator extends DefaultContentLocator {
    *
    * @param file The file for which the content locator is created
    */
-  public FileContentLocator(File file) {
+  public FileContentLocator(FileDescriptor file) {
     super(file.getStorageFileName(), file.getStorageName().get());
   }
 }

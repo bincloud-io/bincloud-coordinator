@@ -13,9 +13,9 @@ import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.errors.FileNotDisposedException;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
+import io.bcs.fileserver.domain.events.FileDistributionHasBeenStarted;
+import io.bcs.fileserver.domain.events.FileDownloadHasBeenRequested;
 import io.bcs.fileserver.domain.model.file.File;
-import io.bcs.fileserver.domain.model.file.FileDistributionHasBeenStarted;
-import io.bcs.fileserver.domain.model.file.FileDownloadHasBeenRequested;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.Range;
 import io.bcs.fileserver.domain.model.file.content.Downloader;
@@ -23,6 +23,7 @@ import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
 import io.bcs.fileserver.domain.model.file.content.Uploader;
 import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource;
+import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.util.Collection;
 import java.util.Optional;
@@ -60,7 +61,7 @@ public class ContentService {
       Uploader uploader = new Uploader(file, fileStorage);
       uploader.uploadContent(contentSender, contentLength).then(statistic -> {
         fileRepository.save(file);
-        eventPublisher.publish(new FileDistributionHasBeenStarted(file));
+        eventPublisher.publish(new FileDistributionHasBeenStarted(new FileContentLocator(file)));
         deferred.resolve(statistic);
       }).error(deferred);
     });
@@ -92,26 +93,6 @@ public class ContentService {
     log.info("Use-case: Close all disposed files.");
     Polling.sequentialPolling(fileRepository::findNotRemovedDisposedFiles)
         .forEach(this::removeDisposedFile);
-  }
-
-  /**
-   * Warm content up. This method allocate space on a local storage and replicate file mirror from
-   * remote storage of original file.
-   *
-   * @param fileName The file name
-   */
-  public Promise<Void> warmContentUp(String fileName) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Cool content down. This method remove file mirror from the local storage and replace storage
-   * pointer to the remote storage.
-   *
-   * @param fileName The file name
-   */
-  public Promise<Void> coolContentDown(String fileName) {
-    throw new UnsupportedOperationException();
   }
 
   private void removeDisposedFile(File file) {

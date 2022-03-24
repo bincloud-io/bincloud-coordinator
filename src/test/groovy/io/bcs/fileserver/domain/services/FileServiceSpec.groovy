@@ -14,9 +14,9 @@ import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.errors.FileDisposedException
 import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.PrimaryValidationException
+import io.bcs.fileserver.domain.events.FileHasBeenCreated
+import io.bcs.fileserver.domain.events.FileHasBeenDisposed
 import io.bcs.fileserver.domain.model.file.File
-import io.bcs.fileserver.domain.model.file.FileHasBeenCreated
-import io.bcs.fileserver.domain.model.file.FileHasBeenDisposed
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.storage.ContentLocator

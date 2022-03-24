@@ -1,6 +1,6 @@
 package io.bcs.fileserver.domain.model.file;
 
-import io.bcs.fileserver.domain.model.file.File.CreatedFileState;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,11 +49,11 @@ public class FileLocation {
    *
    * @param createdFileState The created file state
    */
-  public FileLocation(CreatedFileState createdFileState) {
+  public FileLocation(ContentLocator createdFileState) {
     super();
     this.storageFileName = createdFileState.getStorageFileName();
     this.storageName = createdFileState.getStorageName();
-    this.lastModification = createdFileState.getCreatedAt();
+    this.lastModification = LocalDateTime.now();
     this.active = true;
   }
 

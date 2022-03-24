@@ -1,6 +1,6 @@
 package io.bcs.fileserver.domain.services.listeners
 
-import io.bcs.fileserver.domain.model.file.FileDistributionHasBeenStarted
+import io.bcs.fileserver.domain.events.FileDistributionHasBeenStarted
 import io.bcs.fileserver.domain.model.file.FileLocation
 import io.bcs.fileserver.domain.model.file.FileLocationRepository
 import io.bcs.fileserver.domain.model.storage.DefaultContentLocator
@@ -28,11 +28,8 @@ class DistributingFileLocationHandlerSpec extends Specification {
     Collection<FileLocation> fileLocations
     given: "The file distribution has been started event for file with ${STORAGE_FILE_NAME} on ${STORAGE_NAME} storage"
     FileDistributionHasBeenStarted event = FileDistributionHasBeenStarted.builder()
-        .contentLocator(new DefaultContentLocator(STORAGE_FILE_NAME, STORAGE_NAME))
-        .mediaType(MEDIA_TYPE)
-        .totalLength(CONTENT_LENGTH)
-        .fileName(FILE_NAME)
-        .createdAt(TODAY)
+        .storageFileName(STORAGE_FILE_NAME)
+        .storageName(STORAGE_NAME)
         .build()
     when: "The event is received by listener"
     eventListener.onEvent(event)
@@ -41,20 +38,21 @@ class DistributingFileLocationHandlerSpec extends Specification {
     1 * fileLocationRepository.save(_) >> {
       fileLocations = it[0]
     }
-    
+
     and: "Only one event should be stored"
     fileLocations.size() == 1
-    
+
     FileLocation fileLocation = fileLocations[0]
     and: "The file location storage file name should be ${STORAGE_FILE_NAME}"
     fileLocation.getStorageFileName() == STORAGE_FILE_NAME
-    
+
     and: "The file location storage name should be ${STORAGE_NAME}"
     fileLocation.getStorageName() == STORAGE_NAME
-    
-    and: "The file location created date is ${TODAY}"
-    fileLocation.getLastModification() == TODAY
-    
+
+    and: "The file location created date is between ${TODAY.minusMinutes(10)} and ${TODAY.plusMinutes(10)}"
+    fileLocation.getLastModification() >= TODAY.minusMinutes(10)
+    fileLocation.getLastModification() <= TODAY.plusMinutes(10)
+
     and: "The file location should be active"
     fileLocation.isActive() == true
   }

@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.file;
+package io.bcs.fileserver.domain.events;
 
 import io.bce.domain.EventType;
 import java.util.Optional;

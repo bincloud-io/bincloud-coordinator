@@ -14,10 +14,10 @@ import io.bce.validation.ValidationState;
 import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.PrimaryValidationException;
+import io.bcs.fileserver.domain.events.FileHasBeenCreated;
+import io.bcs.fileserver.domain.events.FileHasBeenDisposed;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.File.CreationData;
-import io.bcs.fileserver.domain.model.file.FileHasBeenCreated;
-import io.bcs.fileserver.domain.model.file.FileHasBeenDisposed;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileContentLocator;
@@ -57,8 +57,7 @@ public class FileService {
       log.debug(TextTemplates.createBy("The file {{storageFileName}} has been successfully created")
           .withParameter("storageFileName", file.getStorageFileName()));
       fileRepository.save(file);
-      eventPublisher
-          .publish(new FileHasBeenCreated(file.getStorageFileName(), file.getMediaType()));
+      eventPublisher.publish(new FileHasBeenCreated(file));
       deferred.resolve(file.getStorageFileName());
     });
   }

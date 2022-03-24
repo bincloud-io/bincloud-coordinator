@@ -17,18 +17,15 @@ import io.bcs.fileserver.domain.Constants
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException
 import io.bcs.fileserver.domain.errors.ContentUploadedException
 import io.bcs.fileserver.domain.errors.FileDisposedException
-import io.bcs.fileserver.domain.errors.FileNotDisposedException
 import io.bcs.fileserver.domain.errors.FileNotExistsException
-import io.bcs.fileserver.domain.errors.FileNotMirrorException
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
+import io.bcs.fileserver.domain.events.FileDownloadHasBeenRequested
 import io.bcs.fileserver.domain.model.file.File
-import io.bcs.fileserver.domain.model.file.FileDownloadHasBeenRequested
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.file.Range
-import io.bcs.fileserver.domain.model.file.StorageMode
 import io.bcs.fileserver.domain.model.file.content.FileContent
 import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic
 import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver
@@ -38,7 +35,6 @@ import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import io.bcs.fileserver.domain.services.ContentService.DownloadCommand
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class ContentServiceSpec extends Specification {
@@ -694,202 +690,6 @@ class ContentServiceSpec extends Specification {
     file.getStorageName().isPresent() == false
   }
 
-  @Ignore
-  def "Scenario: clean not disposed file"() {
-    FileNotDisposedException error
-    given: "The non-disposed file will be returned from repository"
-    fileRepository.findNotRemovedDisposedFiles() >> [createDraftFile()] >> []
-
-    when: "The files clear operation is requested"
-    contentService.clearDisposedFiles()
-
-    then: "The file not disposed error should be happened"
-    error = thrown(FileNotDisposedException)
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.INCIDENT
-    error.getErrorCode() == Constants.FILE_IS_NOT_DISPOSED_ERROR
-  }
-
-  @Ignore
-  def "Scenario: warm up unknown file"() {
-    FileNotExistsException error
-    given: "The requested file is not exists"
-    fileRepository.findById(FILE_NAME) >> Optional.empty()
-
-    and: "The error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content warming up is requested"
-    WaitingPromise.of(contentService.warmContentUp(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The file not exists error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
-  }
-
-  @Ignore
-  def "Scenario: warm up created file"() {
-    ContentNotUploadedException error
-    given: "The existing draft file"
-    fileRepository.findById(FILE_NAME) >> Optional.of(createDraftFile())
-
-    and: "The error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content warming up is requested"
-    WaitingPromise.of(contentService.warmContentUp(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The content not uploaded error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.CONTENT_IS_NOT_UPLOADED_ERROR
-  }
-
-  @Ignore
-  def "Scenario: warm up disposed file"() {
-    FileDisposedException error
-    given: "The existing disposed file"
-    fileRepository.findById(FILE_NAME) >> Optional.of(createDisposedFile())
-
-    and: "The error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content warming up is requested"
-    WaitingPromise.of(contentService.warmContentUp(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The file disposed error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
-  }
-
-  @Ignore
-  def "Scenario: warm up distributed original file"() {
-    FileNotMirrorException error
-    given: "The distributing original file"
-    fileRepository.findById(FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
-
-    and: "The response handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content warming up is requested"
-    WaitingPromise.of(contentService.warmContentUp(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The file not exists error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.FILE_IS_NOT_MIRROR_ERROR
-  }
-
-  def "Scenario: warm up distributed cold mirror file"() {
-  }
-
-  def "Scenario: warm up distributed warmed mirror file"() {
-  }
-
-  @Ignore
-  def "Scenario: cool down unknown file"() {
-    FileNotExistsException error
-    given: "The requested file is not exists"
-    fileRepository.findById(FILE_NAME) >> Optional.empty()
-
-    and: "The error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content cooling down is requested"
-    WaitingPromise.of(contentService.coolContentDown(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The file not exists error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
-  }
-
-  @Ignore
-  def "Scenario: cool down created file"() {
-    ContentNotUploadedException error
-    given: "The existing draft file"
-    fileRepository.findById(FILE_NAME) >> Optional.of(createDraftFile())
-
-    and: "The error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content cooling down is requested"
-    WaitingPromise.of(contentService.coolContentDown(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The content not uploaded error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.CONTENT_IS_NOT_UPLOADED_ERROR
-  }
-
-  @Ignore
-  def "Scenario: cool down disposed file"() {
-    FileDisposedException error
-    given: "The existing disposed file"
-    fileRepository.findById(FILE_NAME) >> Optional.of(createDisposedFile())
-
-    and: "The error handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content cooling down is requested"
-    WaitingPromise.of(contentService.warmContentUp(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The file disposed error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.FILE_IS_DISPOSED_ERROR
-  }
-
-  @Ignore
-  def "Scenario: cool down distributed original file"() {
-    FileNotMirrorException error
-    given: "The distributing original file"
-    fileRepository.findById(FILE_NAME) >> Optional.of(createDistributedFile(DISTRIBUTIONING_CONTENT_LENGTH))
-
-    and: "The response handler"
-    ErrorHandler errorHandler = Mock(ErrorHandler)
-
-    when: "The file content cooling down is requested"
-    WaitingPromise.of(contentService.coolContentDown(FILE_NAME))
-        .error(errorHandler)
-        .await(100L)
-
-    then: "The file not exists error should be happened"
-    1 * errorHandler.onError(_) >> {error = it[0]}
-    error.getContextId() == Constants.CONTEXT
-    error.getErrorSeverity() == ErrorSeverity.BUSINESS
-    error.getErrorCode() == Constants.FILE_IS_NOT_MIRROR_ERROR
-  }
-
-  def "Scenario: cool down distributed warmed mirror file"() {
-  }
-
-  def "Scenario: cool down distributed cold mirror file"() {
-  }
-
   private Range createRange(Long start, Long end) {
     return new Range() {
           @Override
@@ -917,28 +717,23 @@ class ContentServiceSpec extends Specification {
 
 
   private File createDraftFile() {
-    return createFile(DRAFT, DEFAULT_CONTENT_LENGTH, StorageMode.ORIGINAL)
+    return createFile(DRAFT, DEFAULT_CONTENT_LENGTH)
   }
 
   private File createDistributedFile(Long contentLength) {
-    return createFile(DISTRIBUTING, contentLength, StorageMode.ORIGINAL)
+    return createFile(DISTRIBUTING, contentLength)
   }
 
   private File createMirrorDistributedFile(Long contentLength) {
-    return createFile(DISTRIBUTING, contentLength, StorageMode.MIRROR)
-  }
-
-  private File createDistributedFile(Long contentLength, StorageMode storageMode) {
-    return createFile(DISTRIBUTING, contentLength, storageMode)
+    return createFile(DISTRIBUTING, contentLength)
   }
 
   private File createDisposedFile() {
-    return createFile(DISPOSED, DISTRIBUTIONING_CONTENT_LENGTH, StorageMode.ORIGINAL)
+    return createFile(DISPOSED, DISTRIBUTIONING_CONTENT_LENGTH)
   }
 
-  private File createFile(FileStatus status, Long contentLength, StorageMode storageMode) {
+  private File createFile(FileStatus status, Long contentLength) {
     return File.builder()
-        .storageMode(storageMode)
         .storageName(STORAGE_NAME)
         .storageFileName(STORAGE_FILE_NAME)
         .status(status)

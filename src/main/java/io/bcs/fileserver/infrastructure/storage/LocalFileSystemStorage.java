@@ -4,7 +4,6 @@ import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bcs.fileserver.domain.errors.FileStorageException;
-import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
@@ -30,7 +29,8 @@ public class LocalFileSystemStorage implements FileStorage {
   private final int bufferSize;
 
   @Override
-  public ContentLocator create(File file, Long contentLength) throws FileStorageException {
+  public ContentLocator create(FileDescriptor file, Long contentLength)
+      throws FileStorageException {
     try {
       String storageName = filesystemSpaceManager.allocateSpace(file.getMediaType(),
           file.getStorageFileName(), contentLength);
@@ -65,7 +65,7 @@ public class LocalFileSystemStorage implements FileStorage {
   }
 
   @Override
-  public void delete(File file) throws FileStorageException {
+  public void delete(FileDescriptor file) throws FileStorageException {
     getPhysicalFile(new FileContentLocator(file)).delete();
   }
 

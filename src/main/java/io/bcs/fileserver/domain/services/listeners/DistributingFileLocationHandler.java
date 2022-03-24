@@ -1,7 +1,7 @@
 package io.bcs.fileserver.domain.services.listeners;
 
 import io.bce.domain.EventListener;
-import io.bcs.fileserver.domain.model.file.FileDistributionHasBeenStarted;
+import io.bcs.fileserver.domain.events.FileDistributionHasBeenStarted;
 import io.bcs.fileserver.domain.model.file.FileLocation;
 import io.bcs.fileserver.domain.model.file.FileLocationRepository;
 import java.util.Arrays;
