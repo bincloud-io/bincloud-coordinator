@@ -1,9 +1,7 @@
-package io.bcs.fileserver.domain.model.file.content;
+package io.bcs.fileserver.domain.model.content;
 
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
-import io.bcs.fileserver.domain.model.storage.ContentFragment;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import java.util.Collection;
 
 /**
@@ -18,7 +16,10 @@ public interface FileContent {
   
   ContentLocator getLocator();
   
+  FileMetadata getFileMetadata();
+  
   Collection<ContentPart> getParts();
+  
 
   /**
    * This interface describes an accessor to a part of retrieved file content.

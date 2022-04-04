@@ -1,6 +1,8 @@
 package io.bcs.fileserver.infrastructure.repositories;
 
+import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
 import io.bcs.fileserver.domain.model.file.File;
+import io.bcs.fileserver.domain.model.file.FileId;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -22,10 +24,13 @@ import lombok.SneakyThrows;
 public class JpaFileRepository implements FileRepository {
   private final EntityManager entityManager;
   private final TransactionManager transactionManager;
+  private final DistributionPointNameProvider distributionPointNameProvider;
 
   @Override
   public Optional<File> findById(String storageFileName) {
-    return Optional.ofNullable(entityManager.find(File.class, storageFileName));
+    FileId fileId =
+        new FileId(distributionPointNameProvider.getDistributionPointName(), storageFileName);
+    return Optional.ofNullable(entityManager.find(File.class, fileId));
   }
 
   @Override

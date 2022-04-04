@@ -6,10 +6,10 @@ import io.bce.interaction.streaming.binary.OutputStreamDestination
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.streaming.DirectStreamer
-import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic
-import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource
-import io.bcs.fileserver.domain.model.storage.ContentLocator
-import io.bcs.fileserver.domain.model.storage.FileStorage
+import io.bcs.fileserver.domain.model.content.ContentLocator
+import io.bcs.fileserver.domain.model.content.ContentSource
+import io.bcs.fileserver.domain.model.content.FileStorage
+import io.bcs.fileserver.domain.model.content.FileUploadStatistic
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletRequest
 import spock.lang.Specification

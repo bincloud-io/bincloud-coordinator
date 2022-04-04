@@ -4,7 +4,7 @@ import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bce.text.TextTemplates;
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
-import io.bcs.fileserver.domain.model.storage.ContentFragment;
+import io.bcs.fileserver.domain.model.content.ContentFragment;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;

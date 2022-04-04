@@ -16,10 +16,11 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.PrimaryValidationException;
 import io.bcs.fileserver.domain.events.FileHasBeenCreated;
 import io.bcs.fileserver.domain.events.FileHasBeenDisposed;
+import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
+import io.bcs.fileserver.domain.model.content.ContentLocator;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.File.CreationData;
 import io.bcs.fileserver.domain.model.file.FileRepository;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileContentLocator;
 import java.util.Optional;
 import lombok.Getter;
@@ -38,10 +39,11 @@ public class FileService {
   private final ValidationService validationService;
   private final FileRepository fileRepository;
   private final Generator<String> fileNameGenerator;
+  private final DistributionPointNameProvider distributionPointNameProvider;
   private final EventBus eventBus;
 
   /**
-   * Create a file.
+   * Create a new file.
    *
    * @param command The file creation command
    * @return The file creation result promise
@@ -53,7 +55,8 @@ public class FileService {
       log.info("Use-case: Create file.");
       checkThatCommandIsValid(command);
       FileCreationData fileCreationData = new FileCreationData(command);
-      File file = new File(fileNameGenerator, fileCreationData);
+      File file = new File(distributionPointNameProvider.getDistributionPointName(),
+          fileNameGenerator, fileCreationData);
       log.debug(TextTemplates.createBy("The file {{storageFileName}} has been successfully created")
           .withParameter("storageFileName", file.getStorageFileName()));
       fileRepository.save(file);
@@ -88,7 +91,7 @@ public class FileService {
   private void notifyAboutDisposedOriginalFile(File file) {
     EventPublisher<FileHasBeenDisposed> eventPublisher =
         createPublisher(FileHasBeenDisposed.EVENT_TYPE);
-    eventPublisher.publish(new FileHasBeenDisposed(new FileContentLocator(file)));
+    eventPublisher.publish(new FileHasBeenDisposed(file));
   }
 
   private File retrieveExistingFileDescriptor(String storageFileName) {

@@ -2,7 +2,7 @@ package io.bcs.fileserver.infrastructure.storage;
 
 import io.bce.interaction.streaming.binary.BinaryDestination;
 import io.bce.interaction.streaming.binary.BinarySource;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.content.ContentLocator;
 import java.io.IOException;
 
 /**

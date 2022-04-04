@@ -16,16 +16,17 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException
 import io.bcs.fileserver.domain.errors.PrimaryValidationException
 import io.bcs.fileserver.domain.events.FileHasBeenCreated
 import io.bcs.fileserver.domain.events.FileHasBeenDisposed
+import io.bcs.fileserver.domain.model.DistributionPointNameProvider
+import io.bcs.fileserver.domain.model.content.ContentLocator
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
-import io.bcs.fileserver.domain.model.storage.ContentLocator
-import io.bcs.fileserver.domain.model.storage.FileStorage
 import io.bcs.fileserver.domain.services.FileService.CreateFile
 import java.time.LocalDateTime
 import spock.lang.Specification
 
 class FileServiceSpec extends Specification {
+  public static final String DISTRIBUTION_POINT_NAME = "DEFAULT"
   public static final String STORAGE_NAME = "storage.0001"
   public static final String STORAGE_FILE_NAME = "instance--${Thread.currentThread()}--${UUID.randomUUID()}"
   public static final String MEDIA_TYPE = "application/media-type-xxx"
@@ -37,11 +38,11 @@ class FileServiceSpec extends Specification {
 
   private ValidationService validationService
   private FileRepository fileRepository;
-  private FileStorage fileStorage
   private EventBus eventBus;
   private FileService fileService
   private Generator<String> fileNameGenerator
   private EventPublisher eventPublisher
+  private DistributionPointNameProvider distributionPointNameProvider
 
   def setup() {
     this.validationService = Mock(ValidationService)
@@ -49,9 +50,11 @@ class FileServiceSpec extends Specification {
     this.fileNameGenerator = Mock(Generator)
     this.eventBus = Mock(EventBus)
     this.eventPublisher = Mock(EventPublisher)
+    this.distributionPointNameProvider = Mock(DistributionPointNameProvider)
     this.eventBus.getPublisher(_, _) >> eventPublisher
     this.fileNameGenerator.generateNext() >> STORAGE_FILE_NAME
-    this.fileService = new FileService(validationService, fileRepository, fileNameGenerator, eventBus)
+    this.distributionPointNameProvider.getDistributionPointName() >> DISTRIBUTION_POINT_NAME
+    this.fileService = new FileService(validationService, fileRepository, fileNameGenerator, distributionPointNameProvider, eventBus)
   }
 
   def "Scenario: successfully create new file"() {
@@ -63,9 +66,6 @@ class FileServiceSpec extends Specification {
     and: "The command passes validation"
     this.validationService.validate(command) >> new ValidationState()
 
-    and: "The file storage is going to create file successfully"
-    this.fileStorage.create(MEDIA_TYPE) >> contentLocator()
-
     and: "The response handler"
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
@@ -75,6 +75,9 @@ class FileServiceSpec extends Specification {
 
     then: "The draft file should be stored into repository"
     1 * fileRepository.save(_) >> {file = it[0]}
+
+    and: "The distribution point should be ${DISTRIBUTION_POINT_NAME}"
+    file.getDistributionPoint() == DISTRIBUTION_POINT_NAME
 
     and: "The storage file name should be ${STORAGE_FILE_NAME}"
     file.getStorageFileName() == STORAGE_FILE_NAME
@@ -90,17 +93,17 @@ class FileServiceSpec extends Specification {
 
     and: "The file name should be ${FILE_NAME}"
     file.getFileName() == FILE_NAME
-    
+
     and: "The file creation time is initialized"
-    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) && 
-    file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
-    
+    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) &&
+        file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
+
     and: "The file dispose time shouldn't be specified"
     file.getDisposedAt().isPresent() == false
 
     and: "The total length should be 0"
     file.getTotalLength() == 0L
-    
+
     and: "The system should be notified about file creation"
     1 * eventPublisher.publish(_) >> {event = it[0]}
     event.getStorageFileName() == STORAGE_FILE_NAME
@@ -116,9 +119,6 @@ class FileServiceSpec extends Specification {
     and: "The command passes validation"
     this.validationService.validate(command) >> new ValidationState()
 
-    and: "The file storage is going to create file successfully"
-    this.fileStorage.create(DEFAULT_MEDIA_TYPE) >> contentLocator()
-
     and: "The response handler"
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
@@ -128,6 +128,9 @@ class FileServiceSpec extends Specification {
 
     then: "The draft file should be stored into repository"
     1 * fileRepository.save(_) >> {file = it[0]}
+
+    and: "The distribution point should be ${DISTRIBUTION_POINT_NAME}"
+    file.getDistributionPoint() == DISTRIBUTION_POINT_NAME
 
     and: "The storage file name should be ${STORAGE_FILE_NAME}"
     file.getStorageFileName() == STORAGE_FILE_NAME
@@ -146,14 +149,14 @@ class FileServiceSpec extends Specification {
 
     and: "The total length should be 0"
     file.getTotalLength() == 0L
-    
+
     and: "The file creation time is initialized"
-    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) && 
-    file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
-    
+    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) &&
+        file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
+
     and: "The file dispose time shouldn't be specified"
     file.getDisposedAt().isPresent() == false
-    
+
     and: "The system should be notified about file creation"
     1 * eventPublisher.publish(_) >> {event = it[0]}
     event.getStorageFileName() == STORAGE_FILE_NAME
@@ -169,9 +172,6 @@ class FileServiceSpec extends Specification {
     and: "The command passes validation"
     this.validationService.validate(command) >> new ValidationState()
 
-    and: "The file storage is going to create file successfully"
-    this.fileStorage.create(MEDIA_TYPE) >> contentLocator()
-
     and: "The response handler"
     ResponseHandler responseHandler = Mock(ResponseHandler)
 
@@ -180,6 +180,9 @@ class FileServiceSpec extends Specification {
 
     then: "The draft file should be stored into repository"
     1 * fileRepository.save(_) >> {file = it[0]}
+
+    and: "The distribution point should be ${DISTRIBUTION_POINT_NAME}"
+    file.getDistributionPoint() == DISTRIBUTION_POINT_NAME
 
     and: "The storage file name should be ${STORAGE_FILE_NAME}"
     file.getStorageFileName() == STORAGE_FILE_NAME
@@ -198,14 +201,14 @@ class FileServiceSpec extends Specification {
 
     and: "The total length should be 0"
     file.getTotalLength() == 0L
-    
+
     and: "The file creation time is initialized"
-    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) && 
-    file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
-    
+    file.getCreatedAt().isBefore(LocalDateTime.now().plusMinutes(1)) &&
+        file.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1L))
+
     and: "The file dispose time shouldn't be specified"
     file.getDisposedAt().isPresent() == false
-    
+
     and: "The system should be notified about file creation"
     1 * eventPublisher.publish(_) >> {event = it[0]}
     event.getStorageFileName() == STORAGE_FILE_NAME
@@ -219,9 +222,6 @@ class FileServiceSpec extends Specification {
 
     and: "The command passes validation"
     this.validationService.validate(command) >> new ValidationState().withUngrouped(ErrorMessage.createFor("Smth went wrong"))
-
-    and: "The file storage is going to create file successfully"
-    this.fileStorage.create(MEDIA_TYPE) >> contentLocator()
 
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
@@ -271,18 +271,15 @@ class FileServiceSpec extends Specification {
 
     and: "The total length should not be clear"
     file.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
-    
+
     and: "The file dispose time should be initialized"
     LocalDateTime disposedAt = file.getDisposedAt().get()
     disposedAt.isBefore(LocalDateTime.now().plusMinutes(1L)) &&
-    disposedAt.isAfter(LocalDateTime.now().minusMinutes(1L))
+        disposedAt.isAfter(LocalDateTime.now().minusMinutes(1L))
 
     and: "The system should be notified that file has been disposed"
     1 * eventPublisher.publish(_) >> {event = it[0]}
-    ContentLocator contentLocator = event.getContentLocator()
-    contentLocator.getStorageFileName() == STORAGE_FILE_NAME
-    contentLocator.getStorageName() == STORAGE_NAME
-    
+    event.getStorageFileName() == STORAGE_FILE_NAME
   }
 
   def "Scenario: dispose existing file which had already disposed before"() {
@@ -320,9 +317,10 @@ class FileServiceSpec extends Specification {
     error.getErrorSeverity() == ErrorSeverity.BUSINESS
     error.getErrorCode() == Constants.FILE_NOT_EXIST_ERROR
   }
-  
+
   private File createFileDescriptor(FileStatus status, Long contentLength) {
     return File.builder()
+        .distributionPoint(DISTRIBUTION_POINT_NAME)
         .storageName(STORAGE_NAME)
         .storageFileName(STORAGE_FILE_NAME)
         .status(status)

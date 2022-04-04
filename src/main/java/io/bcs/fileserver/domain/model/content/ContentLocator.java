@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.storage;
+package io.bcs.fileserver.domain.model.content;
 
 /**
  * This interface describes the file location inside a physical storage.

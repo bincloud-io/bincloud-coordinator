@@ -9,10 +9,10 @@ import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.interaction.streaming.binary.OutputStreamDestination;
 import io.bce.promises.Promise;
-import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.FileContent;
-import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata;
+import io.bcs.fileserver.domain.model.content.ContentReceiver;
+import io.bcs.fileserver.domain.model.content.FileContent;
+import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.content.FileMetadata;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -30,21 +30,18 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
   private static final String MULTIPART_ENDING = MULTIPART_SEPARATOR + "--";
   private final Streamer streamer;
   private final Destination<BinaryChunk> destination;
-  private final FileMetadataProvider metadataProvider;
 
   /**
    * Create file data receiver.
    *
-   * @param streamer         A data streamer
-   * @param servletResponse  A servlet response instance.
-   * @param metadataProvider A metadata provider
+   * @param streamer        A data streamer
+   * @param servletResponse A servlet response instance.
    * @throws IOException Throws if servlet output stream couldn't be obtained.
    */
-  public HttpFileDataReceiver(Streamer streamer, HttpServletResponse servletResponse,
-      FileMetadataProvider metadataProvider) throws IOException {
-    super(servletResponse, metadataProvider);
+  public HttpFileDataReceiver(Streamer streamer, HttpServletResponse servletResponse)
+      throws IOException {
+    super(servletResponse);
     this.destination = new OutputStreamDestination(servletResponse.getOutputStream());
-    this.metadataProvider = metadataProvider;
     this.streamer = streamer;
   }
 
@@ -65,7 +62,7 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
   @Override
   public Promise<Void> receiveContentRanges(FileContent content) {
     return HttpFileDataReceiver.super.receiveContentRanges(content).chain((v, deferred) -> {
-      transferContent(new MultiRangeContentSource(content, metadataProvider))
+      transferContent(new MultiRangeContentSource(content, content.getFileMetadata()))
           .then(s -> deferred.resolve(null));
     });
   }
@@ -87,15 +84,14 @@ public class HttpFileDataReceiver extends HttpHeadersReceiver implements Content
   }
 
   private static class MultiRangeContentSource extends RechargeableSource<BinaryChunk> {
-    public MultiRangeContentSource(FileContent content, FileMetadataProvider fileMetadataProvider) {
-      super(createSourcesQueue(content, fileMetadataProvider));
+    public MultiRangeContentSource(FileContent content, FileMetadata fileMetadata) {
+      super(createSourcesQueue(content, fileMetadata));
     }
 
     private static Queue<Source<BinaryChunk>> createSourcesQueue(FileContent content,
-        FileMetadataProvider fileMetadataProvider) {
+        FileMetadata fileMetadata) {
       LinkedList<Source<BinaryChunk>> queue = new LinkedList<Source<BinaryChunk>>();
-      FileMetadata metadata = fileMetadataProvider.getMetadataFor(content.getLocator());
-      content.getParts().forEach(part -> queue.add(createPartSource(metadata, part)));
+      content.getParts().forEach(part -> queue.add(createPartSource(fileMetadata, part)));
       byte[] contentEnding = createContentEnding();
       queue.add(
           new InputStreamSource(new ByteArrayInputStream(contentEnding), contentEnding.length));

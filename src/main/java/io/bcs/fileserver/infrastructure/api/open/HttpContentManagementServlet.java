@@ -14,15 +14,15 @@ import io.bcs.fileserver.domain.errors.FileDisposedException;
 import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
-import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.FileUploadStatistic;
-import io.bcs.fileserver.domain.model.file.content.Uploader.ContentSource;
+import io.bcs.fileserver.domain.model.content.ContentReceiver;
+import io.bcs.fileserver.domain.model.content.ContentSource;
+import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.content.UploadCommand;
 import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.api.HttpAsyncExecutor;
 import io.bcs.fileserver.infrastructure.api.HttpResponseContext;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
-import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
 import io.bcs.fileserver.infrastructure.file.content.HttpDownloadCommand;
 import io.bcs.fileserver.infrastructure.file.content.HttpFileContentSource;
 import io.bcs.fileserver.infrastructure.file.content.HttpFileDataReceiver;
@@ -36,6 +36,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 /**
  * This class implements the content management HTTP servlet.
@@ -60,9 +61,6 @@ public class HttpContentManagementServlet extends HttpServlet {
 
   @Inject
   private FileServerConfigurationProperties contentLoadingProperties;
-
-  @Inject
-  private FileMetadataProvider metadataProvider;
 
   @Override
   protected void doHead(HttpServletRequest request, HttpServletResponse response)
@@ -94,8 +92,8 @@ public class HttpContentManagementServlet extends HttpServlet {
   private void uploadContent(AsyncContext asyncContext, HttpServletRequest request,
       HttpServletResponse response) {
     Promises.<FileUploadStatistic>of(deferred -> {
-      contentService.upload(getStorageFileNameParam(request), request.getContentLengthLong(),
-          createSender(request)).delegate(deferred);
+      contentService.upload(new HttpUploadCommand(request), createSender(request))
+          .delegate(deferred);
     }).then(uploadSuccessHandler(response))
         .error(FileNotSpecifiedException.class,
             applicationError(response, HttpServletResponse.SC_BAD_REQUEST))
@@ -148,12 +146,12 @@ public class HttpContentManagementServlet extends HttpServlet {
   }
 
   private ContentReceiver createHeadersOnlyContentReceiver(HttpServletResponse response) {
-    return new HttpHeadersReceiver(response, metadataProvider);
+    return new HttpHeadersReceiver(response);
   }
 
   private ContentReceiver createFileDataContentReceiver(HttpServletResponse response) {
     try {
-      return new HttpFileDataReceiver(streamer, response, metadataProvider);
+      return new HttpFileDataReceiver(streamer, response);
     } catch (IOException error) {
       throw new UnexpectedErrorException(error);
     }
@@ -184,6 +182,21 @@ public class HttpContentManagementServlet extends HttpServlet {
   private static class HttpServletDownloadCommand extends HttpDownloadCommand {
     public HttpServletDownloadCommand(HttpServletRequest request) {
       super(getStorageFileNameParam(request), getHttpRanges(request));
+    }
+  }
+
+  @RequiredArgsConstructor
+  private static class HttpUploadCommand implements UploadCommand {
+    private final HttpServletRequest request;
+
+    @Override
+    public Optional<String> getStorageFileName() {
+      return getStorageFileNameParam(request);
+    }
+
+    @Override
+    public Long getContentLength() {
+      return request.getContentLengthLong();
     }
   }
 }

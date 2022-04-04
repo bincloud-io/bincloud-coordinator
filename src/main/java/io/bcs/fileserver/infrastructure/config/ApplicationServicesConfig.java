@@ -3,15 +3,12 @@ package io.bcs.fileserver.infrastructure.config;
 import io.bce.Generator;
 import io.bce.domain.EventBus;
 import io.bce.validation.ValidationService;
+import io.bcs.fileserver.domain.model.content.FileStorage;
 import io.bcs.fileserver.domain.model.file.FileRepository;
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadataRepository;
-import io.bcs.fileserver.domain.model.storage.FileStorage;
-import io.bcs.fileserver.domain.services.ContentService;
+import io.bcs.fileserver.domain.services.ContentCleanService;
 import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.StorageFileNameGenerator;
-import io.bcs.fileserver.infrastructure.file.content.FileMetadataProvider;
-import io.bcs.fileserver.infrastructure.repositories.JpaFileMetadataRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -54,8 +51,7 @@ public class ApplicationServicesConfig {
    */
   @Produces
   public Generator<String> fileNameGenerator() {
-    return new StorageFileNameGenerator(
-        fileServerConfigurationProperties::getDistributionPointName);
+    return new StorageFileNameGenerator(fileServerConfigurationProperties);
   }
 
   /**
@@ -65,29 +61,8 @@ public class ApplicationServicesConfig {
    */
   @Produces
   public FileRepository fileRepository() {
-    return new JpaFileRepository(entityManager, transactionManager);
-  }
-
-  /**
-   * The file metadata repository configuration.
-   *
-   * @return The file metadata repository
-   */
-  @Produces
-  public FileMetadataRepository fileMetadataRepository() {
-    return new JpaFileMetadataRepository(entityManager);
-  }
-
-  /**
-   * The file metadata provider configuration.
-   *
-   * @return The file metadata provider
-   */
-  @Produces
-  public FileMetadataProvider fileMetadataProvider() {
-    return contentLocator -> {
-      return fileMetadataRepository().findById(contentLocator.getStorageFileName()).get();
-    };
+    return new JpaFileRepository(entityManager, transactionManager,
+        fileServerConfigurationProperties);
   }
 
   /**
@@ -97,8 +72,8 @@ public class ApplicationServicesConfig {
    */
   @Produces
   @SuppressWarnings("cdi-ambiguous-dependency")
-  public ContentService contentService() {
-    return new ContentService(fileRepository(), fileStorage, eventBus);
+  public ContentCleanService contentService() {
+    return new ContentCleanService(fileRepository(), fileStorage);
   }
 
   /**
@@ -109,6 +84,7 @@ public class ApplicationServicesConfig {
   @Produces
   @SuppressWarnings("cdi-ambiguous-dependency")
   public FileService fileService() {
-    return new FileService(validationService, fileRepository(), fileNameGenerator(), eventBus);
+    return new FileService(validationService, fileRepository(), fileNameGenerator(),
+        fileServerConfigurationProperties, eventBus);
   }
 }

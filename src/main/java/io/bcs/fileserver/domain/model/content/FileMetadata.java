@@ -1,4 +1,6 @@
-package io.bcs.fileserver.domain.model.file.metadata;
+package io.bcs.fileserver.domain.model.content;
+
+import io.bcs.fileserver.domain.model.file.Disposition;
 
 /**
  * This class describes the file metadata.

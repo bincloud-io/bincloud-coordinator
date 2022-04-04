@@ -21,4 +21,5 @@ public class Constants {
   public static final ErrorCode FILE_IS_NOT_SPECIFIED = ErrorCode.createFor(8L);
   public static final ErrorCode FILE_IS_NOT_DISPOSED_ERROR = ErrorCode.createFor(9L);
   public static final ErrorCode FILE_IS_NOT_MIRROR_ERROR = ErrorCode.createFor(10L);
+  public static final ErrorCode FILE_STORAGE_IS_NOT_SPECIFIED = ErrorCode.createFor(11L);
 }

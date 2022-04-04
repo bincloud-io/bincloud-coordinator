@@ -4,7 +4,7 @@ import io.bce.interaction.streaming.binary.BinaryDestination;
 import io.bce.interaction.streaming.binary.BinarySource;
 import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.interaction.streaming.binary.OutputStreamDestination;
-import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.content.ContentLocator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

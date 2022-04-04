@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.file.metadata;
+package io.bcs.fileserver.domain.model.file;
 
 /**
  * This class enumerates the available content disposition types.

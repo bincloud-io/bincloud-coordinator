@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.storage;
+package io.bcs.fileserver.domain.model.content;
 
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
@@ -21,15 +21,24 @@ public interface FileStorage {
    * @return The content locator
    * @throws FileStorageException Throws if something went wrong
    */
-  ContentLocator create(FileDescriptor file, Long contentLength) throws FileStorageException;
+  default ContentLocator create(FileDescriptor file, Long contentLength)
+      throws FileStorageException {
+    throw new FileStorageException(new UnsupportedOperationException());
+  }
 
-  Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
-      throws FileStorageException;
+  default Destination<BinaryChunk> getAccessOnWrite(ContentLocator contentLocator)
+      throws FileStorageException {
+    throw new FileStorageException(new UnsupportedOperationException());
+  }
 
-  Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator, ContentFragment fragment)
-      throws FileStorageException;
+  default Source<BinaryChunk> getAccessOnRead(ContentLocator contentLocator,
+      ContentFragment fragment) throws FileStorageException {
+    throw new FileStorageException(new UnsupportedOperationException());
+  }
 
-  void delete(FileDescriptor file) throws FileStorageException;
+  default void delete(FileDescriptor file) throws FileStorageException {
+    throw new FileStorageException(new UnsupportedOperationException());
+  }
 
   /**
    * This interface describes an abstraction describing file.

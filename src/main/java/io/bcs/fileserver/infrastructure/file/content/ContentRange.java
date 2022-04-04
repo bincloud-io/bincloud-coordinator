@@ -1,8 +1,8 @@
 package io.bcs.fileserver.infrastructure.file.content;
 
-import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata;
-import io.bcs.fileserver.domain.model.storage.ContentFragment;
+import io.bcs.fileserver.domain.model.content.ContentFragment;
+import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.content.FileMetadata;
 
 class ContentRange {
   private final Long rangeStart;

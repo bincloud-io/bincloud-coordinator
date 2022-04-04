@@ -1,7 +1,7 @@
 package io.bcs.fileserver.infrastructure.file.content;
 
+import io.bcs.fileserver.domain.model.content.DownloadCommand;
 import io.bcs.fileserver.domain.model.file.Range;
-import io.bcs.fileserver.domain.services.ContentService.DownloadCommand;
 import io.bcs.fileserver.infrastructure.file.HttpRanges;
 import java.util.Collection;
 import java.util.Optional;

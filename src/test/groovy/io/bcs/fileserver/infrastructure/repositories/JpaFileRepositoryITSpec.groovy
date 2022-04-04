@@ -16,10 +16,10 @@ import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
 import io.bce.CriticalSection
 import io.bcs.fileserver.domain.Constants
+import io.bcs.fileserver.domain.model.content.ContentLocator
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
-import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository
 import io.bcs.testing.archive.ArchiveBuilder
 import io.bcs.testing.database.DatabaseConfigurer

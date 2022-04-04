@@ -2,9 +2,8 @@ package io.bcs.fileserver.domain.events;
 
 import io.bce.domain.EventType;
 import io.bcs.fileserver.domain.model.file.File;
-import io.bcs.fileserver.domain.model.file.File.FileEntityState;
+import io.bcs.fileserver.domain.model.file.File.CreatedFileState;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import lombok.Getter;
 
 /**
@@ -14,9 +13,10 @@ import lombok.Getter;
  *
  */
 @Getter
-public class FileHasBeenCreated implements FileEntityState {
+public class FileHasBeenCreated implements CreatedFileState {
   public static final EventType<FileHasBeenCreated> EVENT_TYPE =
       EventType.createFor("FILE_HAS_BEEN_CREATED", FileHasBeenCreated.class);
+  private final String distributionPoint;
   private final String storageFileName;
   private final String mediaType;
   private final String fileName;
@@ -29,19 +29,10 @@ public class FileHasBeenCreated implements FileEntityState {
    */
   public FileHasBeenCreated(File file) {
     super();
+    this.distributionPoint = file.getDistributionPoint();
     this.storageFileName = file.getStorageFileName();
     this.mediaType = file.getMediaType();
     this.fileName = file.getFileName();
     this.createdAt = file.getCreatedAt();
   }
-  
-  @Override
-  public Optional<String> getStorageName() {
-    return Optional.empty();
-  }
-  
-  @Override
-  public Long getTotalLength() {
-    return 0L;
-  }  
 }

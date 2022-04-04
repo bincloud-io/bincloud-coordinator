@@ -1,8 +1,8 @@
 package io.bcs.fileserver.infrastructure.file;
 
 import io.bce.Generator;
+import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
 import java.util.UUID;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -13,11 +13,11 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class StorageFileNameGenerator implements Generator<String> {
-  private final Supplier<String> distributionPointNameProvider;
+  private final DistributionPointNameProvider distributionPointNameProvider;
 
   @Override
   public String generateNext() {
-    return String.format("%s--%s-%s", distributionPointNameProvider.get(),
+    return String.format("%s--%s-%s", distributionPointNameProvider.getDistributionPointName(),
         Thread.currentThread().getId(), UUID.randomUUID());
   }
 }

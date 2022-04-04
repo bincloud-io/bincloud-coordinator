@@ -2,11 +2,11 @@ package io.bcs.fileserver.infrastructure.file.content;
 
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.model.file.content.Downloader.ContentReceiver;
-import io.bcs.fileserver.domain.model.file.content.FileContent;
-import io.bcs.fileserver.domain.model.file.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.file.metadata.Disposition;
-import io.bcs.fileserver.domain.model.file.metadata.FileMetadata;
+import io.bcs.fileserver.domain.model.content.ContentReceiver;
+import io.bcs.fileserver.domain.model.content.FileContent;
+import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.content.FileMetadata;
+import io.bcs.fileserver.domain.model.file.Disposition;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +22,6 @@ public class HttpHeadersReceiver implements ContentReceiver {
   protected static final String MULTIPART_MEDIA_TYPE =
       "multipart/byteranges; boundary=" + MULTIPART_BOUNDARY;
   private final HttpServletResponse servletResponse;
-  private final FileMetadataProvider metadataProvider;
 
   @Override
   public Promise<Void> receiveFullContent(FileContent content) {
@@ -64,7 +63,7 @@ public class HttpHeadersReceiver implements ContentReceiver {
   }
 
   private FileMetadata getMetadata(FileContent fileContent) {
-    return metadataProvider.getMetadataFor(fileContent.getLocator());
+    return fileContent.getFileMetadata();
   }
 
   private void setContentRangeHeader(FileContent content, FileMetadata fileMetadata) {

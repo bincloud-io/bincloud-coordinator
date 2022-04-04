@@ -9,6 +9,7 @@
 		author="Dmitry Mikhaylenko">
 		<createTable tableName="SEQUENCES"
 			remarks="The current state of sequence generator">
+
 			<column name="SEQUENCE_NAME" type="VARCHAR(40)"
 				remarks="The sequence generator name">
 				<constraints nullable="false" />
@@ -34,6 +35,7 @@
 
 		<createTable tableName="SEQUENCE_VALUES_HISTORY"
 			remarks="The sequences generations history table">
+
 			<column name="GUID" type="VARCHAR(36)"
 				remarks="The historical identifier">
 				<constraints nullable="false" />
@@ -62,13 +64,43 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="CSET.ADD_SCHEDLOCK" author="Dmitry Mikaylenko">
+		<createTable tableName="SCHEDLOCK"
+			remarks="Schedulers lock table.">
+			<column name="NAME" type="VARCHAR(64)"
+				remarks="Scheduler's name.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCKED_AT" type="TIMESTAMP"
+				remarks="Lock acquiring time.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCK_UNTIL" type="TIMESTAMP"
+				remarks="Lock keeping until.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="LOCKED_BY" type="VARCHAR2(255)"
+				remarks="Who acquired lock.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="SCHEDLOCK" columnNames="NAME" />
+	</changeSet>
+
 	<changeSet id="CSET.REF_MEDIA_TYPES"
 		author="Dmitry Mikhaylenko">
-		<createTable tableName="REF_MEDIA_TYPES">
+		<createTable tableName="REF_MEDIA_TYPES"
+			remarks="The media types dictionary.">
+
 			<column name="MEDIA_TYPE" type="VARCHAR(128)"
 				remarks="The supported file media type">
 				<constraints nullable="false" />
 			</column>
+
 			<column name="CONTENT_DISPOSITION" type="VARCHAR(12)"
 				remarks="The content disposition for specified media-type">
 				<constraints nullable="false" />
@@ -81,10 +113,12 @@
 
 	<changeSet id="CSET.OCTET_STREAM_TYPE"
 		author="Dmitry Mikhaylenko">
+
 		<insert tableName="REF_MEDIA_TYPES">
 			<column name="MEDIA_TYPE" value="application/octet-stream" />
 			<column name="CONTENT_DISPOSITION" value="ATTACHMENT" />
 		</insert>
+
 		<rollback>
 			<sql>DELETE FROM REF_MEDIA_TYPES WHERE MEDIA_TYPE IN
 				('application/octet-stream')
@@ -92,18 +126,35 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="CSET.REF_DISTRIBUTION_POINTS"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_DISTRIBUTION_POINTS"
+			remarks="The distribution points dictionary.">
+
+			<column name="DISTRIBUTION_POINT_NAME" type="VARCHAR(16)"
+				remarks="The distribution point name">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="DP_REMOTE_STORAGE_GATEWAY_WSDL"
+				type="VARCHAR(2000)"
+				remarks="The distribution point remote storage gateway WSDL address.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_DISTRIBUTION_POINTS"
+			columnNames="DISTRIBUTION_POINT_NAME" />
+	</changeSet>
+
 	<changeSet id="CSET.REF_STORAGES" author="Dmitry Mikhaylenko">
 		<createTable tableName="REF_STORAGES"
 			remarks="The dictionary table which enumerates registered storages.">
+
 			<column name="STORAGE_NAME" type="VARCHAR(16)"
 				remarks="The unique storage name, identifying storage inside the distribution points net. 
 				This value should be unique between all distribution points.">
 				<constraints nullable="false" />
-			</column>
-
-			<column name="STORAGE_TYPE" type="VARCHAR(12)"
-				remarks="The file storage type discriminator.">
-				<constraints nullable="true" />
 			</column>
 
 			<column name="MEDIA_TYPE" type="VARCHAR(128)"
@@ -127,6 +178,12 @@
 		<createTable tableName="REF_LOCAL_STORAGES"
 			remarks="The dictionary table which enumerates local storages parameters. 
 			This table inherits storages dictionary table(REF_STORAGES).">
+
+			<column name="DISTRIBUTION_POINT_NAME" type="VARCHAR(16)"
+				remarks="The distribution point name, which the distribution point is assigned to.">
+				<constraints nullable="false" />
+			</column>
+
 			<column name="STORAGE_NAME" type="VARCHAR(16)"
 				remarks="The unique storage name, identifying storage.">
 				<constraints nullable="false" />
@@ -152,6 +209,44 @@
 			baseTableName="REF_LOCAL_STORAGES" baseColumnNames="STORAGE_NAME"
 			referencedTableName="REF_STORAGES"
 			referencedColumnNames="STORAGE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_REF_LOCAL_STORAGES$REF_DISTRIBUTION_POINTS"
+			baseTableName="REF_LOCAL_STORAGES"
+			baseColumnNames="DISTRIBUTION_POINT_NAME"
+			referencedTableName="REF_DISTRIBUTION_POINTS"
+			referencedColumnNames="DISTRIBUTION_POINT_NAME" />
+	</changeSet>
+
+	<changeSet id="CSET.REMOTE_STORAGES"
+		author="Dmitry Mikhaylenko">
+		<createTable tableName="REF_REMOTE_STORAGES">
+			<column name="DISTRIBUTION_POINT_NAME" type="VARCHAR(16)"
+				remarks="The distribution point name, which the distribution point is assigned to.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="STORAGE_NAME" type="VARCHAR(16)"
+				remarks="The unique storage name, identifying storage.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="REF_REMOTE_STORAGES"
+			columnNames="DISTRIBUTION_POINT_NAME, STORAGE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_REF_REMOTE_STORAGES$REF_STORAGES"
+			baseTableName="REF_LOCAL_STORAGES" baseColumnNames="STORAGE_NAME"
+			referencedTableName="REF_STORAGES"
+			referencedColumnNames="STORAGE_NAME" />
+
+		<addForeignKeyConstraint
+			constraintName="FK_REF_REMOTE_STORAGES$REF_DISTRIBUTION_POINTS"
+			baseTableName="REF_REMOTE_STORAGES"
+			baseColumnNames="DISTRIBUTION_POINT_NAME"
+			referencedTableName="REF_DISTRIBUTION_POINTS"
+			referencedColumnNames="DISTRIBUTION_POINT_NAME" />
 	</changeSet>
 
 	<changeSet id="CSET.SPACE_MANAGEMENT"
@@ -169,6 +264,11 @@
 
 			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
 				remarks="The file name for which space is allocated.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="DISTRIBUTION_POINT_NAME" type="VARCHAR(16)"
+				remarks="The distribution point name">
 				<constraints nullable="false" />
 			</column>
 
@@ -207,9 +307,9 @@
 		<addForeignKeyConstraint
 			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$REF_LOCAL_STORAGES"
 			baseTableName="SPACE_ALLOCATIONS_HISTORY"
-			baseColumnNames="STORAGE_NAME"
+			baseColumnNames="DISTRIBUTION_POINT_NAME, STORAGE_NAME"
 			referencedTableName="REF_LOCAL_STORAGES"
-			referencedColumnNames="STORAGE_NAME" />
+			referencedColumnNames="DISTRIBUTION_POINT_NAME, STORAGE_NAME" />
 
 		<addForeignKeyConstraint
 			constraintName="FK_SPACE_ALLOCATIONS_HISTORY$ALLOC_ROW_REFERENCE"
@@ -238,6 +338,11 @@
 
 	<changeSet id="CSET.FILES" author="Dmitry Mikhaylenko">
 		<createTable tableName="FILES">
+			<column name="DISTRIBUTION_POINT_NAME" type="VARCHAR(16)"
+				remarks="The distribution point with which the file is associated.">
+				<constraints nullable="false" />
+			</column>
+
 			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
 				remarks="The file name into file storage.">
 				<constraints nullable="false" />
@@ -245,16 +350,6 @@
 
 			<column name="STORAGE_NAME" type="VARCHAR(16)"
 				remarks="The storage name where file is stored.">
-				<constraints nullable="true" />
-			</column>
-
-			<column name="CREATED_AT" type="DATETIME"
-				remarks="A time shows when the file was created.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="DISPOSED_AT" type="DATETIME"
-				remarks="A time shows when the file was disposed.">
 				<constraints nullable="true" />
 			</column>
 
@@ -277,84 +372,35 @@
 				remarks="The stored file content length.">
 				<constraints nullable="false" />
 			</column>
+
+			<column name="CREATED_AT" type="DATETIME"
+				remarks="A time shows when the file was created.">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="DISPOSED_AT" type="DATETIME"
+				remarks="A time shows when the file was disposed.">
+				<constraints nullable="true" />
+			</column>
 		</createTable>
 
 		<addPrimaryKey tableName="FILES"
 			columnNames="STORAGE_FILE_NAME" />
 
 		<addForeignKeyConstraint
-			constraintName="FK_FILES$REF_MEDIA_TYPES" baseTableName="FILES"
-			baseColumnNames="MEDIA_TYPE" referencedTableName="REF_MEDIA_TYPES"
-			referencedColumnNames="MEDIA_TYPE" />
+			constraintName="FK_FILES$REF_DISTRIBUTION_POINTS"
+			baseTableName="FILES" baseColumnNames="DISTRIBUTION_POINT_NAME"
+			referencedTableName="REF_DISTRIBUTION_POINTS"
+			referencedColumnNames="DISTRIBUTION_POINT_NAME" />
 
 		<addForeignKeyConstraint
 			constraintName="FK_FILES$REF_STORAGES" baseTableName="FILES"
 			baseColumnNames="STORAGE_NAME" referencedTableName="REF_STORAGES"
 			referencedColumnNames="STORAGE_NAME" />
 
-		<createView viewName="VW_FILES_METADATA"
-			replaceIfExists="false">
-			SELECT
-				`F`.`STORAGE_FILE_NAME`,
-				`F`.`STATUS`,
-				`F`.`FILE_NAME`,
-				`F`.`CONTENT_LENGTH`,
-				`MT`.`MEDIA_TYPE`,
-				`MT`.`CONTENT_DISPOSITION`
-			FROM `FILES` `F`
-			INNER JOIN `REF_MEDIA_TYPES` `MT` ON 
-				`F`.`MEDIA_TYPE` = `MT`.`MEDIA_TYPE`
-		</createView>
-	</changeSet>
-
-	<changeSet id="CSET.ADD_SCHEDLOCK" author="Dmitry Mikaylenko">
-		<createTable tableName="SCHEDLOCK"
-			remarks="Schedulers lock table.">
-			<column name="NAME" type="VARCHAR(64)"
-				remarks="Scheduler's name.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="LOCKED_AT" type="TIMESTAMP"
-				remarks="Lock acquiring time.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="LOCK_UNTIL" type="TIMESTAMP"
-				remarks="Lock keeping until.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="LOCKED_BY" type="VARCHAR2(255)"
-				remarks="Who acquired lock.">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="SCHEDLOCK" columnNames="NAME" />
-	</changeSet>
-
-	<changeSet id="CSET.ADD_FILE_RELOCATIONS_JOURNAL"
-		author="Dmitry Mikhaylenko">
-		<createTable tableName="FILE_RELOCATIONS_JOURNAL">
-			<column name="STORAGE_FILE_NAME" type="VARCHAR(64)"
-				remarks="The file name into file storage.">
-				<constraints nullable="false" />
-			</column>
-
-			<column name="STATUS" type="VARCHAR(10)"
-				remarks="The file replica status. It may be active or passive.">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-
-		<addPrimaryKey tableName="FILE_REPLICAS_JOURNAL"
-			columnNames="STORAGE_FILE_NAME,REPLICA_ID" />
-
 		<addForeignKeyConstraint
-			constraintName="FK_FILE_REPLICAS_JOURNAL$FILES"
-			baseTableName="FILE_REPLICAS_JOURNAL"
-			baseColumnNames="STORAGE_FILE_NAME" referencedTableName="FILES"
-			referencedColumnNames="STORAGE_FILE_NAME" />
+			constraintName="FK_FILES$REF_MEDIA_TYPES" baseTableName="FILES"
+			baseColumnNames="MEDIA_TYPE" referencedTableName="REF_MEDIA_TYPES"
+			referencedColumnNames="MEDIA_TYPE" />
 	</changeSet>
 </databaseChangeLog>

@@ -1,7 +1,7 @@
 package io.bcs.fileserver.domain.model.storage.descriptor;
 
-import io.bcs.fileserver.domain.model.storage.StorageType;
 import lombok.Builder.Default;
+import io.bcs.fileserver.domain.model.content.StorageType;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
 import lombok.Getter;
@@ -23,6 +23,11 @@ import lombok.experimental.SuperBuilder;
 public abstract class StorageDescriptor {
   static final String DEFAULT_STORAGE_NAME = "unknown";
   static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
+  static final String DEFAULT_DISTRIBUTION_POINT = "UNKNOWN";
+
+  @Include
+  @Default
+  private String distributionPoint = DEFAULT_DISTRIBUTION_POINT;
 
   @Include
   @Default
@@ -30,6 +35,6 @@ public abstract class StorageDescriptor {
 
   @Default
   private String mediaType = DEFAULT_MEDIA_TYPE;
-  
+
   public abstract StorageType getType();
 }

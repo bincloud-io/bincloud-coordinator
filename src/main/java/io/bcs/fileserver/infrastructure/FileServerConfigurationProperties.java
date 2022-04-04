@@ -1,16 +1,16 @@
 package io.bcs.fileserver.infrastructure;
 
+import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
+
 /**
  * This interface describes provided configuration properties.
  *
  * @author Dmitry Mikhaylenko
  *
  */
-public interface FileServerConfigurationProperties {
+public interface FileServerConfigurationProperties extends DistributionPointNameProvider {
   int getBufferSize();
   
-  String getDistributionPointName();
-
   String getPublicBaseUrlAddress();
   
   String getPrivateBaseUrlAddress();

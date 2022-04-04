@@ -1,7 +1,7 @@
 package io.bcs.fileserver.infrastructure.jobs;
 
 import io.bce.domain.errors.UnexpectedErrorException;
-import io.bcs.fileserver.domain.services.ContentService;
+import io.bcs.fileserver.domain.services.ContentCleanService;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -55,7 +55,7 @@ public class FilesCleanJob {
   private TransactionManager transactionManager;
   
   @Inject
-  private ContentService contentService;
+  private ContentCleanService contentService;
 
   @PostConstruct
   public void initTimer() {

@@ -1,5 +1,6 @@
 package io.bcs.fileserver.domain.model.storage;
 
+import io.bcs.fileserver.domain.model.content.ContentLocator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

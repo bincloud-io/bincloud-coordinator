@@ -1,6 +1,6 @@
 package io.bcs.fileserver.domain.model.storage;
 
-import io.bcs.fileserver.domain.model.storage.FileStorage.FileDescriptor;
+import io.bcs.fileserver.domain.model.content.FileStorage.FileDescriptor;
 import lombok.EqualsAndHashCode;
 
 /**

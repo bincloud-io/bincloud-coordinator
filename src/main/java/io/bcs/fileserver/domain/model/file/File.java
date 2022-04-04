@@ -4,7 +4,7 @@ import io.bce.Generator;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
-import io.bcs.fileserver.domain.model.storage.FileStorage;
+import io.bcs.fileserver.domain.model.content.FileStorage;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -32,6 +32,11 @@ public class File implements FileStorage.FileDescriptor {
   static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
   static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
   static final String DEFAULT_FILE_NAME = "UNKNOWN";
+  static final String DEFAULT_DISTRIBUTION_POINT = "UNKNOWN";
+
+  @Include
+  @Default
+  private String distributionPoint = DEFAULT_DISTRIBUTION_POINT;
 
   @Include
   @Default
@@ -58,33 +63,37 @@ public class File implements FileStorage.FileDescriptor {
   private LocalDateTime disposedAt;
 
   /**
-   * Create mirror file copy.
-   *
-   * @param fileState The created file state
-   */
-  public File(FileEntityState fileState) {
-    super();
-    this.storageFileName = fileState.getStorageFileName();
-    this.storageName = fileState.getStorageName().orElse(null);
-    this.mediaType = fileState.getMediaType();
-    this.fileName = fileState.getFileName();
-    this.totalLength = fileState.getTotalLength();
-    this.createdAt = fileState.getCreatedAt();
-    this.status = FileStatus.DISTRIBUTING;
-  }
-
-  /**
    * Create file.
    *
+   * @param distributionPoint The distribution point name
    * @param filenameGenerator The file name generator, generating unique filename
    * @param creationData      The file creation data
    */
-  public File(Generator<String> filenameGenerator, CreationData creationData) {
+  public File(String distributionPoint, Generator<String> filenameGenerator,
+      CreationData creationData) {
     super();
+    this.distributionPoint = distributionPoint;
     this.storageFileName = filenameGenerator.generateNext();
     this.mediaType = creationData.getMediaType();
     this.fileName = creationData.getFileName().orElse(storageFileName);
     this.createdAt = LocalDateTime.now();
+    this.status = FileStatus.DRAFT;
+    this.totalLength = 0L;
+  }
+
+  /**
+   * Create file entity copy, created on another node.
+   *
+   * @param distributionPoint The distribution point, which the file is going to be replicated on
+   * @param createdFileState  The file state, created on another node.
+   */
+  public File(String distributionPoint, CreatedFileState createdFileState) {
+    super();
+    this.distributionPoint = distributionPoint;
+    this.storageFileName = createdFileState.getStorageFileName();
+    this.mediaType = createdFileState.getMediaType();
+    this.fileName = createdFileState.getFileName();
+    this.createdAt = createdFileState.getCreatedAt();
     this.status = FileStatus.DRAFT;
     this.totalLength = 0L;
   }
@@ -204,20 +213,13 @@ public class File implements FileStorage.FileDescriptor {
    * @author Dmitry Mikhaylenko
    *
    */
-  public interface FileEntityState {
+  public interface CreatedFileState {
     /**
      * Get storage file name.
      *
      * @return The storage file name
      */
     String getStorageFileName();
-
-    /**
-     * Get storage name.
-     *
-     * @return The storage name
-     */
-    Optional<String> getStorageName();
 
     /**
      * Get media type.
@@ -232,13 +234,6 @@ public class File implements FileStorage.FileDescriptor {
      * @return The file name
      */
     String getFileName();
-
-    /**
-     * Get total length.
-     *
-     * @return The total length
-     */
-    Long getTotalLength();
 
     /**
      * Get creation moment.
