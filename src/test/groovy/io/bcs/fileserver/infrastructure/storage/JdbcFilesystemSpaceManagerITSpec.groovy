@@ -20,10 +20,12 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JdbcFilesystemSpaceManagerITSpec extends Specification {
+  private static final String REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT = "db-init/file/distribution.points.changelog.xml"
   private static final String REF_MEDIATYPES_MIGRATION_SCRIPT = "db-init/file/ref.mediatypes.config.changelog.xml"
   private static final String REF_LOCAL_STORAGES_MIGRATION_SCRIPT = "db-init/file/ref.local.storages.config.changelog.xml"
   private static final String BCE_DATABASE_CONFIGURER_PACKAGE = DatabaseConfigurer.getPackage().getName()
   private static final String BCS_DOMAIN_MODEL_PACKAGE = Constants.getPackage().getName()
+  private static final String DISTRIBUTION_POINT = "DP_1"
 
   @Deployment
   public static Archive "create deployment"() {
@@ -55,9 +57,10 @@ class JdbcFilesystemSpaceManagerITSpec extends Specification {
 
   def setup() {
     databaseConfigurer.setup("liquibase/master.changelog.xml")
+    databaseConfigurer.setup(REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
-    this.filesystemSpaceManager = new JdbcFilesystemSpaceManager(dataSource)
+    this.filesystemSpaceManager = new JdbcFilesystemSpaceManager(dataSource, {DISTRIBUTION_POINT})
   }
 
   def "Scenario: successfully allocate space"() {

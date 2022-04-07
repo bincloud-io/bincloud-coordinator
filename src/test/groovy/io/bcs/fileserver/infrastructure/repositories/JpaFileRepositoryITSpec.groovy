@@ -28,6 +28,7 @@ import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
 class JpaFileRepositoryITSpec extends Specification {
+  private static final String REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT = "db-init/file/distribution.points.changelog.xml"
   private static final String REF_MEDIATYPES_MIGRATION_SCRIPT ="db-init/file/ref.mediatypes.config.changelog.xml"
   private static final String REF_LOCAL_STORAGES_MIGRATION_SCRIPT = "db-init/file/ref.local.storages.config.changelog.xml"
   private static final String FILES_MIGRATION_SCRIPT = "db-init/file/files.config.changelog.xml"
@@ -39,6 +40,7 @@ class JpaFileRepositoryITSpec extends Specification {
   private static final String MEDIA_TYPE = "application/mediatype"
   private static final String FILE_NAME = "file.txt"
   private static final Long CONTENT_LENGTH = 1000L
+  private static final String DISTRIBUTION_POINT = "DP_1"
 
 
   @Deployment
@@ -77,7 +79,7 @@ class JpaFileRepositoryITSpec extends Specification {
 
   def setup() {
     databaseConfigurer.setup("liquibase/master.changelog.xml")
-    this.fileRepository = new JpaFileRepository(entityManager, transactionManager)
+    this.fileRepository = new JpaFileRepository(entityManager, transactionManager, {DISTRIBUTION_POINT})
   }
 
   def cleanup() {
@@ -86,6 +88,7 @@ class JpaFileRepositoryITSpec extends Specification {
 
   def "Scenario: store file entity"() {
     given: "The file media types and local storage is configured"
+    databaseConfigurer.setup(REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
 
@@ -106,22 +109,23 @@ class JpaFileRepositoryITSpec extends Specification {
     file.getMediaType() == MEDIA_TYPE
     file.getTotalLength() == CONTENT_LENGTH
   }
-  
+
   def "Scenario: find non removed disposed files"() {
     given: "The file media types and local storage is configured"
+    databaseConfigurer.setup(REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
     databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
     databaseConfigurer.setup(FILES_MIGRATION_SCRIPT)
-    
+
     expect: "Non closed file entities should be found"
     Collection<File> files = fileRepository.findNotRemovedDisposedFiles()
     files[0].storageFileName == 'e95b72b3-54dd-11ec-8d39-0242ac130003'
     files.size() == 1
-
   }
 
   private File createFileEntity() {
     return File.builder()
+        .distributionPoint(DISTRIBUTION_POINT)
         .storageFileName(FILE_STORAGE_NAME)
         .storageName(FILE_STORAGE)
         .status(DISTRIBUTING)

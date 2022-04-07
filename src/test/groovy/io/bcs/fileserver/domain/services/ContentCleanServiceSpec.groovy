@@ -57,7 +57,7 @@ class ContentCleanServiceSpec extends Specification {
     this.eventBus = Mock(EventBus)
     this.eventPublisher = Mock(EventPublisher)
     this.eventBus.getPublisher(_, _) >> eventPublisher
-    this.contentService = new ContentCleanService(fileRepository, fileStorage, eventBus)
+    this.contentService = new ContentCleanService(fileRepository, fileStorage)
   }
 
   def "Scenario: clean disposed files"() {
@@ -80,45 +80,7 @@ class ContentCleanServiceSpec extends Specification {
     and: "Stored file storage name should be clear"
     file.getStorageName().isPresent() == false
   }
-
-  private Range createRange(Long start, Long end) {
-    return new Range() {
-          @Override
-          public Optional<Long> getStart() {
-            return Optional.ofNullable(start);
-          }
-
-          @Override
-          public Optional<Long> getEnd() {
-            return Optional.ofNullable(end);
-          }
-        }
-  }
-
-  private DownloadCommand downloadCommand(Optional<String> storageFileName) {
-    return downloadCommand(storageFileName, [])
-  }
-
-  private DownloadCommand downloadCommand(Optional<String> storageFileName, Collection<Range> ranges) {
-    return Stub(DownloadCommand) {
-      getStorageFileName() >> storageFileName
-      getRanges() >> ranges
-    }
-  }
-
-
-  private File createDraftFile() {
-    return createFile(DRAFT, DEFAULT_CONTENT_LENGTH)
-  }
-
-  private File createDistributedFile(Long contentLength) {
-    return createFile(DISTRIBUTING, contentLength)
-  }
-
-  private File createMirrorDistributedFile(Long contentLength) {
-    return createFile(DISTRIBUTING, contentLength)
-  }
-
+  
   private File createDisposedFile() {
     return createFile(DISPOSED, DISTRIBUTIONING_CONTENT_LENGTH)
   }
@@ -132,19 +94,5 @@ class ContentCleanServiceSpec extends Specification {
         .fileName(FILE_NAME)
         .totalLength(contentLength)
         .build()
-  }
-
-  private FileUploadStatistic fileUploadStatistic() {
-    return Stub(FileUploadStatistic) {
-      getLocator() >> contentLocator()
-      getTotalLength() >> DISTRIBUTIONING_CONTENT_LENGTH
-    }
-  }
-
-  private ContentLocator contentLocator() {
-    ContentLocator contentLocator = Stub(ContentLocator)
-    contentLocator.getStorageName() >> STORAGE_NAME
-    contentLocator.getStorageFileName() >> STORAGE_FILE_NAME
-    return contentLocator
   }
 }
