@@ -1,7 +1,6 @@
 package io.bcs.fileserver.infrastructure.file;
 
-import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
-import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.ReplicationPointsProvider;
+import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.DistribuionPointsProvider;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,19 +17,17 @@ import lombok.SneakyThrows;
  *
  */
 @RequiredArgsConstructor
-public class JdbcReplicationPointsProvider implements ReplicationPointsProvider {
+public class JdbcReplicationPointsProvider implements DistribuionPointsProvider {
   private static final String FIND_REPLICATION_POINTS_QUERY = "SELECT DISTRIBUTION_POINT_NAME "
-      + "FROM REF_DISTRIBUTION_POINTS WHERE DISTRIBUTION_POINT_NAME <> ?";
+      + "FROM REF_DISTRIBUTION_POINTS";
 
   private final DataSource dataSource;
-  private final DistributionPointNameProvider distributionPointNameProvider;
 
   @Override
   @SneakyThrows
-  public Collection<String> findReplicationPoints() {
+  public Collection<String> findDistributionPoints() {
     try (Connection connection = dataSource.getConnection()) {
       PreparedStatement statement = connection.prepareStatement(FIND_REPLICATION_POINTS_QUERY);
-      statement.setString(1, distributionPointNameProvider.getDistributionPointName());
       return extractReplicationPointsNames(statement.executeQuery());
     }
   }

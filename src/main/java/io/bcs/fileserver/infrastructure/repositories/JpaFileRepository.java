@@ -27,10 +27,20 @@ public class JpaFileRepository implements FileRepository {
   private final DistributionPointNameProvider distributionPointNameProvider;
 
   @Override
-  public Optional<File> findById(String storageFileName) {
+  public Optional<File> findLocatedOnCurrentPoint(String storageFileName) {
     FileId fileId =
         new FileId(distributionPointNameProvider.getDistributionPointName(), storageFileName);
     return Optional.ofNullable(entityManager.find(File.class, fileId));
+  }
+
+  @Override
+  public Collection<File> findAllReplicatedFiles(String storageName) {
+    TypedQuery<File> query =
+        entityManager.createNamedQuery("File.findAllReplicatedFiles", File.class);
+    query.setParameter("storageName", storageName);
+    query.setParameter("distributionPoint",
+        distributionPointNameProvider.getDistributionPointName());
+    return query.getResultList();
   }
 
   @Override

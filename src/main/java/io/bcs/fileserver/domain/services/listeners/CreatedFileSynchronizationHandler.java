@@ -16,27 +16,27 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreatedFileSynchronizationHandler implements EventListener<FileHasBeenCreated> {
   private final FileRepository fileRepository;
-  private final ReplicationPointsProvider replicationPointsProvider;
+  private final DistribuionPointsProvider replicationPointsProvider;
 
   @Override
   public void onEvent(FileHasBeenCreated event) {
-    replicationPointsProvider.findReplicationPoints().forEach(replicationPoint -> {
+    replicationPointsProvider.findDistributionPoints().forEach(replicationPoint -> {
       fileRepository.save(new File(replicationPoint, event));
     });
   }
 
   /**
-   * This interface describes the component, providing distribution points for replication.
+   * This interface describes the component, providing existing distribution points.
    *
    * @author Dmitry Mikhaylenko
    *
    */
-  public interface ReplicationPointsProvider {
+  public interface DistribuionPointsProvider {
     /**
-     * Find distribution points for replication.
+     * Find distribution points.
      *
-     * @return The collection of replication points
+     * @return The collection of distribution points names
      */
-    Collection<String> findReplicationPoints();
+    Collection<String> findDistributionPoints();
   }
 }

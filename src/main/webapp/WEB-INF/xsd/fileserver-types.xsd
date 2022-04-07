@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema targetNamespace="http://www.bcs.io/fileserver/types"
-	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.bcs.io/fileserver/types" xmlns:global="http://www.bcs.io/fileserver/types">
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bcs.io/fileserver/types"
+	xmlns:global="http://www.bcs.io/fileserver/types">
 
 
 	<simpleType name="FileName_Type">
@@ -61,8 +63,18 @@
 
 	<complexType name="ContentLocator_Type">
 		<sequence>
-			<element name="storageName" type="tns:StorageName_Type" minOccurs="1" maxOccurs="1"></element>
-			<element name="storageFileName" type="tns:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
+			<element name="storageName" type="tns:StorageName_Type"
+				minOccurs="1" maxOccurs="1"></element>
+			<element name="storageFileName"
+				type="tns:StorageFileName_Type" minOccurs="1" maxOccurs="1"></element>
 		</sequence>
 	</complexType>
+
+
+	<simpleType name="ContentLength_Type">
+		<restriction base="long">
+
+			<minInclusive value="0"></minInclusive>
+		</restriction>
+	</simpleType>
 </schema>

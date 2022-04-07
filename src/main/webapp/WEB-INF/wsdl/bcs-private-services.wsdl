@@ -8,12 +8,14 @@
 	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
 	xmlns:xsd1="http://www.bcs.io/fileserver/api/types/internal"
 	xmlns:global="http://www.bcs.io/global/types">
+	
 	<wsdl:types>
 		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 			<xsd:import
 				namespace="http://www.bcs.io/fileserver/api/types/internal"
 				schemaLocation="bcs-private-services.xsd">
 			</xsd:import>
+			
 			<xsd:import namespace="http://www.bcs.io/global/types"
 				schemaLocation="../xsd/global-types.xsd">
 			</xsd:import>
@@ -34,60 +36,76 @@
 		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
 
+
+	<wsdl:message name="getContentWriteUrlRequest">
+		<wsdl:part name="parameters"
+			element="xsd1:GetDirectContentWriteUrlRq"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="getContentWriteUrlResponse">
+		<wsdl:part name="parameters"
+			element="xsd1:GetDirectContentWriteUrlRs"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="createFileRequest">
+		<wsdl:part name="parameters" element="xsd1:CreateFileRq"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="createFileResponse">
+		<wsdl:part name="parameters" element="xsd1:CreateFileRs"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="deleteFileRequest">
+		<wsdl:part name="parameters" element="xsd1:DeleteFileRq"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="deleteFileResponse">
+		<wsdl:part name="parameters" element="xsd1:DeleteFileRs"></wsdl:part>
+	</wsdl:message>
+
 	<wsdl:message name="getContentWriteUrlFault">
-		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
+		<wsdl:part name="fault" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
-
-	<wsdl:message name="warmContentUpRequest">
-		<wsdl:part name="parameters" element="xsd1:WarmContentUpRq"></wsdl:part>
+	
+	<wsdl:message name="createFileFault">
+		<wsdl:part name="fault" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
-
-	<wsdl:message name="warmContentUpResponse">
-		<wsdl:part name="parameters" element="xsd1:WarmContentUpRs"></wsdl:part>
+	
+	<wsdl:message name="deleteFileFault">
+		<wsdl:part name="fault" element="global:ServiceFault"></wsdl:part>
 	</wsdl:message>
-
-	<wsdl:message name="coolContentDownRequest">
-		<wsdl:part name="parameters"
-			element="xsd1:CoolContentDownRq"></wsdl:part>
-	</wsdl:message>
-
-	<wsdl:message name="coolContentDownResponse">
-		<wsdl:part name="parameters"
-			element="xsd1:CoolContentDownRs"></wsdl:part>
-	</wsdl:message>
-
-	<wsdl:message name="warmContentUpFault">
-		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
-	</wsdl:message>
-	<wsdl:message name="coolContentDownFault">
-		<wsdl:part name="parameters" element="global:ServiceFault"></wsdl:part>
-	</wsdl:message>
-	<wsdl:portType name="WSContentAccess">
+	
+	<wsdl:portType name="WSRemoteStorage">
 		<wsdl:operation name="getContentReadUrl">
 			<wsdl:input message="tns:getContentReadUrlRequest"></wsdl:input>
 			<wsdl:output message="tns:getContentReadUrlResponse"></wsdl:output>
 			<wsdl:fault name="fault"
 				message="tns:getContentReadUrlFault"></wsdl:fault>
 		</wsdl:operation>
-	</wsdl:portType>
 
-	<wsdl:portType name="WSContentWarming">
-		<wsdl:operation name="warmContentUp">
-			<wsdl:input message="tns:warmContentUpRequest"></wsdl:input>
-			<wsdl:output message="tns:warmContentUpResponse"></wsdl:output>
-			<wsdl:fault name="fault" message="tns:warmContentUpFault"></wsdl:fault>
-		</wsdl:operation>
-
-		<wsdl:operation name="coolContentDown">
-			<wsdl:input message="tns:coolContentDownRequest"></wsdl:input>
-			<wsdl:output message="tns:coolContentDownResponse"></wsdl:output>
+		<wsdl:operation name="getContentWriteUrl">
+			<wsdl:input message="tns:getContentWriteUrlRequest"></wsdl:input>
+			<wsdl:output message="tns:getContentWriteUrlResponse"></wsdl:output>
 			<wsdl:fault name="fault"
-				message="tns:coolContentDownFault"></wsdl:fault>
+				message="tns:getContentWriteUrlFault"></wsdl:fault>
+		</wsdl:operation>
+
+		<wsdl:operation name="createFile">
+			<wsdl:input message="tns:createFileRequest"></wsdl:input>
+			<wsdl:output message="tns:createFileResponse"></wsdl:output>
+			<wsdl:fault name="fault" message="tns:createFileFault"></wsdl:fault>
+		</wsdl:operation>
+
+		<wsdl:operation name="deleteFile">
+			<wsdl:input message="tns:deleteFileRequest"></wsdl:input>
+			<wsdl:output message="tns:deleteFileResponse"></wsdl:output>
+			<wsdl:fault name="fault" message="tns:deleteFileFault"></wsdl:fault>
 		</wsdl:operation>
 	</wsdl:portType>
 
-	<wsdl:binding name="WSContentAccessBinding"
-		type="tns:WSContentAccess">
+
+	<wsdl:binding name="WSRemoteStorageBinding"
+		type="tns:WSRemoteStorage">
 
 		<soap:binding style="document"
 			transport="http://schemas.xmlsoap.org/soap/http" />
@@ -108,16 +126,10 @@
 				<soap:fault use="literal" name="fault" />
 			</wsdl:fault>
 		</wsdl:operation>
-	</wsdl:binding>
-	<wsdl:binding name="WSContentWarmingBinding"
-		type="tns:WSContentWarming">
-
-		<soap:binding style="document"
-			transport="http://schemas.xmlsoap.org/soap/http" />
-		<wsdl:operation name="warmContentUp">
+		<wsdl:operation name="getContentWriteUrl">
 
 			<soap:operation
-				soapAction="http://www.bcs.io/fileserver/api/services/internal/warmContentUp" />
+				soapAction="http://www.bcs.io/fileserver/api/services/internal/getContentWriteUrl" />
 			<wsdl:input>
 
 				<soap:body use="literal" />
@@ -126,11 +138,15 @@
 
 				<soap:body use="literal" />
 			</wsdl:output>
+			<wsdl:fault name="fault">
+
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
 		</wsdl:operation>
-		<wsdl:operation name="coolContentDown">
+		<wsdl:operation name="createFile">
 
 			<soap:operation
-				soapAction="http://www.bcs.io/fileserver/api/services/internal/coolContentDown" />
+				soapAction="http://www.bcs.io/fileserver/api/services/internal/createFile" />
 			<wsdl:input>
 
 				<soap:body use="literal" />
@@ -139,18 +155,35 @@
 
 				<soap:body use="literal" />
 			</wsdl:output>
+			<wsdl:fault name="fault">
+
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="deleteFile">
+
+			<soap:operation
+				soapAction="http://www.bcs.io/fileserver/api/services/internal/deleteFile" />
+			<wsdl:input>
+
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+
+				<soap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="fault">
+
+				<soap:fault use="literal" name="fault" />
+			</wsdl:fault>
 		</wsdl:operation>
 	</wsdl:binding>
+
 	<wsdl:service name="BCSPrivateServicesEndpoint">
-		<wsdl:port name="WSContentAccessPort"
-			binding="tns:WSContentAccessBinding">
+		<wsdl:port name="WSRemoteStoragePort"
+			binding="tns:WSRemoteStorageBinding">
 			<soap:address
-				location="http://www.bcs.io/fileserver/api/private/WSContentAccess" />
-		</wsdl:port>
-		<wsdl:port name="WSContentWarmingPort"
-			binding="tns:WSContentWarmingBinding">
-			<soap:address
-				location="http://www.bcs.io/fileserver/api/private/WSContentWarming" />
-		</wsdl:port>
+				location="http://www.bcs.io/fileserver/api/private/WSRemoteStorage" />
+		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

@@ -4,13 +4,13 @@ import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bcs.fileserver.domain.errors.FileStorageException;
-import io.bcs.fileserver.domain.model.content.ContentFragment;
-import io.bcs.fileserver.domain.model.content.ContentLocator;
-import io.bcs.fileserver.domain.model.content.DefaultContentLocator;
-import io.bcs.fileserver.domain.model.content.FileStorage;
-import io.bcs.fileserver.domain.model.content.StorageType.FileStorageProvider;
-import io.bcs.fileserver.domain.model.content.storage.FileContentLocator;
-import io.bcs.fileserver.domain.model.content.storage.LocalStorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.ContentFragment;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
+import io.bcs.fileserver.domain.model.storage.FileStorage;
+import io.bcs.fileserver.domain.model.storage.FileStorageProvider;
+import io.bcs.fileserver.domain.model.storage.types.LocalStorageDescriptor;
+import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.storage.PhysicalFile.Factory;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class LocalFilesystemStorageFactory implements FileStorageProvider<LocalStorageDescriptor> {
   private final FilesystemSpaceManager filesystemSpaceManager;
   private final Factory physicalFileFactory;
-  private final int bufferSize;
+  private final FileServerConfigurationProperties fileServerConfig;
 
   @Override
   public FileStorage getFileStorage(LocalStorageDescriptor storage) {
@@ -66,7 +66,7 @@ public class LocalFilesystemStorageFactory implements FileStorageProvider<LocalS
         ContentFragment fragment) throws FileStorageException {
       try {
         return getPhysicalFile(contentLocator).openForRead(fragment.getOffset(),
-            fragment.getLength(), bufferSize);
+            fragment.getLength(), fileServerConfig.getBufferSize());
       } catch (IOException error) {
         throw new FileStorageException(error);
       }
@@ -74,7 +74,9 @@ public class LocalFilesystemStorageFactory implements FileStorageProvider<LocalS
 
     @Override
     public void delete(FileDescriptor file) throws FileStorageException {
-      getPhysicalFile(new FileContentLocator(file)).delete();
+      ContentLocator contentLocator =
+          new DefaultContentLocator(file.getStorageFileName(), file.getStorageName().get());
+      getPhysicalFile(contentLocator).delete();
     }
 
     private PhysicalFile getPhysicalFile(ContentLocator contentLocator) {

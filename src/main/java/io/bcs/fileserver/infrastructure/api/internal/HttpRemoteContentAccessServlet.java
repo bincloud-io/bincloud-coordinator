@@ -11,9 +11,9 @@ import io.bce.interaction.streaming.binary.InputStreamSource;
 import io.bce.interaction.streaming.binary.OutputStreamDestination;
 import io.bce.promises.Deferred.DeferredFunction;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.model.content.ContentFragment;
-import io.bcs.fileserver.domain.model.content.ContentLocator;
-import io.bcs.fileserver.domain.model.content.FileStorage;
+import io.bcs.fileserver.domain.model.storage.ContentFragment;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.services.ContentAccessService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.api.HttpAsyncExecutor;
 import io.bcs.fileserver.infrastructure.api.HttpResponseContext;
@@ -45,7 +45,8 @@ public class HttpRemoteContentAccessServlet extends HttpServlet {
   private Streamer streamer;
 
   @Inject
-  private FileStorage fileStorage;
+  @SuppressWarnings("cdi-ambiguous-dependency")
+  private ContentAccessService contentAccessService;
 
   private FileServerConfigurationProperties fileServerConfigurationProperties;
 
@@ -86,7 +87,8 @@ public class HttpRemoteContentAccessServlet extends HttpServlet {
   }
 
   private Source<BinaryChunk> getReadSource(HttpReadContentCommand readCommand) {
-    return fileStorage.getAccessOnRead(readCommand.getContentLocator(), readCommand.getFragment());
+    return contentAccessService.getAccessOnRead(readCommand.getContentLocator(),
+        readCommand.getFragment());
   }
 
   private Destination<BinaryChunk> getReadDestination(HttpServletResponse response) {
@@ -99,7 +101,7 @@ public class HttpRemoteContentAccessServlet extends HttpServlet {
   }
 
   private Destination<BinaryChunk> getWriteDestination(HttpWriteContentCommand writeCommand) {
-    return fileStorage.getAccessOnWrite(writeCommand.getContextLocator());
+    return contentAccessService.getAccessOnWrite(writeCommand.getContextLocator());
   }
 
   private ServletInputStream getRequestInputStream(HttpServletRequest request) {
@@ -152,7 +154,7 @@ public class HttpRemoteContentAccessServlet extends HttpServlet {
   @RequiredArgsConstructor
   private static class HttpWriteContentCommand {
     private final HttpServletRequest request;
-    
+
     public ContentLocator getContextLocator() {
       return new RequestContextLocator(request);
     }

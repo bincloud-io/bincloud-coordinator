@@ -1,7 +1,7 @@
 package io.bcs.fileserver.infrastructure.file;
 
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
-import io.bcs.fileserver.domain.model.file.Range;
+import io.bcs.fileserver.domain.model.content.Range;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

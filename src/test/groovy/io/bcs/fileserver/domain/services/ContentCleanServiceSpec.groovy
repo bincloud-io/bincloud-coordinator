@@ -22,18 +22,16 @@ import io.bcs.fileserver.domain.errors.FileNotSpecifiedException
 import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.events.FileDownloadHasBeenRequested
-import io.bcs.fileserver.domain.model.content.ContentLocator
-import io.bcs.fileserver.domain.model.content.ContentReceiver
-import io.bcs.fileserver.domain.model.content.DownloadCommand
 import io.bcs.fileserver.domain.model.content.FileContent
-import io.bcs.fileserver.domain.model.content.FileStorage
 import io.bcs.fileserver.domain.model.content.FileUploadStatistic
+import io.bcs.fileserver.domain.model.content.Range
 import io.bcs.fileserver.domain.model.content.FileContent.ContentPart
 import io.bcs.fileserver.domain.model.content.FileContent.ContentType
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
-import io.bcs.fileserver.domain.model.file.Range
+import io.bcs.fileserver.domain.model.storage.ContentLocator
+import io.bcs.fileserver.domain.model.storage.FileStorage
 import spock.lang.Specification
 
 class ContentCleanServiceSpec extends Specification {

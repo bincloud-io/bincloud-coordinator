@@ -4,9 +4,9 @@ import io.bce.interaction.polling.Polling;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bcs.fileserver.domain.errors.FileNotDisposedException;
-import io.bcs.fileserver.domain.model.content.FileStorage;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
 
 /**

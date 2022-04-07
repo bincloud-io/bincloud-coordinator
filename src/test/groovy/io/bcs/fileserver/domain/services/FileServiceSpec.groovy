@@ -17,10 +17,10 @@ import io.bcs.fileserver.domain.errors.PrimaryValidationException
 import io.bcs.fileserver.domain.events.FileHasBeenCreated
 import io.bcs.fileserver.domain.events.FileHasBeenDisposed
 import io.bcs.fileserver.domain.model.DistributionPointNameProvider
-import io.bcs.fileserver.domain.model.content.ContentLocator
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
+import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.services.FileService.CreateFile
 import java.time.LocalDateTime
 import spock.lang.Specification
@@ -243,7 +243,7 @@ class FileServiceSpec extends Specification {
     File file
     FileHasBeenDisposed event
     given: "The distributing file, existing into repository"
-    this.fileRepository.findById(_) >> Optional.of(createFileDescriptor(FileStatus.DISTRIBUTING, DISTRIBUTIONING_CONTENT_LENGTH))
+    this.fileRepository.findLocatedOnCurrentPoint(_) >> Optional.of(createFileDescriptor(FileStatus.DISTRIBUTING, DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The response handler"
     ResponseHandler responseHandler = Mock(ResponseHandler)
@@ -285,7 +285,7 @@ class FileServiceSpec extends Specification {
   def "Scenario: dispose existing file which had already disposed before"() {
     FileDisposedException error
     given: "The distributing file, existing into repository"
-    this.fileRepository.findById(_) >> Optional.of(createFileDescriptor(FileStatus.DISPOSED, DISTRIBUTIONING_CONTENT_LENGTH))
+    this.fileRepository.findLocatedOnCurrentPoint(_) >> Optional.of(createFileDescriptor(FileStatus.DISPOSED, DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)
@@ -303,7 +303,7 @@ class FileServiceSpec extends Specification {
   def "Scenario: dispose unknown file"() {
     FileNotExistsException error
     given: "The distributing file, existing into repository"
-    this.fileRepository.findById(STORAGE_FILE_NAME) >> Optional.empty()
+    this.fileRepository.findLocatedOnCurrentPoint(STORAGE_FILE_NAME) >> Optional.empty()
 
     and: "The error handler"
     ErrorHandler errorHandler = Mock(ErrorHandler)

@@ -25,27 +25,27 @@ import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.events.FileContentHasBeenUploaded
 import io.bcs.fileserver.domain.events.FileDownloadHasBeenRequested
+import io.bcs.fileserver.domain.model.MediaType
 import io.bcs.fileserver.domain.model.content.Content
-import io.bcs.fileserver.domain.model.content.ContentLocator
 import io.bcs.fileserver.domain.model.content.ContentReceiver
 import io.bcs.fileserver.domain.model.content.ContentRepository
 import io.bcs.fileserver.domain.model.content.ContentSource
-import io.bcs.fileserver.domain.model.content.DownloadCommand
 import io.bcs.fileserver.domain.model.content.FileContent
 import io.bcs.fileserver.domain.model.content.FileMetadata
-import io.bcs.fileserver.domain.model.content.FileStorage
 import io.bcs.fileserver.domain.model.content.FileUploadStatistic
-import io.bcs.fileserver.domain.model.content.MediaType
-import io.bcs.fileserver.domain.model.content.StorageDescriptor
-import io.bcs.fileserver.domain.model.content.StorageType
-import io.bcs.fileserver.domain.model.content.UploadCommand
+import io.bcs.fileserver.domain.model.content.Range
 import io.bcs.fileserver.domain.model.content.FileContent.ContentPart
 import io.bcs.fileserver.domain.model.content.FileContent.ContentType
-import io.bcs.fileserver.domain.model.content.StorageType.FileStorageProvider
-import io.bcs.fileserver.domain.model.content.storage.LocalStorageDescriptor
-import io.bcs.fileserver.domain.model.content.storage.RemoteStorageDescriptor
 import io.bcs.fileserver.domain.model.file.FileStatus
-import io.bcs.fileserver.domain.model.file.Range
+import io.bcs.fileserver.domain.model.storage.ContentLocator
+import io.bcs.fileserver.domain.model.storage.FileStorage
+import io.bcs.fileserver.domain.model.storage.FileStorageProvider
+import io.bcs.fileserver.domain.model.storage.StorageDescriptor
+import io.bcs.fileserver.domain.model.storage.StorageType
+import io.bcs.fileserver.domain.model.storage.types.LocalStorageDescriptor
+import io.bcs.fileserver.domain.model.storage.types.RemoteStorageDescriptor
+import io.bcs.fileserver.domain.services.ContentService.DownloadCommand
+import io.bcs.fileserver.domain.services.ContentService.UploadCommand
 import spock.lang.Specification
 
 class ContentServiceSpec extends Specification {
@@ -73,8 +73,10 @@ class ContentServiceSpec extends Specification {
   def setup() {
     this.contentRepository = Mock(ContentRepository)
     this.fileStorage = Mock(FileStorage)
-    this.localStorageProvider = {fileStorage}
-    this.remoteStorageProvider = {fileStorage}
+    this.localStorageProvider = Mock(FileStorageProvider)
+    this.localStorageProvider.getFileStorage(_) >> fileStorage
+    this.remoteStorageProvider = Mock(FileStorageProvider)
+    this.remoteStorageProvider.getFileStorage(_) >> fileStorage
     this.eventBus = Mock(EventBus)
     this.eventPublisher = Mock(EventPublisher)
     this.eventBus.getPublisher(_, _) >> eventPublisher

@@ -3,7 +3,7 @@ package io.bcs.fileserver.domain.services.listeners
 import io.bcs.fileserver.domain.events.FileHasBeenCreated
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
-import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.ReplicationPointsProvider
+import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.DistribuionPointsProvider
 import spock.lang.Specification
 
 class CreatedFileSynchronizationHandlerSpec extends Specification {
@@ -19,12 +19,12 @@ class CreatedFileSynchronizationHandlerSpec extends Specification {
   private static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
 
   private FileRepository fileRepository;
-  private ReplicationPointsProvider replicationPointsProvider;
+  private DistribuionPointsProvider replicationPointsProvider;
   private CreatedFileSynchronizationHandler eventHandler;
 
   def setup() {
     this.fileRepository = Mock(FileRepository)
-    this.replicationPointsProvider = Stub(ReplicationPointsProvider)
+    this.replicationPointsProvider = Stub(DistribuionPointsProvider)
     this.eventHandler = new CreatedFileSynchronizationHandler(fileRepository, replicationPointsProvider)
   }
 
@@ -35,7 +35,7 @@ class CreatedFileSynchronizationHandlerSpec extends Specification {
     FileHasBeenCreated event = createFileHasBeenCreatedEvent()
 
     and: "The provided replication distribution points"
-    replicationPointsProvider.findReplicationPoints() >> [
+    replicationPointsProvider.findDistributionPoints() >> [
       ADDITIONAL_DISTRIBUTION_POINT_1,
       ADDITIONAL_DISTRIBUTION_POINT_2
     ]

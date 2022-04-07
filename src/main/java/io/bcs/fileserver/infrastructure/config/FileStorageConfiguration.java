@@ -4,17 +4,20 @@ import io.bce.domain.EventBus;
 import io.bce.domain.EventBus.EventSubscribtion;
 import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.events.FileHasBeenCreated;
-import io.bcs.fileserver.domain.model.content.StorageType.FileStorageProvider;
-import io.bcs.fileserver.domain.model.content.storage.LocalStorageDescriptor;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.storage.FileStorageProvider;
+import io.bcs.fileserver.domain.model.storage.StorageType;
+import io.bcs.fileserver.domain.model.storage.types.LocalStorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.types.RemoteStorageDescriptor;
 import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler;
-import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.ReplicationPointsProvider;
+import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.DistribuionPointsProvider;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.JdbcReplicationPointsProvider;
 import io.bcs.fileserver.infrastructure.storage.FilesystemPhysicalFile;
 import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.JdbcFilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.LocalFilesystemStorageFactory;
+import io.bcs.fileserver.infrastructure.storage.RemoteFilesystemStorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
@@ -52,7 +55,7 @@ public class FileStorageConfiguration {
   private EventBus eventBus;
 
   private final List<EventSubscribtion> subscribtions = new ArrayList<>();
-  
+
   /**
    * The file system space manager configuration.
    *
@@ -71,7 +74,17 @@ public class FileStorageConfiguration {
   @Produces
   public FileStorageProvider<LocalStorageDescriptor> localFileStorageProvider() {
     return new LocalFilesystemStorageFactory(fileSpaceManager(), FilesystemPhysicalFile.factory(),
-        fileServerConfigurationProperties.getBufferSize());
+        fileServerConfigurationProperties);
+  }
+
+  /**
+   * The remote file storage provider configuration.
+   *
+   * @return The remote file storage provider
+   */
+  @Produces
+  public FileStorageProvider<RemoteStorageDescriptor> remoteFileStorageProvider() {
+    return new RemoteFilesystemStorageFactory(fileServerConfigurationProperties);
   }
 
   /**
@@ -80,8 +93,8 @@ public class FileStorageConfiguration {
    * @return The replication points provider.
    */
   @Produces
-  public ReplicationPointsProvider replicationPointsProvider() {
-    return new JdbcReplicationPointsProvider(dataSource, fileServerConfigurationProperties);
+  public DistribuionPointsProvider replicationPointsProvider() {
+    return new JdbcReplicationPointsProvider(dataSource);
   }
 
   /**
@@ -92,6 +105,16 @@ public class FileStorageConfiguration {
   @Produces
   public CreatedFileSynchronizationHandler createdFileSynchronizationHandler() {
     return new CreatedFileSynchronizationHandler(fileRepository, replicationPointsProvider());
+  }
+
+  /**
+   * Register storage providers.
+   *
+   * @param init The CDI context event
+   */
+  public void configureStorages(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    StorageType.LOCAL.registerFileStorageProvider(localFileStorageProvider());
+    StorageType.REMOTE.registerFileStorageProvider(remoteFileStorageProvider());
   }
 
   /**

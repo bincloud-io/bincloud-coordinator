@@ -17,11 +17,11 @@ import io.bcs.fileserver.domain.errors.PrimaryValidationException;
 import io.bcs.fileserver.domain.events.FileHasBeenCreated;
 import io.bcs.fileserver.domain.events.FileHasBeenDisposed;
 import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
-import io.bcs.fileserver.domain.model.content.ContentLocator;
-import io.bcs.fileserver.domain.model.content.storage.FileContentLocator;
 import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.File.CreationData;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,8 @@ public class FileService {
     return Promises.of(deferred -> {
       log.info("Use-case: Dispose file.");
       File file = retrieveExistingFileDescriptor(storageFileName);
-      ContentLocator contentLocator = new FileContentLocator(file);
+      ContentLocator contentLocator =
+          new DefaultContentLocator(storageFileName, file.getStorageName().get());
       file.dispose();
       log.debug(TextTemplates
           .createBy("The file {{storageFileName}} has been successfully disposed "
@@ -95,7 +96,7 @@ public class FileService {
   }
 
   private File retrieveExistingFileDescriptor(String storageFileName) {
-    return fileRepository.findById(storageFileName).orElseThrow(() -> {
+    return fileRepository.findLocatedOnCurrentPoint(storageFileName).orElseThrow(() -> {
       log.warn(TextTemplates.createBy("The file with {{storageFileName}} hasn't been found.")
           .withParameter("storageFileName", storageFileName));
       return new FileNotExistsException();
@@ -123,8 +124,18 @@ public class FileService {
    *
    */
   public interface CreateFile {
+    /**
+     * Get created file media type.
+     *
+     * @return The media type
+     */
     Optional<String> getMediaType();
 
+    /**
+     * Get created file real name (name, assigned to file on download).
+     *
+     * @return The file name
+     */
     Optional<String> getFileName();
   }
 

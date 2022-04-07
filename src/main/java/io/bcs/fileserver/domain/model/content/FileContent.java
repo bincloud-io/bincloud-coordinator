@@ -2,6 +2,8 @@ package io.bcs.fileserver.domain.model.content;
 
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
+import io.bcs.fileserver.domain.model.storage.ContentFragment;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import java.util.Collection;
 
 /**

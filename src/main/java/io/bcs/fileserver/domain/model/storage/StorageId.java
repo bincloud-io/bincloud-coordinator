@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.content;
+package io.bcs.fileserver.domain.model.storage;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;

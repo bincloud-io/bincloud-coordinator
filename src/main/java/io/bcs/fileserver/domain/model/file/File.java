@@ -4,7 +4,8 @@ import io.bce.Generator;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
-import io.bcs.fileserver.domain.model.content.FileStorage;
+import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -136,29 +137,13 @@ public class File implements FileStorage.FileDescriptor {
 
   /**
    * Start file distribution.
+   *
+   * @param uploadStatistic The file upload statistic
    */
-  public void startFileDistribution() {
+  public void startFileDistribution(FileUploadStatistic uploadStatistic) {
+    this.storageName = uploadStatistic.getLocator().getStorageName();
+    this.totalLength = uploadStatistic.getTotalLength();
     this.status = FileStatus.DISTRIBUTING;
-  }
-
-  /**
-   * Specify where content is going to be placed and how much space is allocated on storage.
-   *
-   * @param storageName   The storage file name
-   * @param contentLength The distributed content length
-   */
-  public void specifyContentPlacement(String storageName, Long contentLength) {
-    this.totalLength = contentLength;
-    this.storageName = storageName;
-  }
-
-  /**
-   * Relocate file to another storage.
-   *
-   * @param storageName The storage name
-   */
-  public void relocateFile(String storageName) {
-    this.storageName = storageName;
   }
 
   /**

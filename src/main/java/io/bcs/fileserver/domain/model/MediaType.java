@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.content;
+package io.bcs.fileserver.domain.model;
 
 import io.bcs.fileserver.domain.model.file.Disposition;
 import lombok.Builder.Default;

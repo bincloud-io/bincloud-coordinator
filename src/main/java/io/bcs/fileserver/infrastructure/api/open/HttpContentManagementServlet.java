@@ -17,8 +17,8 @@ import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
 import io.bcs.fileserver.domain.model.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.content.ContentSource;
 import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
-import io.bcs.fileserver.domain.model.content.UploadCommand;
 import io.bcs.fileserver.domain.services.ContentService;
+import io.bcs.fileserver.domain.services.ContentService.UploadCommand;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.api.HttpAsyncExecutor;
 import io.bcs.fileserver.infrastructure.api.HttpResponseContext;
@@ -57,6 +57,7 @@ public class HttpContentManagementServlet extends HttpServlet {
   private Streamer streamer;
 
   @Inject
+  @SuppressWarnings("cdi-ambiguous-dependency")
   private ContentService contentService;
 
   @Inject

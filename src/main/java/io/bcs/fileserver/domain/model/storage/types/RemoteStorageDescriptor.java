@@ -1,10 +1,11 @@
-package io.bcs.fileserver.domain.model.content.storage;
+package io.bcs.fileserver.domain.model.storage.types;
 
-import io.bcs.fileserver.domain.model.content.StorageDescriptor;
-import io.bcs.fileserver.domain.model.content.StorageType;
+import io.bcs.fileserver.domain.model.storage.StorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.StorageType;
+import java.net.URL;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
@@ -14,7 +15,6 @@ import lombok.experimental.SuperBuilder;
  * @author Dmitry Mikhaylenko
  *
  */
-@Getter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,5 +25,10 @@ public class RemoteStorageDescriptor extends StorageDescriptor {
   @Override
   public StorageType getType() {
     return StorageType.REMOTE;
+  }
+  
+  @SneakyThrows
+  public URL getRemoteStorageGatewayWsdl() {
+    return new URL(remoteStorageGatewayWsdl);
   }
 }

@@ -13,9 +13,9 @@ import io.bcs.fileserver.domain.model.content.Content;
 import io.bcs.fileserver.domain.model.content.ContentReceiver;
 import io.bcs.fileserver.domain.model.content.ContentRepository;
 import io.bcs.fileserver.domain.model.content.ContentSource;
-import io.bcs.fileserver.domain.model.content.DownloadCommand;
 import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
-import io.bcs.fileserver.domain.model.content.UploadCommand;
+import io.bcs.fileserver.domain.model.content.Range;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -83,4 +83,47 @@ public class ContentService {
     });
   }
 
+  /**
+   * This interface describes a content download command.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public interface DownloadCommand {
+    /**
+     * Get storage file name.
+     *
+     * @return The storage file name
+     */
+    Optional<String> getStorageFileName();
+
+    /**
+     * Get content ranges.
+     *
+     * @return The content ranges
+     */
+    Collection<Range> getRanges();
+  }
+
+  /**
+   * This interface describes a content upload command.
+   *
+   * @author Dmitry Mikhaylenko
+   *
+   */
+  public interface UploadCommand {
+    /**
+     * Get storage file name.
+     *
+     * @return The storage file name
+     */
+    Optional<String> getStorageFileName();
+
+    /**
+     * The file content length.
+     *
+     * @return The content length
+     */
+    Long getContentLength();
+  }
 }

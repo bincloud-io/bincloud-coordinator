@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.file;
+package io.bcs.fileserver.domain.model.content;
 
 import java.util.Optional;
 

@@ -1,5 +1,7 @@
 package io.bcs.fileserver.domain.model.content;
 
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
+
 /**
  * This interface describes the file upload statistic.
  *

@@ -1,6 +1,6 @@
 package io.bcs.fileserver.infrastructure.file
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
-import io.bcs.fileserver.domain.model.file.Range
+import io.bcs.fileserver.domain.model.content.Range
 import io.bcs.fileserver.infrastructure.file.HttpRanges
 import spock.lang.Specification
 

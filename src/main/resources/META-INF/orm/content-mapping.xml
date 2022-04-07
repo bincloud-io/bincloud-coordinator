@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+	<access>FIELD</access>
+
+	<entity class="io.bcs.fileserver.domain.model.content.Content">
+		<table name="FILES" />
+		<id-class class="io.bcs.fileserver.domain.model.file.FileId" />
+
+		<attributes>
+			<id name="distributionPoint">
+				<column name="DISTRIBUTION_POINT_NAME" />
+			</id>
+
+			<id name="storageFileName">
+				<column name="STORAGE_FILE_NAME" />
+			</id>
+
+			<basic name="fileName">
+				<column name="FILE_NAME" />
+			</basic>
+
+			<basic name="totalLength">
+				<column name="CONTENT_LENGTH" />
+			</basic>
+
+			<basic name="status">
+				<column name="STATUS" />
+				<enumerated>STRING</enumerated>
+			</basic>
+
+			<many-to-one name="storage">
+				<join-column name="STORAGE_NAME"
+					referenced-column-name="STORAGE_NAME" />
+			</many-to-one>
+
+			<many-to-one name="mediaType">
+				<join-column name="MEDIA_TYPE"
+					referenced-column-name="MEDIA_TYPE" />
+			</many-to-one>
+		</attributes>
+	</entity>
+</entity-mappings>

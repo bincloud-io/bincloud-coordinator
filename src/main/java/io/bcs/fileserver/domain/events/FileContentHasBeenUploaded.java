@@ -1,9 +1,9 @@
 package io.bcs.fileserver.domain.events;
 
 import io.bce.domain.EventType;
-import io.bcs.fileserver.domain.model.content.ContentLocator;
-import io.bcs.fileserver.domain.model.content.DefaultContentLocator;
 import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;

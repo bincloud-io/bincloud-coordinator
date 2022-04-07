@@ -3,13 +3,19 @@ package io.bcs.fileserver.infrastructure.config;
 import io.bce.Generator;
 import io.bce.domain.EventBus;
 import io.bce.validation.ValidationService;
-import io.bcs.fileserver.domain.model.content.FileStorage;
+import io.bcs.fileserver.domain.model.content.ContentRepository;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.storage.FileStorage;
+import io.bcs.fileserver.domain.model.storage.StorageDescriptorRepository;
+import io.bcs.fileserver.domain.services.ContentAccessService;
 import io.bcs.fileserver.domain.services.ContentCleanService;
+import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.StorageFileNameGenerator;
+import io.bcs.fileserver.infrastructure.repositories.JpaContentRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
+import io.bcs.fileserver.infrastructure.repositories.JpaStorageDescriptorRepository;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -34,9 +40,6 @@ public class ApplicationServicesConfig {
 
   @Inject
   private ValidationService validationService;
-
-  @Inject
-  private FileStorage fileStorage;
 
   @Inject
   private EventBus eventBus;
@@ -66,14 +69,54 @@ public class ApplicationServicesConfig {
   }
 
   /**
+   * The storage descriptor repository configuration.
+   *
+   * @return The file repository
+   */
+  @Produces
+  public StorageDescriptorRepository storageDescriptorRepository() {
+    return new JpaStorageDescriptorRepository(entityManager, fileServerConfigurationProperties);
+  }
+
+  /**
+   * The content repository configuration.
+   *
+   * @return The storage repository
+   */
+  @Produces
+  public ContentRepository contentRepository() {
+    return new JpaContentRepository(entityManager, fileServerConfigurationProperties);
+  }
+
+  /**
+   * The content access service configuration.
+   *
+   * @return The content access service
+   */
+  @Produces
+  public ContentAccessService contentAccessService() {
+    return new ContentAccessService(storageDescriptorRepository());
+  }
+
+  /**
    * The content service configuration.
+   *
+   * @return The content clean service
+   */
+  @Produces
+  @SuppressWarnings("cdi-ambiguous-dependency")
+  public ContentCleanService contentCleanService(FileStorage fileStorage) {
+    return new ContentCleanService(fileRepository(), fileStorage);
+  }
+
+  /**
+   * The content clean service configuration.
    *
    * @return The content service
    */
   @Produces
-  @SuppressWarnings("cdi-ambiguous-dependency")
-  public ContentCleanService contentService() {
-    return new ContentCleanService(fileRepository(), fileStorage);
+  public ContentService contentService() {
+    return new ContentService(contentRepository(), eventBus);
   }
 
   /**
@@ -82,7 +125,6 @@ public class ApplicationServicesConfig {
    * @return The file service.
    */
   @Produces
-  @SuppressWarnings("cdi-ambiguous-dependency")
   public FileService fileService() {
     return new FileService(validationService, fileRepository(), fileNameGenerator(),
         fileServerConfigurationProperties, eventBus);

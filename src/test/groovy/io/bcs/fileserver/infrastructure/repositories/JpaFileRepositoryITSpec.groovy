@@ -5,25 +5,21 @@ import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.COMPILE
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.RUNTIME
 import static org.jboss.shrinkwrap.resolver.api.maven.ScopeType.TEST
 
+import io.bcs.fileserver.domain.Constants
+import io.bcs.fileserver.domain.model.file.File
+import io.bcs.fileserver.domain.model.file.FileRepository
+import io.bcs.fileserver.domain.model.file.FileStatus
+import io.bcs.testing.archive.ArchiveBuilder
+import io.bcs.testing.database.DatabaseConfigurer
+import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import javax.inject.Inject
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.TransactionManager
-
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSputnik
 import org.jboss.shrinkwrap.api.Archive
 import org.junit.runner.RunWith
-import io.bce.CriticalSection
-import io.bcs.fileserver.domain.Constants
-import io.bcs.fileserver.domain.model.content.ContentLocator
-import io.bcs.fileserver.domain.model.file.File
-import io.bcs.fileserver.domain.model.file.FileRepository
-import io.bcs.fileserver.domain.model.file.FileStatus
-import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository
-import io.bcs.testing.archive.ArchiveBuilder
-import io.bcs.testing.database.DatabaseConfigurer
-import io.bcs.testing.database.jdbc.cdi.JdbcLiquibase
 import spock.lang.Specification
 
 @RunWith(ArquillianSputnik)
@@ -99,7 +95,7 @@ class JpaFileRepositoryITSpec extends Specification {
     fileRepository.save(file)
 
     and: "The stored entity is retreved by id"
-    file = fileRepository.findById(FILE_STORAGE_NAME).get()
+    file = fileRepository.findLocatedOnCurrentPoint(FILE_STORAGE_NAME).get()
 
     then: "The found file state should be equal to the state before save"
     file.getStorageName() == Optional.of(FILE_STORAGE)

@@ -4,12 +4,12 @@ package io.bcs.fileserver.infrastructure.file.content
 import io.bce.interaction.streaming.Source
 import io.bce.interaction.streaming.binary.BinaryChunk
 import io.bce.interaction.streaming.binary.InputStreamSource
-import io.bcs.fileserver.domain.model.content.ContentFragment
 import io.bcs.fileserver.domain.model.content.FileContent
 import io.bcs.fileserver.domain.model.content.FileMetadata
 import io.bcs.fileserver.domain.model.content.FileContent.ContentPart
 import io.bcs.fileserver.domain.model.file.Disposition
 import io.bcs.fileserver.domain.model.file.FileStatus
+import io.bcs.fileserver.domain.model.storage.ContentFragment
 import spock.lang.Specification
 
 abstract class ContentReceiverSpecification extends Specification {

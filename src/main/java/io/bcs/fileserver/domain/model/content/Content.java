@@ -10,12 +10,17 @@ import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException;
 import io.bcs.fileserver.domain.errors.ContentUploadedException;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
+import io.bcs.fileserver.domain.model.MediaType;
 import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
 import io.bcs.fileserver.domain.model.content.FileContent.ContentType;
 import io.bcs.fileserver.domain.model.file.Disposition;
 import io.bcs.fileserver.domain.model.file.FileFragments;
 import io.bcs.fileserver.domain.model.file.FileStatus;
-import io.bcs.fileserver.domain.model.file.Range;
+import io.bcs.fileserver.domain.model.storage.ContentFragment;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
+import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
+import io.bcs.fileserver.domain.model.storage.FileStorage;
+import io.bcs.fileserver.domain.model.storage.StorageDescriptor;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -42,18 +47,23 @@ import lombok.experimental.SuperBuilder;
 public class Content {
   private static final ApplicationLogger log = Loggers.applicationLogger(Content.class);
 
+  
+  private static final String DEFAULT_DISTRIBUTION_POINT = "DEFAULT";
   private static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
   private static final String DEFAULT_FILE_NAME = "UNKNOWN";
   private static final Long DEFAULT_FILE_LENGTH = 0L;
 
   @Include
   @Default
-  private StorageDescriptor storage = StorageDescriptor.unknownStorage();
-
+  private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
+  
   @Include
   @Default
-  private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
-
+  private String distributionPointName = DEFAULT_DISTRIBUTION_POINT;
+  
+  @Default
+  private StorageDescriptor storage = StorageDescriptor.unknownStorage();
+  
   @Default
   private MediaType mediaType = new MediaType();
 

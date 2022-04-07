@@ -25,11 +25,11 @@
 	<element name="GetDirectContentReadUrlRq"
 		type="tns:GetDirectContentReadUrlRq_Type" />
 
-	<complexType name="GetDirectContentReadUrlRs_Type">
+	<complexType name="ContentDirectAccessUrlRs_Type">
 		<complexContent>
 			<extension base="global:ServiceResponse_Type">
 				<sequence>
-					<element name="contentRef" type="common:URL_Type"
+					<element name="contentAccessUrl" type="common:URL_Type"
 						minOccurs="1" maxOccurs="1"></element>
 				</sequence>
 			</extension>
@@ -37,42 +37,71 @@
 	</complexType>
 
 	<element name="GetDirectContentReadUrlRs"
-		type="tns:GetDirectContentReadUrlRs_Type" />
+		type="tns:ContentDirectAccessUrlRs_Type" />
 
 
 
 
 
 
-	<complexType name="WarmContentUpRq_Type">
-		<sequence>
-			<element name="fileName" type="common:FileName_Type"></element>
-		</sequence>
-	</complexType>
 	
-    <complexType name="WarmContentUpRs_Type">
-    	<complexContent>
-    		<extension base="global:ServiceResponse_Type"></extension>
-    	</complexContent>
-    </complexType>
     
-    <complexType name="CoolContentDownRq_Type">
+    
+
+
+
+
+
+    <element name="GetDirectContentWriteUrlRq" type="tns:GetDirectContentWriteUrlRq_Type"></element>
+
+    <element name="GetDirectContentWriteUrlRs" type="tns:ContentDirectAccessUrlRs_Type"></element>
+
+    <complexType name="GetDirectContentWriteUrlRq_Type">
     	<sequence>
-    		<element name="fileName" type="common:FileName_Type"></element>
+    		<element name="contentLocator" type="common:ContentLocator_Type" minOccurs="1" maxOccurs="1"></element>
     	</sequence>
     </complexType>
-    
-    <complexType name="CoolContentDownRs_Type">
+
+    <complexType name="FileDescriptor_Type">
+    	<sequence>
+    		<element name="storageFileName"
+    			type="common:StorageFileName_Type" minOccurs="1" maxOccurs="1">
+    		</element>
+    		<element name="storageName"
+    			type="common:StorageName_Type" minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="mediaType" type="common:MimeType_Type" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="CreateFileRq_Type">
+    	<sequence>
+    		<element name="file" type="tns:FileDescriptor_Type"></element>
+    		<element name="contentLength" type="common:ContentLength_Type"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="CreateFileRs_Type">
     	<complexContent>
-    		<extension base="global:ServiceResponse_Type"></extension>
+    		<extension base="global:ServiceResponse_Type">
+    			<sequence>
+    				<element name="contentLocator" type="common:ContentLocator_Type"></element>
+    			</sequence>
+    		</extension>
     	</complexContent>
     </complexType>
 
-    <element name="CoolContentDownRq" type="tns:CoolContentDownRq_Type"></element>
+    <element name="CreateFileRq" type="tns:CreateFileRq_Type"></element>
 
-    <element name="CoolContentDownRs" type="tns:CoolContentDownRs_Type"></element>
+    <element name="CreateFileRs" type="tns:CreateFileRs_Type"></element>
 
-    <element name="WarmContentUpRq" type="tns:WarmContentUpRq_Type"></element>
+    <element name="DeleteFileRq" type="tns:DeleteFileRq_Type"></element>
 
-    <element name="WarmContentUpRs" type="tns:WarmContentUpRs_Type"></element>
+    <complexType name="DeleteFileRq_Type">
+    	<sequence>
+    		<element name="file" type="tns:FileDescriptor_Type"></element>
+    	</sequence>
+    </complexType>
+
+    <element name="DeleteFileRs" type="global:ServiceResponse_Type"></element>
 </schema>

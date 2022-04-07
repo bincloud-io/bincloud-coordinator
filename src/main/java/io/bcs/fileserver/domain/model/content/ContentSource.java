@@ -3,6 +3,7 @@ package io.bcs.fileserver.domain.model.content;
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.promises.Promise;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
 
 /**
  * This interface describes the component, sending file content to the storage.

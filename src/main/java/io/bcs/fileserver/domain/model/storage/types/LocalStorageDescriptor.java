@@ -1,7 +1,7 @@
-package io.bcs.fileserver.domain.model.content.storage;
+package io.bcs.fileserver.domain.model.storage.types;
 
-import io.bcs.fileserver.domain.model.content.StorageDescriptor;
-import io.bcs.fileserver.domain.model.content.StorageType;
+import io.bcs.fileserver.domain.model.storage.StorageDescriptor;
+import io.bcs.fileserver.domain.model.storage.StorageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
