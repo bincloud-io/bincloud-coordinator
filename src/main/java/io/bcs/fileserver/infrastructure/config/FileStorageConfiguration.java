@@ -4,18 +4,17 @@ import io.bce.domain.EventBus;
 import io.bce.domain.EventBus.EventSubscribtion;
 import io.bcs.fileserver.domain.Constants;
 import io.bcs.fileserver.domain.events.FileHasBeenCreated;
-import io.bcs.fileserver.domain.model.content.FileStorage;
+import io.bcs.fileserver.domain.model.content.StorageType.FileStorageProvider;
+import io.bcs.fileserver.domain.model.content.storage.LocalStorageDescriptor;
 import io.bcs.fileserver.domain.model.file.FileRepository;
-import io.bcs.fileserver.domain.model.storage.descriptor.StorageDescriptorRepository;
 import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler;
 import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.ReplicationPointsProvider;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.JdbcReplicationPointsProvider;
-import io.bcs.fileserver.infrastructure.repositories.JpaStorageDescriptorRepository;
 import io.bcs.fileserver.infrastructure.storage.FilesystemPhysicalFile;
 import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.JdbcFilesystemSpaceManager;
-import io.bcs.fileserver.infrastructure.storage.LocalFileSystemStorage;
+import io.bcs.fileserver.infrastructure.storage.LocalFilesystemStorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
@@ -53,17 +52,7 @@ public class FileStorageConfiguration {
   private EventBus eventBus;
 
   private final List<EventSubscribtion> subscribtions = new ArrayList<>();
-
-  /**
-   * The storage descriptor repository configuration.
-   *
-   * @return The storage descriptor repository
-   */
-  @Produces
-  public StorageDescriptorRepository localStorageDescriptorRepository() {
-    return new JpaStorageDescriptorRepository(entityManager, fileServerConfigurationProperties);
-  }
-
+  
   /**
    * The file system space manager configuration.
    *
@@ -75,14 +64,14 @@ public class FileStorageConfiguration {
   }
 
   /**
-   * The file storage configuration.
+   * The local file storage provider configuration.
    *
-   * @return The file storage
+   * @return The local file storage provider
    */
   @Produces
-  public FileStorage fileStorage() {
-    return new LocalFileSystemStorage(fileSpaceManager(), localStorageDescriptorRepository(),
-        FilesystemPhysicalFile.factory(), fileServerConfigurationProperties.getBufferSize());
+  public FileStorageProvider<LocalStorageDescriptor> localFileStorageProvider() {
+    return new LocalFilesystemStorageFactory(fileSpaceManager(), FilesystemPhysicalFile.factory(),
+        fileServerConfigurationProperties.getBufferSize());
   }
 
   /**

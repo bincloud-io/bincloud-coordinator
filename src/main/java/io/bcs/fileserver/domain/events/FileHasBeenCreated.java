@@ -5,6 +5,7 @@ import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.File.CreatedFileState;
 import java.time.LocalDateTime;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * This event notifies that the file has been disposed.
@@ -13,6 +14,7 @@ import lombok.Getter;
  *
  */
 @Getter
+@SuperBuilder
 public class FileHasBeenCreated implements CreatedFileState {
   public static final EventType<FileHasBeenCreated> EVENT_TYPE =
       EventType.createFor("FILE_HAS_BEEN_CREATED", FileHasBeenCreated.class);

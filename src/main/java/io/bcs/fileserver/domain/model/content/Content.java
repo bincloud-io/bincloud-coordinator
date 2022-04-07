@@ -16,7 +16,6 @@ import io.bcs.fileserver.domain.model.file.Disposition;
 import io.bcs.fileserver.domain.model.file.FileFragments;
 import io.bcs.fileserver.domain.model.file.FileStatus;
 import io.bcs.fileserver.domain.model.file.Range;
-import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;

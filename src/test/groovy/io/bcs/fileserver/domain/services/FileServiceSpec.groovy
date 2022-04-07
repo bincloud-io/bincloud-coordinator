@@ -26,14 +26,14 @@ import java.time.LocalDateTime
 import spock.lang.Specification
 
 class FileServiceSpec extends Specification {
-  public static final String DISTRIBUTION_POINT_NAME = "DEFAULT"
-  public static final String STORAGE_NAME = "storage.0001"
-  public static final String STORAGE_FILE_NAME = "instance--${Thread.currentThread()}--${UUID.randomUUID()}"
-  public static final String MEDIA_TYPE = "application/media-type-xxx"
-  public static final String FILE_NAME = "file.txt"
-  public static final Long DEFAULT_CONTENT_LENGTH = 0L
-  public static final Long DISTRIBUTIONING_CONTENT_LENGTH = 100L
-  public static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
+  private static final String DISTRIBUTION_POINT_NAME = "DEFAULT"
+  private static final String STORAGE_NAME = "storage.0001"
+  private static final String STORAGE_FILE_NAME = "instance--${Thread.currentThread()}--${UUID.randomUUID()}"
+  private static final String MEDIA_TYPE = "application/media-type-xxx"
+  private static final String FILE_NAME = "file.txt"
+  private static final Long DEFAULT_CONTENT_LENGTH = 0L
+  private static final Long DISTRIBUTIONING_CONTENT_LENGTH = 100L
+  private static final String DEFAULT_MEDIA_TYPE = "application/octet-stream";
 
 
   private ValidationService validationService
@@ -335,12 +335,5 @@ class FileServiceSpec extends Specification {
     command.getMediaType() >> Optional.ofNullable(mediaType)
     command.getFileName() >> Optional.ofNullable(fileName)
     return command
-  }
-
-  private ContentLocator contentLocator() {
-    ContentLocator contentLocator = Stub(ContentLocator)
-    contentLocator.getStorageName() >> STORAGE_NAME
-    contentLocator.getStorageFileName() >> STORAGE_FILE_NAME
-    return contentLocator
   }
 }

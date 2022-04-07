@@ -18,7 +18,8 @@ public enum StorageType {
 
   @Getter
   @NonNull
-  private FileStorageProvider<?> registeredFileStorageProvider;
+  @SuppressWarnings("rawtypes")
+  private FileStorageProvider registeredFileStorageProvider;
 
   public <D extends StorageDescriptor> void registerFileStorageProvider(
       FileStorageProvider<D> storageProvider) {
@@ -34,7 +35,7 @@ public enum StorageType {
    * @param <S> The concrete storage descriptor type
    */
   public interface FileStorageProvider<S extends StorageDescriptor> {
-    FileStorage getFileStorage(StorageDescriptor storage);
+    FileStorage getFileStorage(S storage);
   }
 
   private static class NullFileStorage implements FileStorage {

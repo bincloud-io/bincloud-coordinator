@@ -42,8 +42,8 @@ import io.bcs.fileserver.domain.model.content.UploadCommand
 import io.bcs.fileserver.domain.model.content.FileContent.ContentPart
 import io.bcs.fileserver.domain.model.content.FileContent.ContentType
 import io.bcs.fileserver.domain.model.content.StorageType.FileStorageProvider
-import io.bcs.fileserver.domain.model.content.storage.LocalStorage
-import io.bcs.fileserver.domain.model.content.storage.RemoteStorage
+import io.bcs.fileserver.domain.model.content.storage.LocalStorageDescriptor
+import io.bcs.fileserver.domain.model.content.storage.RemoteStorageDescriptor
 import io.bcs.fileserver.domain.model.file.FileStatus
 import io.bcs.fileserver.domain.model.file.Range
 import spock.lang.Specification
@@ -62,8 +62,8 @@ class ContentServiceSpec extends Specification {
 
 
   private ContentRepository contentRepository
-  private FileStorageProvider<LocalStorage> localStorageProvider;
-  private FileStorageProvider<RemoteStorage> remoteStorageProvider;
+  private FileStorageProvider<LocalStorageDescriptor> localStorageProvider;
+  private FileStorageProvider<RemoteStorageDescriptor> remoteStorageProvider;
   private FileStorage fileStorage
   private EventBus eventBus
   private EventPublisher eventPublisher
@@ -754,8 +754,8 @@ class ContentServiceSpec extends Specification {
         .build()
   }
 
-  private LocalStorage createLocalStorage() {
-    return LocalStorage.builder()
+  private LocalStorageDescriptor createLocalStorage() {
+    return LocalStorageDescriptor.builder()
         .storageName(STORAGE_NAME)
         .distributionPoint(DISTRIBUTION_POINT)
         .baseDirectory(BASE_DIRECTORY)
@@ -763,8 +763,8 @@ class ContentServiceSpec extends Specification {
         .build()
   }
 
-  private RemoteStorage createRemoteStorage() {
-    return RemoteStorage.builder()
+  private RemoteStorageDescriptor createRemoteStorage() {
+    return RemoteStorageDescriptor.builder()
         .storageName(STORAGE_NAME)
         .distributionPoint(DISTRIBUTION_POINT)
         .remoteStorageGatewayWsdl(STORAGE_GATEWAY_WSDL)

@@ -2,6 +2,7 @@ package io.bcs.fileserver.domain.services.listeners;
 
 import io.bce.domain.EventListener;
 import io.bcs.fileserver.domain.events.FileHasBeenCreated;
+import io.bcs.fileserver.domain.model.file.File;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,9 @@ public class CreatedFileSynchronizationHandler implements EventListener<FileHasB
 
   @Override
   public void onEvent(FileHasBeenCreated event) {
-    throw new UnsupportedOperationException();
+    replicationPointsProvider.findReplicationPoints().forEach(replicationPoint -> {
+      fileRepository.save(new File(replicationPoint, event));
+    });
   }
 
   /**

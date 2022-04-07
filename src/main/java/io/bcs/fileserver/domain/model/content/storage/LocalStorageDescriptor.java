@@ -1,15 +1,15 @@
-package io.bcs.fileserver.domain.model.storage.descriptor;
+package io.bcs.fileserver.domain.model.content.storage;
 
-import lombok.Builder.Default;
+import io.bcs.fileserver.domain.model.content.StorageDescriptor;
 import io.bcs.fileserver.domain.model.content.StorageType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
- * This class inherits the {@link StorageDescriptor} and represents the file storage type, which
- * stores files on the local filesystem.
+ * This class describes the local storage descriptor type.
  *
  * @author Dmitry Mikhaylenko
  *
@@ -17,16 +17,12 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(callSuper = true)
 public class LocalStorageDescriptor extends StorageDescriptor {
-  static final String DEFAULT_BASE_DIRECTORY = "";
+  private String baseDirectory;
+  private Long diskQuote;
 
-  @Default
-  private String baseDirectory = DEFAULT_BASE_DIRECTORY;
-
-  @Default
-  private Long diskQuote = 0L;
-  
   @Override
   public StorageType getType() {
     return StorageType.LOCAL;

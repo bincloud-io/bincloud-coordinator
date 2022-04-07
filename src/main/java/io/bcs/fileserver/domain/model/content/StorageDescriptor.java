@@ -8,6 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * This class describes the storage descriptor entity.
+ *
+ * @author Dmitry Mikhaylenko
+ *
+ */
 @Getter
 @SuperBuilder
 @NoArgsConstructor
@@ -29,6 +35,7 @@ public abstract class StorageDescriptor {
     return new UnknownStorage();
   }
 
+  @SuppressWarnings("unchecked")
   public FileStorage getStorage() {
     return getType().getRegisteredFileStorageProvider().getFileStorage(this);
   }
