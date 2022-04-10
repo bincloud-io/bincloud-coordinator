@@ -10,10 +10,19 @@
 
 		<id-class class="io.bcs.fileserver.domain.model.file.FileId" />
 
+		<named-query name="File.findAllReplicatedFiles">
+			<query>
+				SELECT f FROM io.bcs.fileserver.domain.model.file.File f
+				WHERE f.storageFileName = :storageFileName
+				AND f.distributionPoint != :distributionPoint
+			</query>
+		</named-query>
+
 		<named-query name="File.findNotRemovedDisposedFiles">
 			<query>
 				SELECT f FROM io.bcs.fileserver.domain.model.file.File f 
 				WHERE f.disposedAt >= :disposedAfter
+				AND f.distributionPoint = :distributionPoint
 				AND f.status = io.bcs.fileserver.domain.model.file.FileStatus.DRAFT
 				AND f.storageName IS NOT NULL
 			</query>

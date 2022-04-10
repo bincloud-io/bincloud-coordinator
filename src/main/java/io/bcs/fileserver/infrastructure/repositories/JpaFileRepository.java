@@ -34,10 +34,10 @@ public class JpaFileRepository implements FileRepository {
   }
 
   @Override
-  public Collection<File> findAllReplicatedFiles(String storageName) {
+  public Collection<File> findAllReplicatedFiles(String storageFileName) {
     TypedQuery<File> query =
         entityManager.createNamedQuery("File.findAllReplicatedFiles", File.class);
-    query.setParameter("storageName", storageName);
+    query.setParameter("storageFileName", storageFileName);
     query.setParameter("distributionPoint",
         distributionPointNameProvider.getDistributionPointName());
     return query.getResultList();
@@ -49,6 +49,8 @@ public class JpaFileRepository implements FileRepository {
         entityManager.createNamedQuery("File.findNotRemovedDisposedFiles", File.class);
     LocalDateTime disposedMinDate = LocalDateTime.now().minusDays(1);
     query.setParameter("disposedAfter", disposedMinDate);
+    query.setParameter("distributionPoint",
+        distributionPointNameProvider.getDistributionPointName());
     return Collections.unmodifiableList(query.getResultList());
   }
 
