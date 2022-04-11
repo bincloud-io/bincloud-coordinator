@@ -21,7 +21,7 @@
 		<named-query name="File.findNotRemovedDisposedFiles">
 			<query>
 				SELECT f FROM io.bcs.fileserver.domain.model.file.File f 
-				WHERE f.disposedAt >= :disposedAfter
+				WHERE f.disposedAt &lt;= :disposedAfter
 				AND f.distributionPoint = :distributionPoint
 				AND f.status = io.bcs.fileserver.domain.model.file.FileStatus.DRAFT
 				AND f.storageName IS NOT NULL

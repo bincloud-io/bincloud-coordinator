@@ -36,7 +36,8 @@ class JpaFileRepositoryITSpec extends Specification {
   private static final String MEDIA_TYPE = "application/mediatype"
   private static final String FILE_NAME = "file.txt"
   private static final Long CONTENT_LENGTH = 1000L
-  private static final String DISTRIBUTION_POINT = "DP_1"
+  private static final String CURRENT_DISTRIBUTION_POINT = "DP_1"
+  private static final String ALTERNATIVE_DISTRIBUTION_POINT = "DP_2"
 
 
   @Deployment
@@ -55,7 +56,6 @@ class JpaFileRepositoryITSpec extends Specification {
         .appendManifestResource("META-INF/beans.xml", "beans.xml")
         .appendManifestResource("jpa-test/file-mapping-persistence.xml", "persistence.xml")
         .appendManifestResource("META-INF/orm/file-mapping.xml", "orm/file-mapping.xml")
-        .appendManifestResource("META-INF/orm/storage-descriptors-mapping.xml", "orm/storage-descriptors-mapping.xml")
         .appendResource("liquibase")
         .appendResource("db-init")
         .build()
@@ -75,7 +75,7 @@ class JpaFileRepositoryITSpec extends Specification {
 
   def setup() {
     databaseConfigurer.setup("liquibase/master.changelog.xml")
-    this.fileRepository = new JpaFileRepository(entityManager, transactionManager, {DISTRIBUTION_POINT})
+    this.fileRepository = new JpaFileRepository(entityManager, transactionManager, {CURRENT_DISTRIBUTION_POINT})
   }
 
   def cleanup() {
@@ -106,6 +106,19 @@ class JpaFileRepositoryITSpec extends Specification {
     file.getTotalLength() == CONTENT_LENGTH
   }
 
+  def "Scenario: find all replicated files"() {
+    given: "The file media types and local storage is configured"
+    databaseConfigurer.setup(REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(REF_MEDIATYPES_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(REF_LOCAL_STORAGES_MIGRATION_SCRIPT)
+    databaseConfigurer.setup(FILES_MIGRATION_SCRIPT)
+
+    expect: "File replica should be found"
+    Collection<File> files = fileRepository.findAllReplicatedFiles('e95b72b3-54dd-11ec-8d39-0242ac130003')
+    files[0].distributionPoint == ALTERNATIVE_DISTRIBUTION_POINT
+    files.size() == 1
+  }
+  
   def "Scenario: find non removed disposed files"() {
     given: "The file media types and local storage is configured"
     databaseConfigurer.setup(REF_DISTRIBUTION_POINTS_MIGRATION_SCRIPT)
@@ -121,7 +134,7 @@ class JpaFileRepositoryITSpec extends Specification {
 
   private File createFileEntity() {
     return File.builder()
-        .distributionPoint(DISTRIBUTION_POINT)
+        .distributionPoint(CURRENT_DISTRIBUTION_POINT)
         .storageFileName(FILE_STORAGE_NAME)
         .storageName(FILE_STORAGE)
         .status(DISTRIBUTING)

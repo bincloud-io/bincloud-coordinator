@@ -63,9 +63,9 @@ class JdbcSequenceGeneratorITSpec extends Specification {
     Generator<Long> generator = new JdbcSequenceGenerator(dataSource, "SEQUENCE")
 
     expect: "The auto incremented integer numbers will be generated"
-    IntStream.range(1, 10).forEach({
-      generator.generateNext() == it
-    })
+    generator.generateNext() == 1
+    generator.generateNext() == 2
+    generator.generateNext() == 3
   }
 
   def cleanup() {
