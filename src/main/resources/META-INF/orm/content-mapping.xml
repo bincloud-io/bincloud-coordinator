@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
 	<access>FIELD</access>
 
-	<entity class="io.bcs.fileserver.domain.model.content.Content">
+	<entity class="io.bcs.fileserver.domain.model.content.download.DownloadableContent">
 		<table name="FILES" />
 		<id-class class="io.bcs.fileserver.domain.model.file.FileId" />
 

@@ -25,27 +25,31 @@ import io.bcs.fileserver.domain.errors.FileStorageException
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException
 import io.bcs.fileserver.domain.events.FileContentHasBeenUploaded
 import io.bcs.fileserver.domain.events.FileDownloadHasBeenRequested
-import io.bcs.fileserver.domain.model.MediaType
-import io.bcs.fileserver.domain.model.content.Content
-import io.bcs.fileserver.domain.model.content.ContentReceiver
-import io.bcs.fileserver.domain.model.content.ContentRepository
-import io.bcs.fileserver.domain.model.content.ContentSource
-import io.bcs.fileserver.domain.model.content.FileContent
-import io.bcs.fileserver.domain.model.content.FileMetadata
-import io.bcs.fileserver.domain.model.content.FileUploadStatistic
-import io.bcs.fileserver.domain.model.content.Range
-import io.bcs.fileserver.domain.model.content.FileContent.ContentPart
-import io.bcs.fileserver.domain.model.content.FileContent.ContentType
 import io.bcs.fileserver.domain.model.file.FileStatus
+import io.bcs.fileserver.domain.model.file.content.download.ContentReceiver
+import io.bcs.fileserver.domain.model.file.content.download.DownloadableContent
+import io.bcs.fileserver.domain.model.file.content.download.DownloadableContentRepository
+import io.bcs.fileserver.domain.model.file.content.download.FileContent
+import io.bcs.fileserver.domain.model.file.content.download.FileMetadata
+import io.bcs.fileserver.domain.model.file.content.download.MediaType
+import io.bcs.fileserver.domain.model.file.content.download.Range
+import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentPart
+import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentType
+import io.bcs.fileserver.domain.model.file.content.upload.ContentSource
+import io.bcs.fileserver.domain.model.file.content.upload.FileUploadStatistic
+import io.bcs.fileserver.domain.model.file.content.upload.UploadableContent
+import io.bcs.fileserver.domain.model.file.content.upload.UploadableContentRepository
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import io.bcs.fileserver.domain.model.storage.FileStorageProvider
 import io.bcs.fileserver.domain.model.storage.StorageDescriptor
+import io.bcs.fileserver.domain.model.storage.StorageDescriptorRepository
 import io.bcs.fileserver.domain.model.storage.StorageType
 import io.bcs.fileserver.domain.model.storage.types.LocalStorageDescriptor
 import io.bcs.fileserver.domain.model.storage.types.RemoteStorageDescriptor
 import io.bcs.fileserver.domain.services.ContentService.DownloadCommand
 import io.bcs.fileserver.domain.services.ContentService.UploadCommand
+import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager
 import spock.lang.Specification
 
 class ContentServiceSpec extends Specification {
@@ -61,7 +65,10 @@ class ContentServiceSpec extends Specification {
   public static final String STORAGE_GATEWAY_WSDL = "http://storage.gateway/internal?wsdl"
 
 
-  private ContentRepository contentRepository
+  private FilesystemSpaceManager fileSpaceManager;
+  private StorageDescriptorRepository storageDescriptorRepository;
+  private UploadableContentRepository uploadableContentRepository;
+  private DownloadableContentRepository downloadableContentRepository;
   private FileStorageProvider<LocalStorageDescriptor> localStorageProvider;
   private FileStorageProvider<RemoteStorageDescriptor> remoteStorageProvider;
   private FileStorage fileStorage
@@ -71,7 +78,10 @@ class ContentServiceSpec extends Specification {
 
 
   def setup() {
-    this.contentRepository = Mock(ContentRepository)
+    this.fileSpaceManager = Mock(FilesystemSpaceManager)
+    this.storageDescriptorRepository = Mock(StorageDescriptorRepository)
+    this.uploadableContentRepository = Mock(UploadableContentRepository)
+    this.downloadableContentRepository = Mock(DownloadableContentRepository)
     this.fileStorage = Mock(FileStorage)
     this.localStorageProvider = Mock(FileStorageProvider)
     this.localStorageProvider.getFileStorage(_) >> fileStorage
@@ -80,7 +90,12 @@ class ContentServiceSpec extends Specification {
     this.eventBus = Mock(EventBus)
     this.eventPublisher = Mock(EventPublisher)
     this.eventBus.getPublisher(_, _) >> eventPublisher
-    this.contentService = new ContentService(contentRepository, eventBus)
+    this.contentService = new ContentService(
+        fileSpaceManager,
+        storageDescriptorRepository,
+        uploadableContentRepository,
+        downloadableContentRepository,
+        eventBus)
 
     StorageType.LOCAL.registerFileStorageProvider(localStorageProvider)
     StorageType.REMOTE.registerFileStorageProvider(remoteStorageProvider)
@@ -109,7 +124,7 @@ class ContentServiceSpec extends Specification {
   def "Scenario: unsuccessfully upload file content to the unknown file"() {
     FileNotExistsException error
     given: "The draft file, missing into repository"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.empty()
+    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.empty()
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -138,10 +153,16 @@ class ContentServiceSpec extends Specification {
     "Media type: ${MEDIA_TYPE}" +
     "File name: ${FILE_NAME}" +
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileContent())
+    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileUploadableContent())
 
     and: "The file will be created"
     fileStorage.create(_, _) >> contentLocator()
+
+    and: "The file space is successfully allocated"
+    this.fileSpaceManager.allocateSpace(MEDIA_TYPE, STORAGE_FILE_NAME, DISTRIBUTIONING_CONTENT_LENGTH) >> STORAGE_NAME
+        
+    and: "The file storage is found"
+    this.storageDescriptorRepository.findStorageDescriptor(STORAGE_NAME) >> Optional.of(createLocalStorage())
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -159,7 +180,7 @@ class ContentServiceSpec extends Specification {
     event.getLocator().getStorageFileName() == STORAGE_FILE_NAME
     event.getLocator().getStorageName() == STORAGE_NAME
     event.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
-    
+
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_) >> {statistic = it[0]}
     ContentLocator locator = statistic.getLocator()
@@ -176,10 +197,16 @@ class ContentServiceSpec extends Specification {
     "Media type: ${MEDIA_TYPE}" +
     "File name: ${FILE_NAME}" +
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileContent())
+    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileUploadableContent())
 
     and: "The file will be created"
     fileStorage.create(_, _) >> contentLocator()
+    
+    and: "The file space is successfully allocated"
+    this.fileSpaceManager.allocateSpace(MEDIA_TYPE, STORAGE_FILE_NAME, DISTRIBUTIONING_CONTENT_LENGTH) >> STORAGE_NAME
+    
+    and: "The file storage is found"
+    this.storageDescriptorRepository.findStorageDescriptor(STORAGE_NAME) >> Optional.of(createLocalStorage())
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -207,7 +234,7 @@ class ContentServiceSpec extends Specification {
     "Media type: ${MEDIA_TYPE}" +
     "File name: ${FILE_NAME}" +
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createLocalStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileUploadableContent())
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -237,7 +264,7 @@ class ContentServiceSpec extends Specification {
     "Media type: ${MEDIA_TYPE}" +
     "File name: ${FILE_NAME}" +
     "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDisposedFileContent(createLocalStorage()))
+    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDisposedFileUploadableContent())
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -287,7 +314,7 @@ class ContentServiceSpec extends Specification {
     FileNotExistsException error
     FileDownloadHasBeenRequested event
     given: "The draft file, missing into repository"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.empty()
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.empty()
 
     and: "The file content receiver"
     ContentReceiver contentReceiver = Mock(ContentReceiver)
@@ -314,7 +341,7 @@ class ContentServiceSpec extends Specification {
     ContentNotUploadedException error
     FileDownloadHasBeenRequested event
     given: "The existing draft file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileContent())
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileDownloadableContent())
 
     and: "The file content receiver"
     ContentReceiver contentReceiver = Mock(ContentReceiver)
@@ -347,7 +374,7 @@ class ContentServiceSpec extends Specification {
     FileDisposedException error
     FileDownloadHasBeenRequested event
     given: "The existing disposed file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDisposedFileContent(createRemoteStorage()))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDisposedFileDownloadableContent(createRemoteStorage()))
 
     and: "The file content receiver"
     ContentReceiver contentReceiver = Mock(ContentReceiver)
@@ -379,7 +406,7 @@ class ContentServiceSpec extends Specification {
     FileContent fileContent
     FileDownloadHasBeenRequested event
     given: "The existing distributing file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileDownloadableContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content parts should not be passed"
     Collection<Range> contentParts = Collections.emptyList()
@@ -420,7 +447,7 @@ class ContentServiceSpec extends Specification {
     contentPart.getContentFragment().getOffset() == 0L
     contentPart.getContentFragment().getLength() == DISTRIBUTIONING_CONTENT_LENGTH
     contentPart.getContentSource() == source
-    
+
     and: "The file content should contain correct file metadata"
     FileMetadata fileMetadata = fileContent.getFileMetadata()
     fileMetadata.getContentDisposition() == ATTACHMENT
@@ -441,7 +468,7 @@ class ContentServiceSpec extends Specification {
     FileDownloadHasBeenRequested event
     UnsatisfiableRangeFormatException error
     given: "The existing distributing file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileDownloadableContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content parts contains a negative size requested fragment"
     Collection<Range> contentParts = [
@@ -482,7 +509,7 @@ class ContentServiceSpec extends Specification {
     FileDownloadHasBeenRequested event
     UnsatisfiableRangeFormatException error
     given: "The existing distributing file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileDownloadableContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content parts contains a negative size requested fragment"
     Collection<Range> contentParts = [
@@ -522,7 +549,7 @@ class ContentServiceSpec extends Specification {
     FileDownloadHasBeenRequested event
     UnsatisfiableRangeFormatException error
     given: "The existing distributing file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileDownloadableContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content parts contains a negative fragment offset"
     Collection<Range> contentParts = [
@@ -561,7 +588,7 @@ class ContentServiceSpec extends Specification {
     FileContent fileContent
     FileDownloadHasBeenRequested event
     given: "The existing distributing file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileDownloadableContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content parts contains valid range"
     Collection<Range> contentParts = [
@@ -604,14 +631,14 @@ class ContentServiceSpec extends Specification {
     contentPart.getContentFragment().getOffset() == partOffset
     contentPart.getContentFragment().getLength() == partSize
     contentPart.getContentSource() == source
-    
+
     and: "The file content should contain correct file metadata"
     FileMetadata fileMetadata = fileContent.getFileMetadata()
     fileMetadata.getContentDisposition() == ATTACHMENT
     fileMetadata.getFileName() == FILE_NAME
     fileMetadata.getMediaType() == MEDIA_TYPE
     fileMetadata.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
-    
+
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
 
@@ -634,7 +661,7 @@ class ContentServiceSpec extends Specification {
     FileContent fileContent
     FileDownloadHasBeenRequested event
     given: "The existing distributing file"
-    this.contentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
+    this.downloadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileDownloadableContent(createRemoteStorage(), DISTRIBUTIONING_CONTENT_LENGTH))
 
     and: "The content parts contains valid range"
     Collection<Range> contentParts = [
@@ -685,14 +712,14 @@ class ContentServiceSpec extends Specification {
     secondContentPart.getContentFragment().getOffset() == 10L
     secondContentPart.getContentFragment().getLength() == 10L
     secondContentPart.getContentSource() == secondSource
-    
+
     and: "The file content should contain correct file metadata"
     FileMetadata fileMetadata = fileContent.getFileMetadata()
     fileMetadata.getContentDisposition() == ATTACHMENT
     fileMetadata.getFileName() == FILE_NAME
     fileMetadata.getMediaType() == MEDIA_TYPE
     fileMetadata.getTotalLength() == DISTRIBUTIONING_CONTENT_LENGTH
-    
+
     and: "The response handler should be resolved"
     1 * responseHandler.onResponse(_)
 
@@ -733,20 +760,41 @@ class ContentServiceSpec extends Specification {
     }
   }
 
-  private Content createDraftFileContent() {
-    return createContent(DRAFT, createLocalStorage(), 0L)
+  private UploadableContent createDraftFileUploadableContent() {
+    return createUploadableContent(DRAFT)
   }
 
-  private Content createDistributedFileContent(StorageDescriptor storageDescriptor, Long contentLength) {
-    return createContent(DISTRIBUTING, storageDescriptor, contentLength)
+  private UploadableContent createDistributedFileUploadableContent() {
+    return createUploadableContent(DISTRIBUTING)
   }
 
-  private Content createDisposedFileContent(StorageDescriptor storageDescriptor) {
-    return createContent(DISPOSED, storageDescriptor, DISTRIBUTIONING_CONTENT_LENGTH)
+  private UploadableContent createDisposedFileUploadableContent() {
+    return createUploadableContent(DISPOSED)
   }
 
-  private Content createContent(FileStatus fileStatus, StorageDescriptor storage, Long totalLength) {
-    return Content.builder()
+  private UploadableContent createUploadableContent(FileStatus fileStatus) {
+    return UploadableContent.builder()
+        .mediaType(MEDIA_TYPE)
+        .storageFileName(STORAGE_FILE_NAME)
+        .distributionPointName(DISTRIBUTION_POINT)
+        .status(fileStatus)
+        .build()
+  }
+
+  private DownloadableContent createDraftFileDownloadableContent() {
+    return createDownloadableContent(DRAFT, createLocalStorage(), 0L)
+  }
+
+  private DownloadableContent createDistributedFileDownloadableContent(StorageDescriptor storageDescriptor, Long contentLength) {
+    return createDownloadableContent(DISTRIBUTING, storageDescriptor, contentLength)
+  }
+
+  private DownloadableContent createDisposedFileDownloadableContent(StorageDescriptor storageDescriptor) {
+    return createDownloadableContent(DISPOSED, storageDescriptor, DISTRIBUTIONING_CONTENT_LENGTH)
+  }
+
+  private DownloadableContent createDownloadableContent(FileStatus fileStatus, StorageDescriptor storage, Long totalLength) {
+    return DownloadableContent.builder()
         .storage(storage)
         .storageFileName(STORAGE_FILE_NAME)
         .mediaType(createMediaType())
@@ -755,6 +803,9 @@ class ContentServiceSpec extends Specification {
         .totalLength(totalLength)
         .build()
   }
+
+
+
 
   private LocalStorageDescriptor createLocalStorage() {
     return LocalStorageDescriptor.builder()

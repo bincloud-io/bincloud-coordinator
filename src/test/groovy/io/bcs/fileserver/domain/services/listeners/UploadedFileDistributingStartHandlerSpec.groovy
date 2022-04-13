@@ -6,10 +6,10 @@ import io.bce.domain.EventBus
 import io.bce.domain.EventPublisher
 import io.bcs.fileserver.domain.events.FileContentHasBeenUploaded
 import io.bcs.fileserver.domain.events.FileDistributionHasBeenStarted
-import io.bcs.fileserver.domain.model.content.FileUploadStatistic
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
+import io.bcs.fileserver.domain.model.file.content.upload.FileUploadStatistic
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import java.time.LocalDateTime
 import spock.lang.Specification

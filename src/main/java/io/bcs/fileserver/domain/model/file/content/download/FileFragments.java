@@ -1,10 +1,9 @@
-package io.bcs.fileserver.domain.model.file;
+package io.bcs.fileserver.domain.model.file.content.download;
 
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bce.text.TextTemplates;
 import io.bcs.fileserver.domain.errors.UnsatisfiableRangeFormatException;
-import io.bcs.fileserver.domain.model.content.Range;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import java.util.Collection;
 import java.util.Optional;

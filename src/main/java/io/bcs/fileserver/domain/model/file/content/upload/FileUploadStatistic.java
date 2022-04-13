@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.content;
+package io.bcs.fileserver.domain.model.file.content.upload;
 
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
 

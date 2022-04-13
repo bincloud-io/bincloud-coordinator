@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model;
+package io.bcs.fileserver.domain.model.file.content.download;
 
 import io.bcs.fileserver.domain.model.file.Disposition;
 import lombok.Builder.Default;

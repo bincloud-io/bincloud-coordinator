@@ -2,8 +2,8 @@ package io.bcs.fileserver.infrastructure.file.content
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.streaming.DirectStreamer
-import io.bcs.fileserver.domain.model.content.FileContent
 import io.bcs.fileserver.domain.model.file.Disposition
+import io.bcs.fileserver.domain.model.file.content.download.FileContent
 import javax.servlet.ServletOutputStream
 import javax.servlet.http.HttpServletResponse
 

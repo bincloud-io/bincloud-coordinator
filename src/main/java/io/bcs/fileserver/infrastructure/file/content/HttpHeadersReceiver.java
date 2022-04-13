@@ -2,11 +2,11 @@ package io.bcs.fileserver.infrastructure.file.content;
 
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
-import io.bcs.fileserver.domain.model.content.ContentReceiver;
-import io.bcs.fileserver.domain.model.content.FileContent;
-import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.content.FileMetadata;
 import io.bcs.fileserver.domain.model.file.Disposition;
+import io.bcs.fileserver.domain.model.file.content.download.ContentReceiver;
+import io.bcs.fileserver.domain.model.file.content.download.FileContent;
+import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.file.content.download.FileMetadata;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 

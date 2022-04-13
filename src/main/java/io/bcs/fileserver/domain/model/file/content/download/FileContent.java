@@ -1,4 +1,4 @@
-package io.bcs.fileserver.domain.model.content;
+package io.bcs.fileserver.domain.model.file.content.download;
 
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;

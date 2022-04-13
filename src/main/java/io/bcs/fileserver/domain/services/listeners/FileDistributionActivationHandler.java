@@ -19,7 +19,7 @@ public class FileDistributionActivationHandler
   @Override
   public void onEvent(FileDistributionHasBeenStarted event) {
     fileRepository.findAllReplicatedFiles(event.getLocator().getStorageFileName()).forEach(file -> {
-      file.startFileDistribution(event);
+      file.startFileDistribution(event.getLocator(), event.getTotalLength());
       fileRepository.save(file);
     });
   }

@@ -4,7 +4,7 @@ import io.bce.Generator;
 import io.bce.logging.ApplicationLogger;
 import io.bce.logging.Loggers;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
-import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.storage.ContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -138,11 +138,12 @@ public class File implements FileStorage.FileDescriptor {
   /**
    * Start file distribution.
    *
-   * @param uploadStatistic The file upload statistic
+   * @param contentLocator The content locator
+   * @param contentLength  The content length
    */
-  public void startFileDistribution(FileUploadStatistic uploadStatistic) {
-    this.storageName = uploadStatistic.getLocator().getStorageName();
-    this.totalLength = uploadStatistic.getTotalLength();
+  public void startFileDistribution(ContentLocator contentLocator, Long contentLength) {
+    this.storageName = contentLocator.getStorageName();
+    this.totalLength = contentLength;
     this.status = FileStatus.DISTRIBUTING;
   }
 

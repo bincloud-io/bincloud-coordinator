@@ -1,7 +1,7 @@
 package io.bcs.fileserver.infrastructure.file.content;
 
-import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.content.FileMetadata;
+import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.file.content.download.FileMetadata;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 
 class ContentRange {

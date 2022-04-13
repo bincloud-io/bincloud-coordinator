@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
 	<access>FIELD</access>
 
-	<entity class="io.bcs.fileserver.domain.model.MediaType">
+	<entity class="io.bcs.fileserver.domain.model.content.download.MediaType">
 		<table name="REF_MEDIA_TYPES" />
 
 		<attributes>

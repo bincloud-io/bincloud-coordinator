@@ -1,6 +1,5 @@
-package io.bcs.fileserver.domain.model.content;
+package io.bcs.fileserver.domain.model.file.content.download;
 
-import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
 import io.bce.interaction.streaming.binary.BinaryChunk;
 import io.bce.logging.ApplicationLogger;
@@ -8,23 +7,20 @@ import io.bce.logging.Loggers;
 import io.bce.promises.Promise;
 import io.bce.promises.Promises;
 import io.bcs.fileserver.domain.errors.ContentNotUploadedException;
-import io.bcs.fileserver.domain.errors.ContentUploadedException;
 import io.bcs.fileserver.domain.errors.FileDisposedException;
-import io.bcs.fileserver.domain.model.MediaType;
-import io.bcs.fileserver.domain.model.content.FileContent.ContentPart;
-import io.bcs.fileserver.domain.model.content.FileContent.ContentType;
 import io.bcs.fileserver.domain.model.file.Disposition;
-import io.bcs.fileserver.domain.model.file.FileFragments;
 import io.bcs.fileserver.domain.model.file.FileStatus;
+import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentPart;
+import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentType;
 import io.bcs.fileserver.domain.model.storage.ContentFragment;
 import io.bcs.fileserver.domain.model.storage.ContentLocator;
-import io.bcs.fileserver.domain.model.storage.DefaultContentLocator;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.StorageDescriptor;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
@@ -35,7 +31,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
- * This class describes the file content entity.
+ * This class describes the entity, describing content is allowable for downloading.
  *
  * @author Dmitry Mikhaylenko
  *
@@ -43,11 +39,11 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuperBuilder
 @NoArgsConstructor
+@Getter(value = AccessLevel.PROTECTED)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Content {
-  private static final ApplicationLogger log = Loggers.applicationLogger(Content.class);
+public class DownloadableContent {
+  private static final ApplicationLogger log = Loggers.applicationLogger(DownloadableContent.class);
 
-  
   private static final String DEFAULT_DISTRIBUTION_POINT = "DEFAULT";
   private static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
   private static final String DEFAULT_FILE_NAME = "UNKNOWN";
@@ -56,14 +52,14 @@ public class Content {
   @Include
   @Default
   private String storageFileName = DEFAULT_STORAGE_FILE_NAME;
-  
+
   @Include
   @Default
   private String distributionPointName = DEFAULT_DISTRIBUTION_POINT;
-  
+
   @Default
   private StorageDescriptor storage = StorageDescriptor.unknownStorage();
-  
+
   @Default
   private MediaType mediaType = new MediaType();
 
@@ -87,18 +83,6 @@ public class Content {
     return getFileState().downloadContent(ranges, contentReceiver);
   }
 
-  /**
-   * Upload file content.
-   *
-   * @param contentSource The content source
-   * @param contentLength The content length
-   * @return The file upload statistic promise
-   */
-  public Promise<FileUploadStatistic> uploadContent(ContentSource contentSource,
-      Long contentLength) {
-    return getFileState().uploadContent(contentSource, contentLength);
-  }
-
   private FileState getFileState() {
     if (status == FileStatus.DRAFT) {
       return new DraftFile();
@@ -117,8 +101,6 @@ public class Content {
 
   private interface FileState {
     Promise<Void> downloadContent(Collection<Range> ranges, ContentReceiver contentReceiver);
-
-    Promise<FileUploadStatistic> uploadContent(ContentSource contentSource, Long contentLength);
   }
 
   private class DraftFile implements FileState {
@@ -127,17 +109,6 @@ public class Content {
         ContentReceiver contentReceiver) {
       log.debug("The file content download is going to be performed from draft file");
       return Promises.rejectedBy(new ContentNotUploadedException());
-    }
-
-    @Override
-    public Promise<FileUploadStatistic> uploadContent(ContentSource contentSource,
-        Long contentLength) {
-      return Promises.of(deferred -> {
-        ContentLocator contentLocator =
-            new DefaultContentLocator(storageFileName, storage.getStorageName());
-        Destination<BinaryChunk> destination = getStorage().getAccessOnWrite(contentLocator);
-        contentSource.sendContent(contentLocator, destination).delegate(deferred);
-      });
     }
   }
 
@@ -150,13 +121,6 @@ public class Content {
         FileContent fileContent = new FileContentInfo(fragments.getParts());
         receiveContent(fileContent, contentReceiver).delegate(deferred);
       });
-    }
-
-    @Override
-    public Promise<FileUploadStatistic> uploadContent(ContentSource contentSource,
-        Long contentLength) {
-      log.debug("The file content upload is going to be performed from distributed file");
-      return Promises.rejectedBy(new ContentUploadedException());
     }
 
     private Promise<Void> receiveContent(FileContent fileContent, ContentReceiver contentReceiver) {
@@ -180,13 +144,6 @@ public class Content {
     public Promise<Void> downloadContent(Collection<Range> ranges,
         ContentReceiver contentReceiver) {
       log.debug("The file content download is going to be performed from disposed file");
-      return Promises.rejectedBy(new FileDisposedException());
-    }
-
-    @Override
-    public Promise<FileUploadStatistic> uploadContent(ContentSource contentSource,
-        Long contentLength) {
-      log.debug("The file content upload is going to be performed from disposed file");
       return Promises.rejectedBy(new FileDisposedException());
     }
   }

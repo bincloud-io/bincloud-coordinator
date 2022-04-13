@@ -9,12 +9,16 @@ import io.bcs.fileserver.domain.errors.FileNotExistsException;
 import io.bcs.fileserver.domain.errors.FileNotSpecifiedException;
 import io.bcs.fileserver.domain.events.FileContentHasBeenUploaded;
 import io.bcs.fileserver.domain.events.FileDownloadHasBeenRequested;
-import io.bcs.fileserver.domain.model.content.Content;
-import io.bcs.fileserver.domain.model.content.ContentReceiver;
-import io.bcs.fileserver.domain.model.content.ContentRepository;
-import io.bcs.fileserver.domain.model.content.ContentSource;
-import io.bcs.fileserver.domain.model.content.FileUploadStatistic;
-import io.bcs.fileserver.domain.model.content.Range;
+import io.bcs.fileserver.domain.model.file.content.download.ContentReceiver;
+import io.bcs.fileserver.domain.model.file.content.download.DownloadableContent;
+import io.bcs.fileserver.domain.model.file.content.download.DownloadableContentRepository;
+import io.bcs.fileserver.domain.model.file.content.download.Range;
+import io.bcs.fileserver.domain.model.file.content.upload.ContentSource;
+import io.bcs.fileserver.domain.model.file.content.upload.FileUploadStatistic;
+import io.bcs.fileserver.domain.model.file.content.upload.UploadableContent;
+import io.bcs.fileserver.domain.model.file.content.upload.UploadableContentRepository;
+import io.bcs.fileserver.domain.model.storage.StorageDescriptorRepository;
+import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -28,7 +32,10 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class ContentService {
-  private final ContentRepository contentRepository;
+  private final FilesystemSpaceManager fileSpaceManager;
+  private final StorageDescriptorRepository storageDescriptorRepository;
+  private final UploadableContentRepository uploadableContentRepository;
+  private final DownloadableContentRepository downloadableContentRepository;
   private final EventBus eventBus;
 
   /**
@@ -40,10 +47,14 @@ public class ContentService {
    */
   public Promise<FileUploadStatistic> upload(UploadCommand command, ContentSource contentSource) {
     return Promises.of(deferred -> {
-      Content content =
-          retrieveExistingFileContent(extractStorageFileName(command::getStorageFileName));
-      content.uploadContent(contentSource, command.getContentLength())
-          .then(ContentService.this::notifyAboutUploadedContent).delegate(deferred);
+      UploadableContent content = retrieveExistingUploadableFileContent(
+          extractStorageFileName(command::getStorageFileName));
+      content.uploadContent(contentSource, command.getContentLength(),
+          (mediaType, storageFileName, contentLength) -> {
+            String storageName =
+                fileSpaceManager.allocateSpace(mediaType, storageFileName, contentLength);
+            return storageDescriptorRepository.findStorageDescriptor(storageName).get();
+          }).then(ContentService.this::notifyAboutUploadedContent).delegate(deferred);
     });
   }
 
@@ -59,8 +70,8 @@ public class ContentService {
         eventBus.getPublisher(Constants.CONTEXT, FileDownloadHasBeenRequested.EVENT_TYPE);
     return Promises.of(deferred -> {
       publisher.publish(new FileDownloadHasBeenRequested(command.getStorageFileName()));
-      Content content =
-          retrieveExistingFileContent(extractStorageFileName(command::getStorageFileName));
+      DownloadableContent content = retrieveExistingDownloadableFileContent(
+          extractStorageFileName(command::getStorageFileName));
       content.downloadContent(command.getRanges(), contentReceiver).delegate(deferred);
     });
   }
@@ -71,8 +82,14 @@ public class ContentService {
     publisher.publish(new FileContentHasBeenUploaded(uploadStatistic));
   }
 
-  private Content retrieveExistingFileContent(String storageFileName) {
-    return contentRepository.findBy(storageFileName).orElseThrow(() -> {
+  private UploadableContent retrieveExistingUploadableFileContent(String storageFileName) {
+    return uploadableContentRepository.findBy(storageFileName).orElseThrow(() -> {
+      return new FileNotExistsException();
+    });
+  }
+
+  private DownloadableContent retrieveExistingDownloadableFileContent(String storageFileName) {
+    return downloadableContentRepository.findBy(storageFileName).orElseThrow(() -> {
       return new FileNotExistsException();
     });
   }

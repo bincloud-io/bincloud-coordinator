@@ -3,10 +3,10 @@ package io.bcs.fileserver.domain.services.listeners
 import static io.bcs.fileserver.domain.model.file.FileStatus.DRAFT
 
 import io.bcs.fileserver.domain.events.FileDistributionHasBeenStarted
-import io.bcs.fileserver.domain.model.content.FileUploadStatistic
 import io.bcs.fileserver.domain.model.file.File
 import io.bcs.fileserver.domain.model.file.FileRepository
 import io.bcs.fileserver.domain.model.file.FileStatus
+import io.bcs.fileserver.domain.model.file.content.upload.FileUploadStatistic
 import java.time.LocalDateTime
 import spock.lang.Specification
 

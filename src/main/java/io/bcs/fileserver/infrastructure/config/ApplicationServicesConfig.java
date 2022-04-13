@@ -3,8 +3,9 @@ package io.bcs.fileserver.infrastructure.config;
 import io.bce.Generator;
 import io.bce.domain.EventBus;
 import io.bce.validation.ValidationService;
-import io.bcs.fileserver.domain.model.content.ContentRepository;
 import io.bcs.fileserver.domain.model.file.FileRepository;
+import io.bcs.fileserver.domain.model.file.content.download.DownloadableContentRepository;
+import io.bcs.fileserver.domain.model.file.content.upload.UploadableContentRepository;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.StorageDescriptorRepository;
 import io.bcs.fileserver.domain.services.ContentAccessService;
@@ -13,9 +14,11 @@ import io.bcs.fileserver.domain.services.ContentService;
 import io.bcs.fileserver.domain.services.FileService;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.StorageFileNameGenerator;
-import io.bcs.fileserver.infrastructure.repositories.JpaContentRepository;
+import io.bcs.fileserver.infrastructure.repositories.JpaDownloadableContentRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaFileRepository;
 import io.bcs.fileserver.infrastructure.repositories.JpaStorageDescriptorRepository;
+import io.bcs.fileserver.infrastructure.repositories.JpaUploadableContentRepository;
+import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -40,6 +43,9 @@ public class ApplicationServicesConfig {
 
   @Inject
   private ValidationService validationService;
+  
+  @Inject
+  private FilesystemSpaceManager filesystemSpaceManager;
 
   @Inject
   private EventBus eventBus;
@@ -79,13 +85,23 @@ public class ApplicationServicesConfig {
   }
 
   /**
-   * The content repository configuration.
+   * The uploadable content repository configuration.
    *
    * @return The storage repository
    */
   @Produces
-  public ContentRepository contentRepository() {
-    return new JpaContentRepository(entityManager, fileServerConfigurationProperties);
+  public UploadableContentRepository uploadableContentRepository() {
+    return new JpaUploadableContentRepository(entityManager, fileServerConfigurationProperties);
+  }
+
+  /**
+   * The downloadable content repository configuration.
+   *
+   * @return The storage repository
+   */
+  @Produces
+  public DownloadableContentRepository downloadableContentRepository() {
+    return new JpaDownloadableContentRepository(entityManager, fileServerConfigurationProperties);
   }
 
   /**
@@ -116,7 +132,8 @@ public class ApplicationServicesConfig {
    */
   @Produces
   public ContentService contentService() {
-    return new ContentService(contentRepository(), eventBus);
+    return new ContentService(filesystemSpaceManager, storageDescriptorRepository(),
+        uploadableContentRepository(), downloadableContentRepository(), eventBus);
   }
 
   /**

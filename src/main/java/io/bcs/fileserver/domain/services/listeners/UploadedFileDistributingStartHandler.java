@@ -27,7 +27,7 @@ public class UploadedFileDistributingStartHandler
     fileRepository.findLocatedOnCurrentPoint(event.getLocator().getStorageFileName())
         .ifPresent(file -> {
           EventPublisher<FileDistributionHasBeenStarted> eventPublisher = getPublisher();
-          file.startFileDistribution(event);
+          file.startFileDistribution(event.getLocator(), event.getTotalLength());
           fileRepository.save(file);
           eventPublisher.publish(new FileDistributionHasBeenStarted(file));
         });

@@ -6,8 +6,8 @@ import io.bce.interaction.streaming.binary.OutputStreamDestination
 import io.bce.promises.WaitingPromise
 import io.bce.promises.Promise.ResponseHandler
 import io.bce.streaming.DirectStreamer
-import io.bcs.fileserver.domain.model.content.ContentSource
-import io.bcs.fileserver.domain.model.content.FileUploadStatistic
+import io.bcs.fileserver.domain.model.file.content.upload.ContentSource
+import io.bcs.fileserver.domain.model.file.content.upload.FileUploadStatistic
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import javax.servlet.ServletInputStream
