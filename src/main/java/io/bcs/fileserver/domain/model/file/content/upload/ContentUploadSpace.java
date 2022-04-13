@@ -22,7 +22,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
- * This class describes the entity, describing content is allowable for uploading.
+ * This class describes the entity, describing a space for content uploading of a concrete file.
  *
  * @author Dmitry Mikhaylenko
  *
@@ -32,8 +32,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Getter(value = AccessLevel.PROTECTED)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class UploadableContent {
-  private static final ApplicationLogger log = Loggers.applicationLogger(UploadableContent.class);
+public class ContentUploadSpace {
+  private static final ApplicationLogger log = Loggers.applicationLogger(ContentUploadSpace.class);
 
   private static final String DEFAULT_DISTRIBUTION_POINT = "DEFAULT";
   private static final String DEFAULT_STORAGE_FILE_NAME = "UNKNOWN";
@@ -52,7 +52,7 @@ public class UploadableContent {
 
   @Default
   private FileStatus status = FileStatus.DRAFT;
-  
+
   /**
    * Upload file content.
    *

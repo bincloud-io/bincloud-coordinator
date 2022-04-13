@@ -9,5 +9,11 @@ import java.util.Optional;
  *
  */
 public interface DownloadableContentRepository {
+  /**
+   * Find downloadable content by storage file name.
+   *
+   * @param storageFileName The storage file name
+   * @return The downloadable content
+   */
   Optional<DownloadableContent> findBy(String storageFileName);
 }

@@ -37,8 +37,8 @@ import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentP
 import io.bcs.fileserver.domain.model.file.content.download.FileContent.ContentType
 import io.bcs.fileserver.domain.model.file.content.upload.ContentSource
 import io.bcs.fileserver.domain.model.file.content.upload.FileUploadStatistic
-import io.bcs.fileserver.domain.model.file.content.upload.UploadableContent
-import io.bcs.fileserver.domain.model.file.content.upload.UploadableContentRepository
+import io.bcs.fileserver.domain.model.file.content.upload.ContentUploadSpace
+import io.bcs.fileserver.domain.model.file.content.upload.ContentUploadSpaceRepository
 import io.bcs.fileserver.domain.model.storage.ContentLocator
 import io.bcs.fileserver.domain.model.storage.FileStorage
 import io.bcs.fileserver.domain.model.storage.FileStorageProvider
@@ -67,7 +67,7 @@ class ContentServiceSpec extends Specification {
 
   private FilesystemSpaceManager fileSpaceManager;
   private StorageDescriptorRepository storageDescriptorRepository;
-  private UploadableContentRepository uploadableContentRepository;
+  private ContentUploadSpaceRepository contentUploadSpaceRepository;
   private DownloadableContentRepository downloadableContentRepository;
   private FileStorageProvider<LocalStorageDescriptor> localStorageProvider;
   private FileStorageProvider<RemoteStorageDescriptor> remoteStorageProvider;
@@ -80,7 +80,7 @@ class ContentServiceSpec extends Specification {
   def setup() {
     this.fileSpaceManager = Mock(FilesystemSpaceManager)
     this.storageDescriptorRepository = Mock(StorageDescriptorRepository)
-    this.uploadableContentRepository = Mock(UploadableContentRepository)
+    this.contentUploadSpaceRepository = Mock(ContentUploadSpaceRepository)
     this.downloadableContentRepository = Mock(DownloadableContentRepository)
     this.fileStorage = Mock(FileStorage)
     this.localStorageProvider = Mock(FileStorageProvider)
@@ -93,7 +93,7 @@ class ContentServiceSpec extends Specification {
     this.contentService = new ContentService(
         fileSpaceManager,
         storageDescriptorRepository,
-        uploadableContentRepository,
+        contentUploadSpaceRepository,
         downloadableContentRepository,
         eventBus)
 
@@ -123,8 +123,8 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: unsuccessfully upload file content to the unknown file"() {
     FileNotExistsException error
-    given: "The draft file, missing into repository"
-    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.empty()
+    given: "The draft file content upload space is missing into repository"
+    this.contentUploadSpaceRepository.findBy(STORAGE_FILE_NAME) >> Optional.empty()
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -147,20 +147,15 @@ class ContentServiceSpec extends Specification {
     FileContentHasBeenUploaded event
     FileUploadStatistic statistic
 
-    given: "The draft file, existing into repository."+
-    "Storage file name: ${STORAGE_FILE_NAME}" +
-    "Storage name: ${STORAGE_NAME}" +
-    "Media type: ${MEDIA_TYPE}" +
-    "File name: ${FILE_NAME}" +
-    "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileUploadableContent())
+    given: "The draft file content upload space, existing into repository."
+    this.contentUploadSpaceRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileContentUploadSpace())
 
     and: "The file will be created"
     fileStorage.create(_, _) >> contentLocator()
 
     and: "The file space is successfully allocated"
     this.fileSpaceManager.allocateSpace(MEDIA_TYPE, STORAGE_FILE_NAME, DISTRIBUTIONING_CONTENT_LENGTH) >> STORAGE_NAME
-        
+
     and: "The file storage is found"
     this.storageDescriptorRepository.findStorageDescriptor(STORAGE_NAME) >> Optional.of(createLocalStorage())
 
@@ -191,20 +186,15 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: unsuccessfully upload file content if we can't get access on write"() {
     FileStorageException error
-    given: "The draft file, existing into repository."+
-    "Storage file name: ${STORAGE_FILE_NAME}" +
-    "Storage name: ${STORAGE_NAME}" +
-    "Media type: ${MEDIA_TYPE}" +
-    "File name: ${FILE_NAME}" +
-    "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileUploadableContent())
+    given: "The draft file content upload space, existing into repository."
+    this.contentUploadSpaceRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDraftFileContentUploadSpace())
 
     and: "The file will be created"
     fileStorage.create(_, _) >> contentLocator()
-    
+
     and: "The file space is successfully allocated"
     this.fileSpaceManager.allocateSpace(MEDIA_TYPE, STORAGE_FILE_NAME, DISTRIBUTIONING_CONTENT_LENGTH) >> STORAGE_NAME
-    
+
     and: "The file storage is found"
     this.storageDescriptorRepository.findStorageDescriptor(STORAGE_NAME) >> Optional.of(createLocalStorage())
 
@@ -228,13 +218,8 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: unsuccessfully upload file content to the distributed file"() {
     ContentUploadedException error
-    given: "The distributing file, existing into repository."+
-    "Storage file name: ${STORAGE_FILE_NAME}" +
-    "Storage name: ${STORAGE_NAME}" +
-    "Media type: ${MEDIA_TYPE}" +
-    "File name: ${FILE_NAME}" +
-    "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileUploadableContent())
+    given: "The distributing file content upload space, existing into repository."
+    this.contentUploadSpaceRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDistributedFileContentUploadSpace())
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -258,13 +243,8 @@ class ContentServiceSpec extends Specification {
 
   def "Scenario: unsuccessfully upload file content to the disposed file"() {
     FileDisposedException error
-    given: "The distributing file, existing into repository."+
-    "Storage file name: ${STORAGE_FILE_NAME}" +
-    "Storage name: ${STORAGE_NAME}" +
-    "Media type: ${MEDIA_TYPE}" +
-    "File name: ${FILE_NAME}" +
-    "Total length: ${DEFAULT_CONTENT_LENGTH}"
-    this.uploadableContentRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDisposedFileUploadableContent())
+    given: "The distributing file content upload space, existing into repository."
+    this.contentUploadSpaceRepository.findBy(STORAGE_FILE_NAME) >> Optional.of(createDisposedFileContentUploadSpace())
 
     and: "The file content source"
     ContentSource contentSource = Mock(ContentSource)
@@ -760,20 +740,20 @@ class ContentServiceSpec extends Specification {
     }
   }
 
-  private UploadableContent createDraftFileUploadableContent() {
-    return createUploadableContent(DRAFT)
+  private ContentUploadSpace createDraftFileContentUploadSpace() {
+    return createContentUploadSpace(DRAFT)
   }
 
-  private UploadableContent createDistributedFileUploadableContent() {
-    return createUploadableContent(DISTRIBUTING)
+  private ContentUploadSpace createDistributedFileContentUploadSpace() {
+    return createContentUploadSpace(DISTRIBUTING)
   }
 
-  private UploadableContent createDisposedFileUploadableContent() {
-    return createUploadableContent(DISPOSED)
+  private ContentUploadSpace createDisposedFileContentUploadSpace() {
+    return createContentUploadSpace(DISPOSED)
   }
 
-  private UploadableContent createUploadableContent(FileStatus fileStatus) {
-    return UploadableContent.builder()
+  private ContentUploadSpace createContentUploadSpace(FileStatus fileStatus) {
+    return ContentUploadSpace.builder()
         .mediaType(MEDIA_TYPE)
         .storageFileName(STORAGE_FILE_NAME)
         .distributionPointName(DISTRIBUTION_POINT)

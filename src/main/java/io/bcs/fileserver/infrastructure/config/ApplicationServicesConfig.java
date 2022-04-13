@@ -5,7 +5,7 @@ import io.bce.domain.EventBus;
 import io.bce.validation.ValidationService;
 import io.bcs.fileserver.domain.model.file.FileRepository;
 import io.bcs.fileserver.domain.model.file.content.download.DownloadableContentRepository;
-import io.bcs.fileserver.domain.model.file.content.upload.UploadableContentRepository;
+import io.bcs.fileserver.domain.model.file.content.upload.ContentUploadSpaceRepository;
 import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.StorageDescriptorRepository;
 import io.bcs.fileserver.domain.services.ContentAccessService;
@@ -90,7 +90,7 @@ public class ApplicationServicesConfig {
    * @return The storage repository
    */
   @Produces
-  public UploadableContentRepository uploadableContentRepository() {
+  public ContentUploadSpaceRepository uploadableContentRepository() {
     return new JpaUploadableContentRepository(entityManager, fileServerConfigurationProperties);
   }
 

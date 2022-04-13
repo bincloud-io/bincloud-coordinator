@@ -2,8 +2,8 @@ package io.bcs.fileserver.infrastructure.repositories;
 
 import io.bcs.fileserver.domain.model.DistributionPointNameProvider;
 import io.bcs.fileserver.domain.model.file.FileId;
-import io.bcs.fileserver.domain.model.file.content.upload.UploadableContent;
-import io.bcs.fileserver.domain.model.file.content.upload.UploadableContentRepository;
+import io.bcs.fileserver.domain.model.file.content.upload.ContentUploadSpace;
+import io.bcs.fileserver.domain.model.file.content.upload.ContentUploadSpaceRepository;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +15,14 @@ import lombok.RequiredArgsConstructor;
  *
  */
 @RequiredArgsConstructor
-public class JpaUploadableContentRepository implements UploadableContentRepository {
+public class JpaUploadableContentRepository implements ContentUploadSpaceRepository {
   private final EntityManager entityManager;
   private final DistributionPointNameProvider distributionPointNameProvider;
 
   @Override
-  public Optional<UploadableContent> findBy(String storageFileName) {
+  public Optional<ContentUploadSpace> findBy(String storageFileName) {
     FileId fileId =
         new FileId(distributionPointNameProvider.getDistributionPointName(), storageFileName);
-    return Optional.ofNullable(entityManager.find(UploadableContent.class, fileId));
+    return Optional.ofNullable(entityManager.find(ContentUploadSpace.class, fileId));
   }
 }

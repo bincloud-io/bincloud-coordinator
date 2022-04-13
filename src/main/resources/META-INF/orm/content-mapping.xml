@@ -5,12 +5,13 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
 	<access>FIELD</access>
 
-	<entity class="io.bcs.fileserver.domain.model.content.download.DownloadableContent">
+	<entity
+		class="io.bcs.fileserver.domain.model.content.download.DownloadableContent">
 		<table name="FILES" />
 		<id-class class="io.bcs.fileserver.domain.model.file.FileId" />
 
 		<attributes>
-			<id name="distributionPoint">
+			<id name="distributionPointName">
 				<column name="DISTRIBUTION_POINT_NAME" />
 			</id>
 
@@ -40,6 +41,31 @@
 				<join-column name="MEDIA_TYPE"
 					referenced-column-name="MEDIA_TYPE" />
 			</many-to-one>
+		</attributes>
+	</entity>
+
+	<entity
+		class="io.bcs.fileserver.domain.model.file.content.upload.ContentUploadSpace">
+		<table name="FILES" />
+		<id-class class="io.bcs.fileserver.domain.model.file.FileId" />
+
+		<attributes>
+			<id name="distributionPointName">
+				<column name="DISTRIBUTION_POINT_NAME" />
+			</id>
+
+			<id name="storageFileName">
+				<column name="STORAGE_FILE_NAME" />
+			</id>
+
+			<basic name="status">
+				<column name="STATUS" />
+				<enumerated>STRING</enumerated>
+			</basic>
+
+			<basic name="mediaType">
+				<column name="MEDIA_TYPE" />
+			</basic>
 		</attributes>
 	</entity>
 </entity-mappings>
