@@ -13,11 +13,11 @@ import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHan
 import io.bcs.fileserver.domain.services.listeners.CreatedFileSynchronizationHandler.DistribuionPointsProvider;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
 import io.bcs.fileserver.infrastructure.file.JdbcReplicationPointsProvider;
-import io.bcs.fileserver.infrastructure.storage.FilesystemPhysicalFile;
 import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
 import io.bcs.fileserver.infrastructure.storage.JdbcFilesystemSpaceManager;
-import io.bcs.fileserver.infrastructure.storage.LocalFilesystemStorageFactory;
-import io.bcs.fileserver.infrastructure.storage.RemoteFilesystemStorageFactory;
+import io.bcs.fileserver.infrastructure.storage.local.FilesystemPhysicalFile;
+import io.bcs.fileserver.infrastructure.storage.local.LocalFilesystemStorageFactory;
+import io.bcs.fileserver.infrastructure.storage.remote.RemoteFilesystemStorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;

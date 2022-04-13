@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.storage;
+package io.bcs.fileserver.infrastructure.storage.local;
 
 import io.bce.interaction.streaming.binary.BinaryDestination;
 import io.bce.interaction.streaming.binary.BinarySource;
@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * This class is responsible for physical file management, stored on filesystem.
@@ -30,7 +31,16 @@ public class FilesystemPhysicalFile implements PhysicalFile {
 
   @Override
   public void create() throws IOException {
-    file.createNewFile();
+    if (!file.createNewFile()) {      
+      truncate();
+    }
+  }
+
+  @Override
+  public void truncate() throws IOException {
+    try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
+      randomAccessFile.setLength(0);
+    }
   }
 
   @Override
@@ -47,7 +57,7 @@ public class FilesystemPhysicalFile implements PhysicalFile {
   }
 
   @Override
-  public void delete() {
+  public void delete() throws IOException {
     file.delete();
   }
 

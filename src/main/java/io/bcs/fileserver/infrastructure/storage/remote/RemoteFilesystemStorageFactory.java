@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.storage;
+package io.bcs.fileserver.infrastructure.storage.remote;
 
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;

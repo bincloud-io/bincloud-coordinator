@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.storage;
+package io.bcs.fileserver.infrastructure.storage.local;
 
 import io.bce.interaction.streaming.binary.BinaryDestination;
 import io.bce.interaction.streaming.binary.BinarySource;
@@ -39,9 +39,18 @@ public interface PhysicalFile {
   BinaryDestination openForWrite() throws IOException;
 
   /**
-   * Delete file from file system.
+   * Truncate the file.
+   *
+   * @throws IOException Throws if something went wrong during truncate process
    */
-  void delete();
+  void truncate() throws IOException;
+
+  /**
+   * Delete file from file system.
+   *
+   * @throws IOException Throws if something went wrong during delete process
+   */
+  void delete() throws IOException;
 
   /**
    * This interface declares the contract for physical file creation.

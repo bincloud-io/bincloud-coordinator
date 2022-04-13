@@ -1,4 +1,4 @@
-package io.bcs.fileserver.infrastructure.storage;
+package io.bcs.fileserver.infrastructure.storage.local;
 
 import io.bce.interaction.streaming.Destination;
 import io.bce.interaction.streaming.Source;
@@ -11,7 +11,8 @@ import io.bcs.fileserver.domain.model.storage.FileStorage;
 import io.bcs.fileserver.domain.model.storage.FileStorageProvider;
 import io.bcs.fileserver.domain.model.storage.types.LocalStorageDescriptor;
 import io.bcs.fileserver.infrastructure.FileServerConfigurationProperties;
-import io.bcs.fileserver.infrastructure.storage.PhysicalFile.Factory;
+import io.bcs.fileserver.infrastructure.storage.FilesystemSpaceManager;
+import io.bcs.fileserver.infrastructure.storage.local.PhysicalFile.Factory;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 
@@ -74,9 +75,13 @@ public class LocalFilesystemStorageFactory implements FileStorageProvider<LocalS
 
     @Override
     public void delete(FileDescriptor file) throws FileStorageException {
-      ContentLocator contentLocator =
-          new DefaultContentLocator(file.getStorageFileName(), file.getStorageName().get());
-      getPhysicalFile(contentLocator).delete();
+      try {
+        ContentLocator contentLocator =
+            new DefaultContentLocator(file.getStorageFileName(), file.getStorageName().get());
+        getPhysicalFile(contentLocator).delete();
+      } catch (IOException error) {
+        throw new FileStorageException(error);
+      }
     }
 
     private PhysicalFile getPhysicalFile(ContentLocator contentLocator) {
